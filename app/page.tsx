@@ -1,43 +1,47 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
   BarChart3,
+  Bot,
   BrainCircuit,
   BriefcaseBusiness,
-  Building2,
   Check,
   ChevronDown,
   CircleCheck,
-  Clock3,
-  Database,
-  Gauge,
-  Globe2,
-  Handshake,
+  FileText,
+  ImageIcon,
+  LayoutTemplate,
   Menu,
   MessageCircle,
+  Monitor,
+  Moon,
   Paintbrush,
   PanelTop,
+  Palette,
   SearchCheck,
   ShieldCheck,
+  Smartphone,
   SquareKanban,
   Sparkles,
+  Star,
+  Sun,
+  Type,
+  Upload,
   UsersRound,
-  Workflow,
   X,
-  Zap,
 } from "lucide-react";
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=5561991630130&text=Ol%C3%A1%2C+quero+conhecer+a+JobForged.&type=phone_number&app_absent=0";
 
 const navItems = [
-  { label: "Produto", href: "#produto" },
   { label: "Diferenciais", href: "#diferenciais" },
   { label: "Como funciona", href: "#como-funciona" },
-  { label: "White label", href: "#white-label" },
+  { label: "Planos", href: "#planos" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -50,76 +54,6 @@ const capabilityTags = [
   { icon: SquareKanban, label: "Metodologias ágeis" },
   { icon: BriefcaseBusiness, label: "Contratos assertivos" },
   { icon: ShieldCheck, label: "Decisões mais seguras" },
-];
-
-const features = [
-  {
-    icon: Paintbrush,
-    eyebrow: "Sua identidade",
-    title: "White label de verdade",
-    text: "Entregue uma experiência própria, com logo, cores, textos, página de carreiras e domínio da sua empresa.",
-    className: "feature-card feature-card--wide feature-card--teal",
-  },
-  {
-    icon: MessageCircle,
-    eyebrow: "Conversas que avançam",
-    title: "Entrevistas pelo WhatsApp",
-    text: "Automatize perguntas eliminatórias, confirmações e retornos no canal que o candidato já usa todos os dias.",
-    className: "feature-card feature-card--dark",
-  },
-  {
-    icon: SearchCheck,
-    eyebrow: "Qualidade desde a triagem",
-    title: "Triagem de currículos por IA",
-    text: "Compare currículos com os critérios da vaga e priorize os perfis mais aderentes para o RH avaliar com segurança.",
-    className: "feature-card feature-card--ai",
-  },
-  {
-    icon: Globe2,
-    eyebrow: "Presença própria",
-    title: "Seu domínio. Sua plataforma.",
-    text: "Publique vagas e conduza candidatos em uma página de carreiras conectada ao domínio da sua empresa.",
-    className: "feature-card feature-card--sky",
-  },
-  {
-    icon: Workflow,
-    eyebrow: "Processo visível",
-    title: "Pipeline em Kanban",
-    text: "Visualize cada candidatura, personalize etapas e identifique rapidamente onde cada processo precisa avançar.",
-    className: "feature-card feature-card--blue",
-  },
-  {
-    icon: BarChart3,
-    eyebrow: "Decisões melhores",
-    title: "Indicadores em tempo real",
-    text: "Acompanhe vagas, candidaturas, conversões e contratações para corrigir gargalos e elevar a qualidade do processo.",
-    className: "feature-card feature-card--wide feature-card--insights",
-  },
-  {
-    icon: Handshake,
-    eyebrow: "Apoio especializado",
-    title: "Consultoria mensal para o RH",
-    text: "Conte com a equipe JobForged para revisar indicadores, ajustar etapas e transformar dados do funil em contratações mais seguras.",
-    className: "feature-card feature-card--consulting",
-  },
-];
-
-const audiences = [
-  {
-    icon: UsersRound,
-    title: "RH interno",
-    text: "Padronize a seleção, reduza tarefas operacionais e dê visibilidade aos gestores.",
-  },
-  {
-    icon: BriefcaseBusiness,
-    title: "Consultorias de R&S",
-    text: "Entregue uma operação com a sua marca e organize múltiplas vagas e clientes.",
-  },
-  {
-    icon: Building2,
-    title: "Grupos empresariais",
-    text: "Centralize unidades, marcas e processos sem perder governança ou identidade.",
-  },
 ];
 
 const faqs = [
@@ -186,7 +120,7 @@ function SectionIntro({
   align = "left",
 }: {
   eyebrow: string;
-  title: string;
+  title: ReactNode;
   text: string;
   align?: "left" | "center";
 }) {
@@ -196,6 +130,15 @@ function SectionIntro({
       <h2>{title}</h2>
       <p>{text}</p>
     </Reveal>
+  );
+}
+
+function BrandPair({ blue, teal, light = false }: { blue: string; teal: string; light?: boolean }) {
+  return (
+    <span className={`highlight-pair${light ? " highlight-pair--light" : ""}`}>
+      <span className="highlight-blue">{blue}</span>{" "}
+      <span className="highlight-teal">{teal}</span>
+    </span>
   );
 }
 
@@ -314,10 +257,45 @@ function ProductMockup() {
 }
 
 export default function Home() {
+  const reduceMotion = useReducedMotion();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [annualBilling, setAnnualBilling] = useState(true);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const currentTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+      setTheme(currentTheme);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const closeMenu = () => setMenuOpen(false);
+  const applyTheme = (nextTheme: "light" | "dark") => {
+    if (nextTheme === theme) return;
+    const root = document.documentElement;
+    const commitTheme = () => {
+      root.dataset.theme = nextTheme;
+      root.style.colorScheme = nextTheme;
+      localStorage.setItem("jobforged-theme", nextTheme);
+      setTheme(nextTheme);
+    };
+    const transitionDocument = document as Document & {
+      startViewTransition?: (callback: () => void) => { finished: Promise<void> };
+    };
+
+    root.classList.add("theme-switching");
+    if (transitionDocument.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const transition = transitionDocument.startViewTransition(commitTheme);
+      void transition.finished.finally(() => root.classList.remove("theme-switching"));
+      return;
+    }
+
+    commitTheme();
+    window.setTimeout(() => root.classList.remove("theme-switching"), 820);
+  };
 
   return (
     <main>
@@ -330,9 +308,14 @@ export default function Home() {
           <nav className="desktop-nav" aria-label="Navegação principal">
             {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           </nav>
-          <a className="button button--small button--blue desktop-cta" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
-            Solicitar demonstração <ArrowRight size={17} />
-          </a>
+          <div className="theme-switcher" role="group" aria-label="Tema da página">
+            <button type="button" className={theme === "light" ? "is-active" : ""} aria-pressed={theme === "light"} onClick={() => applyTheme("light")}>
+              <Sun aria-hidden="true" /><span>Claro</span>
+            </button>
+            <button type="button" className={theme === "dark" ? "is-active" : ""} aria-pressed={theme === "dark"} onClick={() => applyTheme("dark")}>
+              <Moon aria-hidden="true" /><span>Escuro</span>
+            </button>
+          </div>
           <button
             className="menu-button"
             type="button"
@@ -351,10 +334,20 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
           >
             {navItems.map((item) => <a key={item.href} href={item.href} onClick={closeMenu}>{item.label}</a>)}
-            <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer" onClick={closeMenu}>Solicitar demonstração</a>
           </motion.nav>
         )}
       </header>
+
+      <a
+        className="floating-whatsapp-cta"
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Solicitar demonstração pelo WhatsApp"
+      >
+        <span><MessageCircle aria-hidden="true" /></span>
+        <strong>Solicitar demonstração</strong>
+      </a>
 
       <section className="hero" id="inicio">
         <div className="hero-grid" aria-hidden="true" />
@@ -367,9 +360,9 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1>Recrute com a <em className="highlight-pair"><span className="highlight-blue">sua</span> <span className="highlight-teal">marca.</span></em><br />Contrate com mais inteligência.</h1>
+            <h1>Recrute com a <BrandPair blue="sua" teal="marca." /><br />Contrate com inteligência.</h1>
             <p className="hero-lead">
-              Centralize vagas e candidatos em um ATS simples, com triagem por IA, entrevistas pelo WhatsApp e critérios que ajudam seu RH a contratar com mais qualidade.
+              Centralize vagas, currículos, triagem automática, Kanban e histórico de candidatos em uma plataforma feita para PMEs que querem mais controle e menos retrabalho.
             </p>
             <div className="hero-actions">
               <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Quero uma demonstração <ArrowRight size={19} /></a>
@@ -398,51 +391,22 @@ export default function Home() {
         <div className="container problem-layout">
           <Reveal className="problem-copy">
             <span className="eyebrow">Menos ruído. Mais qualidade.</span>
-            <h2>Contratar bem pode ser mais simples do que administrar ferramentas desconectadas.</h2>
-            <p>A JobForged reúne vagas, currículos, mensagens, critérios e decisões em um único fluxo. Seu RH reduz o trabalho manual sem perder controle sobre quem avança.</p>
-            <div className="problem-points">
-              <span><X size={17} /> Informações espalhadas</span>
-              <span><X size={17} /> Triagem totalmente manual</span>
-              <span><X size={17} /> Experiência sem identidade</span>
-            </div>
+            <h2>Menos ferramentas. <BrandPair blue="Mais" teal="controle." /> Uma contratação melhor.</h2>
+            <p>Vagas, currículos, conversas e decisões ficam no mesmo fluxo. Seu RH trabalha com clareza e reduz o retrabalho.</p>
           </Reveal>
           <Reveal className="solution-card" delay={0.12}>
             <div className="solution-card__top">
               <span className="solution-icon"><Sparkles /></span>
-              <span>Com a JobForged</span>
+              <span>Um processo conectado</span>
             </div>
-            <h3>Um fluxo simples, automatizado e orientado à qualidade de cada contratação.</h3>
-            <div className="solution-list">
-              <span><CircleCheck /> Vagas e candidatos centralizados</span>
-              <span><CircleCheck /> IA aplicada à triagem de currículos</span>
-              <span><CircleCheck /> Entrevistas e retornos pelo WhatsApp</span>
-              <span><CircleCheck /> Critérios claros para decidir com segurança</span>
+            <h3>Do currículo à decisão, tudo avança no mesmo lugar.</h3>
+            <p>O agente organiza os perfis. O WhatsApp conduz a conversa. Seu RH mantém a decisão.</p>
+            <div className="solution-flow" aria-label="Fluxo de recrutamento JobForged">
+              <span><BriefcaseBusiness /><small>Receba</small><strong>Vagas e currículos</strong></span>
+              <span><Bot /><small>Priorize</small><strong>Triagem por IA</strong></span>
+              <span><MessageCircle /><small>Avance</small><strong>Pelo WhatsApp</strong></span>
             </div>
           </Reveal>
-        </div>
-      </section>
-
-      <section className="features-section" id="diferenciais">
-        <div className="container">
-          <SectionIntro
-            eyebrow="Tecnologia que trabalha pelo seu RH"
-            title="Automação onde há repetição. Controle humano onde a decisão importa."
-            text="Recursos conectados para simplificar a rotina do RH, identificar candidatos aderentes e sustentar contratações com critérios mais claros."
-            align="center"
-          />
-          <div className="features-grid">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <Reveal className={feature.className} delay={(index % 3) * 0.08} key={feature.title}>
-                  <div className="feature-icon"><Icon /></div>
-                  <span className="feature-eyebrow">{feature.eyebrow}</span>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.text}</p>
-                </Reveal>
-              );
-            })}
-          </div>
         </div>
       </section>
 
@@ -458,27 +422,37 @@ export default function Home() {
               </div>
               <div className="chat-body">
                 <div className="chat-date">Hoje</div>
-                <div className="chat-bubble chat-bubble--bot">Olá, Marina! 👋 Podemos começar a primeira etapa da vaga de Analista?</div>
-                <div className="chat-bubble chat-bubble--user">Sim, podemos!</div>
-                <div className="chat-bubble chat-bubble--bot">Perfeito. Você possui experiência com atendimento B2B?</div>
-                <div className="chat-options"><span>Sim, possuo</span><span>Ainda não</span></div>
+                <div className="chat-bubble chat-bubble--bot">Olá, Marina! 👋 Para concluir sua candidatura, pode enviar seu currículo em PDF?</div>
+                <div className="chat-file"><span><FileText /></span><div><strong>Curriculo_Marina.pdf</strong><small>Documento enviado</small></div><CircleCheck /></div>
+                <div className="chat-bubble chat-bubble--bot">Currículo recebido! Você foi aprovada para a próxima fase. Podemos agendar sua entrevista para 28/08 às 14h?</div>
+                <div className="chat-bubble chat-bubble--user">Sim, confirmado! 😊</div>
+                <div className="chat-options"><span>Ver agendamento</span><span>Adicionar à agenda</span></div>
               </div>
             </div>
-            <motion.div className="phone-status" animate={{ y: [0, -7, 0] }} transition={{ repeat: Infinity, duration: 4 }}>
+            <motion.div
+              className="phone-status"
+              animate={reduceMotion ? undefined : { x: [0, 9, -5, 7, 0], y: [0, -12, 5, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 7.4, ease: "easeInOut" }}
+            >
               <CircleCheck /><span><strong>Resposta registrada</strong><small>Perfil atualizado no ATS</small></span>
+            </motion.div>
+            <motion.div
+              className="phone-quality"
+              animate={reduceMotion ? undefined : { x: [0, -10, 6, -7, 0], y: [0, 9, -6, 11, 0] }}
+              transition={{ repeat: Infinity, duration: 8.2, ease: "easeInOut", delay: 0.6 }}
+            >
+              <Bot /><span><strong>Agente de triagem</strong><small>Currículo analisado no WhatsApp</small></span>
             </motion.div>
           </Reveal>
           <Reveal className="whatsapp-copy" delay={0.1}>
-            <span className="eyebrow eyebrow--light">Entrevistas pelo WhatsApp</span>
-            <h2>Menos atrito para o candidato. Mais velocidade para o seu time.</h2>
-            <p>Envie perguntas objetivas, registre respostas e avance candidatos pelo canal mais presente na rotina deles. Tudo retorna organizado ao ATS para o RH avaliar sem copiar informações manualmente.</p>
+            <span className="eyebrow eyebrow--light">Agente de triagem no WhatsApp</span>
+            <h2>O candidato envia. <BrandPair blue="A IA" teal="organiza." light /> Seu RH decide.</h2>
+            <p>Nosso agente recebe o currículo, coleta respostas e organiza a aderência do perfil. Tudo chega ao ATS pronto para o RH avaliar.</p>
             <div className="whatsapp-benefits">
-              <span><Clock3 /> Respostas mais ágeis</span>
-              <span><Database /> Histórico centralizado</span>
-              <span><Gauge /> Menos tarefas repetitivas</span>
-              <span><ShieldCheck /> Processo padronizado</span>
+              <span><FileText /> Currículo recebido no WhatsApp</span>
+              <span><Bot /> Aderência organizada pela IA</span>
+              <span><SquareKanban /> Próxima etapa registrada no ATS</span>
             </div>
-            <a className="text-link text-link--light" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Conhecer as automações <ArrowRight /></a>
           </Reveal>
         </div>
       </section>
@@ -486,26 +460,29 @@ export default function Home() {
       <section className="steps-section" id="como-funciona">
         <div className="container">
           <SectionIntro
-            eyebrow="Simples desde o primeiro dia"
-            title="Em apenas 3 passos, sua empresa já melhora o recrutamento e a seleção."
-            text="A JobForged conduz a configuração com seu time. Sem projeto longo: organizamos o processo, ativamos as automações e colocamos sua operação para funcionar."
+            eyebrow="Da configuração à contratação"
+            title={<>Sua operação pronta em <BrandPair blue="3" teal="passos" /> claros.</>}
+            text="Nós configuramos a base. Seu RH publica, acompanha e decide."
             align="center"
           />
           <div className="steps-grid">
             <Reveal className="step-card">
               <span className="step-number">01</span><Paintbrush />
-              <h3>Entendemos e personalizamos</h3>
-              <p>Mapeamos o processo essencial e aplicamos marca, cores, conteúdo, domínio e página de carreiras.</p>
+              <span className="step-outcome">Marca própria</span>
+              <h3>Personalize sua operação</h3>
+              <p>Aplicamos sua marca, domínio e etapas ao processo.</p>
             </Reveal>
             <Reveal className="step-card" delay={0.1}>
-              <span className="step-number">02</span><Workflow />
-              <h3>Ativamos as automações</h3>
-              <p>Configuramos etapas, critérios, triagem por IA e entrevistas pelo WhatsApp para reduzir tarefas manuais.</p>
+              <span className="step-number">02</span><Bot />
+              <span className="step-outcome">Triagem assistida</span>
+              <h3>Ative o agente de IA</h3>
+              <p>A IA organiza currículos e o WhatsApp coleta respostas.</p>
             </Reveal>
             <Reveal className="step-card" delay={0.2}>
-              <span className="step-number">03</span><Zap />
-              <h3>Seu RH começa melhor</h3>
-              <p>O time publica vagas, recebe candidatos priorizados e acompanha cada decisão com clareza e suporte contínuo.</p>
+              <span className="step-number">03</span><BarChart3 />
+              <span className="step-outcome">Decisão com contexto</span>
+              <h3>Acompanhe e decida</h3>
+              <p>Kanban, histórico e indicadores mantêm o RH no controle.</p>
             </Reveal>
           </div>
         </div>
@@ -514,54 +491,191 @@ export default function Home() {
       <section className="white-label-section" id="white-label">
         <div className="container white-label-layout">
           <Reveal className="white-label-copy">
-            <span className="eyebrow">Tecnologia invisível. Sua marca em primeiro plano.</span>
-            <h2>A experiência é da sua empresa. A tecnologia é JobForged.</h2>
-            <p>Ofereça uma jornada simples e consistente do primeiro acesso do candidato até a decisão do gestor, sem expor a marca do fornecedor.</p>
+            <span className="eyebrow">White label para sua empresa</span>
+            <h2><BrandPair blue="Sua marca" teal="na frente." /> A tecnologia nos bastidores.</h2>
+            <p>Personalize a experiência e apresente cada vaga como parte da sua empresa.</p>
             <div className="check-grid">
-              <span><Check /> Logo e identidade visual</span>
-              <span><Check /> Página de carreiras</span>
-              <span><Check /> Domínio personalizado</span>
-              <span><Check /> Textos e conteúdos</span>
-              <span><Check /> Etapas do processo</span>
-              <span><Check /> Perfis e permissões</span>
+              <span><Check /> Logo, cores e página de carreiras</span>
+              <span><Check /> Domínio e comunicação próprios</span>
+              <span><Check /> Jornada adaptada ao seu processo</span>
             </div>
-            <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Ver a JobForged com a minha marca <ArrowRight /></a>
+            <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Ver com minha marca <ArrowRight /></a>
           </Reveal>
-          <Reveal className="customizer" delay={0.12}>
-            <div className="customizer-head"><span><Paintbrush /> Personalização</span><small>Pré-visualização ao vivo</small></div>
-            <div className="customizer-body">
-              <div className="custom-controls">
-                <label>Identidade da empresa</label>
-                <div className="upload-box"><span className="custom-brand"><span>J</span> SuaMarca Jobs</span><small>Logo principal</small></div>
-                <label>Cor principal</label>
-                <div className="color-options"><span className="color-one" /><span className="color-two" /><span className="color-three" /><span className="color-four" /><span>+</span></div>
-                <label>Domínio</label>
-                <div className="domain-field"><Globe2 /> carreiras.suaempresa.com.br</div>
+          <Reveal className="personalization-scene" delay={0.12}>
+            <div className="product-window personalization-window">
+              <div className="window-bar">
+                <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
+                <span className="window-address">app.suaempresa.com.br/personalizacao</span>
+                <ShieldCheck size={16} aria-hidden="true" />
               </div>
-              <div className="custom-preview">
-                <div className="preview-nav"><span className="custom-brand custom-brand--small"><span>J</span> SuaMarca Jobs</span><span>Vagas &nbsp; Sobre nós</span></div>
-                <div className="preview-hero"><small>FAÇA PARTE DO NOSSO TIME</small><strong>Encontre um trabalho que combina com você.</strong><span>Ver vagas abertas <ArrowRight /></span></div>
-                <div className="preview-cards"><i /><i /><i /></div>
+              <div className="personalization-shell">
+                <aside className="app-sidebar personalization-sidebar" aria-label="Representação do menu da plataforma">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="app-sidebar__mark" src="/favicon.svg" alt="" width={46} height={46} />
+                  <span className="side-item"><PanelTop size={17} /></span>
+                  <span className="side-item"><BriefcaseBusiness size={17} /></span>
+                  <span className="side-item"><UsersRound size={17} /></span>
+                  <span className="side-item side-item--active"><Paintbrush size={17} /></span>
+                  <span className="side-item"><BarChart3 size={17} /></span>
+                </aside>
+                <div className="personalization-main">
+                  <div className="personalization-heading">
+                    <span><small>Personalização</small><strong>Identidade do portal</strong></span>
+                    <button type="button" tabIndex={-1}>Publicar alterações</button>
+                  </div>
+                  <div className="personalization-tabs" aria-label="Seções de personalização">
+                    <span className="is-active"><Paintbrush /> Marca</span>
+                    <span><Palette /> Cores</span>
+                    <span><Type /> Tipografia</span>
+                    <span><LayoutTemplate /> Estrutura</span>
+                    <span><ImageIcon /> Banners</span>
+                  </div>
+                  <div className="personalization-workspace">
+                    <div className="personalization-controls">
+                      <div className="personalization-progress">
+                        <span><strong>Identidade configurada</strong><small>4 de 7 itens concluídos</small></span><em>57%</em>
+                        <i><b /></i>
+                      </div>
+                      <div className="personalization-control-card">
+                        <small>IDENTIDADE DA EMPRESA</small>
+                        <div className="personalization-field"><span>S</span><strong>Sua Empresa</strong></div>
+                        <div className="personalization-upload"><Upload /><span><strong>Logotipo principal</strong><small>SVG atualizado</small></span><CircleCheck /></div>
+                      </div>
+                      <div className="personalization-control-card">
+                        <small>CORES DA MARCA</small>
+                        <div className="personalization-colors"><span /><span /><span /><b>#20B2AA</b></div>
+                      </div>
+                      <div className="personalization-layouts">
+                        <span className="is-selected"><LayoutTemplate /><strong>Corporativo</strong></span>
+                        <span><PanelTop /><strong>Minimal</strong></span>
+                      </div>
+                    </div>
+                    <div className="personalization-preview">
+                      <div className="personalization-preview-head">
+                        <span><strong>Pré-visualização do portal</strong><small>Exatamente como o candidato vê</small></span>
+                        <div><Monitor /><Smartphone /></div>
+                      </div>
+                      <div className="careers-preview">
+                        <div className="careers-preview__nav"><span><b>S</b> Sua Empresa</span><small>Vagas&nbsp;&nbsp;&nbsp; Cultura&nbsp;&nbsp;&nbsp; Contato</small></div>
+                        <div className="careers-preview__hero">
+                          <span>FAÇA PARTE DO NOSSO TIME</span>
+                          <strong>O próximo capítulo da sua carreira começa aqui.</strong>
+                          <small>Conheça oportunidades feitas para pessoas que querem construir, aprender e crescer.</small>
+                          <button type="button" tabIndex={-1}>Explorar vagas <ArrowRight /></button>
+                        </div>
+                        <div className="careers-preview__jobs">
+                          <div className="careers-search"><SearchCheck /> Busque por área ou oportunidade</div>
+                          <span><i /><b>Analista de Customer Success</b><small>Híbrido · Brasília, DF</small><ArrowRight /></span>
+                          <span><i /><b>Desenvolvedor Front-end</b><small>Remoto · Pleno</small><ArrowRight /></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      <section className="audience-section">
+      <section className="difference-section" id="diferenciais">
         <div className="container">
           <SectionIntro
-            eyebrow="Feita para operações que querem evoluir"
-            title="Uma operação simples para diferentes modelos de recrutamento."
-            text="Do RH interno às consultorias com múltiplos clientes, cada equipe organiza seus critérios sem aumentar a complexidade."
+            eyebrow="Três diferenciais. Uma operação conectada."
+            title={<>Sua marca, seu WhatsApp e um <BrandPair blue="agente" teal="de triagem." /></>}
+            text="A JobForged une presença própria, comunicação no canal do candidato e IA para organizar quem merece atenção primeiro."
             align="center"
           />
-          <div className="audience-grid">
-            {audiences.map((audience, index) => {
-              const Icon = audience.icon;
-              return <Reveal className="audience-card" delay={index * 0.08} key={audience.title}><Icon /><h3>{audience.title}</h3><p>{audience.text}</p><span>Explorar solução <ArrowRight /></span></Reveal>;
-            })}
+          <div className="difference-grid">
+            <Reveal className="difference-card difference-card--brand">
+              <span className="difference-number">01</span>
+              <Paintbrush />
+              <h3>White label de ponta a ponta.</h3>
+              <p>Logo, cores, domínio e página de carreiras com a identidade da sua empresa.</p>
+              <div className="difference-mini-brand">
+                <span><i>S</i><strong>SuaEmpresa</strong></span>
+                <small>carreiras.suaempresa.com.br</small>
+              </div>
+            </Reveal>
+            <Reveal className="difference-card difference-card--whatsapp" delay={0.08}>
+              <span className="difference-number">02</span>
+              <MessageCircle />
+              <h3>WhatsApp integrado ao processo.</h3>
+              <p>Perguntas, documentos e confirmações no canal que o candidato já utiliza.</p>
+              <div className="difference-mini-chat">
+                <span>Olá, Júlia! Pode enviar seu currículo?</span>
+                <span>Enviado! <i>✓✓</i></span>
+              </div>
+            </Reveal>
+            <Reveal className="difference-card difference-card--ai" delay={0.16}>
+              <span className="difference-number">03</span>
+              <Bot />
+              <h3>Agente de triagem por IA.</h3>
+              <p>Lê currículos, organiza a aderência e entrega contexto para o RH decidir.</p>
+              <div className="difference-mini-score">
+                <span><Sparkles /> Currículo analisado</span>
+                <strong>92%</strong>
+                <i><b /></i>
+              </div>
+            </Reveal>
           </div>
+        </div>
+      </section>
+
+      <section className="pricing-section" id="planos">
+        <div className="container">
+          <SectionIntro
+            eyebrow="Planos para cada momento"
+            title={<>Escolha o <BrandPair blue="plano" teal="ideal" /> para sua operação</>}
+            text="Comece gratuitamente e evolua conforme sua necessidade de vagas, usuários e automações."
+            align="center"
+          />
+          <div className="billing-toggle" role="group" aria-label="Período de cobrança">
+            <button type="button" className={!annualBilling ? "is-active" : ""} aria-pressed={!annualBilling} onClick={() => setAnnualBilling(false)}>Mensal</button>
+            <button type="button" className={annualBilling ? "is-active" : ""} aria-pressed={annualBilling} onClick={() => setAnnualBilling(true)}>Anual <span>2 meses grátis</span></button>
+          </div>
+          <div className="pricing-grid">
+            <Reveal className="price-card">
+              <div className="plan-head"><span>Gratuito</span><small>Para conhecer a plataforma</small></div>
+              <div className="plan-price"><strong>R$ 0</strong><span>para começar</span></div>
+              <p>Uma base organizada para operações menores iniciarem com clareza.</p>
+              <a className="button button--ghost" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Começar grátis <ArrowRight /></a>
+              <ul>
+                <li><Check /> Até 2 vagas simultâneas</li>
+                <li><Check /> 1 usuário recrutador</li>
+                <li><Check /> Página básica de carreiras</li>
+                <li><Check /> Kanban e histórico de candidatos</li>
+                <li><Check /> Até 500 candidatos armazenados</li>
+                <li><Check /> Portal geral JobForged</li>
+              </ul>
+            </Reveal>
+            <Reveal className="price-card price-card--featured" delay={0.08}>
+              <span className="plan-badge"><Star /> Melhor custo-benefício</span>
+              <div className="plan-head"><span>Essencial</span><small>Para ter mais controle</small></div>
+              <div className="plan-price"><strong>R$ {annualBilling ? "80,83" : "97"}</strong><span>/mês{annualBilling ? ", no anual" : ""}</span></div>
+              <p>Mais capacidade para empresas que já recrutam com frequência.</p>
+              <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
+              <ul>
+                <li><Check /> Até 5 vagas simultâneas</li>
+                <li><Check /> 3 usuários</li>
+                <li><Check /> Tudo do plano Gratuito</li>
+                <li><Check /> Estrutura para sua operação crescer</li>
+              </ul>
+            </Reveal>
+            <Reveal className="price-card" delay={0.16}>
+              <div className="plan-head"><span>Profissional</span><small>Para operações estruturadas</small></div>
+              <div className="plan-price"><strong>R$ {annualBilling ? "205,83" : "247"}</strong><span>/mês{annualBilling ? ", no anual" : ""}</span></div>
+              <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
+              <a className="button button--ghost" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
+              <ul>
+                <li><Check /> Até 15 vagas simultâneas</li>
+                <li><Check /> 10 usuários</li>
+                <li><Check /> Tudo do plano Essencial</li>
+                <li><Check /> Operação pronta para escala</li>
+              </ul>
+            </Reveal>
+          </div>
+          <p className="pricing-note"><ShieldCheck /> Fale com um especialista para escolher o plano mais adequado à sua operação.</p>
         </div>
       </section>
 
@@ -569,19 +683,20 @@ export default function Home() {
         <div className="container faq-layout">
           <Reveal className="faq-copy">
             <span className="eyebrow">Perguntas frequentes</span>
-            <h2>O que você precisa saber antes de transformar seu recrutamento.</h2>
-            <p>Ainda tem alguma dúvida? Fale com a JobForged e veja como as automações podem apoiar a qualidade das contratações da sua empresa.</p>
-            <a className="text-link" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Conversar com a JobForged <ArrowRight /></a>
+            <h2>O que você precisa saber antes de transformar o <BrandPair blue="seu" teal="recrutamento." /></h2>
+            <p>Respostas diretas sobre personalização, triagem por IA, WhatsApp e operação da plataforma.</p>
           </Reveal>
           <div className="faq-list">
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index;
               return (
                 <Reveal className={`faq-item ${isOpen ? "faq-item--open" : ""}`} delay={index * 0.04} key={faq.question}>
-                  <button type="button" aria-expanded={isOpen} onClick={() => setOpenFaq(isOpen ? null : index)}>
+                  <button type="button" aria-expanded={isOpen} aria-controls={`faq-answer-${index}`} onClick={() => setOpenFaq(isOpen ? null : index)}>
                     <span>{faq.question}</span><ChevronDown />
                   </button>
-                  {isOpen && <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>{faq.answer}</motion.p>}
+                  <div id={`faq-answer-${index}`} className={`faq-answer ${isOpen ? "is-open" : ""}`} aria-hidden={!isOpen}>
+                    <div><p>{faq.answer}</p></div>
+                  </div>
                 </Reveal>
               );
             })}
@@ -595,7 +710,7 @@ export default function Home() {
             <div className="cta-orb" aria-hidden="true" />
             <div className="cta-copy">
               <span className="eyebrow eyebrow--light">Pronto para contratar de um jeito melhor?</span>
-              <h2>Veja como a JobForged simplifica o processo sem simplificar a decisão.</h2>
+              <h2>Veja como a JobForged <BrandPair blue="simplifica" teal="processos" light /> sem simplificar a decisão.</h2>
               <p>Conheça o ATS white label que combina automações, critérios de seleção e suporte especializado para contratar com mais qualidade.</p>
             </div>
             <div className="cta-actions">
@@ -611,13 +726,20 @@ export default function Home() {
           <div className="footer-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/jobforged-logo.png" alt="JobForged" width={636} height={184} />
-            <p>ATS white label para empresas que querem simplificar o recrutamento e contratar com mais tecnologia, critérios e identidade.</p>
+            <p>ATS white label com WhatsApp integrado e agente de triagem por IA.</p>
+            <address>JobForged · CNPJ 65.703.328/0001-10</address>
           </div>
-          <div className="footer-column"><strong>Produto</strong><a href="#diferenciais">Recursos</a><a href="#white-label">White label</a><a href="#como-funciona">Como funciona</a></div>
-          <div className="footer-column"><strong>Soluções</strong><a href="#produto">RH interno</a><a href="#produto">Consultorias</a><a href="#produto">Grupos empresariais</a></div>
-          <div className="footer-column"><strong>Contato</strong><a href={WHATSAPP_URL} target="_blank" rel="noreferrer">Solicitar demonstração</a><a href="#faq">Perguntas frequentes</a></div>
+          <div className="footer-column"><strong>Explore</strong><a href="#diferenciais">Diferenciais</a><a href="#planos">Planos</a><Link href="/design-system">Design System</Link></div>
+          <div className="footer-column"><strong>Contato</strong><a href="mailto:jobforged@gmail.com">jobforged@gmail.com</a><a href="tel:+5561991630130">+55 61 9 9163-0130</a></div>
         </div>
-        <div className="container footer-bottom"><span>© {new Date().getFullYear()} JobForged. Todos os direitos reservados.</span><span>Recrutamento sob medida para a sua marca.</span></div>
+        <div className="container footer-bottom">
+          <span>© {new Date().getFullYear()} JobForged. Todos os direitos reservados.</span>
+          <nav className="footer-legal" aria-label="Documentos legais">
+            <Link href="/termos-servico">Termos de serviço</Link>
+            <Link href="/politicas-privacidade">Privacidade</Link>
+            <Link href="/politicas-exclusao">Exclusão de dados</Link>
+          </nav>
+        </div>
       </footer>
     </main>
   );

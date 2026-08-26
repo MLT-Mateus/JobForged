@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import "@fontsource-variable/montserrat";
+import "@fontsource-variable/open-sans";
 import "./globals.css";
+import "./components/ui/ui.css";
+import NavigationLoader from "./components/NavigationLoader";
 
 export const metadata: Metadata = {
   title: "JobForged",
   description:
-    "Simplifique o recrutamento com um ATS white label, triagem por IA, entrevistas pelo WhatsApp e critérios para contratar com mais qualidade.",
+    "Centralize vagas, currículos, triagem automática, Kanban e histórico de candidatos em uma plataforma feita para PMEs.",
   keywords: [
     "ATS white label",
     "software de recrutamento e seleção",
@@ -16,7 +19,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "JobForged",
-    description: "ATS white label para transformar recrutamento em um processo conectado, automatizado e inteligente.",
+    description: "Recrutamento organizado para PMEs, com vagas, currículos, Kanban, histórico de candidatos e triagem assistida por IA.",
     type: "website",
     locale: "pt_BR",
     images: [{ url: "/brand/jobforged-logo.png", width: 636, height: 184, alt: "JobForged" }],
@@ -24,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "JobForged",
-    description: "Recrute com a sua marca. Contrate com mais inteligência.",
+    description: "Recrute com a sua marca. Contrate com inteligência.",
     images: ["/brand/jobforged-logo.png"],
   },
   other: { "codex-preview": "development" },
@@ -45,8 +48,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   };
 
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var key="jobforged-theme";var saved=localStorage.getItem(key);var theme=saved==="dark"||saved==="light"?saved:(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;}catch(error){document.documentElement.dataset.theme="light";}})();`,
+          }}
+        />
+      </head>
       <body>
+        <NavigationLoader />
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </body>

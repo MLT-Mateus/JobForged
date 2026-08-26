@@ -50,7 +50,10 @@ O workflow em `.github/workflows/quality.yml` valida automaticamente pushes e Pu
 - `app/page.tsx`: conteúdo, componentes e interações da página
 - `app/globals.css`: identidade visual e responsividade
 - `app/layout.tsx`: metadados, SEO e dados estruturados
+- `app/design-system/`: catálogo de fundamentos e componentes com temas claro e escuro
 - `public/brand/`: logos oficiais da JobForged
+
+A página de referência visual fica disponível em `/design-system` e salva a preferência de tema no navegador.
 
 ## Identidade visual
 
