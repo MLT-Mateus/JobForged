@@ -5593,3 +5593,40 @@ html[data-theme="dark"] .floating-whatsapp-cta {
     font-size: 9px;
   }
 }
+
+
+/* JobForged — ajustes finais LP */
+html {
+  view-transition-name: root;
+}
+
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.theme-switching,
+html.theme-switching body,
+html.theme-switching main,
+html.theme-switching section,
+html.theme-switching header,
+html.theme-switching footer,
+html.theme-switching .site-header,
+html.theme-switching .button,
+html.theme-switching a,
+html.theme-switching button {
+  transition-duration: 220ms !important;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.agent-triage-float {
+  transform: translateY(46px) !important;
+}
+
+@media (max-width: 700px) {
+  .agent-triage-float {
+    transform: translateY(32px) !important;
+  }
+}
