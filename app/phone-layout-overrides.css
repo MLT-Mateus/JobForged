@@ -1,0 +1,20 @@
+/*
+ * Landing page phone composition — final floating-card positioning.
+ * Keep the AI triage badge below the conversation controls while preserving
+ * a clear vertical hierarchy above the "Resposta registrada" badge.
+ */
+.phone-quality {
+  top: 370px;
+}
+
+@media (max-width: 900px) {
+  .phone-quality {
+    top: 355px;
+  }
+}
+
+@media (max-width: 640px) {
+  .phone-quality {
+    top: 365px;
+  }
+}
