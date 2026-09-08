@@ -1544,7 +1544,7 @@ main {
 .phone-quality {
   position: absolute;
   z-index: 4;
-  top: 386px;
+  top: 420px;
   left: -22px;
   display: flex;
   align-items: center;
@@ -5596,7 +5596,7 @@ html[data-theme="dark"] .not-found-window__body small { color: var(--ink-soft); 
   }
 
   .phone-quality {
-    top: 416px;
+    top: 450px;
     left: -4px;
   }
 

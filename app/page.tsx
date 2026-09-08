@@ -361,7 +361,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1>Contrate com a <BrandPair blue="sua" teal="marca." /><br />Contrate com inteligência.</h1>
+            <h1>Recrute com a <BrandPair blue="sua" teal="marca." /><br />Contrate com inteligência.</h1>
             <p className="hero-lead">
               Centralize vagas, currículos, triagem automática, Kanban e histórico de candidatos em uma plataforma feita para PMEs que querem mais controle e menos retrabalho.
             </p>

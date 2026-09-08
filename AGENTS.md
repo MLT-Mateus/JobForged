@@ -19,7 +19,7 @@ The user requires every update made here in Sites to also update
 
 ## Triage badge
 
-The approved 34px downward correction is defined in `app/globals.css`:
-`.phone-quality` uses `top: 386px` by default and `top: 416px` in its existing
+The latest approved additional 34px downward correction is defined in `app/globals.css`:
+`.phone-quality` uses `top: 420px` by default and `top: 450px` in its existing
 responsive rule. Keep one source of truth for this position. Do not reintroduce
 `app/phone-layout-overrides.css` or an overriding `!important` rule.
