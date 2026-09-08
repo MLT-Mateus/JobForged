@@ -15,6 +15,7 @@ import {
   FileText,
   ImageIcon,
   LayoutTemplate,
+  Mail,
   Menu,
   MessageCircle,
   Monitor,
@@ -446,7 +447,7 @@ export default function Home() {
           </Reveal>
           <Reveal className="whatsapp-copy" delay={0.1}>
             <span className="eyebrow eyebrow--light">Agente de triagem no WhatsApp</span>
-            <h2>O candidato envia. <BrandPair blue="A IA" teal="organiza." light /> Seu RH decide.</h2>
+            <h2><BrandPair blue="Triamos" teal="e organizamos" light /> cada candidato.<br />Seu RH decide.</h2>
             <p>Nosso agente recebe o currículo, coleta respostas e organiza a aderência do perfil. Tudo chega ao ATS pronto para o RH avaliar.</p>
             <div className="whatsapp-benefits">
               <span><FileText /> Currículo recebido no WhatsApp</span>
@@ -581,41 +582,45 @@ export default function Home() {
       <section className="difference-section" id="diferenciais">
         <div className="container">
           <SectionIntro
-            eyebrow="Três diferenciais. Uma operação conectada."
-            title={<>Sua marca, seu WhatsApp e um <BrandPair blue="agente" teal="de triagem." /></>}
-            text="A JobForged une presença própria, comunicação no canal do candidato e IA para organizar quem merece atenção primeiro."
+            eyebrow="Três diferenciais. Um só processo."
+            title={<>Uma experiência mais <BrandPair blue="próxima" teal="e inteligente." /></>}
+            text="Identidade própria, conversas pelo WhatsApp e triagem assistida trabalhando de forma integrada."
             align="center"
           />
           <div className="difference-grid">
             <Reveal className="difference-card difference-card--brand">
               <span className="difference-number">01</span>
               <Paintbrush />
-              <h3>White label de ponta a ponta.</h3>
-              <p>Logo, cores, domínio e página de carreiras com a identidade da sua empresa.</p>
-              <div className="difference-mini-brand">
-                <span><i>S</i><strong>SuaEmpresa</strong></span>
-                <small>carreiras.suaempresa.com.br</small>
+              <h3>Sua marca em toda a jornada.</h3>
+              <p>Logo, cores, domínio e portal de carreiras criam uma experiência realmente própria.</p>
+              <div className="difference-visual difference-mini-brand">
+                <span className="difference-visual__label"><ShieldCheck /> White label ativo</span>
+                <div className="difference-brand-row"><i>S</i><span><strong>Sua Empresa</strong><small>Portal de carreiras personalizado</small></span></div>
+                <em>carreiras.suaempresa.com.br</em>
               </div>
             </Reveal>
             <Reveal className="difference-card difference-card--whatsapp" delay={0.08}>
               <span className="difference-number">02</span>
               <MessageCircle />
-              <h3>WhatsApp integrado ao processo.</h3>
-              <p>Perguntas, documentos e confirmações no canal que o candidato já utiliza.</p>
-              <div className="difference-mini-chat">
-                <span>Olá, Júlia! Pode enviar seu currículo?</span>
-                <span>Enviado! <i>✓✓</i></span>
+              <h3>WhatsApp conectado ao processo.</h3>
+              <p>Currículos, respostas e confirmações chegam pelo canal que o candidato já utiliza.</p>
+              <div className="difference-visual difference-mini-chat">
+                <span className="difference-visual__label"><MessageCircle /> Conversa integrada</span>
+                <div className="difference-chat-bubble">Olá, Júlia! Envie seu currículo.</div>
+                <div className="difference-chat-bubble difference-chat-bubble--reply">Currículo enviado <i>✓✓</i></div>
+                <small className="difference-visual__status"><CircleCheck /> Resposta salva no ATS</small>
               </div>
             </Reveal>
             <Reveal className="difference-card difference-card--ai" delay={0.16}>
               <span className="difference-number">03</span>
               <Bot />
-              <h3>Agente de triagem por IA.</h3>
-              <p>Lê currículos, organiza a aderência e entrega contexto para o RH decidir.</p>
-              <div className="difference-mini-score">
-                <span><Sparkles /> Currículo analisado</span>
-                <strong>92%</strong>
+              <h3>Triagem por IA com contexto.</h3>
+              <p>O agente lê cada perfil, organiza a aderência e destaca quem merece atenção primeiro.</p>
+              <div className="difference-visual difference-mini-score">
+                <span className="difference-visual__label"><Sparkles /> Agente de triagem</span>
+                <div className="difference-score-row"><strong>92%</strong><span><b>Alta aderência</b><small>Perfil recomendado</small></span></div>
                 <i><b /></i>
+                <small className="difference-visual__status"><FileText /> Currículo e respostas analisados</small>
               </div>
             </Reveal>
           </div>
@@ -635,7 +640,7 @@ export default function Home() {
             <button type="button" className={annualBilling ? "is-active" : ""} aria-pressed={annualBilling} onClick={() => setAnnualBilling(true)}>Anual <span>2 meses grátis</span></button>
           </div>
           <div className="pricing-grid">
-            <Reveal className="price-card">
+            <Reveal className="price-card price-card--free">
               <div className="plan-head"><span>Gratuito</span><small>Para conhecer a plataforma</small></div>
               <div className="plan-price"><strong>R$ 0</strong><span>para começar</span></div>
               <p>Uma base organizada para operações menores iniciarem com clareza.</p>
@@ -650,28 +655,32 @@ export default function Home() {
               </ul>
             </Reveal>
             <Reveal className="price-card price-card--featured" delay={0.08}>
-              <span className="plan-badge"><Star /> Melhor custo-benefício</span>
-              <div className="plan-head"><span>Essencial</span><small>Para ter mais controle</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "80,83" : "97"}</strong><span>/mês{annualBilling ? ", no anual" : ""}</span></div>
-              <p>Mais capacidade para empresas que já recrutam com frequência.</p>
+              <span className="plan-badge"><Star /> Mais popular</span>
+              <div className="plan-head"><span>Básico</span><small>Para PMEs que querem mais controle</small></div>
+              <div className="plan-price"><strong>R$ {annualBilling ? "350" : "35"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              {annualBilling && <small className="plan-equivalent">Equivale a R$ 29,17 por mês</small>}
+              <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
               <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
               <ul>
                 <li><Check /> Até 5 vagas simultâneas</li>
                 <li><Check /> 3 usuários</li>
+                <li><Check /> Triagem por IA</li>
+                <li><Check /> WhatsApp integrado</li>
                 <li><Check /> Tudo do plano Gratuito</li>
-                <li><Check /> Estrutura para sua operação crescer</li>
               </ul>
             </Reveal>
-            <Reveal className="price-card" delay={0.16}>
+            <Reveal className="price-card price-card--professional" delay={0.16}>
               <div className="plan-head"><span>Profissional</span><small>Para operações estruturadas</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "205,83" : "247"}</strong><span>/mês{annualBilling ? ", no anual" : ""}</span></div>
+              <div className="plan-price"><strong>R$ {annualBilling ? "700" : "70"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              {annualBilling && <small className="plan-equivalent">Equivale a R$ 58,33 por mês</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
-              <a className="button button--ghost" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
+              <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
               <ul>
                 <li><Check /> Até 15 vagas simultâneas</li>
                 <li><Check /> 10 usuários</li>
-                <li><Check /> Tudo do plano Essencial</li>
-                <li><Check /> Operação pronta para escala</li>
+                <li><Check /> Automações avançadas</li>
+                <li><Check /> Experiência white label</li>
+                <li><Check /> Tudo do plano Básico</li>
               </ul>
             </Reveal>
           </div>
@@ -722,23 +731,35 @@ export default function Home() {
       </section>
 
       <footer className="site-footer">
-        <div className="container footer-grid">
-          <div className="footer-brand">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/jobforged-logo.png" alt="JobForged" width={636} height={184} />
-            <p>ATS white label com WhatsApp integrado e agente de triagem por IA.</p>
-            <address>JobForged · CNPJ 65.703.328/0001-10</address>
+        <div className="container footer-shell">
+          <div className="footer-grid">
+            <div className="footer-brand">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/jobforged-logo.png" alt="JobForged" width={636} height={184} />
+              <p>ATS white label com WhatsApp integrado e agente de triagem por IA.</p>
+              <address>CNPJ 65.703.328/0001-10</address>
+            </div>
+            <div className="footer-contact">
+              <span className="eyebrow">Vamos conversar?</span>
+              <h2>Veja a JobForged funcionando na sua operação.</h2>
+              <div className="footer-contact__links">
+                <a href="mailto:jobforged@gmail.com"><Mail /> <span><small>E-mail</small><strong>jobforged@gmail.com</strong></span></a>
+                <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><MessageCircle /> <span><small>WhatsApp</small><strong>+55 61 9 9163-0130</strong></span></a>
+              </div>
+            </div>
           </div>
-          <div className="footer-column"><strong>Explore</strong><a href="#diferenciais">Diferenciais</a><a href="#planos">Planos</a><Link href="/design-system">Design System</Link></div>
-          <div className="footer-column"><strong>Contato</strong><a href="mailto:jobforged@gmail.com">jobforged@gmail.com</a><a href="tel:+5561991630130">+55 61 9 9163-0130</a></div>
-        </div>
-        <div className="container footer-bottom">
-          <span>© {new Date().getFullYear()} JobForged. Todos os direitos reservados.</span>
-          <nav className="footer-legal" aria-label="Documentos legais">
-            <Link href="/termos-servico">Termos de serviço</Link>
-            <Link href="/politicas-privacidade">Privacidade</Link>
-            <Link href="/politicas-exclusao">Exclusão de dados</Link>
-          </nav>
+          <div className="footer-navigation">
+            <nav aria-label="Navegação do rodapé"><a href="#diferenciais">Diferenciais</a><a href="#planos">Planos</a><Link href="/design-system">Design System</Link></nav>
+            <span>Menos retrabalho. Mais contexto para decidir.</span>
+          </div>
+          <div className="footer-bottom">
+            <span>© {new Date().getFullYear()} JobForged. Todos os direitos reservados.</span>
+            <nav className="footer-legal" aria-label="Documentos legais">
+              <Link href="/termos-servico">Termos de serviço</Link>
+              <Link href="/politicas-privacidade">Privacidade</Link>
+              <Link href="/politicas-exclusao">Exclusão de dados</Link>
+            </nav>
+          </div>
         </div>
       </footer>
     </main>

@@ -3,7 +3,6 @@ import "@fontsource-variable/montserrat";
 import "@fontsource-variable/open-sans";
 import "./globals.css";
 import "./components/ui/ui.css";
-import "./phone-layout-overrides.css";
 import NavigationLoader from "./components/NavigationLoader";
 
 export const metadata: Metadata = {
