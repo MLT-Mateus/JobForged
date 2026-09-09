@@ -493,8 +493,8 @@ export default function Home() {
         <div className="container white-label-layout">
           <Reveal className="white-label-copy">
             <span className="eyebrow">White label para sua empresa</span>
-            <h2><BrandPair blue="Sua marca" teal="na frente." /> A tecnologia nos bastidores.</h2>
-            <p>Personalize a experiência e apresente cada vaga como parte da sua empresa.</p>
+            <h2><BrandPair blue="Sua marca" teal="na frente." /> Tecnologia por trás.</h2>
+            <p>Uma experiência de recrutamento com a identidade da sua empresa.</p>
             <div className="check-grid">
               <span><Check /> Logo, cores e página de carreiras</span>
               <span><Check /> Domínio e comunicação próprios</span>
@@ -503,75 +503,30 @@ export default function Home() {
             <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Ver com minha marca <ArrowRight /></a>
           </Reveal>
           <Reveal className="personalization-scene" delay={0.12}>
-            <div className="product-window personalization-window">
+            <div className="product-window personalization-window brand-studio-window">
               <div className="window-bar">
                 <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
-                <span className="window-address">app.suaempresa.com.br/personalizacao</span>
+                <span className="window-address">carreiras.suaempresa.com.br</span>
                 <ShieldCheck size={16} aria-hidden="true" />
               </div>
-              <div className="personalization-shell">
-                <aside className="app-sidebar personalization-sidebar" aria-label="Representação do menu da plataforma">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="app-sidebar__mark" src="/favicon.svg" alt="" width={46} height={46} />
-                  <span className="side-item"><PanelTop size={17} /></span>
-                  <span className="side-item"><BriefcaseBusiness size={17} /></span>
-                  <span className="side-item"><UsersRound size={17} /></span>
-                  <span className="side-item side-item--active"><Paintbrush size={17} /></span>
-                  <span className="side-item"><BarChart3 size={17} /></span>
+              <div className="brand-studio">
+                <aside className="brand-studio__sidebar" aria-label="Menu do portal">
+                  <span className="brand-studio__sidebar-mark">S</span>
+                  <i><PanelTop /></i>
+                  <i><BriefcaseBusiness /></i>
+                  <i className="is-active"><Paintbrush /></i>
+                  <i><BarChart3 /></i>
                 </aside>
-                <div className="personalization-main">
-                  <div className="personalization-heading">
-                    <span><small>Personalização</small><strong>Identidade do portal</strong></span>
-                    <button type="button" tabIndex={-1}>Publicar alterações</button>
-                  </div>
-                  <div className="personalization-tabs" aria-label="Seções de personalização">
-                    <span className="is-active"><Paintbrush /> Marca</span>
-                    <span><Palette /> Cores</span>
-                    <span><Type /> Tipografia</span>
-                    <span><LayoutTemplate /> Estrutura</span>
-                    <span><ImageIcon /> Banners</span>
-                  </div>
-                  <div className="personalization-workspace">
-                    <div className="personalization-controls">
-                      <div className="personalization-progress">
-                        <span><strong>Identidade configurada</strong><small>4 de 7 itens concluídos</small></span><em>57%</em>
-                        <i><b /></i>
-                      </div>
-                      <div className="personalization-control-card">
-                        <small>IDENTIDADE DA EMPRESA</small>
-                        <div className="personalization-field"><span>S</span><strong>Sua Empresa</strong></div>
-                        <div className="personalization-upload"><Upload /><span><strong>Logotipo principal</strong><small>SVG atualizado</small></span><CircleCheck /></div>
-                      </div>
-                      <div className="personalization-control-card">
-                        <small>CORES DA MARCA</small>
-                        <div className="personalization-colors"><span /><span /><span /><b>#20B2AA</b></div>
-                      </div>
-                      <div className="personalization-layouts">
-                        <span className="is-selected"><LayoutTemplate /><strong>Corporativo</strong></span>
-                        <span><PanelTop /><strong>Minimal</strong></span>
-                      </div>
-                    </div>
-                    <div className="personalization-preview">
-                      <div className="personalization-preview-head">
-                        <span><strong>Pré-visualização do portal</strong><small>Exatamente como o candidato vê</small></span>
-                        <div><Monitor /><Smartphone /></div>
-                      </div>
-                      <div className="careers-preview">
-                        <div className="careers-preview__nav"><span><b>S</b> Sua Empresa</span><small>Vagas&nbsp;&nbsp;&nbsp; Cultura&nbsp;&nbsp;&nbsp; Contato</small></div>
-                        <div className="careers-preview__hero">
-                          <span>FAÇA PARTE DO NOSSO TIME</span>
-                          <strong>O próximo capítulo da sua carreira começa aqui.</strong>
-                          <small>Conheça oportunidades feitas para pessoas que querem construir, aprender e crescer.</small>
-                          <button type="button" tabIndex={-1}>Explorar vagas <ArrowRight /></button>
-                        </div>
-                        <div className="careers-preview__jobs">
-                          <div className="careers-search"><SearchCheck /> Busque por área ou oportunidade</div>
-                          <span><i /><b>Analista de Customer Success</b><small>Híbrido · Brasília, DF</small><ArrowRight /></span>
-                          <span><i /><b>Desenvolvedor Front-end</b><small>Remoto · Pleno</small><ArrowRight /></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="brand-studio__panel">
+                  <span className="brand-studio__eyebrow"><Paintbrush /> Identidade da marca</span>
+                  <div className="brand-studio__company"><b>S</b><span><strong>Sua empresa</strong><small>Portal de carreiras próprio</small></span></div>
+                  <div className="brand-studio__swatches" aria-label="Cores da marca"><i /><i /><i /></div>
+                  <span className="brand-studio__domain">carreiras.suaempresa.com.br</span>
+                </div>
+                <div className="brand-studio__preview">
+                  <div className="brand-studio__nav"><span><b>S</b> Sua empresa</span><small>Vagas&nbsp;&nbsp; Cultura</small></div>
+                  <div className="brand-studio__hero"><span>TRABALHE CONOSCO</span><strong>Um time com espaço para você crescer.</strong><button type="button" tabIndex={-1}>Ver vagas <ArrowRight /></button></div>
+                  <div className="brand-studio__cards"><span>Produto</span><span>Comercial</span><span>Operações</span></div>
                 </div>
               </div>
             </div>
@@ -657,8 +612,8 @@ export default function Home() {
             <Reveal className="price-card price-card--featured" delay={0.08}>
               <span className="plan-badge"><Star /> Mais popular</span>
               <div className="plan-head"><span>Básico</span><small>Para PMEs que querem mais controle</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "350" : "35"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
-              {annualBilling && <small className="plan-equivalent">Equivale a R$ 29,17 por mês</small>}
+              <div className="plan-price"><strong>R$ {annualBilling ? "288,00" : "248,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              {annualBilling && <small className="plan-equivalent">Equivale a R$ 24,00 por mês</small>}
               <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
               <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
               <ul>
@@ -671,8 +626,8 @@ export default function Home() {
             </Reveal>
             <Reveal className="price-card price-card--professional" delay={0.16}>
               <div className="plan-head"><span>Profissional</span><small>Para operações estruturadas</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "700" : "70"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
-              {annualBilling && <small className="plan-equivalent">Equivale a R$ 58,33 por mês</small>}
+              <div className="plan-price"><strong>R$ {annualBilling ? "496,00" : "449,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              {annualBilling && <small className="plan-equivalent">Equivale a R$ 41,33 por mês</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
               <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
               <ul>

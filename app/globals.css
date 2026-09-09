@@ -5852,6 +5852,133 @@ html[data-theme="dark"] .footer-navigation {
   line-height: 1.72;
 }
 
+/* White-label visual: same generous product presence as the Kanban hero. */
+.white-label-layout {
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.02fr);
+  gap: clamp(42px, 5vw, 72px);
+  align-items: center;
+}
+
+.personalization-scene {
+  width: 100%;
+  max-width: 680px;
+  justify-self: end;
+}
+
+.brand-studio-window {
+  aspect-ratio: 1.52 / 1;
+  min-height: 0;
+  border-radius: 24px;
+  transform: perspective(1400px) rotateY(-2deg) rotateX(1deg);
+}
+
+.brand-studio {
+  min-height: 0;
+  aspect-ratio: 1.7 / 1;
+  display: grid;
+  grid-template-columns: 42px minmax(150px, .58fr) minmax(0, 1.42fr);
+  gap: 14px;
+  padding: 18px;
+  background: linear-gradient(135deg, #fffdf7 0%, #fff9ed 52%, #f4fbfa 100%);
+}
+
+.white-label-copy { min-width: 0; }
+.white-label-copy h2 {
+  max-width: 570px;
+  font-size: clamp(42px, 4.2vw, 64px);
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+}
+.white-label-copy > p { max-width: 500px; }
+
+.brand-studio__sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 5px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff1d7, #fff9ef);
+}
+.brand-studio__sidebar-mark,
+.brand-studio__sidebar i {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px;
+}
+.brand-studio__sidebar-mark { margin-bottom: 6px; background: linear-gradient(135deg, #f5a517, #ef6d23); color: white; font-size: 12px; font-weight: 850; }
+.brand-studio__sidebar i { color: #b8731b; font-style: normal; }
+.brand-studio__sidebar i svg { width: 15px; }
+.brand-studio__sidebar i.is-active { background: #fff; color: #ef6d23; box-shadow: 0 4px 12px rgba(203, 112, 27, .17); }
+
+.brand-studio__panel,
+.brand-studio__preview {
+  border: 1px solid rgba(30, 52, 48, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.brand-studio__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 18px;
+}
+
+.brand-studio__eyebrow,
+.brand-studio__company,
+.brand-studio__nav {
+  display: flex;
+  align-items: center;
+}
+
+.brand-studio__eyebrow {
+  gap: 7px;
+  color: #9b5c05;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.brand-studio__eyebrow svg { width: 15px; }
+
+.brand-studio__company { gap: 11px; }
+.brand-studio__company > b,
+.brand-studio__nav b {
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #f5a517, #ef6d23);
+  color: white;
+  font-weight: 800;
+}
+.brand-studio__company > b { width: 42px; height: 42px; font-size: 18px; }
+.brand-studio__company span { display: flex; flex-direction: column; gap: 3px; }
+.brand-studio__company strong { color: #2d2417; font-size: 15px; }
+.brand-studio__company small { color: #8d7d63; font-size: 9px; }
+
+.brand-studio__swatches { display: flex; gap: 8px; margin-top: 2px; }
+.brand-studio__swatches i { width: 30px; height: 30px; border-radius: 9px; background: #f5a517; }
+.brand-studio__swatches i:nth-child(2) { background: #ef6d23; }
+.brand-studio__swatches i:nth-child(3) { background: #2d2417; }
+.brand-studio__domain { margin-top: auto; color: #a18f72; font-size: 9px; overflow-wrap: anywhere; }
+
+.brand-studio__preview { overflow: hidden; padding: 12px; }
+.brand-studio__nav { justify-content: space-between; min-height: 34px; padding: 0 8px 10px; color: #7d725e; font-size: 9px; }
+.brand-studio__nav > span { display: inline-flex; align-items: center; gap: 7px; color: #2d2417; font-weight: 800; }
+.brand-studio__nav b { width: 22px; height: 22px; border-radius: 7px; font-size: 10px; }
+.brand-studio__nav small { font-size: 8px; }
+.brand-studio__hero { min-height: 220px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 13px; padding: clamp(24px, 5vw, 48px); border-radius: 13px; background: linear-gradient(125deg, #f6a617, #ef6d23); color: white; }
+.brand-studio__hero > span { font-size: 9px; font-weight: 800; letter-spacing: .11em; }
+.brand-studio__hero strong { max-width: 330px; font-size: clamp(21px, 2.3vw, 32px); letter-spacing: -.045em; line-height: 1.05; }
+.brand-studio__hero button { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; padding: 10px 13px; border: 0; border-radius: 8px; background: white; color: #bf5417; font-size: 10px; font-weight: 800; }
+.brand-studio__hero button svg { width: 14px; }
+.brand-studio__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 11px; }
+.brand-studio__cards span { min-height: 46px; display: grid; align-content: center; padding: 9px; border: 1px solid #f0e8dc; border-radius: 10px; color: #705d43; font-size: 9px; font-weight: 750; }
+
 .personalization-shell {
   height: 365px;
   min-height: 365px;
@@ -6006,6 +6133,7 @@ html[data-theme="dark"] .site-footer {
 
   .personalization-scene {
     width: min(690px, 100%);
+    justify-self: start;
   }
 
   .footer-grid {
@@ -6029,6 +6157,12 @@ html[data-theme="dark"] .site-footer {
     overflow: visible;
     grid-template-columns: 42px minmax(0, 1fr);
   }
+
+  .brand-studio-window { min-height: 0; transform: none; }
+  .brand-studio { min-height: 0; grid-template-columns: 1fr; padding: 14px; }
+  .brand-studio__panel { gap: 13px; padding: 16px; }
+  .brand-studio__domain { margin-top: 0; }
+  .brand-studio__hero { min-height: 185px; padding: 26px; }
 
   .personalization-workspace {
     grid-template-columns: 1fr;
