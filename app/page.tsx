@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import {
@@ -38,6 +38,7 @@ import {
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=5561991630130&text=Ol%C3%A1%2C+quero+conhecer+a+JobForged.&type=phone_number&app_absent=0";
+const THEME_LOADER_CYCLE_MS = 3200;
 
 const navItems = [
   { label: "Diferenciais", href: "#diferenciais" },
@@ -263,6 +264,9 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [annualBilling, setAnnualBilling] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [themeLoading, setThemeLoading] = useState<"light" | "dark" | null>(null);
+  const themeSwitchingRef = useRef(false);
+  const themeTimersRef = useRef<number[]>([]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -273,9 +277,11 @@ export default function Home() {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
+  useEffect(() => () => themeTimersRef.current.forEach((timer) => window.clearTimeout(timer)), []);
+
   const closeMenu = () => setMenuOpen(false);
   const applyTheme = (nextTheme: "light" | "dark") => {
-    if (nextTheme === theme) return;
+    if (nextTheme === theme || themeSwitchingRef.current) return;
     const root = document.documentElement;
     const commitTheme = () => {
       root.dataset.theme = nextTheme;
@@ -283,23 +289,24 @@ export default function Home() {
       localStorage.setItem("jobforged-theme", nextTheme);
       setTheme(nextTheme);
     };
-    const transitionDocument = document as Document & {
-      startViewTransition?: (callback: () => void) => { finished: Promise<void> };
-    };
-
-    root.classList.add("theme-switching");
-    if (transitionDocument.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const transition = transitionDocument.startViewTransition(commitTheme);
-      void transition.finished.finally(() => root.classList.remove("theme-switching"));
-      return;
-    }
-
-    commitTheme();
-    window.setTimeout(() => root.classList.remove("theme-switching"), 820);
+    themeSwitchingRef.current = true;
+    setThemeLoading(nextTheme);
+    themeTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    themeTimersRef.current = [
+      window.setTimeout(commitTheme, 180),
+      window.setTimeout(() => {
+      setThemeLoading(null);
+        themeSwitchingRef.current = false;
+      }, THEME_LOADER_CYCLE_MS),
+    ];
   };
 
   return (
     <main>
+      {themeLoading && <div className="app-loader app-loader--theme" data-surface-theme={themeLoading} role="status" aria-live="polite" aria-label="Atualizando tema da JobForged">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="app-loader__logo" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} />
+      </div>}
       <header className="site-header">
         <div className="container nav-wrap">
           <a className="brand" href="#inicio" aria-label="JobForged — início">
@@ -493,7 +500,7 @@ export default function Home() {
         <div className="container white-label-layout">
           <Reveal className="white-label-copy">
             <span className="eyebrow">White label para sua empresa</span>
-            <h2><BrandPair blue="Sua marca" teal="na frente." /> Tecnologia por trás.</h2>
+            <h2 className="brand-promise"><span className="brand-promise__sua">Sua</span> <span className="brand-promise__marca">marca,</span><br />com a <span className="brand-promise__nossa">nossa</span> <span className="brand-promise__tecnologia">tecnologia.</span></h2>
             <p>Uma experiência de recrutamento com a identidade da sua empresa.</p>
             <div className="check-grid">
               <span><Check /> Logo, cores e página de carreiras</span>
@@ -518,10 +525,11 @@ export default function Home() {
                   <i><BarChart3 /></i>
                 </aside>
                 <div className="brand-studio__panel">
-                  <span className="brand-studio__eyebrow"><Paintbrush /> Identidade da marca</span>
-                  <div className="brand-studio__company"><b>S</b><span><strong>Sua empresa</strong><small>Portal de carreiras próprio</small></span></div>
+                  <span className="brand-studio__eyebrow"><Paintbrush /> Identidade da sua marca</span>
+                  <div className="brand-studio__company"><b>S</b><span><strong>Sua empresa</strong></span></div>
+                  <small className="brand-studio__palette-label">Sua paleta de cores</small>
                   <div className="brand-studio__swatches" aria-label="Cores da marca"><i /><i /><i /></div>
-                  <span className="brand-studio__domain">carreiras.suaempresa.com.br</span>
+                  <span className="brand-studio__domain">jobs.suaempresa | jobforged.suaempresa</span>
                 </div>
                 <div className="brand-studio__preview">
                   <div className="brand-studio__nav"><span><b>S</b> Sua empresa</span><small>Vagas&nbsp;&nbsp; Cultura</small></div>
@@ -612,8 +620,8 @@ export default function Home() {
             <Reveal className="price-card price-card--featured" delay={0.08}>
               <span className="plan-badge"><Star /> Mais popular</span>
               <div className="plan-head"><span>Básico</span><small>Para PMEs que querem mais controle</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "288,00" : "248,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
-              {annualBilling && <small className="plan-equivalent">Equivale a R$ 24,00 por mês</small>}
+              <div className="plan-price"><strong>R$ {annualBilling ? "248,00" : "288,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              {annualBilling && <small className="plan-equivalent">Economize R$ 40,00 por mês — R$ 480,00 por ano</small>}
               <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
               <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
               <ul>
@@ -626,8 +634,8 @@ export default function Home() {
             </Reveal>
             <Reveal className="price-card price-card--professional" delay={0.16}>
               <div className="plan-head"><span>Profissional</span><small>Para operações estruturadas</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "496,00" : "449,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
-              {annualBilling && <small className="plan-equivalent">Equivale a R$ 41,33 por mês</small>}
+              <div className="plan-price"><strong>R$ {annualBilling ? "449,00" : "496,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              {annualBilling && <small className="plan-equivalent">Economize R$ 47,00 por mês — R$ 564,00 por ano</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
               <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
               <ul>
