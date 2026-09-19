@@ -22,7 +22,7 @@ export function AppToast({ notice, onClose }: { notice: ToastNotice; onClose: ()
 
   return (
     <div className={`jf-toast jf-toast--${notice.kind}`} role={urgent ? "alert" : "status"} aria-live={urgent ? "assertive" : "polite"}>
-      <ToastIcon kind={notice.kind} />
+      <span className="jf-toast__icon"><ToastIcon kind={notice.kind} /></span>
       <div>
         <strong>{notice.title}</strong>
         <span>{notice.text}</span>

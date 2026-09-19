@@ -32,7 +32,6 @@ import {
   MapPin,
   Menu,
   MessageCircle,
-  Moon,
   MoreHorizontal,
   MousePointerClick,
   Palette,
@@ -45,7 +44,6 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
-  Sun,
   TrendingUp,
   Type,
   Upload,
@@ -67,6 +65,7 @@ import {
   SelectField,
   TextField,
   ToggleSwitch,
+  ThemeSelector,
   type ToastNotice,
   type DateRangeValue,
   type SelectOption,
@@ -126,6 +125,12 @@ const colorTokens = [
   { name: "Success", variable: "--ds-success", light: "#15946B", dark: "#51D3A3", group: "feedback", use: "Conclusão positiva" },
   { name: "Warning", variable: "--ds-warning", light: "#D58A14", dark: "#F0B95A", group: "feedback", use: "Atenção necessária" },
   { name: "Danger", variable: "--ds-danger", light: "#D64A5D", dark: "#FF8291", group: "feedback", use: "Erro ou bloqueio" },
+  { name: "Informação", variable: "--ds-accent", light: "#4169E1", dark: "#7E9CFF", group: "feedback", use: "Observações e casos especiais" },
+];
+
+const animatedBrandAssets = [
+  { title: "Animação principal", description: "Turquesa na mira e azul na pessoa.", asset: "/brand/jobforged-loader.svg" },
+  { title: "Animação alternativa", description: "Azul na mira e turquesa na pessoa.", asset: "/brand/jobforged-loader-alternate.svg" },
 ];
 
 const quickAlerts: Array<{ kind: AlertKind; label: string; title: string; text: string }> = [
@@ -238,15 +243,6 @@ function PaletteColor({ token, theme, copied, onCopy, featured = false }: { toke
   );
 }
 
-function ThemeSelector({ theme, onChange }: { theme: Theme; onChange: (theme: Theme) => void }) {
-  return (
-    <div className="ds-theme-selector" aria-label="Escolha o tema visual">
-      <button type="button" className={theme === "light" ? "is-active" : ""} aria-pressed={theme === "light"} onClick={() => onChange("light")}><Sun size={16} aria-hidden="true" /> Claro</button>
-      <button type="button" className={theme === "dark" ? "is-active" : ""} aria-pressed={theme === "dark"} onClick={() => onChange("dark")}><Moon size={16} aria-hidden="true" /> Escuro</button>
-    </div>
-  );
-}
-
 function AlertIcon({ kind, size = 18 }: { kind: AlertKind; size?: number }) {
   if (kind === "success") return <CircleCheck size={size} aria-hidden="true" />;
   if (kind === "warning") return <CircleAlert size={size} aria-hidden="true" />;
@@ -261,6 +257,7 @@ export default function DesignSystemClient() {
   });
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
+  const [appSidebarExpanded, setAppSidebarExpanded] = useState(true);
   const [activePage, setActivePage] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
   const [activeAlert, setActiveAlert] = useState<ToastNotice | null>(null);
@@ -271,23 +268,29 @@ export default function DesignSystemClient() {
   const [selectedStage, setSelectedStage] = useState("Entrevista");
   const [benefitOptions, setBenefitOptions] = useState<SelectOption[]>(initialBenefitOptions);
   const [selectedBenefits, setSelectedBenefits] = useState(["Vale alimentação"]);
-  const [interviewRange, setInterviewRange] = useState<DateRangeValue>({ start: "2026-08-20", end: "2026-08-27" });
+  const [interviewRange, setInterviewRange] = useState<DateRangeValue>({ start: "2026-08-20", end: "" });
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [uploadedPicture, setUploadedPicture] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploadedPictures, setUploadedPictures] = useState<File[]>([]);
 
   useEffect(() => {
-    const syncPageFromHash = () => {
-      const id = window.location.hash.replace("#", "");
-      const index = navigation.findIndex((item) => item.id === id);
-      if (index >= 0) setActivePage(index);
+    const syncPageFromPath = () => {
+      const segments = window.location.pathname.split("/").filter(Boolean);
+      const requestedSection = segments[0] === "design-system" && segments.length === 2 ? segments[1] : "";
+      const index = navigation.findIndex((item) => item.id === requestedSection);
+      const resolvedIndex = index >= 0 ? index : 0;
+      const canonicalPath = `/design-system/${navigation[resolvedIndex].id}`;
+      setActivePage(resolvedIndex);
+      if (window.location.pathname !== canonicalPath || window.location.hash) {
+        window.history.replaceState(null, "", canonicalPath);
+      }
     };
-    const frame = window.requestAnimationFrame(syncPageFromHash);
-    window.addEventListener("hashchange", syncPageFromHash);
+    const frame = window.requestAnimationFrame(syncPageFromPath);
+    window.addEventListener("popstate", syncPageFromPath);
     return () => {
       window.cancelAnimationFrame(frame);
-      window.removeEventListener("hashchange", syncPageFromHash);
+      window.removeEventListener("popstate", syncPageFromPath);
     };
   }, []);
 
@@ -317,7 +320,7 @@ export default function DesignSystemClient() {
   function changePage(index: number) {
     setActivePage(index);
     setMenuOpen(false);
-    window.history.replaceState(null, "", `#${navigation[index].id}`);
+    window.history.pushState(null, "", `/design-system/${navigation[index].id}`);
     document.querySelector(".ds-content")?.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -389,7 +392,6 @@ export default function DesignSystemClient() {
             </button>
           </div>
           <nav aria-label="Páginas do manual da marca">
-            {sidebarExpanded && <span className="ds-sidebar__label">Seções</span>}
             {navigation.map((item, index) => {
               const Icon = item.icon;
               return (
@@ -413,31 +415,32 @@ export default function DesignSystemClient() {
 
           <section className="ds-section ds-section--first" hidden={activePage !== 1} aria-label="Ativos da marca">
             <SectionHeading title="Arquivos oficiais, prontos para usar." description="Escolha a versão adequada e baixe o arquivo original sem alterar proporções ou cores." />
-            <div className="ds-brand-families">
-              {brandFamilies.map((family) => (
-                <article className="ds-brand-family" key={family.title}>
-                  <header><span>{family.number}</span><div><strong>{family.title}</strong><p>{family.description}</p></div></header>
-                  <div className="ds-brand-family__preview">
-                    <div className="ds-brand-family__logo"><small>Logo horizontal</small><img src={family.logo} alt={`${family.title} da JobForged`} /></div>
-                    <div className="ds-brand-family__symbol"><small>Ícone</small><img src={family.symbol} alt={`Ícone da ${family.title.toLowerCase()}`} /></div>
-                  </div>
-                  <footer>
-                    <span>Arquivos vetoriais oficiais</span>
-                    <div><a href={family.logo} download className="ds-download-button"><Download size={15} />Logo SVG</a><a href={family.symbol} download className="ds-download-button"><Download size={15} />Ícone SVG</a></div>
-                  </footer>
-                </article>
-              ))}
+            <div className="ds-asset-section">
+              <header><span>01</span><div><h3>Logos</h3><p>Assinaturas horizontais para cabeçalhos, documentos e comunicações.</p></div></header>
+              <div className="ds-brand-families">
+                {brandFamilies.map((family) => (
+                  <article className="ds-brand-family" key={family.title}>
+                    <header><span>{family.number}</span><div><strong>{family.title}</strong><p>{family.description}</p></div></header>
+                    <div className="ds-brand-family__preview ds-brand-family__preview--logo"><div className="ds-brand-family__logo"><small>Logo horizontal</small><img src={family.logo} alt={`${family.title} da JobForged`} /></div></div>
+                    <footer><span>Arquivo vetorial oficial</span><div><a href={family.logo} download className="ds-download-button"><Download size={15} />Logo SVG</a></div></footer>
+                  </article>
+                ))}
+              </div>
             </div>
-            <div className="ds-brand-rules"><div><CircleCheck size={20} /><span><strong>Faça</strong>Use área de respiro e preserve as cores oficiais.</span></div><div><CircleX size={20} /><span><strong>Evite</strong>Esticar, inclinar, contornar ou recolorir a marca.</span></div></div>
+            <div className="ds-asset-section">
+              <header><span>02</span><div><h3>Ícones</h3><p>Símbolos compactos para favicons, menus, avatares e estados reduzidos.</p></div></header>
+              <div className="ds-brand-icons">{brandFamilies.map((family) => <article key={family.symbol}><img src={family.symbol} alt={`Ícone da ${family.title.toLowerCase()}`} /><span><strong>{family.title}</strong><small>SVG vetorial · fundo transparente</small></span><a href={family.symbol} download className="ds-download-button"><Download size={15} />Ícone SVG</a></article>)}</div>
+            </div>
+            <div className="ds-asset-section">
+              <header><span>03</span><div><h3>Animações</h3><p>Assets de carregamento para transições, inicialização e processamento.</p></div></header>
+              <div className="ds-animated-assets">{animatedBrandAssets.map((asset) => <article className="ds-animated-asset" key={asset.title}><div><img src={asset.asset} alt={`${asset.title} da JobForged`} /><span><strong>{asset.title}</strong><small>{asset.description}</small></span></div><a href={asset.asset} download className="ds-download-button"><Download size={15} />Baixar SVG animado</a></article>)}</div>
+            </div>
           </section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 2} aria-label="Cores da marca">
             <SectionHeading title="Cores com função clara em cada camada." description="A marca aparece nas ações e nos destaques. Neutros organizam o conteúdo; cores semânticas comunicam estados sem ambiguidade." />
             <div className="ds-color-workbench">
-              <div className="ds-color-workbench__top">
-                <div className="ds-color-story"><span>Sistema cromático</span><h3>Marca em primeiro plano.<br />Interface em equilíbrio.</h3><p>Turquesa conduz decisões e confirma progresso. Azul orienta navegação, informação e recursos tecnológicos.</p><div className="ds-palette-board__brand">{colorTokens.filter((token) => token.group === "brand").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} featured />)}</div></div>
-                <div className="ds-color-preview" aria-label="Exemplo de aplicação das cores"><div className="ds-color-preview__bar"><i /><i /><i /></div><div className="ds-color-preview__canvas"><aside><span /><span /><span /></aside><article><small>VISUALIZAÇÃO</small><strong>Processo seletivo</strong><p>Os neutros estruturam a tela para que a informação e as ações ganhem prioridade.</p><div><em>Em andamento</em><button type="button">Continuar</button></div></article></div><footer><span><i className="is-background" />Background</span><span><i className="is-surface" />Container</span><span><i className="is-line" />Linha</span></footer></div>
-              </div>
+              <div className="ds-color-workbench__top ds-color-workbench__top--single"><div className="ds-color-story"><span>Sistema cromático</span><h3>Marca em primeiro plano.<br />Interface em equilíbrio.</h3><p>Turquesa conduz decisões e confirma progresso. Azul orienta navegação, informação e recursos tecnológicos.</p><div className="ds-palette-board__brand">{colorTokens.filter((token) => token.group === "brand").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} featured />)}</div></div></div>
               <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>01</span><div><strong>Base da interface</strong><small>Fundos, superfícies, linhas e leitura</small></div></div><div className="ds-palette-group__colors">{colorTokens.filter((token) => token.group === "foundation").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
               <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>02</span><div><strong>Cores de feedback</strong><small>Estados que exigem interpretação rápida</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--feedback">{colorTokens.filter((token) => token.group === "feedback").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
             </div>
@@ -453,9 +456,9 @@ export default function DesignSystemClient() {
           <section className="ds-section ds-section--first" hidden={activePage !== 4} aria-label="Botões">
             <SectionHeading title="Botões compactos, claros e consistentes." description="Cantos discretos e cores leves mantêm as ações acessíveis sem competir com o conteúdo." />
             <div className="ds-examples-grid">
-              <ExampleCard title="Principais"><div className="ds-button-row"><button type="button" className="ds-button ds-button--primary"><Plus size={16} />Nova vaga</button><button type="button" className="ds-button ds-button--accent">Ver candidatos</button><button type="button" className="ds-button ds-button--primary" disabled>Carregando</button></div></ExampleCard>
-              <ExampleCard title="Transparentes"><div className="ds-button-row"><button type="button" className="ds-button ds-button--outline">Editar processo</button><button type="button" className="ds-button ds-button--ghost">Cancelar</button><button type="button" className="ds-icon-button" aria-label="Mais opções"><MoreHorizontal size={18} /></button></div></ExampleCard>
-              <ExampleCard title="Botão de menu"><div className="ds-menu-button-showcase"><button type="button" className="ds-menu-button-demo" aria-label="Abrir menu"><Menu size={19} /></button><span><strong>Menu do cabeçalho</strong><small>Ação compacta para abrir e fechar a navegação.</small></span></div></ExampleCard>
+              <ExampleCard title="Principais · com e sem ícone"><div className="ds-button-row"><button type="button" className="ds-button ds-button--primary"><Plus size={16} />Nova vaga</button><button type="button" className="ds-button ds-button--accent">Ver candidatos</button></div><p className="ds-component-spec">Altura 40 px · padding 14 px · gap 8 px · raio 8 px. Use ícone de 16 px quando ele acelerar o reconhecimento da ação.</p></ExampleCard>
+              <ExampleCard title="Transparentes · com e sem ícone"><div className="ds-button-row"><button type="button" className="ds-button ds-button--outline"><Sparkles size={16} />Editar processo</button><button type="button" className="ds-button ds-button--ghost">Cancelar</button><button type="button" className="ds-icon-button" aria-label="Mais opções"><MoreHorizontal size={18} /></button></div><p className="ds-component-spec">Outline para ações secundárias; ghost para baixa ênfase; somente ícone em ações reconhecíveis, sempre com nome acessível.</p></ExampleCard>
+              <ExampleCard title="Botão de menu"><div className="ds-menu-button-showcase"><button type="button" className="ds-menu-button-demo" aria-label={sidebarPinned ? "Reduzir menu" : "Expandir menu"} onClick={() => setSidebarPinned((pinned) => !pinned)}>{sidebarPinned ? <PanelLeftClose size={19} /> : <PanelLeftOpen size={19} />}</button><span><strong>{sidebarPinned ? "Reduzir menu lateral" : "Expandir menu lateral"}</strong><small>40 × 40 px · alterna entre navegação completa e compacta com ícones.</small></span></div></ExampleCard>
               <ExampleCard title="Navegação do cabeçalho"><div className="ds-header-link-showcase"><button type="button" className="ds-header-link-demo">Como funciona</button><span><strong>Link de navegação</strong><small>Texto com mudança de cor e linha inferior no hover.</small></span></div></ExampleCard>
               <ExampleCard title="Tamanhos"><div className="ds-button-row ds-button-row--sizes"><button type="button" className="ds-button ds-button--primary ds-button--small">Pequeno</button><button type="button" className="ds-button ds-button--primary">Padrão</button><button type="button" className="ds-button ds-button--primary ds-button--large">Grande</button></div></ExampleCard>
               <ExampleCard title="Estados"><div className="ds-button-states"><div><button type="button" className="ds-button ds-button--primary">Salvar</button><span><strong>Padrão</strong><small>Pronto para interação</small></span></div><div><button type="button" className="ds-button ds-button--primary is-hover">Salvar</button><span><strong>Hover</strong><small>Elevação e contraste suave</small></span></div><div><button type="button" className="ds-button ds-button--primary is-focus">Salvar</button><span><strong>Focus</strong><small>Contorno visível pelo teclado</small></span></div><div><button type="button" className="ds-button ds-button--primary" disabled>Salvar</button><span><strong>Desabilitado</strong><small>Ação temporariamente indisponível</small></span></div></div></ExampleCard>
@@ -472,10 +475,10 @@ export default function DesignSystemClient() {
             <div className="ds-form-showcase">
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
                 <div className="ds-modern-field-grid">
-                  <TextField label="Nome da vaga" requiredLabel="Obrigatório" icon={BriefcaseBusiness} defaultValue="Analista de Customer Success" helpText="Use um título reconhecido pelo mercado." />
+                  <TextField label="Nome da vaga" requiredLabel="Obrigatório" icon={BriefcaseBusiness} placeholder="Ex.: Analista de Customer Success" defaultValue="Analista de Customer Success" helpText="Use um título reconhecido pelo mercado." />
                   <TextField label="E-mail do responsável" icon={Mail} type="email" placeholder="nome@empresa.com" helpText="Usado apenas nas comunicações sobre a vaga." />
                   <TextField label="Buscar candidato" icon={Search} type="search" placeholder="Nome, e-mail ou competência" helpText="Pesquise por dados ou competências do perfil." />
-                  <TextField label="Senha de acesso" icon={LockKeyhole} type="password" defaultValue="12345" error="A senha precisa ter pelo menos 8 caracteres." />
+                  <TextField label="Senha de acesso" icon={LockKeyhole} type="password" placeholder="Digite ao menos 8 caracteres" defaultValue="12345" error="A senha precisa ter pelo menos 8 caracteres." />
                 </div>
               </ExampleCard>
               <ExampleCard title="Dropdowns">
@@ -488,7 +491,7 @@ export default function DesignSystemClient() {
               </ExampleCard>
               <ExampleCard title="Calendários" className="ds-form-card--wide">
                 <div className="ds-calendar-grid">
-                  <DateField label="Data da entrevista" min="2026-01-01" max="2030-12-31" defaultValue="2026-08-20" helpText="Escolha uma data no calendário da JobForged." />
+                  <DateField label="Data da entrevista" min="2026-01-01" max="2030-12-31" defaultValue="" helpText="Escolha uma data no calendário da JobForged." />
                   <DateRangeField label="Período de entrevistas" min="2026-01-01" max="2030-12-31" value={interviewRange} onValueChange={setInterviewRange} helpText="Escolha a data inicial e depois a data final do período." />
                 </div>
               </ExampleCard>
@@ -576,9 +579,9 @@ export default function DesignSystemClient() {
 
           <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Aplicação">
             <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
-            <div className="ds-app-preview">
+            <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
               <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">
-                <div className="ds-app-preview__brand"><img src="/brand/jobforged-symbol.svg" alt="" /><strong>JobForged</strong></div>
+                <div className="ds-app-preview__brand"><span><img src="/brand/jobforged-symbol.svg" alt="" /><strong>JobForged</strong></span><button type="button" className="ds-app-preview__collapse" aria-label={appSidebarExpanded ? "Reduzir menu lateral" : "Expandir menu lateral"} aria-pressed={!appSidebarExpanded} onClick={() => setAppSidebarExpanded((expanded) => !expanded)}>{appSidebarExpanded ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}</button></div>
                 <nav>{applicationMenu.map(({ label, icon: Icon }, index) => <button type="button" key={label} className={index === 1 ? "is-active" : ""}><Icon size={15} strokeWidth={1.8} /><span>{label}</span></button>)}</nav>
                 <button type="button" className="ds-app-preview__profile" aria-label="Abrir meu perfil"><span><UserRound size={15} /></span><strong>Mateus</strong></button>
               </aside>

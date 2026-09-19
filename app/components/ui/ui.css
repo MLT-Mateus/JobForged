@@ -48,6 +48,18 @@
   --jf-ui-scrollbar-thumb-hover: var(--jf-ui-brand-strong);
 }
 
+.jf-theme-selector { display: inline-flex; padding: 3px; border: 1px solid var(--jf-ui-border); border-radius: 10px; background: var(--jf-ui-surface-soft); font-family: var(--jf-ui-font-heading); }
+.jf-theme-selector button { display: inline-flex; min-height: 34px; align-items: center; gap: 6px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--jf-ui-text-muted); cursor: pointer; font-size: 12px; font-weight: 700; }
+.jf-theme-selector button.is-active { background: var(--jf-ui-surface); box-shadow: 0 3px 12px rgba(6, 47, 44, 0.1); color: var(--jf-ui-text); }
+.jf-theme-selector button:hover { color: var(--jf-ui-brand-strong); }
+.jf-theme-selector button:focus-visible { outline: 3px solid color-mix(in srgb, var(--jf-ui-accent) 28%, transparent); outline-offset: 1px; }
+
+.jf-action { display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;padding:0 14px;border:1px solid transparent;border-radius:9px;font-family:var(--jf-ui-font-heading);font-size:13px;font-weight:750;cursor:pointer; }
+.jf-action svg{width:16px;height:16px}.jf-action--primary{background:var(--jf-ui-brand);color:#fff}.jf-action--primary:hover{background:var(--jf-ui-brand-strong)}.jf-action--secondary{border-color:var(--jf-ui-border-strong);background:var(--jf-ui-surface);color:var(--jf-ui-text)}.jf-action--secondary:hover,.jf-action--quiet:hover{border-color:var(--jf-ui-brand);color:var(--jf-ui-brand-strong)}.jf-action--quiet{background:transparent;color:var(--jf-ui-text-muted)}.jf-action--danger{background:var(--jf-ui-danger);color:#fff}.jf-action:disabled{cursor:not-allowed;opacity:.48}.jf-action:focus-visible{outline:3px solid color-mix(in srgb,var(--jf-ui-accent) 28%,transparent);outline-offset:2px}
+.jf-status{display:inline-flex;min-height:24px;align-items:center;padding:0 8px;border-radius:999px;background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted);font-size:12px;font-weight:700;white-space:nowrap}.jf-status--positive{background:var(--jf-ui-success-soft);color:var(--jf-ui-success)}.jf-status--warning{background:#fff2dc;color:#a66a0d}.jf-status--danger{background:color-mix(in srgb,var(--jf-ui-danger) 12%,var(--jf-ui-surface));color:var(--jf-ui-danger)}.jf-status--info{background:var(--jf-ui-accent-soft);color:var(--jf-ui-accent)}
+.jf-table-wrap{width:100%;overflow-x:auto}.jf-table{width:100%;min-width:720px;border-collapse:collapse;color:var(--jf-ui-text);font-family:var(--jf-ui-font-body)}.jf-table th{padding:11px 14px;border-bottom:1px solid var(--jf-ui-border);color:var(--jf-ui-text-soft);font-size:12px;font-weight:700;text-align:left;text-transform:uppercase}.jf-table td{padding:14px;border-bottom:1px solid var(--jf-ui-border);font-size:14px}.jf-table tbody tr:hover{background:color-mix(in srgb,var(--jf-ui-brand-soft) 34%,transparent)}
+.jf-empty{display:grid;min-height:260px;place-content:center;justify-items:center;gap:7px;padding:28px;color:var(--jf-ui-text-muted);text-align:center}.jf-empty>span{display:grid;width:48px;height:48px;place-items:center;border-radius:14px;background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong)}.jf-empty svg{width:22px}.jf-empty strong{color:var(--jf-ui-text);font-size:15px}.jf-empty p{max-width:420px;margin:0 0 8px;font-size:13px;line-height:1.6}
+
 .jf-field {
   display: grid;
   width: 100%;
@@ -329,6 +341,7 @@
 .jf-calendar__days > button.is-today { border-color: var(--jf-ui-border-strong); color: var(--jf-ui-brand-strong); font-weight: 700; }
 .jf-calendar__days > button.is-selected { border-color: var(--jf-ui-brand); background: var(--jf-ui-brand); color: white; font-weight: 700; }
 .jf-calendar__days > button.is-in-range { border-color: transparent; border-radius: 4px; background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); font-weight: 650; }
+.jf-calendar__days > button.is-range-preview { background: color-mix(in srgb, var(--jf-ui-brand-soft) 72%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--jf-ui-brand) 12%, transparent); }
 .jf-calendar__days > button.is-selected.is-range-start { border-radius: 8px 4px 4px 8px; }
 .jf-calendar__days > button.is-selected.is-range-end { border-radius: 4px 8px 8px 4px; }
 .jf-calendar__days > button.is-selected.is-range-start.is-range-end { border-radius: 8px; }
@@ -453,36 +466,40 @@
 .jf-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .jf-toast {
+  --jf-toast-color: var(--jf-ui-accent);
+  --jf-toast-soft: color-mix(in srgb, var(--jf-toast-color) 10%, var(--jf-ui-surface-raised));
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 180;
   display: flex;
   width: min(370px, calc(100% - 32px));
-  min-height: 74px;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid var(--jf-ui-border);
-  border-left: 4px solid;
-  border-radius: 12px;
-  background: var(--jf-ui-surface-raised);
-  box-shadow: var(--jf-ui-shadow);
+  min-height: 84px;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 13px 13px 14px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--jf-toast-color) 24%, var(--jf-ui-border));
+  border-radius: 14px;
+  background: linear-gradient(110deg, var(--jf-toast-soft), var(--jf-ui-surface-raised) 46%);
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--jf-toast-color) 13%, rgba(0, 0, 0, 0.18));
   font-family: var(--jf-ui-font-body);
-  animation: jf-toast-in 220ms ease both;
+  isolation: isolate;
+  animation: jf-toast-in 360ms cubic-bezier(.2,.82,.2,1.08) both;
 }
 
-.jf-toast > svg { flex: 0 0 auto; margin-top: 1px; }
+.jf-toast::before { position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--jf-toast-color); content: ""; }
+.jf-toast__icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border: 1px solid color-mix(in srgb, var(--jf-toast-color) 24%, transparent); border-radius: 11px; background: color-mix(in srgb, var(--jf-toast-color) 13%, var(--jf-ui-surface)); color: var(--jf-toast-color); box-shadow: 0 8px 18px color-mix(in srgb, var(--jf-toast-color) 12%, transparent); }
 .jf-toast > div { display: grid; flex: 1; gap: 4px; }
-.jf-toast strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: 10px; }
-.jf-toast span { color: var(--jf-ui-text-muted); font-size: 8px; line-height: 1.5; }
+.jf-toast strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: 11px; }
+.jf-toast > div > span { color: var(--jf-ui-text-muted); font-size: 9px; line-height: 1.5; }
 .jf-toast > button { display: grid; width: 30px; height: 30px; flex: 0 0 30px; place-items: center; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--jf-ui-text-soft); cursor: pointer; transition: background 160ms ease, color 160ms ease; }
 .jf-toast > button:hover { background: color-mix(in srgb, var(--jf-ui-danger) 12%, transparent); color: var(--jf-ui-danger); }
 .jf-toast > button:focus-visible { outline: 3px solid color-mix(in srgb, var(--jf-ui-brand) 22%, transparent); outline-offset: 1px; }
-.jf-toast--success { border-left-color: var(--jf-ui-success); color: var(--jf-ui-success); }
-.jf-toast--info { border-left-color: var(--jf-ui-accent); color: var(--jf-ui-accent); }
-.jf-toast--warning { border-left-color: #d58a14; color: #d58a14; }
-.jf-toast--danger { border-left-color: var(--jf-ui-danger); color: var(--jf-ui-danger); }
+.jf-toast--success { --jf-toast-color: var(--jf-ui-success); }
+.jf-toast--info { --jf-toast-color: var(--jf-ui-accent); }
+.jf-toast--warning { --jf-toast-color: #d58a14; }
+.jf-toast--danger { --jf-toast-color: var(--jf-ui-danger); }
 
 @keyframes jf-popover-in {
   from { opacity: 0; transform: translateY(-5px) scale(0.99); }
@@ -490,8 +507,9 @@
 }
 
 @keyframes jf-toast-in {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translate3d(24px, 12px, 0) scale(.96); }
+  72% { opacity: 1; transform: translate3d(-3px, 0, 0) scale(1.01); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @media (max-width: 680px) {

@@ -224,6 +224,7 @@ function CalendarPanel({
 }: CalendarPanelProps) {
   const [visibleMonth, setVisibleMonth] = useState(() => new Date(initialDate.getFullYear(), initialDate.getMonth(), 1));
   const [calendarView, setCalendarView] = useState<CalendarView>("days");
+  const [hoveredRangeEnd, setHoveredRangeEnd] = useState("");
   const firstDayOffset = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay();
   const daysInMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate();
   const rawMonthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(visibleMonth);
@@ -315,7 +316,7 @@ function CalendarPanel({
           </div>
         )}
         <div className="jf-calendar__weekdays" aria-hidden="true">{weekDays.map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}</div>
-        <div className="jf-calendar__days" role="grid">
+        <div className="jf-calendar__days" role="grid" onPointerLeave={() => setHoveredRangeEnd("")}>
           {Array.from({ length: 42 }, (_, index) => {
             const dayNumber = index - firstDayOffset + 1;
             if (dayNumber < 1 || dayNumber > daysInMonth) return <span key={index} aria-hidden="true" />;
@@ -324,7 +325,9 @@ function CalendarPanel({
             const unavailable = Boolean((min && dayValue < min) || (max && dayValue > max));
             const isRangeStart = range && selectedStart === dayValue;
             const isRangeEnd = range && selectedEnd === dayValue;
-            const isInRange = range && Boolean(selectedStart && selectedEnd && dayValue > selectedStart && dayValue < selectedEnd);
+            const previewEnd = selectedEnd || hoveredRangeEnd;
+            const isPreviewRange = range && !selectedEnd && Boolean(selectedStart && hoveredRangeEnd && hoveredRangeEnd >= selectedStart);
+            const isInRange = range && Boolean(selectedStart && previewEnd && dayValue > selectedStart && dayValue < previewEnd);
             const isSelected = range ? isRangeStart || isRangeEnd : selectedStart === dayValue;
             const dateLabel = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" }).format(dayDate);
             const classNames = [
@@ -332,6 +335,7 @@ function CalendarPanel({
               isRangeStart ? "is-range-start" : "",
               isRangeEnd ? "is-range-end" : "",
               isInRange ? "is-in-range" : "",
+              isPreviewRange && isInRange ? "is-range-preview" : "",
               todayIso === dayValue ? "is-today" : "",
             ].filter(Boolean).join(" ");
             return (
@@ -344,6 +348,12 @@ function CalendarPanel({
                 aria-selected={isSelected || isInRange}
                 disabled={unavailable}
                 onClick={() => onSelectDate(dayValue)}
+                onPointerEnter={() => {
+                  if (range && selectedStart && !selectedEnd && !unavailable && dayValue >= selectedStart) setHoveredRangeEnd(dayValue);
+                }}
+                onFocus={() => {
+                  if (range && selectedStart && !selectedEnd && !unavailable && dayValue >= selectedStart) setHoveredRangeEnd(dayValue);
+                }}
               >
                 {dayNumber}
               </button>

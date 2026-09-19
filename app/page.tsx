@@ -510,6 +510,12 @@ export default function Home() {
             <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Ver com minha marca <ArrowRight /></a>
           </Reveal>
           <Reveal className="personalization-scene" delay={0.12}>
+            <motion.div className="brand-studio-badge brand-studio-badge--white-label" aria-hidden="true"
+              animate={reduceMotion ? undefined : { x: [0, -16, 8, -12, 0], y: [0, 15, -9, 10, 0] }}
+              transition={{ duration: 8.6, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}>
+              <span className="brand-studio-badge__icon"><LayoutTemplate /></span>
+              <span><strong>White Label</strong><small>Exiba a sua marca</small></span>
+            </motion.div>
             <div className="product-window personalization-window brand-studio-window">
               <div className="window-bar">
                 <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
@@ -538,6 +544,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            <motion.div className="brand-studio-badge brand-studio-badge--on-demand" aria-hidden="true"
+              animate={reduceMotion ? undefined : { x: [0, 14, -7, 18, 0], y: [0, -19, 7, -11, 0] }}
+              transition={{ duration: 7.8, repeat: Infinity, ease: "easeInOut" }}>
+              <span className="brand-studio-badge__icon"><Sparkles /></span>
+              <span><strong>Sob demanda</strong><small>Flexível para seu RS.</small></span>
+            </motion.div>
           </Reveal>
         </div>
       </section>
