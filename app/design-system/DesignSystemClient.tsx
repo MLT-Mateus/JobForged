@@ -10,7 +10,6 @@ import {
   BookOpen,
   Bell,
   BriefcaseBusiness,
-  Building2,
   CalendarDays,
   Check,
   CircleAlert,
@@ -19,19 +18,15 @@ import {
   Clock3,
   Copy,
   Download,
-  Eye,
   FileText,
   Filter,
   House,
   Info,
-  KeyRound,
   Layers3,
   LayoutDashboard,
   LockKeyhole,
   Mail,
-  MapPin,
   Menu,
-  MessageCircle,
   MoreHorizontal,
   MousePointerClick,
   Palette,
@@ -46,12 +41,12 @@ import {
   Sparkles,
   TrendingUp,
   Type,
-  Upload,
   UserRound,
   UserRoundCheck,
   UsersRound,
   WalletCards,
 } from "lucide-react";
+import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
 import {
   CheckboxField,
   AppToast,
@@ -82,6 +77,8 @@ const navigation = [
   { id: "botoes", label: "Botões", icon: MousePointerClick },
   { id: "formularios", label: "Formulários", icon: SlidersHorizontal },
   { id: "componentes", label: "Componentes", icon: Layers3 },
+  { id: "fundos", label: "Fundos (Backgrounds)", icon: PanelsTopLeft },
+  { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
 ];
@@ -180,28 +177,6 @@ const brandFamilies = [
     logo: "/brand/jobforged-logo-alternate.svg",
     symbol: "/brand/jobforged-icon-alternate.svg",
   },
-];
-
-const iconLibrary = [
-  { name: "Candidatos", icon: UsersRound },
-  { name: "Vagas", icon: BriefcaseBusiness },
-  { name: "Notificações", icon: Bell },
-  { name: "Pesquisa", icon: Search },
-  { name: "Dashboard", icon: LayoutDashboard },
-  { name: "Aprovados", icon: UserRoundCheck },
-  { name: "Documentos", icon: FileText },
-  { name: "Calendário", icon: CalendarDays },
-  { name: "Mensagens", icon: MessageCircle },
-  { name: "Filtros", icon: Filter },
-  { name: "Personalizar", icon: SlidersHorizontal },
-  { name: "Configurações", icon: Settings2 },
-  { name: "Empresas", icon: Building2 },
-  { name: "Localização", icon: MapPin },
-  { name: "Enviar arquivo", icon: Upload },
-  { name: "Baixar", icon: Download },
-  { name: "Segurança", icon: ShieldCheck },
-  { name: "Acesso", icon: KeyRound },
-  { name: "Visualizar", icon: Eye },
 ];
 
 function SectionHeading({ title, description }: { title: string; description: string }) {
@@ -338,7 +313,7 @@ export default function DesignSystemClient() {
       textarea.remove();
     }
     setCopied(label);
-    setActiveAlert({ kind: "success", title: "Cor copiada", text: `${label} foi copiada para a área de transferência.` });
+    setActiveAlert({ kind: "success", title: "Conteúdo copiado", text: `${label} foi copiado para a área de transferência.` });
   }
 
   function addStage(label: string) {
@@ -412,6 +387,10 @@ export default function DesignSystemClient() {
             <div className="ds-hero__copy"><span className="ds-kicker">Identidade visual · v1.3</span><h1>Interfaces <em className="ds-highlight-pair"><span className="ds-highlight-blue">claras</span> <span className="ds-highlight-teal">e humanas.</span></em><br />Decisões mais inteligentes.</h1><p>O sistema visual da JobForged une precisão, proximidade e tecnologia. Esta base mantém o produto consistente em qualquer tela, nos temas claro e escuro.</p><div className="ds-hero__tags" aria-label="Princípios da marca"><span>Humano</span><span>Confiável</span><span>Objetivo</span><span>Adaptável</span></div></div>
             <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><img className="ds-hero__loader" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} /><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
           </section>
+          <section className="ds-llm-manual" hidden={activePage !== 0} aria-label="Manual da marca para LLM">
+            <div><FileText size={22} aria-hidden="true"/><span><strong>Manual da marca para LLM</strong><small>Este documento será ampliado quando o Design System estiver concluído e servirá para transportar as regras visuais da JobForged entre ferramentas e modelos de linguagem.</small></span></div>
+            <a className="ds-button ds-button--outline" href="/manual-da-marca-jobforged-llm.md" download><Download size={16}/>Baixar documento para LLM</a>
+          </section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 1} aria-label="Ativos da marca">
             <SectionHeading title="Arquivos oficiais, prontos para usar." description="Escolha a versão adequada e baixe o arquivo original sem alterar proporções ou cores." />
@@ -463,6 +442,7 @@ export default function DesignSystemClient() {
               <ExampleCard title="Tamanhos"><div className="ds-button-row ds-button-row--sizes"><button type="button" className="ds-button ds-button--primary ds-button--small">Pequeno</button><button type="button" className="ds-button ds-button--primary">Padrão</button><button type="button" className="ds-button ds-button--primary ds-button--large">Grande</button></div></ExampleCard>
               <ExampleCard title="Estados"><div className="ds-button-states"><div><button type="button" className="ds-button ds-button--primary">Salvar</button><span><strong>Padrão</strong><small>Pronto para interação</small></span></div><div><button type="button" className="ds-button ds-button--primary is-hover">Salvar</button><span><strong>Hover</strong><small>Elevação e contraste suave</small></span></div><div><button type="button" className="ds-button ds-button--primary is-focus">Salvar</button><span><strong>Focus</strong><small>Contorno visível pelo teclado</small></span></div><div><button type="button" className="ds-button ds-button--primary" disabled>Salvar</button><span><strong>Desabilitado</strong><small>Ação temporariamente indisponível</small></span></div></div></ExampleCard>
             </div>
+            <ButtonSpecs />
           </section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 5} aria-label="Formulários">
@@ -536,13 +516,14 @@ export default function DesignSystemClient() {
               <ExampleCard title="Pessoas"><div className="ds-person-list"><div className="ds-person"><span className="ds-avatar ds-avatar--teal">BS</span><div><strong>Beatriz Souza</strong><small>Product Designer</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle ds-person__settings" aria-label="Configurações de Beatriz Souza"><Settings2 size={17} /></button></div><div className="ds-person"><span className="ds-avatar ds-avatar--blue">AM</span><div><strong>André Martins</strong><small>Customer Success</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle" aria-label="Opções de André Martins"><MoreHorizontal size={17} /></button></div></div></ExampleCard>
               <ExampleCard title="Alertas rápidos"><div className="ds-alert-actions">{quickAlerts.map((alert) => <button key={alert.kind} type="button" className={`ds-alert-trigger ds-alert-trigger--${alert.kind}`} onClick={() => setActiveAlert(alert)}><AlertIcon kind={alert.kind} size={16} />{alert.label}</button>)}</div><small className="ds-example-hint">Clique para visualizar a notificação.</small></ExampleCard>
             </div>
-            <div className="ds-icon-library"><div className="ds-icon-library__heading"><div><strong>Biblioteca de ícones</strong><span>20 referências oficiais para as interfaces do produto</span></div><code>20 px · stroke 1.8</code></div><div className="ds-icon-grid">
-              {iconLibrary.map(({ name, icon: Icon }) => <div key={name}><span><Icon size={20} strokeWidth={1.8} aria-hidden="true" /></span><strong>{name}</strong></div>)}
-              <div><span><img src="/brand/jobforged-symbol.svg" alt="" /></span><strong>JobForged</strong></div>
-            </div></div>
+            <IconLibrary onCopy={copyValue}/>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 7} aria-label="Dashboards">
+          <section className="ds-section ds-section--first" hidden={activePage !== 7} aria-label="Fundos (Backgrounds)"><BackgroundsSection onCopy={copyValue}/></section>
+
+          <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Empty States"><EmptyStatesSection/></section>
+
+          <section className="ds-section ds-section--first" hidden={activePage !== 9} aria-label="Dashboards">
             <SectionHeading title="Dashboards para cada decisão de recrutamento." description="Seis composições reutilizáveis apresentam indicadores, tendências e gargalos com hierarquia clara e dados de demonstração realistas." />
             <div className="ds-dashboard-catalog">
               <article className="ds-dashboard-template ds-dashboard-template--executive">
@@ -575,9 +556,10 @@ export default function DesignSystemClient() {
                 <div className="ds-sla-list"><div><span><i className="is-success" />Triagem inicial</span><strong>8h</strong><small>meta 12h</small></div><div><span><i className="is-warning" />Retorno da entrevista</span><strong>31h</strong><small>meta 24h</small></div><div><span><i className="is-blue" />Envio de proposta</span><strong>18h</strong><small>meta 24h</small></div><div><span><i className="is-danger" />Vagas sem movimento</span><strong>3</strong><small>há +7 dias</small></div></div>
               </article>
             </div>
+            <AdvancedCharts />
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Aplicação">
+          <section className="ds-section ds-section--first" hidden={activePage !== 10} aria-label="Aplicação">
             <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
             <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
               <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">

@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element, react-hooks/set-state-in-effect */
 import {useEffect,useRef,useState,type CSSProperties,type ReactNode} from "react";
-import {ArchiveRestore,ArrowDown,ArrowUp,Check,ChevronDown,ChevronRight,Clock3,Copy,FileImage,History,ImagePlus,Info,LayoutDashboard,Maximize2,Monitor,Palette,Plus,RefreshCcw,RotateCcw,Save,Smartphone,Tablet,Trash2,UploadCloud,X} from "lucide-react";
+import {ArchiveRestore,ArrowDown,ArrowUp,Check,ChevronDown,ChevronRight,Clock3,Copy,FileImage,FileText,History,ImagePlus,Info,LayoutDashboard,Maximize2,Monitor,Palette,Plus,RefreshCcw,RotateCcw,Save,Smartphone,Tablet,Trash2,Type,UploadCloud,X} from "lucide-react";
 import {ActionButton,StatusBadge,ToggleSwitch} from "@/app/components/ui";
 import {AdminShell} from "@/app/components/admin/AdminModuleClient";
 import type {AwaitedAdminContext} from "@/app/components/admin/admin-types";
@@ -9,7 +9,7 @@ import {customizationService} from "./personalization-service";
 import {defaultCustomization,lightPalette} from "./personalization-mocks";
 import type {BrandAsset,Customization,HistoryEntry,OrganizationBanner,Palette as PaletteType,PersonalizationSection,PreviewSurface} from "./personalization-types";
 import "./personalization.css";
-const sections:[PersonalizationSection,string,ReactNode][]=[["marca","Marca",<ImagePlus key="m"/>],["cores","Cores",<Palette key="c"/>],["tipografia","Tipografia",<span key="t">Aa</span>],["estrutura","Estrutura",<LayoutDashboard key="e"/>],["banners","Banners",<FileImage key="b"/>],["conteudo","Conteúdo",<span key="o">Tt</span>],["dominio","Domínio",<span key="d">.com</span>]];
+const sections:[PersonalizationSection,string,ReactNode][]=[["marca","Marca",<ImagePlus key="m"/>],["cores","Cores",<Palette key="c"/>],["tipografia","Tipografia",<Type key="t"/>],["estrutura","Estrutura",<LayoutDashboard key="e"/>],["banners","Banners",<FileImage key="b"/>],["conteudo","Conteúdo",<FileText key="o"/>],["dominio","Domínio",<span key="d">.com</span>]];
 const surfaces:[PreviewSurface,string][]=[["painel","Painel"],["home","Home"],["portal","Portal de vagas"],["vaga","Página da vaga"],["login","Login"]];
 const hex=/^#[0-9A-F]{6}$/i;
 function Field({label,help,children}:{label:string;help?:string;children:ReactNode}){return <label className="custom-field"><span>{label}</span>{children}{help&&<small>{help}</small>}</label>}
