@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Bell, BriefcaseBusiness, CalendarDays, ChartNoAxesCombined, Check, ChevronDown, CircleDollarSign, Download, FileText, House, LayoutDashboard, ListFilter, LogOut, Menu, MoreHorizontal, Palette, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings2, ShieldCheck, SlidersHorizontal, UserRound, UsersRound, WalletCards, X } from "lucide-react";
 import { ActionButton, DataTable, StatusBadge, ThemeSelector, ToggleSwitch } from "@/app/components/ui";
 import { moduleCopy, type AdminModuleId } from "./admin-data";
@@ -11,12 +11,17 @@ import type { AwaitedAdminContext } from "./admin-types";
 const nav = [
   ["Home","/app/home",House],["Dashboards","/app/dashboards",LayoutDashboard],["Vagas","/app/vagas",BriefcaseBusiness],["Candidaturas","/app/candidaturas",UsersRound],["Agenda","/app/agenda",CalendarDays],["Personalização","/app/personalizacao",Palette],["Administradores","/app/administradores",ShieldCheck],["Financeiro","/app/financeiro",WalletCards],["Configurações","/app/configuracoes",Settings2],
 ] as const;
+type OrganizationThemeRecord={palette?:Record<string,string>;theme?:{dark?:Record<string,string>}};
 
 export function AdminShell({ module, context, children }: { module: AdminModuleId; context: AwaitedAdminContext; children: ReactNode }) {
   const [collapsed,setCollapsed]=useState(false); const [menu,setMenu]=useState(false); const [theme,setTheme]=useState<"light"|"dark">("light");
+  const [organizationTheme,setOrganizationTheme]=useState<OrganizationThemeRecord|null>(null);
   useEffect(()=>{const saved=document.documentElement.dataset.theme;if(saved==="dark"||saved==="light")setTheme(saved)},[]);
+  useEffect(()=>{const load=()=>{try{const raw=localStorage.getItem("jobforged.customization.published.v2");setOrganizationTheme(raw?JSON.parse(raw):null)}catch{setOrganizationTheme(null)}};load();window.addEventListener("jobforged-customization-published",load);return()=>window.removeEventListener("jobforged-customization-published",load)},[]);
   const changeTheme=(next:"light"|"dark")=>{setTheme(next);document.documentElement.dataset.theme=next;document.documentElement.style.colorScheme=next;localStorage.setItem("jobforged-theme",next)};
-  return <main className={`admin-shell ${collapsed?"is-collapsed":""}`} data-theme={theme}>
+  const brandPalette=theme==="dark"?organizationTheme?.theme?.dark:organizationTheme?.palette;
+  const brandStyle=brandPalette?{"--teal":brandPalette.primary,"--teal-deep":brandPalette.link,"--teal-soft":brandPalette.activeItem,"--blue":brandPalette.secondary,"--app-bg":brandPalette.background,"--app-panel":brandPalette.surface} as CSSProperties:undefined;
+  return <main className={`admin-shell ${collapsed?"is-collapsed":""}`} data-theme={theme} style={brandStyle}>
     <aside className={`admin-sidebar ${menu?"is-open":""}`}><div className="admin-brand"><span><img src={context.organization.logo} alt=""/><strong>{context.organization.shortName}</strong></span><button onClick={()=>setCollapsed(v=>!v)} aria-label={collapsed?"Expandir menu":"Recolher menu"}>{collapsed?<PanelLeftOpen/>:<PanelLeftClose/>}</button><button className="admin-close" onClick={()=>setMenu(false)} aria-label="Fechar menu"><X/></button></div><nav>{nav.map(([label,href,Icon])=><a key={href} href={href} className={`/app/${module}`===href?"is-active":""} aria-current={`/app/${module}`===href?"page":undefined}><Icon/><span>{label}</span></a>)}</nav><div className="admin-user"><a href="/app/minha-conta"><span>{context.user.initials}</span><span><strong>{context.user.name}</strong><small>{context.user.role}</small></span></a><button aria-label="Sair da conta" title="Sair da conta"><LogOut/></button></div></aside>
     {menu&&<button className="admin-scrim" onClick={()=>setMenu(false)} aria-label="Fechar menu"/>}
     <section className="admin-workspace"><header className="admin-topbar"><button className="admin-menu" onClick={()=>setMenu(true)} aria-label="Abrir menu"><Menu/></button><div className="admin-org"><img src={context.organization.logo} alt=""/><span><small>Organização ativa</small><strong>{context.organization.name}</strong></span></div><div><ThemeSelector theme={theme} onChange={changeTheme}/><button className="admin-notice" aria-label="Notificações"><Bell/><i/></button></div></header><div className="admin-content">{children}</div></section>
