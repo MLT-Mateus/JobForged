@@ -19,7 +19,6 @@ import {
   Copy,
   Download,
   FileText,
-  Filter,
   House,
   Info,
   Layers3,
@@ -77,7 +76,7 @@ const navigation = [
   { id: "botoes", label: "Botões", icon: MousePointerClick },
   { id: "formularios", label: "Formulários", icon: SlidersHorizontal },
   { id: "componentes", label: "Componentes", icon: Layers3 },
-  { id: "fundos", label: "Fundos (Backgrounds)", icon: PanelsTopLeft },
+  { id: "fundos", label: "Background", icon: PanelsTopLeft },
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
@@ -447,11 +446,6 @@ export default function DesignSystemClient() {
 
           <section className="ds-section ds-section--first" hidden={activePage !== 5} aria-label="Formulários">
             <SectionHeading title="Controles limpos, previsíveis e prontos para o produto." description="O manual agora utiliza a mesma biblioteca oficial das futuras telas. Estados, dimensões, foco e comportamento serão reaproveitados sem reconstruir componentes por página." />
-            <div className="ds-reuse-contract">
-              <Layers3 size={20} aria-hidden="true" />
-              <div><strong>Biblioteca oficial da aplicação</strong><span>Uma única implementação para vagas, candidatos, login, dashboard e Kanban.</span></div>
-              <ul aria-label="Garantias da biblioteca"><li>100% responsivo</li><li>Claro + escuro</li><li>Acessibilidade incluída</li></ul>
-            </div>
             <div className="ds-form-showcase">
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
                 <div className="ds-modern-field-grid">
@@ -516,43 +510,44 @@ export default function DesignSystemClient() {
               <ExampleCard title="Pessoas"><div className="ds-person-list"><div className="ds-person"><span className="ds-avatar ds-avatar--teal">BS</span><div><strong>Beatriz Souza</strong><small>Product Designer</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle ds-person__settings" aria-label="Configurações de Beatriz Souza"><Settings2 size={17} /></button></div><div className="ds-person"><span className="ds-avatar ds-avatar--blue">AM</span><div><strong>André Martins</strong><small>Customer Success</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle" aria-label="Opções de André Martins"><MoreHorizontal size={17} /></button></div></div></ExampleCard>
               <ExampleCard title="Alertas rápidos"><div className="ds-alert-actions">{quickAlerts.map((alert) => <button key={alert.kind} type="button" className={`ds-alert-trigger ds-alert-trigger--${alert.kind}`} onClick={() => setActiveAlert(alert)}><AlertIcon kind={alert.kind} size={16} />{alert.label}</button>)}</div><small className="ds-example-hint">Clique para visualizar a notificação.</small></ExampleCard>
             </div>
-            <IconLibrary onCopy={copyValue}/>
+            <IconLibrary/>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 7} aria-label="Fundos (Backgrounds)"><BackgroundsSection onCopy={copyValue}/></section>
+          <section className="ds-section ds-section--first" hidden={activePage !== 7} aria-label="Background"><BackgroundsSection/></section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Empty States"><EmptyStatesSection/></section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 9} aria-label="Dashboards">
-            <SectionHeading title="Dashboards para cada decisão de recrutamento." description="Seis composições reutilizáveis apresentam indicadores, tendências e gargalos com hierarquia clara e dados de demonstração realistas." />
+            <SectionHeading title="Elementos para dashboards." description="Referências visuais reutilizáveis para indicadores e gráficos da aplicação." />
+            <div className="ds-dashboard-kpis">
+              <div><span>Indicador</span><strong>18</strong><small>+3</small></div>
+              <div><span>Indicador</span><strong>1.284</strong><small>+18,4%</small></div>
+              <div><span>Indicador</span><strong>17</strong><small>20</small></div>
+              <div><span>Indicador</span><strong>21d</strong><small>-4d</small></div>
+            </div>
             <div className="ds-dashboard-catalog">
-              <article className="ds-dashboard-template ds-dashboard-template--executive">
-                <header><span><LayoutDashboard size={18} />01 · Executivo</span><strong>Saúde da operação</strong><small>Visão rápida para liderança</small></header>
-                <div className="ds-mini-kpis"><div><span>Vagas ativas</span><strong>18</strong><small>+3 no mês</small></div><div><span>Candidaturas</span><strong>1.284</strong><small>+18,4%</small></div><div><span>Contratações</span><strong>17</strong><small>Meta: 20</small></div><div><span>Tempo médio</span><strong>21d</strong><small>-4 dias</small></div></div>
-              </article>
-
               <article className="ds-dashboard-template ds-dashboard-template--funnel">
-                <header><span><Filter size={18} />02 · Conversão</span><strong>Funil de recrutamento</strong><small>Volume e perda por etapa</small></header>
+                <header><strong>Funil</strong></header>
                 <div className="ds-funnel-chart">{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--jobs">
-                <header><span><BriefcaseBusiness size={18} />03 · Vagas</span><strong>Eficiência por posição</strong><small>Prioridade, prazo e aderência</small></header>
+                <header><strong>Tabela</strong></header>
                 <div className="ds-jobs-performance"><div className="is-head"><span>Vaga</span><span>Candidatos</span><span>Tempo</span><span>Match</span></div><div><strong>Product Designer</strong><span>142</span><span>18 dias</span><b>92%</b></div><div><strong>Customer Success</strong><span>98</span><span>24 dias</span><b>87%</b></div><div><strong>People Analyst</strong><span>76</span><span>16 dias</span><b>89%</b></div></div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--source">
-                <header><span><UsersRound size={18} />04 · Aquisição</span><strong>Origem das candidaturas</strong><small>Canais que atraem talentos</small></header>
+                <header><strong>Rosca</strong></header>
                 <div className="ds-source-chart"><div className="ds-source-donut"><span><strong>1.284</strong><small>total</small></span></div><ul><li><i className="is-brand" />LinkedIn <strong>38%</strong></li><li><i className="is-blue" />Portal de vagas <strong>31%</strong></li><li><i className="is-success" />Indicações <strong>19%</strong></li><li><i className="is-muted" />Outros <strong>12%</strong></li></ul></div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--rhythm">
-                <header><span><TrendingUp size={18} />05 · Ritmo</span><strong>Candidaturas por semana</strong><small>Entrada e avanço no funil</small></header>
+                <header><strong>Barras</strong></header>
                 <div className="ds-week-chart" aria-label="Candidaturas das últimas seis semanas"><div style={{ "--bar": "42%" } as CSSProperties}><i /><span>S1</span></div><div style={{ "--bar": "58%" } as CSSProperties}><i /><span>S2</span></div><div style={{ "--bar": "51%" } as CSSProperties}><i /><span>S3</span></div><div style={{ "--bar": "74%" } as CSSProperties}><i /><span>S4</span></div><div style={{ "--bar": "67%" } as CSSProperties}><i /><span>S5</span></div><div style={{ "--bar": "92%" } as CSSProperties}><i /><span>S6</span></div></div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--sla">
-                <header><span><Clock3 size={18} />06 · SLA</span><strong>Velocidade do processo</strong><small>Alertas antes do gargalo</small></header>
+                <header><strong>Lista de indicadores</strong></header>
                 <div className="ds-sla-list"><div><span><i className="is-success" />Triagem inicial</span><strong>8h</strong><small>meta 12h</small></div><div><span><i className="is-warning" />Retorno da entrevista</span><strong>31h</strong><small>meta 24h</small></div><div><span><i className="is-blue" />Envio de proposta</span><strong>18h</strong><small>meta 24h</small></div><div><span><i className="is-danger" />Vagas sem movimento</span><strong>3</strong><small>há +7 dias</small></div></div>
               </article>
             </div>
@@ -569,7 +564,7 @@ export default function DesignSystemClient() {
               </aside>
 
               <div className="ds-app-preview__main">
-                <header className="ds-app-preview__topbar"><div><span>Dashboards / Visão geral</span><strong>Bom dia, Mateus 👋</strong><small>Acompanhe os resultados da sua operação de talentos.</small></div><div><button type="button" className="ds-app-preview__period"><CalendarDays size={14} />Últimos 30 dias</button><button type="button" className="ds-app-preview__notice" aria-label="Notificações"><Bell size={15} /><i /></button><button type="button" className="ds-app-preview__new"><Plus size={14} />Nova vaga</button></div></header>
+                <header className="ds-app-preview__topbar"><div><span>Dashboards / Visão geral</span><strong>Bom dia, Mateus 👋</strong><small>Acompanhe os resultados da sua operação de talentos.</small></div><div><button type="button" className="ds-app-preview__period"><CalendarDays size={14} />Últimos 30 dias</button><button type="button" className="ds-app-preview__notice" aria-label="Notificações"><Bell size={15} /><i /></button></div></header>
 
                 <div className="ds-app-preview__kpis"><article><span><BriefcaseBusiness size={14} />Vagas ativas</span><strong>18</strong><small><TrendingUp size={12} />3 novas neste mês</small></article><article><span><UsersRound size={14} />Candidaturas</span><strong>1.284</strong><small><TrendingUp size={12} />18,4% no período</small></article><article><span><CalendarDays size={14} />Entrevistas</span><strong>96</strong><small>24 nesta semana</small></article><article><span><UserRoundCheck size={14} />Taxa de contratação</span><strong>12,8%</strong><small><TrendingUp size={12} />2,1 p.p.</small></article></div>
 
