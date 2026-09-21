@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type CSSProperties, type ComponentType } from "react";
 import {
-  AppWindow, Archive, ArrowDownToLine, AtSign, BadgeCheck, BarChart3, Bell, Bot, BriefcaseBusiness,
+  Activity, AppWindow, Archive, ArrowDownToLine, AtSign, BadgeCheck, BarChart3, Bell, Bot, BriefcaseBusiness,
   Building2, CalendarDays, Camera, ChartNoAxesCombined, Check, ChevronLeft, ChevronRight, CircleDollarSign,
   ClipboardCheck, Clock3, CloudUpload, Columns3, Contact, CreditCard, Database, Download, Eye, FileCheck2,
   FileSearch, FileText, Filter, Flag, FolderKanban, Funnel, Gauge, Globe2, GraduationCap, Handshake,
