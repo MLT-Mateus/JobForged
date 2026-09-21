@@ -165,7 +165,8 @@
 .jf-field.is-error .jf-control { border-color: var(--jf-ui-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jf-ui-danger) 10%, transparent); }
 .jf-field.is-error > small { color: var(--jf-ui-danger); }
 
-.jf-floating-field { position: relative; width: 100%; min-width: 0; }
+.jf-floating-field { position: relative; width: 100%; min-width: 0; overflow: visible; }
+.jf-field.is-open { position: relative; z-index: 1000; }
 .jf-select__control,
 .jf-multiselect__control,
 .jf-date__control { cursor: pointer; text-align: left; }

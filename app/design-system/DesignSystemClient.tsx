@@ -75,7 +75,7 @@ const navigation = [
   { id: "tipografia", label: "Tipografia", icon: Type },
   { id: "botoes", label: "Botões", icon: MousePointerClick },
   { id: "formularios", label: "Formulários", icon: SlidersHorizontal },
-  { id: "componentes", label: "Componentes", icon: Layers3 },
+  { id: "componentes", label: "Biblioteca", icon: Layers3 },
   { id: "fundos", label: "Background", icon: PanelsTopLeft },
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
@@ -438,7 +438,7 @@ export default function DesignSystemClient() {
               <ExampleCard title="Transparentes · com e sem ícone"><div className="ds-button-row"><button type="button" className="ds-button ds-button--outline"><Sparkles size={16} />Editar processo</button><button type="button" className="ds-button ds-button--ghost">Cancelar</button><button type="button" className="ds-icon-button" aria-label="Mais opções"><MoreHorizontal size={18} /></button></div><p className="ds-component-spec">Outline para ações secundárias; ghost para baixa ênfase; somente ícone em ações reconhecíveis, sempre com nome acessível.</p></ExampleCard>
               <ExampleCard title="Botão de menu"><div className="ds-menu-button-showcase"><button type="button" className="ds-menu-button-demo" aria-label={sidebarPinned ? "Reduzir menu" : "Expandir menu"} onClick={() => setSidebarPinned((pinned) => !pinned)}>{sidebarPinned ? <PanelLeftClose size={19} /> : <PanelLeftOpen size={19} />}</button><span><strong>{sidebarPinned ? "Reduzir menu lateral" : "Expandir menu lateral"}</strong><small>40 × 40 px · alterna entre navegação completa e compacta com ícones.</small></span></div></ExampleCard>
               <ExampleCard title="Navegação do cabeçalho"><div className="ds-header-link-showcase"><button type="button" className="ds-header-link-demo">Como funciona</button><span><strong>Link de navegação</strong><small>Texto com mudança de cor e linha inferior no hover.</small></span></div></ExampleCard>
-              <ExampleCard title="Tamanhos"><div className="ds-button-row ds-button-row--sizes"><button type="button" className="ds-button ds-button--primary ds-button--small">Pequeno</button><button type="button" className="ds-button ds-button--primary">Padrão</button><button type="button" className="ds-button ds-button--primary ds-button--large">Grande</button></div></ExampleCard>
+              <ExampleCard title="Tamanhos"><div className="ds-size-showcase"><div><span>Preenchido</span><div className="ds-button-row ds-button-row--sizes"><button type="button" className="ds-button ds-button--primary ds-button--small">Pequeno</button><button type="button" className="ds-button ds-button--primary">Padrão</button><button type="button" className="ds-button ds-button--primary ds-button--large">Grande</button></div></div><div><span>Contornado</span><div className="ds-button-row ds-button-row--sizes"><button type="button" className="ds-button ds-button--outline ds-button--small">Pequeno</button><button type="button" className="ds-button ds-button--outline">Padrão</button><button type="button" className="ds-button ds-button--outline ds-button--large">Grande</button></div></div><div><span>Transparente</span><div className="ds-button-row ds-button-row--sizes"><button type="button" className="ds-button ds-button--ghost ds-button--small">Pequeno</button><button type="button" className="ds-button ds-button--ghost">Padrão</button><button type="button" className="ds-button ds-button--ghost ds-button--large">Grande</button></div></div></div></ExampleCard>
               <ExampleCard title="Estados"><div className="ds-button-states"><div><button type="button" className="ds-button ds-button--primary">Salvar</button><span><strong>Padrão</strong><small>Pronto para interação</small></span></div><div><button type="button" className="ds-button ds-button--primary is-hover">Salvar</button><span><strong>Hover</strong><small>Elevação e contraste suave</small></span></div><div><button type="button" className="ds-button ds-button--primary is-focus">Salvar</button><span><strong>Focus</strong><small>Contorno visível pelo teclado</small></span></div><div><button type="button" className="ds-button ds-button--primary" disabled>Salvar</button><span><strong>Desabilitado</strong><small>Ação temporariamente indisponível</small></span></div></div></ExampleCard>
             </div>
             <ButtonSpecs />
@@ -503,7 +503,7 @@ export default function DesignSystemClient() {
             </div>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 6} aria-label="Componentes">
+          <section className="ds-section ds-section--first" hidden={activePage !== 6} aria-label="Biblioteca">
             <SectionHeading title="Peças pequenas que formam experiências completas." description="Combine status, pessoas e notificações com o mesmo vocabulário visual em todo o produto." />
             <div className="ds-components-grid">
               <ExampleCard title="Status"><div className="ds-badge-list"><span className="ds-badge ds-badge--success"><CircleCheck size={14} />Aprovado</span><span className="ds-badge ds-badge--warning"><Clock3 size={14} />Em avaliação</span><span className="ds-badge ds-badge--danger"><CircleX size={14} />Não selecionado</span><span className="ds-badge ds-badge--info"><CircleAlert size={14} />Novo</span></div></ExampleCard>
@@ -519,36 +519,25 @@ export default function DesignSystemClient() {
 
           <section className="ds-section ds-section--first" hidden={activePage !== 9} aria-label="Dashboards">
             <SectionHeading title="Elementos para dashboards." description="Referências visuais reutilizáveis para indicadores e gráficos da aplicação." />
-            <div className="ds-dashboard-kpis">
-              <div><span>Indicador</span><strong>18</strong><small>+3</small></div>
-              <div><span>Indicador</span><strong>1.284</strong><small>+18,4%</small></div>
-              <div><span>Indicador</span><strong>17</strong><small>20</small></div>
-              <div><span>Indicador</span><strong>21d</strong><small>-4d</small></div>
-            </div>
             <div className="ds-dashboard-catalog">
               <article className="ds-dashboard-template ds-dashboard-template--funnel">
-                <header><strong>Funil</strong></header>
+                <header><div><strong>Funil compacto</strong><small>Use em resumos quando o objetivo for identificar rapidamente a queda entre etapas.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue('<JobForgedChart type="funnel-compact" data={stages} />','Código do funil compacto')}><Copy size={14}/>Copiar código</button></header>
                 <div className="ds-funnel-chart">{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--jobs">
-                <header><strong>Tabela</strong></header>
+                <header><div><strong>Tabela comparativa</strong><small>Combine métricas exatas por vaga quando a leitura detalhada for mais importante que a tendência.</small></div></header>
                 <div className="ds-jobs-performance"><div className="is-head"><span>Vaga</span><span>Candidatos</span><span>Tempo</span><span>Match</span></div><div><strong>Product Designer</strong><span>142</span><span>18 dias</span><b>92%</b></div><div><strong>Customer Success</strong><span>98</span><span>24 dias</span><b>87%</b></div><div><strong>People Analyst</strong><span>76</span><span>16 dias</span><b>89%</b></div></div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--source">
-                <header><strong>Rosca</strong></header>
+                <header><div><strong>Gráfico de rosca</strong><small>Mostre a participação de poucos canais dentro de um total conhecido.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue('<JobForgedChart type="donut" data={sources} />','Código do gráfico de rosca')}><Copy size={14}/>Copiar código</button></header>
                 <div className="ds-source-chart"><div className="ds-source-donut"><span><strong>1.284</strong><small>total</small></span></div><ul><li><i className="is-brand" />LinkedIn <strong>38%</strong></li><li><i className="is-blue" />Portal de vagas <strong>31%</strong></li><li><i className="is-success" />Indicações <strong>19%</strong></li><li><i className="is-muted" />Outros <strong>12%</strong></li></ul></div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--rhythm">
-                <header><strong>Barras</strong></header>
+                <header><div><strong>Gráfico de barras</strong><small>Compare volumes discretos por período, vaga, área ou responsável.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue('<JobForgedChart type="bar" data={periods} />','Código do gráfico de barras')}><Copy size={14}/>Copiar código</button></header>
                 <div className="ds-week-chart" aria-label="Candidaturas das últimas seis semanas"><div style={{ "--bar": "42%" } as CSSProperties}><i /><span>S1</span></div><div style={{ "--bar": "58%" } as CSSProperties}><i /><span>S2</span></div><div style={{ "--bar": "51%" } as CSSProperties}><i /><span>S3</span></div><div style={{ "--bar": "74%" } as CSSProperties}><i /><span>S4</span></div><div style={{ "--bar": "67%" } as CSSProperties}><i /><span>S5</span></div><div style={{ "--bar": "92%" } as CSSProperties}><i /><span>S6</span></div></div>
-              </article>
-
-              <article className="ds-dashboard-template ds-dashboard-template--sla">
-                <header><strong>Lista de indicadores</strong></header>
-                <div className="ds-sla-list"><div><span><i className="is-success" />Triagem inicial</span><strong>8h</strong><small>meta 12h</small></div><div><span><i className="is-warning" />Retorno da entrevista</span><strong>31h</strong><small>meta 24h</small></div><div><span><i className="is-blue" />Envio de proposta</span><strong>18h</strong><small>meta 24h</small></div><div><span><i className="is-danger" />Vagas sem movimento</span><strong>3</strong><small>há +7 dias</small></div></div>
               </article>
             </div>
             <AdvancedCharts />
