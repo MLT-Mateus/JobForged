@@ -317,8 +317,8 @@ export default function Home() {
           <nav className="desktop-nav" aria-label="Navegação principal">
             {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           </nav>
-          <Link className="button button--ghost button--small header-login" href="/login">Entrar</Link>
           <ThemeSelector theme={theme} onChange={applyTheme} />
+          <Link className="button button--ghost button--small header-login" href="/login">Entrar</Link>
           <button
             className="menu-button"
             type="button"
