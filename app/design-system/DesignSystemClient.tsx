@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
+import { BrandAsset } from "@/app/components/BrandAsset";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import {
   ArrowLeft,
@@ -33,6 +34,7 @@ import {
   PanelLeftOpen,
   PanelsTopLeft,
   Plus,
+  Ruler,
   Search,
   Settings2,
   ShieldCheck,
@@ -45,7 +47,7 @@ import {
   UsersRound,
   WalletCards,
 } from "lucide-react";
-import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
+import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary, getChartSnippet } from "./DesignSystemAdditions";
 import {
   CheckboxField,
   AppToast,
@@ -77,6 +79,7 @@ const navigation = [
   { id: "formularios", label: "Formulários", icon: SlidersHorizontal },
   { id: "componentes", label: "Biblioteca", icon: Layers3 },
   { id: "fundos", label: "Background", icon: PanelsTopLeft },
+  { id: "espacamento", label: "Espaçamento", icon: Ruler },
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
@@ -339,7 +342,7 @@ export default function DesignSystemClient() {
       <header className="ds-header">
         <div className="ds-header__inner">
           <Link className="ds-brand" href="/" aria-label="Voltar para a página inicial da JobForged">
-            <img src="/brand/jobforged-logo.png" alt="JobForged" width={636} height={184} />
+            <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
             <span>Manual da marca</span>
           </Link>
           <div className="ds-header__actions">
@@ -354,7 +357,7 @@ export default function DesignSystemClient() {
           className={`ds-sidebar ${menuOpen ? "is-open" : ""} ${sidebarExpanded ? "is-expanded" : "is-compact"}`}
         >
           <div className="ds-sidebar__top">
-            <span className="ds-sidebar__title"><img src="/brand/jobforged-symbol.svg" alt="" />{sidebarExpanded && <strong>Manual</strong>}</span>
+            <span className="ds-sidebar__title"><BrandAsset src="/brand/jobforged-symbol.svg" alt="" />{sidebarExpanded && <strong>Manual</strong>}</span>
             <button
               type="button"
               className="ds-sidebar__pin"
@@ -384,7 +387,7 @@ export default function DesignSystemClient() {
 
           <section className="ds-hero" hidden={activePage !== 0} aria-label="Fundamentos da marca">
             <div className="ds-hero__copy"><span className="ds-kicker">Identidade visual · v1.3</span><h1>Interfaces <em className="ds-highlight-pair"><span className="ds-highlight-blue">claras</span> <span className="ds-highlight-teal">e humanas.</span></em><br />Decisões mais inteligentes.</h1><p>O sistema visual da JobForged une precisão, proximidade e tecnologia. Esta base mantém o produto consistente em qualquer tela, nos temas claro e escuro.</p><div className="ds-hero__tags" aria-label="Princípios da marca"><span>Humano</span><span>Confiável</span><span>Objetivo</span><span>Adaptável</span></div></div>
-            <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><img className="ds-hero__loader" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} /><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
+            <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><BrandAsset className="ds-hero__loader" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} /><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
           </section>
           <section className="ds-llm-manual" hidden={activePage !== 0} aria-label="Manual da marca para LLM">
             <div><FileText size={22} aria-hidden="true"/><span><strong>Manual da marca para LLM</strong><small>Este documento será ampliado quando o Design System estiver concluído e servirá para transportar as regras visuais da JobForged entre ferramentas e modelos de linguagem.</small></span></div>
@@ -399,7 +402,7 @@ export default function DesignSystemClient() {
                 {brandFamilies.map((family) => (
                   <article className="ds-brand-family" key={family.title}>
                     <header><span>{family.number}</span><div><strong>{family.title}</strong><p>{family.description}</p></div></header>
-                    <div className="ds-brand-family__preview ds-brand-family__preview--logo"><div className="ds-brand-family__logo"><small>Logo horizontal</small><img src={family.logo} alt={`${family.title} da JobForged`} /></div></div>
+                    <div className="ds-brand-family__preview ds-brand-family__preview--logo"><div className="ds-brand-family__logo"><small>Logo horizontal</small><BrandAsset src={family.logo} alt={`${family.title} da JobForged`} /></div></div>
                     <footer><span>Arquivo vetorial oficial</span><div><a href={family.logo} download className="ds-download-button"><Download size={15} />Logo SVG</a></div></footer>
                   </article>
                 ))}
@@ -407,20 +410,22 @@ export default function DesignSystemClient() {
             </div>
             <div className="ds-asset-section">
               <header><span>02</span><div><h3>Ícones</h3><p>Símbolos compactos para favicons, menus, avatares e estados reduzidos.</p></div></header>
-              <div className="ds-brand-icons">{brandFamilies.map((family) => <article key={family.symbol}><img src={family.symbol} alt={`Ícone da ${family.title.toLowerCase()}`} /><span><strong>{family.title}</strong><small>SVG vetorial · fundo transparente</small></span><a href={family.symbol} download className="ds-download-button"><Download size={15} />Ícone SVG</a></article>)}</div>
+              <div className="ds-brand-icons">{brandFamilies.map((family) => <article key={family.symbol}><BrandAsset src={family.symbol} alt={`Ícone da ${family.title.toLowerCase()}`} /><span><strong>{family.title}</strong><small>SVG vetorial · fundo transparente</small></span><a href={family.symbol} download className="ds-download-button"><Download size={15} />Ícone SVG</a></article>)}</div>
             </div>
             <div className="ds-asset-section">
               <header><span>03</span><div><h3>Animações</h3><p>Assets de carregamento para transições, inicialização e processamento.</p></div></header>
-              <div className="ds-animated-assets">{animatedBrandAssets.map((asset) => <article className="ds-animated-asset" key={asset.title}><div><img src={asset.asset} alt={`${asset.title} da JobForged`} /><span><strong>{asset.title}</strong><small>{asset.description}</small></span></div><a href={asset.asset} download className="ds-download-button"><Download size={15} />Baixar SVG animado</a></article>)}</div>
+              <div className="ds-animated-assets">{animatedBrandAssets.map((asset) => <article className="ds-animated-asset" key={asset.title}><div><BrandAsset src={asset.asset} alt={`${asset.title} da JobForged`} /><span><strong>{asset.title}</strong><small>{asset.description}</small></span></div><a href={asset.asset} download className="ds-download-button"><Download size={15} />Baixar SVG animado</a></article>)}</div>
             </div>
           </section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 2} aria-label="Cores da marca">
             <SectionHeading title="Cores com função clara em cada camada." description="A marca aparece nas ações e nos destaques. Neutros organizam o conteúdo; cores semânticas comunicam estados sem ambiguidade." />
             <div className="ds-color-workbench">
-              <div className="ds-color-workbench__top ds-color-workbench__top--single"><div className="ds-color-story"><span>Sistema cromático</span><h3>Marca em primeiro plano.<br />Interface em equilíbrio.</h3><p>Turquesa conduz decisões e confirma progresso. Azul orienta navegação, informação e recursos tecnológicos.</p><div className="ds-palette-board__brand">{colorTokens.filter((token) => token.group === "brand").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} featured />)}</div></div></div>
-              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>01</span><div><strong>Base da interface</strong><small>Fundos, superfícies, linhas e leitura</small></div></div><div className="ds-palette-group__colors">{colorTokens.filter((token) => token.group === "foundation").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
-              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>02</span><div><strong>Cores de feedback</strong><small>Estados que exigem interpretação rápida</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--feedback">{colorTokens.filter((token) => token.group === "feedback").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
+              <div className="ds-color-overview"><div><span>Sistema cromático</span><h3>Uma paleta orientada por função.</h3><p>As cores de marca conduzem ações; os neutros constroem hierarquia; as cores semânticas comunicam estados. Clique em qualquer token para copiar o valor do tema atual.</p></div><div className="ds-color-overview__rules"><span><b>01</b> Marca</span><span><b>02</b> Estrutura</span><span><b>03</b> Feedback</span></div></div>
+              <div className="ds-palette-group ds-palette-group--brand"><div className="ds-palette-group__heading"><span>01</span><div><strong>Cores da marca</strong><small>Ações, navegação e pontos de destaque</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--brand">{colorTokens.filter((token) => token.group === "brand").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} featured />)}</div></div>
+              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>02</span><div><strong>Base da interface</strong><small>Fundos, superfícies, linhas e leitura</small></div></div><div className="ds-palette-group__colors">{colorTokens.filter((token) => token.group === "foundation").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
+              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>03</span><div><strong>Cores de feedback</strong><small>Estados que exigem interpretação rápida</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--feedback">{colorTokens.filter((token) => token.group === "feedback").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
+              <div className="ds-color-guidance"><div><strong>Contraste é obrigatório</strong><p>Texto e ícones devem manter leitura adequada sobre qualquer cor white label. Cores de feedback não devem ser substituídas por cores de marca.</p></div><div className="ds-color-guidance__samples"><span className="is-approved"><Check size={14}/> Combinação aprovada</span><span className="is-restricted"><CircleAlert size={14}/> Validar contraste</span></div></div>
             </div>
             <div className="ds-color-usage"><div className="ds-color-usage__heading"><Palette size={20} aria-hidden="true" /><div><strong>Mapa de aplicação</strong><span>Use os tokens pelo papel que exercem, não apenas pela aparência.</span></div></div><div className="ds-color-usage__grid">{colorUsage.map((usage) => <article key={usage.title}><i className="ds-color-usage__sample" style={{ "--usage-color": `var(${usage.token})` } as CSSProperties} /><div><span>{usage.title}</span><code>{usage.token}</code><p>{usage.text}</p></div></article>)}</div></div>
           </section>
@@ -515,13 +520,25 @@ export default function DesignSystemClient() {
 
           <section className="ds-section ds-section--first" hidden={activePage !== 7} aria-label="Background"><BackgroundsSection/></section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Empty States"><EmptyStatesSection/></section>
+          <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Espaçamento">
+            <SectionHeading title="Espaço também comunica hierarquia." description="A interface deve respirar. Margens, gutters e intervalos consistentes separam contextos, reduzem a sensação de sufoco e ajudam cada informação a ocupar o espaço certo." />
+            <div className="ds-spacing-principle"><div><span>Princípio prioritário</span><h3>Organizar sem comprimir.</h3><p>Proximidade indica relação; distância indica mudança de assunto. Nunca compense excesso de conteúdo diminuindo indiscriminadamente os espaços. Reorganize, agrupe e priorize.</p></div><div className="ds-spacing-breath" aria-label="Comparação entre conteúdo comprimido e conteúdo com respiro"><article className="is-tight"><span/><span/><span/><span/></article><i>→</i><article className="is-correct"><span/><span/><span/><span/></article></div></div>
+            <div className="ds-spacing-scale" aria-label="Escala oficial de espaçamento">{[[4,"Micro"],[8,"Ícone e texto"],[12,"Controles próximos"],[16,"Gutter móvel"],[24,"Grupos"],[32,"Cards"],[48,"Blocos"],[64,"Seções"]].map(([value,label])=><article key={value}><span style={{"--space":`${value}px`} as CSSProperties}/><strong>{value} px</strong><small>{label}</small></article>)}</div>
+            <div className="ds-layout-rules">
+              <article className="ds-layout-anatomy"><header><span>Envelope principal</span><strong>Desktop como referência</strong></header><div className="ds-layout-canvas"><i className="is-gutter-left"/><div><span>Conteúdo até 1180 px</span><b>Área útil ampla, centralizada e protegida por gutters.</b><small>Em monitores maiores, o espaço externo cresce igualmente dos dois lados.</small></div><i className="is-gutter-right"/></div><footer><span>Viewport</span><i/><strong>gutter</strong><i/><b>conteúdo</b></footer></article>
+              <article className="ds-layout-table"><header><span>Limites por contexto</span><strong>Largura não é densidade</strong></header><div><span>Página pública / Landing</span><b>1180 px</b><small>Conteúdo comercial e institucional</small></div><div><span>Autenticação e adesão</span><b>1180 px</b><small>Formulário + contexto lado a lado</small></div><div><span>Documentos legais</span><b>1180 px</b><small>Envelope amplo; leitura interna até 900 px</small></div><div><span>Aplicação administrativa</span><b>Fluido</b><small>Limitado conforme densidade do módulo</small></div></article>
+            </div>
+            <div className="ds-responsive-spacing"><header><span>Responsividade</span><strong>O conteúdo se adapta; o gutter nunca desaparece.</strong></header><div><article><b>Desktop</b><strong>≥ 1180 px</strong><span>Conteúdo máximo de 1180 px</span><span>Gutter mínimo de 24 px</span><span>Seções: 64–112 px</span></article><article><b>Tablet</b><strong>681–1179 px</strong><span>Envelope fluido</span><span>Gutter de 24 px</span><span>Grids reorganizados</span></article><article><b>Mobile</b><strong>330–680 px</strong><span>Envelope fluido</span><span>Gutter mínimo de 16 px</span><span>Cards com 16–24 px internos</span></article></div></div>
+            <div className="ds-spacing-guidance"><article className="is-do"><span><Check/> Faça</span><ul><li>Separe seções antes de adicionar bordas.</li><li>Use 24–32 px dentro de containers principais.</li><li>Mantenha alinhamento vertical entre blocos relacionados.</li><li>Reduza colunas antes de reduzir o espaço interno.</li></ul></article><article className="is-avoid"><span><CircleX/> Evite</span><ul><li>Conteúdo encostado na borda do viewport.</li><li>Cards dentro de cards sem necessidade.</li><li>Intervalos diferentes para relações equivalentes.</li><li>Comprimir formulários para ocupar menos altura.</li></ul></article></div>
+          </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 9} aria-label="Dashboards">
+          <section className="ds-section ds-section--first" hidden={activePage !== 9} aria-label="Empty States"><EmptyStatesSection/></section>
+
+          <section className="ds-section ds-section--first" hidden={activePage !== 10} aria-label="Dashboards">
             <SectionHeading title="Elementos para dashboards." description="Referências visuais reutilizáveis para indicadores e gráficos da aplicação." />
             <div className="ds-dashboard-catalog">
               <article className="ds-dashboard-template ds-dashboard-template--funnel">
-                <header><div><strong>Funil compacto</strong><small>Use em resumos quando o objetivo for identificar rapidamente a queda entre etapas.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue('<JobForgedChart type="funnel-compact" data={stages} />','Código do funil compacto')}><Copy size={14}/>Copiar código</button></header>
+                <header><div><strong>Funil compacto</strong><small>Use em resumos quando o objetivo for identificar rapidamente a queda entre etapas.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue(getChartSnippet("funnel-compact",dashboardFunnel.map(stage=>stage.value)),'Código completo do funil compacto')}><Copy size={14}/>Copiar código</button></header>
                 <div className="ds-funnel-chart">{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div>
               </article>
 
@@ -531,23 +548,23 @@ export default function DesignSystemClient() {
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--source">
-                <header><div><strong>Gráfico de rosca</strong><small>Mostre a participação de poucos canais dentro de um total conhecido.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue('<JobForgedChart type="donut" data={sources} />','Código do gráfico de rosca')}><Copy size={14}/>Copiar código</button></header>
+                <header><div><strong>Gráfico de rosca</strong><small>Mostre a participação de poucos canais dentro de um total conhecido.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue(getChartSnippet("donut",[38,31,19,12]),'Código completo do gráfico de rosca')}><Copy size={14}/>Copiar código</button></header>
                 <div className="ds-source-chart"><div className="ds-source-donut"><span><strong>1.284</strong><small>total</small></span></div><ul><li><i className="is-brand" />LinkedIn <strong>38%</strong></li><li><i className="is-blue" />Portal de vagas <strong>31%</strong></li><li><i className="is-success" />Indicações <strong>19%</strong></li><li><i className="is-muted" />Outros <strong>12%</strong></li></ul></div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--rhythm">
-                <header><div><strong>Gráfico de barras</strong><small>Compare volumes discretos por período, vaga, área ou responsável.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue('<JobForgedChart type="bar" data={periods} />','Código do gráfico de barras')}><Copy size={14}/>Copiar código</button></header>
+                <header><div><strong>Gráfico de barras</strong><small>Compare volumes discretos por período, vaga, área ou responsável.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue(getChartSnippet("bar",[42,58,51,74,67,92]),'Código completo do gráfico de barras')}><Copy size={14}/>Copiar código</button></header>
                 <div className="ds-week-chart" aria-label="Candidaturas das últimas seis semanas"><div style={{ "--bar": "42%" } as CSSProperties}><i /><span>S1</span></div><div style={{ "--bar": "58%" } as CSSProperties}><i /><span>S2</span></div><div style={{ "--bar": "51%" } as CSSProperties}><i /><span>S3</span></div><div style={{ "--bar": "74%" } as CSSProperties}><i /><span>S4</span></div><div style={{ "--bar": "67%" } as CSSProperties}><i /><span>S5</span></div><div style={{ "--bar": "92%" } as CSSProperties}><i /><span>S6</span></div></div>
               </article>
             </div>
             <AdvancedCharts />
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 10} aria-label="Aplicação">
+          <section className="ds-section ds-section--first" hidden={activePage !== 11} aria-label="Aplicação">
             <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
             <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
               <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">
-                <div className="ds-app-preview__brand"><span><img src="/brand/jobforged-symbol.svg" alt="" /><strong>JobForged</strong></span><button type="button" className="ds-app-preview__collapse" aria-label={appSidebarExpanded ? "Reduzir menu lateral" : "Expandir menu lateral"} aria-pressed={!appSidebarExpanded} onClick={() => setAppSidebarExpanded((expanded) => !expanded)}>{appSidebarExpanded ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}</button></div>
+              <div className="ds-app-preview__brand"><span><BrandAsset src="/brand/jobforged-symbol.svg" alt="" /><strong>JobForged</strong></span><button type="button" className="ds-app-preview__collapse" aria-label={appSidebarExpanded ? "Reduzir menu lateral" : "Expandir menu lateral"} aria-pressed={!appSidebarExpanded} onClick={() => setAppSidebarExpanded((expanded) => !expanded)}>{appSidebarExpanded ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}</button></div>
                 <nav>{applicationMenu.map(({ label, icon: Icon }, index) => <button type="button" key={label} className={index === 1 ? "is-active" : ""}><Icon size={15} strokeWidth={1.8} /><span>{label}</span></button>)}</nav>
                 <button type="button" className="ds-app-preview__profile" aria-label="Abrir meu perfil"><span><UserRound size={15} /></span><strong>Mateus</strong></button>
               </aside>
