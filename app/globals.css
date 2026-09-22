@@ -299,6 +299,8 @@ main {
   color: var(--blue);
 }
 
+.header-login { flex: 0 0 auto; }
+
 .button {
   display: inline-flex;
   min-height: 46px;
@@ -2864,7 +2866,8 @@ main {
 
 @media (max-width: 900px) {
   .desktop-nav,
-  .desktop-cta {
+  .desktop-cta,
+  .header-login {
     display: none;
   }
 

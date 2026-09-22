@@ -35,6 +35,7 @@ import {
   X,
 } from "lucide-react";
 import { ThemeSelector } from "@/app/components/ui";
+import { plansById } from "@/app/data/plans";
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=5561991630130&text=Ol%C3%A1%2C+quero+conhecer+a+JobForged.&type=phone_number&app_absent=0";
@@ -316,6 +317,7 @@ export default function Home() {
           <nav className="desktop-nav" aria-label="Navegação principal">
             {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           </nav>
+          <Link className="button button--ghost button--small header-login" href="/login">Entrar</Link>
           <ThemeSelector theme={theme} onChange={applyTheme} />
           <button
             className="menu-button"
@@ -335,6 +337,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
           >
             {navItems.map((item) => <a key={item.href} href={item.href} onClick={closeMenu}>{item.label}</a>)}
+            <Link className="button button--ghost" href="/login" onClick={closeMenu}>Entrar</Link>
           </motion.nav>
         )}
       </header>
@@ -611,7 +614,7 @@ export default function Home() {
               <div className="plan-head"><span>Gratuito</span><small>Para conhecer a plataforma</small></div>
               <div className="plan-price"><strong>R$ 0</strong><span>para começar</span></div>
               <p>Uma base organizada para operações menores iniciarem com clareza.</p>
-              <a className="button button--ghost" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Começar grátis <ArrowRight /></a>
+              <Link className="button button--ghost" href="/cadastro">Começar grátis <ArrowRight /></Link>
               <ul>
                 <li><Check /> Até 2 vagas simultâneas</li>
                 <li><Check /> 1 usuário recrutador</li>
@@ -624,10 +627,10 @@ export default function Home() {
             <Reveal className="price-card price-card--featured" delay={0.08}>
               <span className="plan-badge"><Star /> Mais popular</span>
               <div className="plan-head"><span>Básico</span><small>Para PMEs que querem mais controle</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "248,00" : "288,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              <div className="plan-price"><strong>R$ {plansById[annualBilling ? "basico-anual" : "basico-mensal"].price}</strong><span>{plansById[annualBilling ? "basico-anual" : "basico-mensal"].suffix}</span></div>
               {annualBilling && <small className="plan-equivalent">Economize R$ 40,00 por mês — R$ 480,00 por ano</small>}
               <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
-              <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
+              <Link className="button button--primary" href={`/cadastro?plano=${annualBilling ? "basico-anual" : "basico-mensal"}`}>Falar com especialista <ArrowRight /></Link>
               <ul>
                 <li><Check /> Até 5 vagas simultâneas</li>
                 <li><Check /> 3 usuários</li>
@@ -638,10 +641,10 @@ export default function Home() {
             </Reveal>
             <Reveal className="price-card price-card--professional" delay={0.16}>
               <div className="plan-head"><span>Profissional</span><small>Para operações estruturadas</small></div>
-              <div className="plan-price"><strong>R$ {annualBilling ? "449,00" : "496,00"}</strong><span>/{annualBilling ? "ano" : "mês"}</span></div>
+              <div className="plan-price"><strong>R$ {plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price}</strong><span>{plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].suffix}</span></div>
               {annualBilling && <small className="plan-equivalent">Economize R$ 47,00 por mês — R$ 564,00 por ano</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
-              <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar com especialista <ArrowRight /></a>
+              <Link className="button button--blue" href={`/cadastro?plano=${annualBilling ? "profissional-anual" : "profissional-mensal"}`}>Falar com especialista <ArrowRight /></Link>
               <ul>
                 <li><Check /> Até 15 vagas simultâneas</li>
                 <li><Check /> 10 usuários</li>

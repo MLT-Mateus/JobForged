@@ -960,7 +960,7 @@ export function ToggleSwitch({ label, description, checked, onCheckedChange, dis
 }
 
 type ChoiceFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "className"> & {
-  label: string;
+  label: ReactNode;
 };
 
 export function CheckboxField({ label, ...inputProps }: ChoiceFieldProps) {
