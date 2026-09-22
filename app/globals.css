@@ -3436,64 +3436,6 @@ html[data-theme="dark"] .footer-bottom { color: var(--ink-soft); }
 
 /* Theme changes are applied behind the dedicated JobForged loader. */
 
-.theme-switcher {
-  display: inline-flex;
-  flex: 0 0 auto;
-  gap: 3px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  background: color-mix(in srgb, var(--white) 90%, transparent);
-  box-shadow: 0 8px 24px rgba(8, 68, 65, 0.06);
-}
-
-.theme-switcher button {
-  min-height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 11px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--ink-soft);
-  cursor: pointer;
-  font-size: 9px;
-  font-weight: 720;
-  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
-}
-
-.theme-switcher button:hover {
-  color: var(--teal-deep);
-}
-
-.theme-switcher button.is-active {
-  background: var(--teal-soft);
-  box-shadow: 0 5px 13px rgba(8, 68, 65, 0.08);
-  color: var(--teal-deep);
-}
-
-.theme-switcher svg {
-  width: 15px;
-  height: 15px;
-}
-
-html[data-theme="dark"] .theme-switcher {
-  border-color: var(--app-border);
-  background: var(--app-panel);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
-}
-
-html[data-theme="dark"] .theme-switcher button {
-  color: var(--ink-soft);
-}
-
-html[data-theme="dark"] .theme-switcher button.is-active {
-  background: var(--app-panel-raised);
-  color: var(--teal-bright);
-}
-
 .highlight-pair {
   display: inline;
   font-style: normal;
@@ -5567,17 +5509,17 @@ html[data-theme="dark"] .not-found-window__body small { color: var(--ink-soft); 
 }
 
 @media (max-width: 680px) {
-  .theme-switcher {
+  .nav-wrap > .jf-theme-selector {
     margin-left: auto;
   }
 
-  .theme-switcher button {
+  .nav-wrap > .jf-theme-selector button {
     width: 34px;
     min-height: 32px;
     padding: 0;
   }
 
-  .theme-switcher button span {
+  .nav-wrap > .jf-theme-selector button span {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -5707,12 +5649,12 @@ html[data-theme="dark"] .not-found-window__body small { color: var(--ink-soft); 
     gap: 7px;
   }
 
-  .theme-switcher {
+  .nav-wrap > .jf-theme-selector {
     gap: 2px;
     padding: 3px;
   }
 
-  .theme-switcher button {
+  .nav-wrap > .jf-theme-selector button {
     width: 31px;
     min-height: 30px;
   }
@@ -6333,3 +6275,9 @@ html[data-theme="dark"] .site-footer {
   .price-card { min-width: 0; padding: 22px; }
   .price-card strong, .price-card small { overflow-wrap: anywhere; }
 }
+/* A identidade JobForged troca de paleta junto com o tema da interface. */
+.jf-brand-asset--dark { display: none !important; }
+html[data-theme="dark"] .jf-brand-asset--light,
+[data-theme="dark"] .jf-brand-asset--light { display: none !important; }
+html[data-theme="dark"] .jf-brand-asset--dark,
+[data-theme="dark"] .jf-brand-asset--dark { display: inline-block !important; }

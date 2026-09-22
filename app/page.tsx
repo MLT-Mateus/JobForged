@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { BrandAsset } from "@/app/components/BrandAsset";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
@@ -19,7 +20,6 @@ import {
   Menu,
   MessageCircle,
   Monitor,
-  Moon,
   Paintbrush,
   PanelTop,
   Palette,
@@ -29,12 +29,12 @@ import {
   SquareKanban,
   Sparkles,
   Star,
-  Sun,
   Type,
   Upload,
   UsersRound,
   X,
 } from "lucide-react";
+import { ThemeSelector } from "@/app/components/ui";
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=5561991630130&text=Ol%C3%A1%2C+quero+conhecer+a+JobForged.&type=phone_number&app_absent=0";
@@ -305,25 +305,18 @@ export default function Home() {
     <main>
       {themeLoading && <div className="app-loader app-loader--theme" data-surface-theme={themeLoading} role="status" aria-live="polite" aria-label="Atualizando tema da JobForged">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="app-loader__logo" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} />
+        <BrandAsset className="app-loader__logo" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} />
       </div>}
       <header className="site-header">
         <div className="container nav-wrap">
           <a className="brand" href="#inicio" aria-label="JobForged — início">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/jobforged-logo.png" alt="JobForged" width={636} height={184} fetchPriority="high" />
+            <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} fetchPriority="high" />
           </a>
           <nav className="desktop-nav" aria-label="Navegação principal">
             {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           </nav>
-          <div className="theme-switcher" role="group" aria-label="Tema da página">
-            <button type="button" className={theme === "light" ? "is-active" : ""} aria-pressed={theme === "light"} onClick={() => applyTheme("light")}>
-              <Sun aria-hidden="true" /><span>Claro</span>
-            </button>
-            <button type="button" className={theme === "dark" ? "is-active" : ""} aria-pressed={theme === "dark"} onClick={() => applyTheme("dark")}>
-              <Moon aria-hidden="true" /><span>Escuro</span>
-            </button>
-          </div>
+          <ThemeSelector theme={theme} onChange={applyTheme} />
           <button
             className="menu-button"
             type="button"
@@ -710,7 +703,7 @@ export default function Home() {
           <div className="footer-grid">
             <div className="footer-brand">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/jobforged-logo.png" alt="JobForged" width={636} height={184} />
+              <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
               <p>ATS white label com WhatsApp integrado e agente de triagem por IA.</p>
               <address>CNPJ 65.703.328/0001-10</address>
             </div>
