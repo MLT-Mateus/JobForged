@@ -12,6 +12,7 @@
 
 .auth-grid { position:absolute;inset:0;pointer-events:none;opacity:.52;background-image:linear-gradient(color-mix(in srgb,var(--jf-ui-border) 42%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--jf-ui-border) 42%,transparent) 1px,transparent 1px);background-size:52px 52px;mask-image:linear-gradient(to bottom,#000,transparent 88%) }
 .auth-header { position:relative;z-index:2;display:flex;width:min(100% - (var(--layout-gutter) * 2),var(--layout-content-max));min-height:82px;align-items:center;justify-content:space-between;gap:20px;margin-inline:auto }
+.auth-header::after{position:absolute;right:0;bottom:0;left:0;height:1px;background:var(--jf-ui-border);content:""}
 .auth-brand { display:inline-flex }.auth-brand img{width:184px;height:auto}
 .auth-layout { position:relative;z-index:1;display:grid;width:min(100% - (var(--layout-gutter) * 2),var(--layout-content-max));grid-template-columns:minmax(280px,.78fr) minmax(0,1.22fr);align-items:center;gap:clamp(40px,7vw,92px);margin:clamp(26px,4vh,52px) auto 72px }
 .auth-page--compact .auth-layout{width:min(100% - (var(--layout-gutter) * 2),var(--layout-content-max));grid-template-columns:minmax(280px,.85fr) minmax(480px,1fr)}
