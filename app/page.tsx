@@ -352,7 +352,6 @@ export default function Home() {
 
       <section className="hero" id="inicio">
         <div className="hero-grid" aria-hidden="true" />
-        <div className="hero-orb hero-orb--one" aria-hidden="true" />
         <div className="hero-orb hero-orb--two" aria-hidden="true" />
         <div className="container hero-layout">
           <motion.div
@@ -705,7 +704,10 @@ export default function Home() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
               <p>ATS white label com WhatsApp integrado e agente de triagem por IA.</p>
-              <address>CNPJ 65.703.328/0001-10</address>
+              <address>
+                CNPJ 65.703.328/0001-10<br />
+                © {new Date().getFullYear()} JobForged. Todos os direitos reservados.
+              </address>
             </div>
             <div className="footer-contact">
               <span className="eyebrow">Vamos conversar?</span>
@@ -717,12 +719,8 @@ export default function Home() {
             </div>
           </div>
           <div className="footer-navigation">
-            <nav aria-label="Navegação do rodapé"><a href="#diferenciais">Diferenciais</a><a href="#planos">Planos</a><Link href="/design-system">Design System</Link></nav>
-            <span>Menos retrabalho. Mais contexto para decidir.</span>
-          </div>
-          <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} JobForged. Todos os direitos reservados.</span>
-            <nav className="footer-legal" aria-label="Documentos legais">
+            <nav aria-label="Navegação institucional e documentos legais">
+              <Link href="/design-system">Design System</Link>
               <Link href="/termos-servico">Termos de serviço</Link>
               <Link href="/politicas-privacidade">Privacidade</Link>
               <Link href="/politicas-exclusao">Exclusão de dados</Link>
