@@ -1,21 +1,12 @@
-# JobForged: Sites and GitHub publication
+# JobForged: official Site and GitHub publication order
 
-The user requires every update made here in Sites to also update
-`MLT-Mateus/JobForged` on GitHub, branch `main`.
-
-- Native Sites project: `appgprj_6a7e58d9c9f48191a05c0c8feb3acb12`.
-- Treat this Sites checkout as the source for changes requested in Sites.
-- Before editing, fetch both repositories and inspect any divergence. Preserve
-  unrelated changes; never force-push or silently overwrite new concurrent work.
-- For each completed update, synchronize the exact tracked source tree to GitHub
-  using the connected GitHub tools or an authorized Git credential. Keep both
-  histories intact. Compare Git tree hashes to verify identical source content.
-- When publication is requested, deploy through native Sites tools and wait for
-  a successful deployment response. GitHub Actions success is not a Sites deploy.
-- If either destination fails, explicitly report the partial result. Do not
-  claim synchronization or publication succeeded without checking both.
-- Never store credentials in this repository. This is an execution rule for
-  agents working on the project, not a background webhook or scheduled service.
+- Native official Sites project: `appgprj_6a7e58d9c9f48191a05c0c8feb3acb12`, slug `jobforged-landing-page`.
+- Treat this Sites checkout and the live official Site as the source for changes requested through Sites. Do not use GitHub as the implementation base.
+- Complete the requested change in the Sites source, publish it through native Sites tools, and verify the successful published version before accessing `MLT-Mateus/JobForged` on GitHub.
+- Only after the official Site is verified live, synchronize the exact published source tree to the project's already-linked official GitHub branch. Preserve unrelated changes and both histories. Never force-push or overwrite concurrent work.
+- Compare Git tree hashes to verify the GitHub commit contains the same tracked source as the published Site. Do not include unrelated changes.
+- If Site publication or verification fails, stop before GitHub. If the linked GitHub branch cannot be identified or safely updated after publication, report the Site as published and the GitHub sync as incomplete.
+- Never store credentials in this repository. This is an execution rule for agents working on the project, not a background webhook or scheduled service.
 
 ## Permanent Design System rule for JobForged work
 

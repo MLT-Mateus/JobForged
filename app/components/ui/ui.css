@@ -16,8 +16,8 @@
   --jf-ui-night: #072f2d;
   --jf-ui-night-text: #f5fffd;
   --jf-ui-focus: var(--jf-ui-brand);
-  --jf-ui-focus-ring: color-mix(in srgb, var(--jf-ui-focus) 15%, transparent);
-  --jf-ui-focus-outline: color-mix(in srgb, var(--jf-ui-focus) 34%, transparent);
+  --jf-ui-focus-ring: color-mix(in srgb, var(--jf-ui-focus) 28%, transparent);
+  --jf-ui-focus-outline: color-mix(in srgb, var(--jf-ui-focus) 40%, transparent);
   --jf-ui-surface: #ffffff;
   --jf-ui-surface-raised: #ffffff;
   --jf-ui-surface-soft: #f5f9f8;
@@ -73,6 +73,7 @@
   --jf-ui-brand-bright: #73e2da;
   --jf-ui-brand-strong: #73e2da;
   --jf-ui-brand-soft: rgba(67, 208, 198, 0.15);
+  --jf-ui-focus: var(--jf-ui-brand);
   --jf-ui-brand-pale: #102b27;
   --jf-ui-accent: #7e9cff;
   --jf-ui-accent-strong: #a8baff;
@@ -269,6 +270,7 @@
 .jf-password-toggle:hover { background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-password-toggle:focus-visible { background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); box-shadow: 0 0 0 2px color-mix(in srgb, var(--jf-ui-brand) 28%, transparent); }
 .jf-field.is-error .jf-control { border-color: var(--jf-ui-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jf-ui-danger) 10%, transparent); }
+.jf-field.is-error .jf-control:focus-within { border-color: var(--jf-ui-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jf-ui-danger) 26%, transparent); }
 .jf-field.is-error > small { color: var(--jf-ui-danger); }
 
 .jf-floating-field { position: relative; width: 100%; min-width: 0; overflow: visible; }
