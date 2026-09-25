@@ -52,7 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var key="jobforged-theme";var saved=localStorage.getItem(key);var theme=saved==="dark"||saved==="light"?saved:(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;}catch(error){document.documentElement.dataset.theme="light";}})();`,
+            __html: `(function(){var root=document.documentElement;var lightIcon="/favicon.svg";var darkIcon="/brand/jobforged-symbol-dark.svg";function syncFavicon(){var href=root.dataset.theme==="dark"?darkIcon:lightIcon;document.querySelectorAll('link[rel~="icon"]').forEach(function(link){if(link.getAttribute("href")!==href)link.setAttribute("href",href);});}try{var key="jobforged-theme";var saved=localStorage.getItem(key);var theme=saved==="dark"||saved==="light"?saved:(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");root.dataset.theme=theme;root.style.colorScheme=theme;}catch(error){root.dataset.theme="light";}syncFavicon();new MutationObserver(syncFavicon).observe(root,{attributes:true,attributeFilter:["data-theme"]});new MutationObserver(syncFavicon).observe(document.head,{childList:true,subtree:true,attributes:true,attributeFilter:["href","rel"]});})();`,
           }}
         />
       </head>

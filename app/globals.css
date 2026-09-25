@@ -833,15 +833,31 @@ main {
 }
 
 .match-value {
+  position: relative;
+  isolation: isolate;
   display: grid;
   width: 40px;
   height: 40px;
   place-items: center;
   border-radius: 50%;
-  background: conic-gradient(var(--blue) 92%, #e3e9fb 0);
-  color: var(--white);
+  background: conic-gradient(var(--blue) 0 92%, var(--blue-soft) 92% 100%);
+  color: var(--ink);
   font-size: 9px;
   font-weight: 760;
+}
+
+.match-value::before {
+  position: absolute;
+  z-index: 0;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--app-panel);
+  content: "";
+}
+
+.match-value > span {
+  position: relative;
+  z-index: 1;
 }
 
 .capability-carousel {

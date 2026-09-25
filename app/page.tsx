@@ -252,7 +252,7 @@ function ProductMockup() {
         animate={reduceMotion ? undefined : { x: [0, -16, 8, -12, 0], y: [0, 15, -9, 10, 0] }}
         transition={{ duration: 8.6, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
       >
-        <span className="match-value">92%</span>
+        <span className="match-value" role="img" aria-label="92% de aderência"><span aria-hidden="true">92%</span></span>
         <span><small>Aderência à vaga</small><strong>Perfil recomendado</strong></span>
       </motion.div>
     </motion.div>
