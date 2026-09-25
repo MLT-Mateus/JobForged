@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 import { useEffect,useMemo,useRef,useState } from "react";
 import { ArrowLeft,ArrowRight,Check,Eye,GripVertical,Lightbulb,Monitor,Plus,Save,Smartphone,Tablet,Trash2,X } from "lucide-react";
-import { ActionButton } from "@/app/components/ui";
+import { ActionButton, FieldControl } from "@/app/components/ui";
 import { AdminShell } from "@/app/components/admin/AdminModuleClient";
 import type { AwaitedAdminContext } from "@/app/components/admin/admin-types";
 import { emptyJob,type Job } from "./job-types";
@@ -13,7 +13,7 @@ const areas=["Tecnologia","Marketing","Vendas","Financeiro","Recursos Humanos","
 const states=["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
 const benefits=["Vale-transporte","Vale-alimentação","Vale-refeição","Plano de saúde","Plano odontológico","Seguro de vida","Auxílio home office","Bônus","Participação nos lucros e resultados","Folga no aniversário","Benefício de atividades físicas","Auxílio-creche","Auxílio-educação","Stock options"];
 const labels={Identificação:"Defina os dados que ajudam candidatos a reconhecer a oportunidade.","Sobre a função":"Explique impacto, rotina e requisitos com objetividade.","Perfil e diferenciais":"Registre conhecimentos e características que agregam valor.",Benefícios:"Apresente a proposta de valor oferecida pela organização.","Cultura e contexto":"Dê contexto sobre o time, desafios e forma de trabalho.","Processo seletivo":"Configure as etapas e os compromissos com candidatos."} as const;
-function Field({label,children,required}:{label:string;children:React.ReactNode;required?:boolean}){return <label className="job-field"><span>{label}{required&&<b>Obrigatório</b>}</span>{children}</label>}
+function Field({label,children,required}:{label:string;children:React.ReactNode;required?:boolean}){return <FieldControl className="job-field" label={label} requiredLabel={required?"Obrigatório":undefined}>{children}</FieldControl>}
 function Select({value,onChange,items,placeholder="Selecione"}:{value:string;onChange:(v:string)=>void;items:string[];placeholder?:string}){return <select value={value} onChange={e=>onChange(e.target.value)}><option value="">{placeholder}</option>{items.map(x=><option key={x}>{x}</option>)}</select>}
 function DynamicList({title,items,onChange,min=0,placeholder}:{title:string;items:string[];onChange:(x:string[])=>void;min?:number;placeholder:string}){const [value,setValue]=useState("");const add=()=>{if(!value.trim())return;onChange([...items,value.trim()]);setValue("")};return <div className="job-dynamic"><div className="job-label"><span>{title}</span><small>{items.length}/{min} mín.</small></div>{items.map((x,i)=><div className="job-list-row" key={`${x}-${i}`}><GripVertical/><input value={x} onChange={e=>onChange(items.map((v,n)=>n===i?e.target.value:v))}/><button type="button" onClick={()=>onChange(items.filter((_,n)=>n!==i))} aria-label={`Remover ${x}`}><Trash2/></button></div>)}<div className="job-add-row"><input value={value} onChange={e=>setValue(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();add()}}} placeholder={placeholder}/><ActionButton type="button" variant="secondary" icon={<Plus/>} onClick={add}>Adicionar</ActionButton></div></div>}
 export default function JobWizardClient({context,jobId}:{context:AwaitedAdminContext;jobId?:string}){

@@ -17,6 +17,24 @@ The user requires every update made here in Sites to also update
 - Never store credentials in this repository. This is an execution rule for
   agents working on the project, not a background webhook or scheduled service.
 
+## Permanent Design System rule for JobForged work
+
+The Design System and shared UI library are the single source of truth for
+visual tokens and reusable components across the application. For every future
+JobForged creation or update:
+
+1. Inspect the Design System, shared tokens, and existing components before
+   editing screens.
+2. Reuse approved tokens and components before creating a new visual element.
+3. Do not duplicate component implementations or page-level color, size, or
+   state styles when a shared definition exists.
+4. Add any missing component or state to the shared UI library and Design
+   System, then use that same implementation on every affected screen.
+5. Validate affected pages after each change and confirm they still use the
+   shared definitions.
+6. Report the tokens and components reused or changed, and identify and fix
+   any related page-level definitions before considering the update complete.
+
 ## Triage badge
 
 The latest approved additional 34px downward correction is defined in `app/globals.css`:

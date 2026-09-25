@@ -1,70 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  --font-heading: "Montserrat Variable", "Montserrat", Arial, sans-serif;
-  --font-body: "Open Sans Variable", "Open Sans", Arial, sans-serif;
-  --teal: #20b2aa;
-  --teal-bright: #30cbc1;
-  --teal-soft: #dff5f2;
-  --teal-pale: #effaf8;
-  --teal-deep: #087a76;
-  --blue: #4169e1;
-  --blue-soft: #e8edff;
-  --ink: #142321;
-  --ink-soft: #445452;
+  --font-heading: var(--jf-ui-font-heading);
+  --font-body: var(--jf-ui-font-body);
+  --teal: var(--jf-ui-brand);
+  --teal-bright: var(--jf-ui-brand-bright);
+  --teal-soft: var(--jf-ui-brand-soft);
+  --teal-pale: var(--jf-ui-brand-pale);
+  --teal-deep: var(--jf-ui-brand-strong);
+  --blue: var(--jf-ui-accent);
+  --blue-soft: var(--jf-ui-accent-soft);
+  --ink: var(--jf-ui-text);
+  --ink-soft: var(--jf-ui-text-app-muted);
   --night: #072f2d;
   --night-deep: #041f1e;
-  --surface: #f1f8ff;
-  --surface-green: #e0f0ef;
+  --surface: var(--jf-ui-surface-marketing);
+  --surface-green: var(--jf-ui-surface-green);
   --white: #ffffff;
-  --line: rgba(20, 35, 33, 0.12);
-  --shadow: 0 28px 80px rgba(8, 68, 65, 0.14);
-  --radius-sm: 14px;
-  --radius-md: 22px;
-  --radius-lg: 32px;
-  --layout-content-max: 1180px;
-  --layout-reading-max: 900px;
-  --layout-gutter: 24px;
-  --layout-gutter-mobile: 16px;
-  --app-bg: #ffffff;
-  --app-panel: #ffffff;
-  --app-panel-soft: #f5f9f8;
-  --app-panel-raised: #ffffff;
-  --app-border: rgba(20, 35, 33, 0.12);
-  --app-scrollbar-track: #e9f5f4;
-  --app-scrollbar-thumb-start: #4169e1;
-  --app-scrollbar-thumb-end: #20b2aa;
-  --app-scrollbar-thumb-hover-start: #3157ca;
-  --app-scrollbar-thumb-hover-end: #087a76;
-  --app-scrollbar-edge: #eef7f6;
+  --line: var(--jf-ui-border-app);
+  --shadow: var(--jf-ui-shadow-marketing);
+  --radius-sm: var(--jf-ui-radius-card);
+  --radius-md: var(--jf-ui-radius-page);
+  --radius-lg: var(--jf-ui-radius-marketing);
+  --layout-content-max: var(--jf-ui-layout-content-max);
+  --layout-reading-max: var(--jf-ui-layout-reading-max);
+  --layout-gutter: var(--jf-ui-layout-gutter);
+  --layout-gutter-mobile: var(--jf-ui-layout-gutter-mobile);
+  --app-bg: var(--jf-ui-surface);
+  --app-panel: var(--jf-ui-surface);
+  --app-panel-soft: var(--jf-ui-surface-soft);
+  --app-panel-raised: var(--jf-ui-surface-raised);
+  --app-border: var(--jf-ui-border-app);
+  --app-scrollbar-track: var(--jf-ui-app-scrollbar-track);
+  --app-scrollbar-thumb-start: var(--jf-ui-app-scrollbar-thumb-start);
+  --app-scrollbar-thumb-end: var(--jf-ui-app-scrollbar-thumb-end);
+  --app-scrollbar-thumb-hover-start: var(--jf-ui-app-scrollbar-thumb-hover-start);
+  --app-scrollbar-thumb-hover-end: var(--jf-ui-app-scrollbar-thumb-hover-end);
+  --app-scrollbar-edge: var(--jf-ui-app-scrollbar-edge);
 }
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --teal: #43d0c6;
-  --teal-bright: #73e2da;
-  --teal-soft: rgba(67, 208, 198, 0.15);
-  --teal-pale: #102b27;
-  --teal-deep: #73e2da;
-  --blue: #7e9cff;
-  --blue-soft: rgba(126, 156, 255, 0.15);
-  --ink: #f2fbf9;
-  --ink-soft: #afc3bf;
-  --surface: #0b1e1b;
-  --surface-green: #102522;
-  --line: rgba(218, 244, 239, 0.12);
-  --shadow: 0 28px 80px rgba(0, 0, 0, 0.3);
-  --app-bg: #071412;
-  --app-panel: #102522;
-  --app-panel-soft: #0b1e1b;
-  --app-panel-raised: #15302c;
-  --app-border: rgba(218, 244, 239, 0.13);
-  --app-scrollbar-track: #0b211e;
-  --app-scrollbar-thumb-start: #7e9cff;
-  --app-scrollbar-thumb-end: #43d0c6;
-  --app-scrollbar-thumb-hover-start: #a8baff;
-  --app-scrollbar-thumb-hover-end: #73e2da;
-  --app-scrollbar-edge: #0b211e;
 }
 
 * {
@@ -327,7 +303,7 @@ main {
 .button:focus-visible,
 .menu-button:focus-visible,
 .faq-item button:focus-visible {
-  outline: 3px solid rgba(65, 105, 225, 0.35);
+  outline: 3px solid var(--jf-ui-focus-outline);
   outline-offset: 3px;
 }
 

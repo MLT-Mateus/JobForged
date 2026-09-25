@@ -31,6 +31,7 @@ function themeVariables(theme: OrganizationTheme): CSSProperties {
     "--home-secondary": theme.secondary, "--home-bg": theme.background, "--home-surface": theme.surface,
     "--home-surface-soft": theme.surfaceSoft, "--home-text": theme.text, "--home-muted": theme.textMuted, "--home-border": theme.border,
     "--jf-ui-brand": theme.primary, "--jf-ui-brand-strong": theme.primaryStrong, "--jf-ui-brand-soft": theme.primarySoft,
+    "--jf-ui-focus": theme.primary, "--jf-ui-focus-ring": `color-mix(in srgb, ${theme.primary} 15%, transparent)`,
     "--jf-ui-accent": theme.secondary, "--jf-ui-surface": theme.surface, "--jf-ui-surface-soft": theme.surfaceSoft,
     "--jf-ui-text": theme.text, "--jf-ui-text-muted": theme.textMuted, "--jf-ui-border": theme.border, "--jf-ui-border-strong": theme.border,
   } as CSSProperties;

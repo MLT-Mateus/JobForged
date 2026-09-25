@@ -94,6 +94,17 @@ const dashboardFunnel = [
   { label: "Contratações", value: 17, width: 20 },
 ];
 
+const spacingScale = [
+  { token: "--jf-ui-space-1", value: 4, label: "Micro" },
+  { token: "--jf-ui-space-2", value: 8, label: "Ícone e texto" },
+  { token: "--jf-ui-space-3", value: 12, label: "Controles próximos" },
+  { token: "--jf-ui-space-4", value: 16, label: "Gutter móvel" },
+  { token: "--jf-ui-space-6", value: 24, label: "Grupos" },
+  { token: "--jf-ui-space-7", value: 32, label: "Cards" },
+  { token: "--jf-ui-space-8", value: 48, label: "Blocos" },
+  { token: "--jf-ui-space-9", value: 64, label: "Seções" },
+];
+
 const applicationMenu = [
   { label: "Home", icon: House },
   { label: "Dashboards", icon: LayoutDashboard },
@@ -113,19 +124,21 @@ const colorUsage = [
   { title: "Linhas", token: "--ds-border", text: "Divisores e contornos discretos; nunca devem competir com o conteúdo." },
   { title: "Ações", token: "--ds-brand", text: "Ações principais, progresso e pontos positivos da experiência." },
   { title: "Informação", token: "--ds-accent", text: "Links, navegação ativa, tecnologia e destaques complementares." },
+  { title: "Foco", token: "--jf-ui-focus", text: "Indicador de foco compartilhado pelos controles do aplicativo." },
 ];
 
 const colorTokens = [
-  { name: "Turquesa JobForged", variable: "--ds-brand", light: "#20B2AA", dark: "#43D0C6", group: "brand", use: "Ações principais e progresso" },
-  { name: "Azul JobForged", variable: "--ds-accent", light: "#4169E1", dark: "#7E9CFF", group: "brand", use: "Navegação e informação" },
-  { name: "Background", variable: "--ds-bg", light: "#F5F9F8", dark: "#071412", group: "foundation", use: "Base da página" },
-  { name: "Surface", variable: "--ds-surface", light: "#FFFFFF", dark: "#102522", group: "foundation", use: "Cards e containers" },
-  { name: "Border", variable: "--ds-border", light: "#DCE8E6", dark: "#2A3D3A", group: "foundation", use: "Linhas e divisores" },
-  { name: "Text primary", variable: "--ds-text", light: "#142321", dark: "#F2FBF9", group: "foundation", use: "Texto de maior contraste" },
-  { name: "Success", variable: "--ds-success", light: "#15946B", dark: "#51D3A3", group: "feedback", use: "Conclusão positiva" },
-  { name: "Warning", variable: "--ds-warning", light: "#D58A14", dark: "#F0B95A", group: "feedback", use: "Atenção necessária" },
-  { name: "Danger", variable: "--ds-danger", light: "#D64A5D", dark: "#FF8291", group: "feedback", use: "Erro ou bloqueio" },
-  { name: "Informação", variable: "--ds-accent", light: "#4169E1", dark: "#7E9CFF", group: "feedback", use: "Observações e casos especiais" },
+  { name: "Turquesa JobForged", variable: "--jf-ui-brand", group: "brand", use: "Ações principais e progresso" },
+  { name: "Azul JobForged", variable: "--jf-ui-accent", group: "brand", use: "Navegação e informação" },
+  { name: "Background", variable: "--jf-ui-surface-soft", group: "foundation", use: "Base da página" },
+  { name: "Surface", variable: "--jf-ui-surface", group: "foundation", use: "Cards e containers" },
+  { name: "Border", variable: "--jf-ui-border", group: "foundation", use: "Linhas e divisores" },
+  { name: "Text primary", variable: "--jf-ui-text", group: "foundation", use: "Texto de maior contraste" },
+  { name: "Success", variable: "--jf-ui-success", group: "feedback", use: "Conclusão positiva" },
+  { name: "Warning", variable: "--jf-ui-warning", group: "feedback", use: "Atenção necessária" },
+  { name: "Danger", variable: "--jf-ui-danger", group: "feedback", use: "Erro ou bloqueio" },
+  { name: "Informação", variable: "--jf-ui-accent", group: "feedback", use: "Observações e casos especiais" },
+  { name: "Foco de controles", variable: "--jf-ui-focus", group: "interaction", use: "Borda e indicador de foco compartilhados" },
 ];
 
 const animatedBrandAssets: Array<{ title: string; description: string; asset: string; reusable?: boolean; variant?: "primary" | "inverted" }> = [
@@ -212,13 +225,18 @@ function ExampleCard({
   );
 }
 
-function PaletteColor({ token, theme, copied, onCopy, featured = false }: { token: (typeof colorTokens)[number]; theme: Theme; copied: string | null; onCopy: (value: string, label: string) => void; featured?: boolean }) {
-  const value = token[theme];
+function PaletteColor({ token, copied, onCopy, featured = false }: { token: (typeof colorTokens)[number]; theme: Theme; copied: string | null; onCopy: (value: string, label: string) => void; featured?: boolean }) {
+  const swatchColor = `var(${token.variable})`;
+  function copyTokenValue() {
+    const page = document.querySelector<HTMLElement>(".ds-page");
+    const value = page ? getComputedStyle(page).getPropertyValue(token.variable).trim() : "";
+    if (value) onCopy(value, token.name);
+  }
   return (
-    <button type="button" className={`ds-palette-color ${featured ? "ds-palette-color--featured" : ""}`} style={{ "--palette-color": value } as CSSProperties} onClick={() => onCopy(value, token.name)} aria-label={`Copiar ${token.name}: ${value}`}>
+    <button type="button" className={`ds-palette-color ${featured ? "ds-palette-color--featured" : ""}`} style={{ "--palette-color": swatchColor } as CSSProperties} onClick={copyTokenValue} aria-label={`Copiar o valor de ${token.name}`}>
       <span className="ds-palette-color__swatch" aria-hidden="true" />
       <span className="ds-palette-color__content"><strong>{token.name}</strong><small>{token.use}</small><code>{token.variable}</code></span>
-      <span className="ds-palette-color__value">{copied === token.name ? <><Check size={14} />Copiado</> : <><Copy size={14} />{value}</>}</span>
+      <span className="ds-palette-color__value">{copied === token.name ? <><Check size={14} />Copiado</> : <><Copy size={14} />Copiar valor</>}</span>
     </button>
   );
 }
@@ -428,6 +446,7 @@ export default function DesignSystemClient() {
               <div className="ds-palette-group ds-palette-group--brand"><div className="ds-palette-group__heading"><span>01</span><div><strong>Cores da marca</strong><small>Ações, navegação e pontos de destaque</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--brand">{colorTokens.filter((token) => token.group === "brand").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} featured />)}</div></div>
               <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>02</span><div><strong>Base da interface</strong><small>Fundos, superfícies, linhas e leitura</small></div></div><div className="ds-palette-group__colors">{colorTokens.filter((token) => token.group === "foundation").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
               <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>03</span><div><strong>Cores de feedback</strong><small>Estados que exigem interpretação rápida</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--feedback">{colorTokens.filter((token) => token.group === "feedback").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
+              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>04</span><div><strong>Interação</strong><small>Foco visível para navegação por teclado</small></div></div><div className="ds-palette-group__colors">{colorTokens.filter((token) => token.group === "interaction").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
               <div className="ds-color-guidance"><div><strong>Contraste é obrigatório</strong><p>Texto e ícones devem manter leitura adequada sobre qualquer cor white label. Cores de feedback não devem ser substituídas por cores de marca.</p></div><div className="ds-color-guidance__samples"><span className="is-approved"><Check size={14}/> Combinação aprovada</span><span className="is-restricted"><CircleAlert size={14}/> Validar contraste</span></div></div>
             </div>
             <div className="ds-color-usage"><div className="ds-color-usage__heading"><Palette size={20} aria-hidden="true" /><div><strong>Mapa de aplicação</strong><span>Use os tokens pelo papel que exercem, não apenas pela aparência.</span></div></div><div className="ds-color-usage__grid">{colorUsage.map((usage) => <article key={usage.title}><i className="ds-color-usage__sample" style={{ "--usage-color": `var(${usage.token})` } as CSSProperties} /><div><span>{usage.title}</span><code>{usage.token}</code><p>{usage.text}</p></div></article>)}</div></div>
@@ -458,9 +477,11 @@ export default function DesignSystemClient() {
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
                 <div className="ds-modern-field-grid">
                   <TextField label="Nome da vaga" requiredLabel="Obrigatório" icon={BriefcaseBusiness} placeholder="Ex.: Analista de Customer Success" defaultValue="Analista de Customer Success" helpText="Use um título reconhecido pelo mercado." />
+                  <TextField label="Foco compartilhado" className="is-focus-demo" icon={Check} defaultValue="Token único · tema atual" readOnly helpText="Usa --jf-ui-focus, o mesmo token dos formulários do app." />
                   <TextField label="E-mail do responsável" icon={Mail} type="email" placeholder="nome@empresa.com" helpText="Usado apenas nas comunicações sobre a vaga." />
                   <TextField label="Buscar candidato" icon={Search} type="search" placeholder="Nome, e-mail ou competência" helpText="Pesquise por dados ou competências do perfil." />
                   <TextField label="Senha de acesso" icon={LockKeyhole} type="password" placeholder="Digite ao menos 8 caracteres" defaultValue="12345" error="A senha precisa ter pelo menos 8 caracteres." />
+                  <TextField label="Desabilitado" icon={LockKeyhole} defaultValue="Indisponível" disabled helpText="Estado inativo do mesmo componente compartilhado." />
                 </div>
               </ExampleCard>
               <ExampleCard title="Dropdowns">
@@ -526,7 +547,7 @@ export default function DesignSystemClient() {
           <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Espaçamento">
             <SectionHeading title="Espaço também comunica hierarquia." description="A interface deve respirar. Margens, gutters e intervalos consistentes separam contextos, reduzem a sensação de sufoco e ajudam cada informação a ocupar o espaço certo." />
             <div className="ds-spacing-principle"><div><span>Princípio prioritário</span><h3>Organizar sem comprimir.</h3><p>Proximidade indica relação; distância indica mudança de assunto. Nunca compense excesso de conteúdo diminuindo indiscriminadamente os espaços. Reorganize, agrupe e priorize.</p></div><div className="ds-spacing-breath" aria-label="Comparação entre conteúdo comprimido e conteúdo com respiro"><article className="is-tight"><span/><span/><span/><span/></article><i>→</i><article className="is-correct"><span/><span/><span/><span/></article></div></div>
-            <div className="ds-spacing-scale" aria-label="Escala oficial de espaçamento">{[[4,"Micro"],[8,"Ícone e texto"],[12,"Controles próximos"],[16,"Gutter móvel"],[24,"Grupos"],[32,"Cards"],[48,"Blocos"],[64,"Seções"]].map(([value,label])=><article key={value}><span style={{"--space":`${value}px`} as CSSProperties}/><strong>{value} px</strong><small>{label}</small></article>)}</div>
+            <div className="ds-spacing-scale" aria-label="Escala oficial de espaçamento">{spacingScale.map(({token,value,label})=><article key={token}><span style={{"--space":`var(${token})`} as CSSProperties}/><strong>{value} px</strong><small>{label}</small><code>{token}</code></article>)}</div>
             <div className="ds-layout-rules">
               <article className="ds-layout-anatomy"><header><span>Envelope principal</span><strong>Desktop como referência</strong></header><div className="ds-layout-canvas"><i className="is-gutter-left"/><div><span>Conteúdo até 1180 px</span><b>Área útil ampla, centralizada e protegida por gutters.</b><small>Em monitores maiores, o espaço externo cresce igualmente dos dois lados.</small></div><i className="is-gutter-right"/></div><footer><span>Viewport</span><i/><strong>gutter</strong><i/><b>conteúdo</b></footer></article>
               <article className="ds-layout-table"><header><span>Limites por contexto</span><strong>Largura não é densidade</strong></header><div><span>Página pública / Landing</span><b>1180 px</b><small>Conteúdo comercial e institucional</small></div><div><span>Autenticação e adesão</span><b>1180 px</b><small>Formulário + contexto lado a lado</small></div><div><span>Documentos legais</span><b>1180 px</b><small>Envelope amplo; leitura interna até 900 px</small></div><div><span>Aplicação administrativa</span><b>Fluido</b><small>Limitado conforme densidade do módulo</small></div></article>

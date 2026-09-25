@@ -34,6 +34,7 @@ import {
   type DragEvent,
   type InputHTMLAttributes,
   type ReactNode,
+  type TextareaHTMLAttributes,
 } from "react";
 
 export type SelectOption = {
@@ -122,6 +123,67 @@ export function TextField({
       </span>
       {(error || helpText) && <small id={messageId}>{error ?? helpText}</small>}
     </div>
+  );
+}
+
+type TextAreaFieldProps = FieldBaseProps &
+  Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className">;
+
+/** Shared multiline field. Label, validation state and focus styling come from the same field tokens as TextField. */
+export function TextAreaField({
+  label,
+  helpText,
+  error,
+  requiredLabel,
+  className = "",
+  id,
+  ...textareaProps
+}: TextAreaFieldProps) {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const messageId = `${inputId}-message`;
+
+  return (
+    <div className={`jf-field ${error ? "is-error" : ""} ${className}`}>
+      <label className="jf-field__label" htmlFor={inputId}>
+        <b>{label}</b>
+        {requiredLabel && <i>{requiredLabel}</i>}
+      </label>
+      <span className="jf-control">
+        <textarea
+          {...textareaProps}
+          id={inputId}
+          aria-invalid={Boolean(error)}
+          aria-describedby={helpText || error ? messageId : undefined}
+        />
+      </span>
+      {(error || helpText) && <small id={messageId}>{error ?? helpText}</small>}
+    </div>
+  );
+}
+
+type FieldControlProps = FieldBaseProps & {
+  children: ReactNode;
+};
+
+/** Shared shell for native select or other controls that need their own behavior but the product's field tokens. */
+export function FieldControl({
+  label,
+  helpText,
+  error,
+  requiredLabel,
+  className = "",
+  children,
+}: FieldControlProps) {
+  return (
+    <label className={`jf-field jf-field--native ${error ? "is-error" : ""} ${className}`}>
+      <span className="jf-field__label">
+        <b>{label}</b>
+        {requiredLabel && <i>{requiredLabel}</i>}
+      </span>
+      <span className="jf-control">{children}</span>
+      {(error || helpText) && <small className="jf-field__message">{error ?? helpText}</small>}
+    </label>
   );
 }
 

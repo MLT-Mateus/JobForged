@@ -15,12 +15,14 @@ Esta pasta é a fonte oficial dos controles usados no produto. Telas novas devem
 - `DateRangeField` reutiliza o mesmo calendário para selecionar início e fim, destacando visualmente todo o período.
 - `MultiFileUploadField` aceita documentos ou imagens, adiciona novos itens sem apagar os anteriores e permite remoção individual.
 - Todo `TextField` com `type="password"` inclui automaticamente o controle acessível de mostrar e ocultar a senha.
+- Use `TextAreaField` para texto multilinha e `FieldControl` apenas quando o controle nativo precisar de comportamento específico. Ambos compartilham o mesmo rótulo, borda, foco, erro e estado desabilitado.
 - O foco pertence ao container `.jf-control`; inputs internos nunca recebem um segundo contorno.
+- `--jf-ui-focus` é o token único para foco dos campos e `--jf-ui-focus-ring` deriva dele. O Design System e todas as telas devem consumir esses tokens.
 
 ## Importação
 
 ```tsx
-import { DateRangeField, MultiFileUploadField, MultiSelectField, TextField } from "@/app/components/ui";
+import { DateRangeField, FieldControl, MultiFileUploadField, MultiSelectField, TextAreaField, TextField } from "@/app/components/ui";
 ```
 
 O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualquer refinamento aprovado ali passa automaticamente a ser o padrão das futuras telas do aplicativo.
