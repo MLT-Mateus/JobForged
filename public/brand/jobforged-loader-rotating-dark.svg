@@ -20,13 +20,25 @@
       animation: jf-loader-rotate 1.5s cubic-bezier(.2, .72, .28, 1) infinite;
     }
 
+    .jf-loader-person {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: jf-loader-person-breathe 1.5s cubic-bezier(.45, 0, .55, 1) infinite;
+    }
+
     @keyframes jf-loader-rotate {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
 
+    @keyframes jf-loader-person-breathe {
+      0%, 100% { opacity: .94; transform: scale(.94); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .jf-loader-reticle { animation: none; }
+      .jf-loader-person { animation: none; opacity: 1; transform: none; }
     }
   </style>
 

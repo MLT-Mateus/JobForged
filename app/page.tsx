@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { BrandAsset } from "@/app/components/BrandAsset";
-import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
@@ -40,7 +39,7 @@ import { plansById } from "@/app/data/plans";
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=5561991630130&text=Ol%C3%A1%2C+quero+conhecer+a+JobForged.&type=phone_number&app_absent=0";
-const THEME_LOADER_CYCLE_MS = 1500;
+const THEME_LOADER_CYCLE_MS = 3200;
 
 const navItems = [
   { label: "Diferenciais", href: "#diferenciais" },
@@ -307,7 +306,7 @@ export default function Home() {
     <main>
       {themeLoading && <div className="app-loader app-loader--theme" data-surface-theme={themeLoading} role="status" aria-live="polite" aria-label="Atualizando tema da JobForged">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <JobForgedLoadingAnimation className="app-loader__logo" size={112} />
+        <BrandAsset className="app-loader__logo" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} />
       </div>}
       <header className="site-header">
         <div className="container nav-wrap">

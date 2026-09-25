@@ -2,12 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { JobForgedLoadingAnimation } from "./JobForgedLoadingAnimation";
+import { BrandAsset } from "./BrandAsset";
 
 type LoaderTheme = "light" | "dark";
 type LoaderPhase = "initial" | "navigation";
 
-const LOADER_CYCLE_MS = 1500;
+const LOADER_CYCLE_MS = 3200;
 const LOADER_FAILSAFE_MS = 30000;
 const EXIT_DELAY_MS = 140;
 
@@ -113,7 +113,8 @@ export default function NavigationLoader() {
 
   return (
     <div className="app-loader app-loader--navigation" data-surface-theme={theme} role="status" aria-live="polite" aria-label={phase === "initial" ? "Carregando JobForged" : "Carregando próxima página"}>
-      <JobForgedLoadingAnimation className="app-loader__logo" size={112} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <BrandAsset className="app-loader__logo" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} />
     </div>
   );
 }
