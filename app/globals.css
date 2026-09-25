@@ -175,16 +175,15 @@ html[data-theme="dark"] .app-loader {
   background: radial-gradient(circle, rgba(32, 178, 170, .2), transparent 68%);
   content: "";
   filter: blur(18px);
-  animation: theme-loader-glow 3.2s ease-in-out both;
+  animation: theme-loader-glow 1.5s ease-in-out both;
 }
 
 .app-loader--theme[data-surface-theme="dark"] { background: rgba(7, 20, 18, .95); }
-.app-loader--theme[data-surface-theme="dark"]::before { background: radial-gradient(circle, rgba(126, 156, 255, .22), transparent 68%); }
+.app-loader--theme[data-surface-theme="dark"]::before { background: radial-gradient(circle, rgba(67, 208, 198, .22), transparent 68%); }
 html[data-theme="dark"] .app-loader--theme[data-surface-theme="light"] { background: rgba(248, 252, 251, .94); }
-.app-loader--theme .app-loader__logo { position: relative; z-index: 1; will-change: transform, opacity; animation: theme-loader-logo 3.2s ease-in-out both; }
+.app-loader--theme .app-loader__logo { position: relative; z-index: 1; }
 
 @keyframes theme-loader-glow { 0% { opacity: .15; transform: scale(.72); } 48% { opacity: 1; transform: scale(1.08); } 100% { opacity: .72; transform: scale(1); } }
-@keyframes theme-loader-logo { 0% { opacity: 0; transform: scale(.8) rotate(-4deg); } 22% { opacity: 1; } 65% { transform: scale(1.06) rotate(0); } 100% { opacity: 1; transform: scale(1); } }
 
 .app-loader__logo {
   width: clamp(92px, 10vw, 118px);

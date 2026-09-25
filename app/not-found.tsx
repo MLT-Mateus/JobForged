@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Compass, Home, Search } from "lucide-react";
+import { BrandAsset } from "@/app/components/BrandAsset";
 
 export default function NotFound() {
   return (
@@ -8,7 +9,7 @@ export default function NotFound() {
       <header className="not-found-header container">
         <Link className="brand" href="/" aria-label="JobForged — início">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/jobforged-logo.png" alt="JobForged" width={636} height={184} />
+          <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
         </Link>
       </header>
       <section className="not-found-content container">

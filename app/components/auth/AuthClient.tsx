@@ -2,162 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Building2, Check, CircleAlert, LockKeyhole, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, LockKeyhole, Mail, Phone, QrCode, ShieldCheck, UserRound } from "lucide-react";
 import { BrandAsset } from "@/app/components/BrandAsset";
-import { ActionButton, AppToast, CheckboxField, SelectField, TextField, ThemeSelector, type ThemeMode, type ToastNotice } from "@/app/components/ui";
-import { commercialPlans, isPlanId, plansById } from "@/app/data/plans";
-import { maskCnpj, maskCpf, maskPhone, passwordRules, validateLogin, validateSignup, type LoginValues, type SignupValues } from "./auth-validation";
+import { ActionButton, AppToast, CheckboxField, RadioField, TextField, ThemeSelector, type ThemeMode, type ToastNotice } from "@/app/components/ui";
+import { commercialPlans, isPlanId, plansById, type PlanId } from "@/app/data/plans";
+import { cardBrand, maskCard, maskCnpj, maskDocument, maskExpiry, maskCpf, maskPhone, normalizeText, passwordRules, validateCard, validateLogin, validateSignup, type CardValues, type LoginValues, type SignupValues } from "./auth-validation";
 import { simulateAuthentication } from "./auth-service";
 import "./auth.css";
 
-type FieldErrors<T> = Partial<Record<keyof T, string>>;
+type FieldErrors<T> = Partial<Record<keyof T,string>>;
+function usePublicTheme(){const [theme,setTheme]=useState<ThemeMode>("light");useEffect(()=>{const saved=localStorage.getItem("jobforged-theme");const initial=saved==="dark"?"dark":"light";document.documentElement.dataset.theme=initial;document.documentElement.style.colorScheme=initial;setTheme(initial)},[]);const changeTheme=(next:ThemeMode)=>{document.documentElement.dataset.theme=next;document.documentElement.style.colorScheme=next;localStorage.setItem("jobforged-theme",next);setTheme(next)};return{theme,changeTheme}}
+function AuthShell({children,compact=false}:{children:ReactNode;compact?:boolean}){const{theme,changeTheme}=usePublicTheme();return <main className={`auth-page ${compact?"auth-page--compact":""}`}><div className="auth-grid" aria-hidden="true"/><header className="site-header auth-official-header"><div className="container nav-wrap"><Link href="/" className="brand" aria-label="JobForged — página inicial"><BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184}/></Link><ThemeSelector theme={theme} onChange={changeTheme}/></div></header><div className="auth-layout"><aside className="auth-context"><span className="auth-context__icon"><Building2/></span><p className="auth-eyebrow">Conta empresarial JobForged</p><h2>Recrutamento estruturado desde o primeiro acesso.</h2><p>Ambiente exclusivo para empresas e administradores responsáveis.</p><ul><li><ShieldCheck/>Dados consistentes da organização</li><li><UserRound/>Acesso inicial do administrador</li><li><LockKeyhole/>Sem armazenamento nesta demonstração</li></ul></aside><section className="auth-card">{children}</section></div></main>}
+function LoadingLabel({loading,idle}:{loading:boolean;idle:string}){return loading?<><span className="auth-spinner"/>Processando...</>:<>{idle}<ArrowRight/></>}
 
-function usePublicTheme() {
-  const [theme, setTheme] = useState<ThemeMode>("light");
-  useEffect(() => {
-    const stored = localStorage.getItem("jobforged-theme");
-    const initial = stored === "dark" || stored === "light" ? stored : document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-    document.documentElement.dataset.theme = initial;
-    document.documentElement.style.colorScheme = initial;
-    setTheme(initial);
-  }, []);
-  const changeTheme = (next: ThemeMode) => {
-    document.documentElement.dataset.theme = next;
-    document.documentElement.style.colorScheme = next;
-    localStorage.setItem("jobforged-theme", next);
-    setTheme(next);
-  };
-  return { theme, changeTheme };
-}
+export function LoginClient(){const[values,setValues]=useState<LoginValues>({identifier:"",password:""});const[errors,setErrors]=useState<FieldErrors<LoginValues>>({});const[loading,setLoading]=useState(false);const[success,setSuccess]=useState(false);const[notice,setNotice]=useState<ToastNotice|null>(null);const submit=async(e:FormEvent)=>{e.preventDefault();const next=validateLogin(values);setErrors(next);if(Object.keys(next).length){setNotice({kind:"danger",title:"Revise os campos",text:"Corrija os dados destacados para continuar."});return}setLoading(true);try{await simulateAuthentication("login",values.identifier);setValues(v=>({...v,password:""}));setSuccess(true);setNotice({kind:"success",title:"Demonstração concluída",text:"Os campos foram validados sem criar uma sessão."})}finally{setLoading(false)}};if(success)return <AuthShell compact><div className="auth-confirmation"><span><Check/></span><p className="auth-eyebrow">Demonstração concluída</p><h1>Dados validados</h1><p>Nenhuma autenticação ou sessão real foi criada.</p><div className="auth-confirmation__actions"><button className="jf-action jf-action--secondary" onClick={()=>setSuccess(false)}>Revisar acesso</button><Link className="jf-action jf-action--primary" href="/">Voltar ao início</Link></div></div>{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>;return <AuthShell compact><div className="auth-heading"><p className="auth-eyebrow">Bem-vindo de volta</p><h1>Acesse sua conta</h1><p>Demonstração visual: nenhuma credencial será armazenada.</p></div><form className="auth-form" noValidate onSubmit={submit}><TextField label="E-mail ou CPF" icon={Mail} value={values.identifier} maxLength={254} onChange={e=>{const raw=e.target.value;setValues(v=>({...v,identifier:/^[\d.\-\s]*$/.test(raw)?maskCpf(raw):raw.slice(0,254)}));setErrors(x=>({...x,identifier:undefined}))}} error={errors.identifier} autoComplete="username"/><TextField label="Senha" icon={LockKeyhole} type="password" value={values.password} maxLength={72} onChange={e=>{setValues(v=>({...v,password:e.target.value}));setErrors(x=>({...x,password:undefined}))}} error={errors.password} autoComplete="current-password"/><button type="button" className="auth-link-button auth-recovery" onClick={()=>setNotice({kind:"info",title:"Recuperação de acesso",text:"Este fluxo será ativado com a autenticação real."})}>Esqueci minha senha</button><ActionButton type="submit" disabled={loading} className="auth-submit"><LoadingLabel loading={loading} idle="Entrar"/></ActionButton></form><div className="auth-switch"><span>Sua empresa ainda não possui conta?</span><Link href="/cadastro">Cadastrar empresa</Link></div><Link className="auth-back" href="/"><ArrowLeft/>Voltar ao início</Link>{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>}
 
-function AuthShell({ children, compact = false }: { children: ReactNode; compact?: boolean }) {
-  const { theme, changeTheme } = usePublicTheme();
-  return <main className={`auth-page ${compact ? "auth-page--compact" : ""}`}>
-    <div className="auth-grid" aria-hidden="true" />
-    <header className="auth-header">
-      <Link href="/" className="auth-brand" aria-label="JobForged — página inicial"><BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184}/></Link>
-      <ThemeSelector theme={theme} onChange={changeTheme}/>
-    </header>
-    <div className="auth-layout">
-      <aside className="auth-context" aria-label="Contexto da conta empresarial">
-        <span className="auth-context__icon"><Building2 aria-hidden="true"/></span>
-        <p className="auth-eyebrow">Conta empresarial JobForged</p>
-        <h2>Sua operação de recrutamento começa com uma base segura.</h2>
-        <p>Este ambiente é exclusivo para empresas clientes e administradores responsáveis.</p>
-        <ul><li><ShieldCheck/> Identidade e dados da organização</li><li><UserRound/> Acesso inicial do administrador</li><li><LockKeyhole/> Preparado para autenticação segura</li></ul>
-      </aside>
-      <section className="auth-card">{children}</section>
-    </div>
-  </main>;
-}
-
-function LoadingLabel({ loading, idle }: { loading: boolean; idle: string }) {
-  return loading ? <><span className="auth-spinner" aria-hidden="true"/>Processando...</> : <>{idle}<ArrowRight aria-hidden="true"/></>;
-}
-
-export function LoginClient() {
-  const [values, setValues] = useState<LoginValues>({ identifier: "", password: "" });
-  const [remember, setRemember] = useState(false);
-  const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
-  const [generalError, setGeneralError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [notice, setNotice] = useState<ToastNotice | null>(null);
-
-  const updateIdentifier = (raw: string) => {
-    const value = /^[\d.\-\s]*$/.test(raw) ? maskCpf(raw) : raw.slice(0, 120);
-    setValues((current) => ({ ...current, identifier: value }));
-    if (errors.identifier) setErrors((current) => ({ ...current, identifier: undefined }));
-  };
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const nextErrors = validateLogin(values);
-    setErrors(nextErrors);
-    setGeneralError("");
-    if (Object.keys(nextErrors).length) return;
-    setLoading(true);
-    try {
-      await simulateAuthentication("login", values.identifier);
-      setValues((current) => ({ ...current, password: "" }));
-      setSuccess(true);
-    } catch (error) {
-      setGeneralError(error instanceof Error ? error.message : "Não foi possível concluir a demonstração.");
-    } finally { setLoading(false); }
-  }
-
-  if (success) return <AuthShell compact><div className="auth-confirmation" role="status"><span><Check/></span><p className="auth-eyebrow">Demonstração concluída</p><h1>Dados validados com sucesso</h1><p>A autenticação real será habilitada após a integração segura do sistema. Nenhuma sessão foi criada.</p><div className="auth-confirmation__actions"><Link className="jf-action jf-action--primary" href="/">Voltar para a página inicial</Link><button className="jf-action jf-action--secondary" type="button" onClick={()=>setSuccess(false)}>Revisar acesso</button></div></div></AuthShell>;
-
-  return <AuthShell compact>
-    <div className="auth-heading"><p className="auth-eyebrow">Bem-vindo de volta</p><h1>Acesse sua conta</h1><p>Entre para continuar gerenciando seus processos seletivos.</p></div>
-    {generalError && <div className="auth-alert auth-alert--error" role="alert"><CircleAlert/><span><strong>Não foi possível continuar</strong>{generalError}</span></div>}
-    <form className="auth-form" noValidate onSubmit={submit}>
-      <TextField label="E-mail ou CPF" icon={Mail} value={values.identifier} onChange={(event)=>updateIdentifier(event.target.value)} error={errors.identifier} autoComplete="username" inputMode="email" placeholder="nome@empresa.com.br ou 000.000.000-00"/>
-      <TextField label="Senha" icon={LockKeyhole} type="password" value={values.password} onChange={(event)=>{setValues((current)=>({...current,password:event.target.value}));if(errors.password)setErrors((current)=>({...current,password:undefined}))}} error={errors.password} autoComplete="current-password" placeholder="Digite sua senha"/>
-      <div className="auth-form__meta"><CheckboxField label="Lembrar de mim" checked={remember} onChange={(event)=>setRemember(event.target.checked)}/><button type="button" className="auth-link-button" onClick={()=>setNotice({kind:"info",title:"Recuperação de acesso",text:"A recuperação de senha será disponibilizada com a integração do sistema de autenticação."})}>Esqueci minha senha</button></div>
-      <ActionButton type="submit" disabled={loading} aria-busy={loading} className="auth-submit"><LoadingLabel loading={loading} idle="Entrar"/></ActionButton>
-    </form>
-    <div className="auth-switch"><span>Sua empresa ainda não possui uma conta?</span><Link href="/cadastro">Cadastrar empresa</Link></div>
-    <Link className="auth-back" href="/"><ArrowLeft/>Voltar para a página inicial</Link>
-    {notice && <AppToast notice={notice} onClose={()=>setNotice(null)}/>} 
-  </AuthShell>;
-}
-
-const emptySignup: SignupValues = { company:"",cnpj:"",phone:"",email:"",password:"",confirmPassword:"",plan:"",consent:false };
-
-export function SignupClient() {
-  const [values, setValues] = useState<SignupValues>(emptySignup);
-  const [errors, setErrors] = useState<FieldErrors<SignupValues>>({});
-  const [generalError, setGeneralError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    const requestedPlan = new URLSearchParams(window.location.search).get("plano");
-    if (isPlanId(requestedPlan)) setValues((current) => ({ ...current, plan: requestedPlan }));
-  }, []);
-
-  const selectedPlan = isPlanId(values.plan) ? plansById[values.plan] : null;
-  const rules = passwordRules(values.password);
-  const strength = Object.values(rules).filter(Boolean).length;
-  const strengthLabel = strength <= 2 ? "Inicial" : strength <= 4 ? "Boa" : "Forte";
-  const set = <K extends keyof SignupValues>(key: K, value: SignupValues[K]) => {
-    setValues((current) => ({ ...current, [key]: value }));
-    if (errors[key]) setErrors((current) => ({ ...current, [key]: undefined }));
-  };
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const nextErrors = validateSignup(values);
-    setErrors(nextErrors);
-    setGeneralError("");
-    if (Object.keys(nextErrors).length) return;
-    setLoading(true);
-    try {
-      await simulateAuthentication("signup", values.email);
-      setValues((current)=>({...current,password:"",confirmPassword:""}));
-      setSuccess(true);
-    } catch (error) {
-      setGeneralError(error instanceof Error ? error.message : "Não foi possível concluir a demonstração.");
-    } finally { setLoading(false); }
-  }
-
-  if (success) return <AuthShell><div className="auth-confirmation" role="status"><span><Check/></span><p className="auth-eyebrow">Adesão empresarial</p><h1>Cadastro validado para demonstração</h1><p>A criação definitiva da conta será habilitada com a integração segura do sistema de autenticação.</p>{selectedPlan&&<div className="auth-selected-plan"><span><b>{selectedPlan.name}</b><small>{selectedPlan.billing}</small></span><strong>R$ {selectedPlan.price}<small>{selectedPlan.suffix}</small></strong></div>}<div className="auth-confirmation__actions"><Link className="jf-action jf-action--primary" href="/">Voltar para a página inicial</Link><button className="jf-action jf-action--secondary" type="button" onClick={()=>setSuccess(false)}>Revisar informações</button></div></div></AuthShell>;
-
-  return <AuthShell>
-    <div className="auth-heading"><p className="auth-eyebrow">Adesão empresarial</p><h1>Cadastre sua empresa</h1><p>Crie a organização e o acesso inicial do administrador responsável.</p></div>
-    {generalError && <div className="auth-alert auth-alert--error" role="alert"><CircleAlert/><span><strong>Não foi possível validar o cadastro</strong>{generalError}</span></div>}
-    <form className="auth-form auth-form--signup" noValidate onSubmit={submit}>
-      <TextField label="Nome da empresa" icon={Building2} value={values.company} maxLength={120} onChange={(event)=>set("company",event.target.value)} error={errors.company} autoComplete="organization" placeholder="Razão social ou nome fantasia"/>
-      <div className="auth-field-row"><TextField label="CNPJ" icon={Building2} value={values.cnpj} onChange={(event)=>set("cnpj",maskCnpj(event.target.value))} error={errors.cnpj} autoComplete="off" inputMode="numeric" placeholder="00.000.000/0000-00"/><TextField label="Telefone" icon={Phone} value={values.phone} onChange={(event)=>set("phone",maskPhone(event.target.value))} error={errors.phone} autoComplete="tel" inputMode="tel" placeholder="(00) 00000-0000"/></div>
-      <TextField label="E-mail do administrador" icon={Mail} value={values.email} onChange={(event)=>set("email",event.target.value.slice(0,120))} error={errors.email} autoComplete="email" inputMode="email" placeholder="administrador@empresa.com.br" helpText={errors.email ? undefined : "Este e-mail será utilizado para acessar e administrar a conta da empresa."}/>
-      <div className="auth-field-row"><TextField label="Senha" icon={LockKeyhole} type="password" value={values.password} onChange={(event)=>set("password",event.target.value)} error={errors.password} autoComplete="new-password" placeholder="Crie uma senha segura"/><TextField label="Confirmar senha" icon={LockKeyhole} type="password" value={values.confirmPassword} onChange={(event)=>set("confirmPassword",event.target.value)} error={errors.confirmPassword} autoComplete="new-password" placeholder="Digite a senha novamente"/></div>
-      <div className="auth-password-guide" aria-live="polite"><div className="auth-strength"><span>Força da senha: <b>{strengthLabel}</b></span><i>{[1,2,3,4,5].map((level)=><b className={level<=strength?"is-active":""} key={level}/>)}</i></div><ul>{[["length","8 caracteres"],["upper","Letra maiúscula"],["lower","Letra minúscula"],["number","Número"],["special","Caractere especial"]].map(([key,label])=><li className={rules[key as keyof typeof rules]?"is-valid":""} key={key}><Check/>{label}</li>)}</ul></div>
-      <div className="auth-plan-field"><SelectField label="Plano escolhido" value={values.plan} onValueChange={(value)=>set("plan",value)} options={commercialPlans.map((plan)=>({value:plan.id,label:`${plan.name} · ${plan.billing}`,description:`R$ ${plan.price}${plan.suffix}`}))} placeholder="Escolha um plano" error={errors.plan}/>{selectedPlan&&<div className="auth-selected-plan" aria-live="polite"><span><b>{selectedPlan.name}</b><small>Modalidade {selectedPlan.billing.toLowerCase()}</small></span><strong>R$ {selectedPlan.price}<small>{selectedPlan.suffix}</small></strong></div>}</div>
-      <div className={`auth-consent ${errors.consent?"is-error":""}`}><CheckboxField label={<>Li e concordo com os <Link href="/termos-servico" target="_blank">Termos de Serviço</Link> e com a <Link href="/politicas-privacidade" target="_blank">Política de Privacidade</Link> da JobForged.</>} checked={values.consent} onChange={(event)=>set("consent",event.target.checked)}/>{errors.consent&&<small role="alert">{errors.consent}</small>}<p>A conta inicial será criada para o administrador responsável pela empresa.</p></div>
-      <ActionButton type="submit" disabled={loading} aria-busy={loading} className="auth-submit"><LoadingLabel loading={loading} idle="Criar conta empresarial"/></ActionButton>
-    </form>
-    <div className="auth-switch"><span>Sua empresa já possui uma conta?</span><Link href="/login">Entrar</Link></div>
-    <Link className="auth-back" href="/"><ArrowLeft/>Voltar para a página inicial</Link>
-  </AuthShell>;
-}
+const emptySignup:SignupValues={responsible:"",company:"",cnpj:"",phone:"",email:"",password:"",confirmPassword:""};
+const emptyCard:CardValues={holder:"",number:"",expiry:"",cvv:"",document:""};
+export function SignupClient(){const[step,setStep]=useState<1|2>(1);const[values,setValues]=useState(emptySignup);const[errors,setErrors]=useState<FieldErrors<SignupValues>>({});const[planId,setPlanId]=useState<PlanId>("profissional-anual");const[payment,setPayment]=useState<"card"|"pix">("card");const[card,setCard]=useState(emptyCard);const[cardErrors,setCardErrors]=useState<FieldErrors<CardValues>>({});const[terms,setTerms]=useState(false);const[loading,setLoading]=useState(false);const[success,setSuccess]=useState(false);const[notice,setNotice]=useState<ToastNotice|null>(null);useEffect(()=>{const q=new URLSearchParams(location.search);const direct=q.get("plano");const conceptual=`${q.get("plano")}-${q.get("ciclo")}`;if(isPlanId(direct))setPlanId(direct);else if(isPlanId(conceptual))setPlanId(conceptual)},[]);const plan=plansById[planId];const rules=passwordRules(values.password);const set=<K extends keyof SignupValues>(key:K,value:SignupValues[K])=>{setValues(v=>({...v,[key]:value}));setErrors(e=>({...e,[key]:undefined}))};const setCardValue=<K extends keyof CardValues>(key:K,value:CardValues[K])=>{setCard(v=>({...v,[key]:value}));setCardErrors(e=>({...e,[key]:undefined}))};const goCheckout=(e:FormEvent)=>{e.preventDefault();const next=validateSignup(values);setErrors(next);if(Object.keys(next).length){setNotice({kind:"danger",title:"Revise os dados cadastrais",text:"Corrija os campos destacados antes de avançar."});return}setStep(2);scrollTo({top:0,behavior:"smooth"})};const finish=async(e:FormEvent)=>{e.preventDefault();const next=payment==="card"?validateCard(card):{};setCardErrors(next);if(Object.keys(next).length||!terms){setNotice({kind:"danger",title:"Checkout incompleto",text:!terms?"Aceite os termos para concluir a demonstração.":"Revise os dados do pagamento demonstrativo."});return}setLoading(true);await new Promise(r=>setTimeout(r,850));setCard(emptyCard);setLoading(false);setSuccess(true);setNotice({kind:"success",title:"Demonstração concluída",text:"Nenhum cadastro ou pagamento foi registrado."})};if(success)return <AuthShell><div className="auth-confirmation"><span><Check/></span><p className="auth-eyebrow">Confirmação demonstrativa</p><h1>Fluxo validado com sucesso</h1><p>Nenhum cadastro, autenticação ou pagamento foi registrado. Os dados do cartão foram descartados.</p><div className="auth-selected-plan"><span><b>{plan.name}</b><small>Ciclo {plan.billing.toLowerCase()}</small></span><strong>R$ {plan.price}<small>{plan.suffix}</small></strong></div><div className="auth-confirmation__actions"><button className="jf-action jf-action--secondary" onClick={()=>{setSuccess(false);setStep(2)}}>Voltar e revisar</button><Link className="jf-action jf-action--primary" href="/">Voltar ao início</Link></div></div>{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>;
+const planCards=<div className="auth-plan-options">{commercialPlans.map(p=><button type="button" key={p.id} className={p.id===planId?"is-selected":""} onClick={()=>setPlanId(p.id)}><span><b>{p.name}</b><small>{p.billing}</small></span><strong>R$ {p.price}<small>{p.suffix}</small></strong>{p.id===planId&&<Check/>}</button>)}</div>;
+return <AuthShell><div className="auth-stepper" aria-label="Progresso do cadastro"><div className={step===1?"is-active":"is-complete"}><i>{step===2?<Check/>:1}</i><span>Dados cadastrais</span></div><b/><div className={step===2?"is-active":""}><i>2</i><span>Plano e pagamento</span></div></div>{step===1?<><div className="auth-heading"><p className="auth-eyebrow">Adesão empresarial</p><h1>Dados da empresa</h1><p>Informe a organização e o administrador responsável.</p></div><form className="auth-form auth-form--signup" noValidate onSubmit={goCheckout}><TextField label="Nome completo do responsável" icon={UserRound} value={values.responsible} maxLength={120} onChange={e=>set("responsible",normalizeText(e.target.value).slice(0,120))} error={errors.responsible}/><TextField label="Nome da empresa" icon={Building2} value={values.company} maxLength={150} onChange={e=>set("company",normalizeText(e.target.value).slice(0,150))} error={errors.company}/><div className="auth-field-row"><TextField label="CNPJ" icon={Building2} value={values.cnpj} maxLength={18} inputMode="numeric" onChange={e=>set("cnpj",maskCnpj(e.target.value))} error={errors.cnpj}/><TextField label="Telefone" icon={Phone} value={values.phone} maxLength={15} inputMode="tel" onChange={e=>set("phone",maskPhone(e.target.value))} error={errors.phone}/></div><TextField label="E-mail" icon={Mail} value={values.email} maxLength={254} inputMode="email" onChange={e=>set("email",e.target.value.slice(0,254))} error={errors.email}/><div className="auth-field-row"><TextField label="Senha" icon={LockKeyhole} type="password" value={values.password} minLength={8} maxLength={72} onChange={e=>set("password",e.target.value)} error={errors.password}/><TextField label="Confirmação da senha" icon={LockKeyhole} type="password" value={values.confirmPassword} minLength={8} maxLength={72} onChange={e=>set("confirmPassword",e.target.value)} error={errors.confirmPassword}/></div><div className="auth-password-guide"><span>Requisitos da senha</span><ul>{[["length","8 a 72 caracteres"],["upper","Letra maiúscula"],["lower","Letra minúscula"],["number","Número"],["special","Caractere especial"]].map(([k,l])=><li className={rules[k as keyof typeof rules]?"is-valid":""} key={k}><Check/>{l}</li>)}</ul></div><div className="auth-plan-compact"><div><span>Plano selecionado</span><strong>{plan.name} · {plan.billing}</strong><small>R$ {plan.price}{plan.suffix}</small></div><button type="button" onClick={()=>document.getElementById("plans")?.showPopover()}>Alterar plano</button></div><div id="plans" popover="auto" className="auth-plan-popover"><header><strong>Escolha o plano e o ciclo</strong><button type="button" popoverTarget="plans" popoverTargetAction="hide">×</button></header>{planCards}</div><ActionButton type="submit" className="auth-submit">Continuar para pagamento <ArrowRight/></ActionButton></form></>:<><div className="auth-heading"><p className="auth-eyebrow">Checkout transparente demonstrativo</p><h1>Plano e pagamento</h1><p>Nenhuma cobrança será realizada e nenhuma informação será armazenada.</p></div><div className="auth-checkout-grid"><div><section className="auth-summary"><header><div><span>Plano escolhido</span><h2>{plan.name} · {plan.billing}</h2></div><button type="button" popoverTarget="checkout-plans">Alterar plano</button></header><strong>R$ {plan.price}<small>{plan.suffix}</small></strong><ul>{plan.benefits.map(x=><li key={x}><Check/>{x}</li>)}</ul></section><div id="checkout-plans" popover="auto" className="auth-plan-popover"><header><strong>Alterar plano e ciclo</strong><button type="button" popoverTarget="checkout-plans" popoverTargetAction="hide">×</button></header>{planCards}</div><section className="auth-company-summary"><span>Empresa</span><b>{values.company}</b><small>{values.cnpj} · {values.email}</small></section></div><form className="auth-form" onSubmit={finish} noValidate><div className="auth-payment-methods"><RadioField name="payment" label={<><CreditCard/>Cartão</>} value="card" checked={payment==="card"} onChange={()=>setPayment("card")}/><RadioField name="payment" label={<><QrCode/>Pix recorrente</>} value="pix" checked={payment==="pix"} onChange={()=>setPayment("pix")}/></div>{payment==="card"?<div className="auth-card-fields"><TextField label="Nome impresso no cartão" value={card.holder} maxLength={120} autoComplete="off" onChange={e=>setCardValue("holder",normalizeText(e.target.value).slice(0,120))} error={cardErrors.holder}/><TextField label="Número do cartão" value={card.number} maxLength={23} inputMode="numeric" autoComplete="off" endAdornment={<em className="auth-card-brand">{cardBrand(card.number)}</em>} onChange={e=>setCardValue("number",maskCard(e.target.value))} error={cardErrors.number}/><div className="auth-field-row"><TextField label="Validade" value={card.expiry} maxLength={5} inputMode="numeric" placeholder="MM/AA" autoComplete="off" onChange={e=>setCardValue("expiry",maskExpiry(e.target.value))} error={cardErrors.expiry}/><TextField label="CVV" type="password" value={card.cvv} maxLength={4} inputMode="numeric" autoComplete="off" onChange={e=>setCardValue("cvv",e.target.value.replace(/\D/g,"").slice(0,4))} error={cardErrors.cvv}/></div><TextField label="CPF ou CNPJ do titular" value={card.document} maxLength={18} inputMode="numeric" autoComplete="off" onChange={e=>setCardValue("document",maskDocument(e.target.value))} error={cardErrors.document}/><p className="auth-security-note"><LockKeyhole/>Dados mantidos somente na memória desta página e descartados ao sair ou atualizar.</p></div>:<div className="auth-pix-flow"><QrCode/><div><strong>Como funcionará futuramente</strong><ol><li>Você autorizará a recorrência no ambiente seguro do gateway.</li><li>O gateway confirmará a autorização à JobForged.</li><li>As cobranças futuras seguirão o ciclo escolhido.</li></ol><small>Este protótipo não gera QR Code, cobrança ou autorização bancária.</small></div></div>}<div className="auth-consent"><CheckboxField label={<>Confirmo o plano e ciclo selecionados e aceito os <Link href="/termos-servico" target="_blank">Termos de Serviço</Link> e a <Link href="/politicas-privacidade" target="_blank">Política de Privacidade</Link>.</>} checked={terms} onChange={e=>setTerms(e.target.checked)}/></div><div className="auth-checkout-actions"><ActionButton type="button" variant="secondary" onClick={()=>setStep(1)}><ArrowLeft/>Anterior</ActionButton><ActionButton type="submit" disabled={loading}><LoadingLabel loading={loading} idle="Confirmar demonstração"/></ActionButton></div></form></div></>}{step===1&&<><div className="auth-switch"><span>Sua empresa já possui conta?</span><Link href="/login">Entrar</Link></div><Link className="auth-back" href="/"><ArrowLeft/>Voltar ao início</Link></>}{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>}

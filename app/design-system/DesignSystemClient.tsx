@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { BrandAsset } from "@/app/components/BrandAsset";
+import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import {
   ArrowLeft,
@@ -47,7 +48,7 @@ import {
   UsersRound,
   WalletCards,
 } from "lucide-react";
-import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary, getChartSnippet } from "./DesignSystemAdditions";
+import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
 import {
   CheckboxField,
   AppToast,
@@ -127,7 +128,8 @@ const colorTokens = [
   { name: "Informação", variable: "--ds-accent", light: "#4169E1", dark: "#7E9CFF", group: "feedback", use: "Observações e casos especiais" },
 ];
 
-const animatedBrandAssets = [
+const animatedBrandAssets: Array<{ title: string; description: string; asset: string; reusable?: boolean }> = [
+  { title: "Carregamento JobForged", description: "Ícone central fixo; mira turquesa em rotação suave de 1,5 segundo.", asset: "/brand/jobforged-loader-rotating.svg", reusable: true },
   { title: "Animação principal", description: "Turquesa na mira e azul na pessoa.", asset: "/brand/jobforged-loader.svg" },
   { title: "Animação alternativa", description: "Azul na mira e turquesa na pessoa.", asset: "/brand/jobforged-loader-alternate.svg" },
 ];
@@ -387,7 +389,7 @@ export default function DesignSystemClient() {
 
           <section className="ds-hero" hidden={activePage !== 0} aria-label="Fundamentos da marca">
             <div className="ds-hero__copy"><span className="ds-kicker">Identidade visual · v1.3</span><h1>Interfaces <em className="ds-highlight-pair"><span className="ds-highlight-blue">claras</span> <span className="ds-highlight-teal">e humanas.</span></em><br />Decisões mais inteligentes.</h1><p>O sistema visual da JobForged une precisão, proximidade e tecnologia. Esta base mantém o produto consistente em qualquer tela, nos temas claro e escuro.</p><div className="ds-hero__tags" aria-label="Princípios da marca"><span>Humano</span><span>Confiável</span><span>Objetivo</span><span>Adaptável</span></div></div>
-            <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><BrandAsset className="ds-hero__loader" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} /><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
+            <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><JobForgedLoadingAnimation className="ds-hero__loader" size={112} /><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
           </section>
           <section className="ds-llm-manual" hidden={activePage !== 0} aria-label="Manual da marca para LLM">
             <div><FileText size={22} aria-hidden="true"/><span><strong>Manual da marca para LLM</strong><small>Este documento será ampliado quando o Design System estiver concluído e servirá para transportar as regras visuais da JobForged entre ferramentas e modelos de linguagem.</small></span></div>
@@ -414,7 +416,7 @@ export default function DesignSystemClient() {
             </div>
             <div className="ds-asset-section">
               <header><span>03</span><div><h3>Animações</h3><p>Assets de carregamento para transições, inicialização e processamento.</p></div></header>
-              <div className="ds-animated-assets">{animatedBrandAssets.map((asset) => <article className="ds-animated-asset" key={asset.title}><div><BrandAsset src={asset.asset} alt={`${asset.title} da JobForged`} /><span><strong>{asset.title}</strong><small>{asset.description}</small></span></div><a href={asset.asset} download className="ds-download-button"><Download size={15} />Baixar SVG animado</a></article>)}</div>
+              <div className="ds-animated-assets">{animatedBrandAssets.map((asset) => <article className="ds-animated-asset" key={asset.title}><div>{asset.reusable ? <JobForgedLoadingAnimation size={76} /> : <BrandAsset src={asset.asset} alt={`${asset.title} da JobForged`} />}<span><strong>{asset.title}</strong><small>{asset.description}</small>{asset.reusable && <code className="ds-animated-asset__example">&lt;JobForgedLoadingAnimation size={112} /&gt;</code>}</span></div><a href={asset.asset} download className="ds-download-button"><Download size={15} />Baixar SVG animado</a></article>)}</div>
             </div>
           </section>
 
@@ -538,7 +540,7 @@ export default function DesignSystemClient() {
             <SectionHeading title="Elementos para dashboards." description="Referências visuais reutilizáveis para indicadores e gráficos da aplicação." />
             <div className="ds-dashboard-catalog">
               <article className="ds-dashboard-template ds-dashboard-template--funnel">
-                <header><div><strong>Funil compacto</strong><small>Use em resumos quando o objetivo for identificar rapidamente a queda entre etapas.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue(getChartSnippet("funnel-compact",dashboardFunnel.map(stage=>stage.value)),'Código completo do funil compacto')}><Copy size={14}/>Copiar código</button></header>
+                <header><div><strong>Funil compacto</strong><small>Use em resumos quando o objetivo for identificar rapidamente a queda entre etapas.</small></div></header>
                 <div className="ds-funnel-chart">{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div>
               </article>
 
@@ -548,12 +550,12 @@ export default function DesignSystemClient() {
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--source">
-                <header><div><strong>Gráfico de rosca</strong><small>Mostre a participação de poucos canais dentro de um total conhecido.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue(getChartSnippet("donut",[38,31,19,12]),'Código completo do gráfico de rosca')}><Copy size={14}/>Copiar código</button></header>
+                <header><div><strong>Gráfico de rosca</strong><small>Mostre a participação de poucos canais dentro de um total conhecido.</small></div></header>
                 <div className="ds-source-chart"><div className="ds-source-donut"><span><strong>1.284</strong><small>total</small></span></div><ul><li><i className="is-brand" />LinkedIn <strong>38%</strong></li><li><i className="is-blue" />Portal de vagas <strong>31%</strong></li><li><i className="is-success" />Indicações <strong>19%</strong></li><li><i className="is-muted" />Outros <strong>12%</strong></li></ul></div>
               </article>
 
               <article className="ds-dashboard-template ds-dashboard-template--rhythm">
-                <header><div><strong>Gráfico de barras</strong><small>Compare volumes discretos por período, vaga, área ou responsável.</small></div><button type="button" className="ds-chart-copy" onClick={()=>copyValue(getChartSnippet("bar",[42,58,51,74,67,92]),'Código completo do gráfico de barras')}><Copy size={14}/>Copiar código</button></header>
+                <header><div><strong>Gráfico de barras</strong><small>Compare volumes discretos por período, vaga, área ou responsável.</small></div></header>
                 <div className="ds-week-chart" aria-label="Candidaturas das últimas seis semanas"><div style={{ "--bar": "42%" } as CSSProperties}><i /><span>S1</span></div><div style={{ "--bar": "58%" } as CSSProperties}><i /><span>S2</span></div><div style={{ "--bar": "51%" } as CSSProperties}><i /><span>S3</span></div><div style={{ "--bar": "74%" } as CSSProperties}><i /><span>S4</span></div><div style={{ "--bar": "67%" } as CSSProperties}><i /><span>S5</span></div><div style={{ "--bar": "92%" } as CSSProperties}><i /><span>S6</span></div></div>
               </article>
             </div>

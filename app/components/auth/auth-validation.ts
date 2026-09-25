@@ -1,84 +1,22 @@
 export type LoginValues = { identifier: string; password: string };
-export type SignupValues = { company: string; cnpj: string; phone: string; email: string; password: string; confirmPassword: string; plan: string; consent: boolean };
+export type SignupValues = { responsible: string; company: string; cnpj: string; phone: string; email: string; password: string; confirmPassword: string };
+export type CardValues = { holder: string; number: string; expiry: string; cvv: string; document: string };
 
 export const onlyDigits = (value: string) => value.replace(/\D/g, "");
+export const normalizeText = (value: string) => value.replace(/\s+/g, " ").trimStart();
 export const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-
-export function maskCpf(value: string) {
-  return onlyDigits(value).slice(0, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-}
-
-export function maskCnpj(value: string) {
-  return onlyDigits(value).slice(0, 14).replace(/(\d{2})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1/$2").replace(/(\d{4})(\d{1,2})$/, "$1-$2");
-}
-
-export function maskPhone(value: string) {
-  const digits = onlyDigits(value).slice(0, 11);
-  if (digits.length <= 10) return digits.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2");
-  return digits.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
-}
-
-function repeatedDigits(value: string) { return /^(\d)\1+$/.test(value); }
-
-export function isValidCpf(value: string) {
-  const digits = onlyDigits(value);
-  if (digits.length !== 11 || repeatedDigits(digits)) return false;
-  const digit = (length: number) => {
-    const total = digits.slice(0, length).split("").reduce((sum, current, index) => sum + Number(current) * (length + 1 - index), 0);
-    const remainder = (total * 10) % 11;
-    return remainder === 10 ? 0 : remainder;
-  };
-  return digit(9) === Number(digits[9]) && digit(10) === Number(digits[10]);
-}
-
-export function isValidCnpj(value: string) {
-  const digits = onlyDigits(value);
-  if (digits.length !== 14 || repeatedDigits(digits)) return false;
-  const calculate = (base: string, weights: number[]) => {
-    const total = base.split("").reduce((sum, current, index) => sum + Number(current) * weights[index], 0);
-    const remainder = total % 11;
-    return remainder < 2 ? 0 : 11 - remainder;
-  };
-  const first = calculate(digits.slice(0, 12), [5,4,3,2,9,8,7,6,5,4,3,2]);
-  const second = calculate(digits.slice(0, 12) + first, [6,5,4,3,2,9,8,7,6,5,4,3,2]);
-  return first === Number(digits[12]) && second === Number(digits[13]);
-}
-
-export const passwordRules = (password: string) => ({
-  length: password.length >= 8,
-  upper: /[A-Z]/.test(password),
-  lower: /[a-z]/.test(password),
-  number: /\d/.test(password),
-  special: /[^A-Za-z0-9]/.test(password),
-});
-
-export function validateLogin(values: LoginValues) {
-  const errors: Partial<Record<keyof LoginValues, string>> = {};
-  const identifier = values.identifier.trim();
-  if (!identifier) errors.identifier = "Informe seu e-mail ou CPF.";
-  else if (/^[\d.\-\s]+$/.test(identifier) ? !isValidCpf(identifier) : !isEmail(identifier)) errors.identifier = /^[\d.\-\s]+$/.test(identifier) ? "Informe um CPF válido." : "Informe um e-mail válido.";
-  if (!values.password) errors.password = "Informe sua senha.";
-  return errors;
-}
-
-export function validateSignup(values: SignupValues) {
-  const errors: Partial<Record<keyof SignupValues, string>> = {};
-  if (!values.company.trim()) errors.company = "Informe o nome da empresa.";
-  else if (values.company.trim().length < 2) errors.company = "Use pelo menos 2 caracteres.";
-  if (!values.cnpj) errors.cnpj = "Informe o CNPJ.";
-  else if (!isValidCnpj(values.cnpj)) errors.cnpj = "Informe um CNPJ válido.";
-  const phoneDigits = onlyDigits(values.phone);
-  if (!values.phone) errors.phone = "Informe o telefone.";
-  else if (phoneDigits.length < 10 || phoneDigits.length > 11) errors.phone = "Informe um telefone com DDD.";
-  if (!values.email.trim()) errors.email = "Informe o e-mail do administrador.";
-  else if (!isEmail(values.email)) errors.email = "Informe um e-mail válido.";
-  const rules = passwordRules(values.password);
-  if (!values.password) errors.password = "Crie uma senha.";
-  else if (Object.values(rules).some((valid) => !valid)) errors.password = "A senha ainda não atende a todos os requisitos.";
-  if (!values.confirmPassword) errors.confirmPassword = "Confirme a senha.";
-  else if (values.confirmPassword !== values.password) errors.confirmPassword = "As senhas não coincidem.";
-  if (!values.plan) errors.plan = "Escolha um plano para continuar.";
-  if (!values.consent) errors.consent = "Você precisa aceitar os termos para continuar.";
-  return errors;
-}
-
+export const maskCpf = (value: string) => onlyDigits(value).slice(0,11).replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+export const maskCnpj = (value: string) => onlyDigits(value).slice(0,14).replace(/(\d{2})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1/$2").replace(/(\d{4})(\d{1,2})$/,"$1-$2");
+export const maskDocument = (value: string) => onlyDigits(value).length <= 11 ? maskCpf(value) : maskCnpj(value);
+export function maskPhone(value:string){const d=onlyDigits(value).slice(0,11);return d.length<=10?d.replace(/(\d{2})(\d)/,"($1) $2").replace(/(\d{4})(\d)/,"$1-$2"):d.replace(/(\d{2})(\d)/,"($1) $2").replace(/(\d{5})(\d)/,"$1-$2")}
+export const maskCard = (value:string) => onlyDigits(value).slice(0,19).replace(/(.{4})/g,"$1 ").trim();
+export const maskExpiry = (value:string) => onlyDigits(value).slice(0,4).replace(/(\d{2})(\d)/,"$1/$2");
+const repeated=(value:string)=>/^(\d)\1+$/.test(value);
+export function isValidCpf(value:string){const d=onlyDigits(value);if(d.length!==11||repeated(d))return false;const digit=(n:number)=>{const t=d.slice(0,n).split("").reduce((s,c,i)=>s+Number(c)*(n+1-i),0);const r=t*10%11;return r===10?0:r};return digit(9)===Number(d[9])&&digit(10)===Number(d[10])}
+export function isValidCnpj(value:string){const d=onlyDigits(value);if(d.length!==14||repeated(d))return false;const calc=(base:string,w:number[])=>{const total=base.split("").reduce((s,c,i)=>s+Number(c)*w[i],0);const r=total%11;return r<2?0:11-r};const a=calc(d.slice(0,12),[5,4,3,2,9,8,7,6,5,4,3,2]);const b=calc(d.slice(0,12)+a,[6,5,4,3,2,9,8,7,6,5,4,3,2]);return a===Number(d[12])&&b===Number(d[13])}
+export const passwordRules=(password:string)=>({length:password.length>=8,upper:/[A-Z]/.test(password),lower:/[a-z]/.test(password),number:/\d/.test(password),special:/[^A-Za-z0-9]/.test(password)});
+export function validateLogin(v:LoginValues){const e:Partial<Record<keyof LoginValues,string>>={};const id=v.identifier.trim();if(!id)e.identifier="Informe seu e-mail ou CPF.";else if(/^[\d.\-\s]+$/.test(id)?!isValidCpf(id):!isEmail(id))e.identifier=/^[\d.\-\s]+$/.test(id)?"Informe um CPF válido.":"Informe um e-mail válido.";if(!v.password)e.password="Informe sua senha.";return e}
+export function validateSignup(v:SignupValues){const e:Partial<Record<keyof SignupValues,string>>={};const name=v.responsible.trim(),company=v.company.trim();if(!name)e.responsible="Informe o nome do responsável.";else if(name.length<3)e.responsible="Use pelo menos 3 caracteres.";if(!company)e.company="Informe o nome da empresa.";else if(company.length<2)e.company="Use pelo menos 2 caracteres.";if(!v.cnpj)e.cnpj="Informe o CNPJ.";else if(!isValidCnpj(v.cnpj))e.cnpj="Informe um CNPJ válido.";const phone=onlyDigits(v.phone);if(!v.phone)e.phone="Informe o telefone.";else if(phone.length<10||phone.length>11)e.phone="Informe um telefone brasileiro com DDD.";if(!v.email.trim())e.email="Informe o e-mail.";else if(!isEmail(v.email))e.email="Informe um e-mail válido.";if(!v.password)e.password="Crie uma senha.";else if(v.password.length>72||Object.values(passwordRules(v.password)).some(ok=>!ok))e.password="A senha ainda não atende aos requisitos.";if(!v.confirmPassword)e.confirmPassword="Confirme a senha.";else if(v.confirmPassword!==v.password)e.confirmPassword="As senhas não coincidem.";return e}
+export function isValidLuhn(value:string){const d=onlyDigits(value);if(d.length<13||d.length>19||repeated(d))return false;return d.split("").reverse().reduce((sum,c,i)=>{let n=Number(c);if(i%2){n*=2;if(n>9)n-=9}return sum+n},0)%10===0}
+export function cardBrand(value:string){const d=onlyDigits(value);if(/^4/.test(d))return "Visa";if(/^(5[1-5]|2[2-7])/.test(d))return "Mastercard";if(/^3[47]/.test(d))return "American Express";if(/^(4011|4312|4389|4514|4576|5041|5067|509|6277|6362|6363|650|6516|6550)/.test(d))return "Elo";return "Bandeira"}
+export function validateCard(v:CardValues){const e:Partial<Record<keyof CardValues,string>>={};if(v.holder.trim().length<3)e.holder="Informe o nome impresso no cartão.";if(!isValidLuhn(v.number))e.number="Informe um número de cartão válido.";const m=v.expiry.match(/^(\d{2})\/(\d{2})$/);if(!m)e.expiry="Use o formato MM/AA.";else{const month=Number(m[1]),year=2000+Number(m[2]),now=new Date();if(month<1||month>12||year<now.getFullYear()||(year===now.getFullYear()&&month<now.getMonth()+1))e.expiry="Informe uma validade futura."}if(!/^\d{3,4}$/.test(v.cvv))e.cvv="Use 3 ou 4 dígitos.";const d=onlyDigits(v.document);if(d.length===11?!isValidCpf(d):d.length===14?!isValidCnpj(d):true)e.document="Informe um CPF ou CNPJ válido.";return e}

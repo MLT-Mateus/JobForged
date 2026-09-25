@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Download, FileText } from "lucide-react";
+import { BrandAsset } from "./BrandAsset";
 
 type LegalPageProps = {
   title: string;
@@ -18,7 +19,7 @@ export default function LegalPage({ title, description, documentHtml, downloadHr
         <div className="legal-shell legal-header__inner">
           <Link className="legal-brand" href="/" aria-label="JobForged — página inicial">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={159} height={46} />
+            <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={159} height={46} />
           </Link>
           <Link className="legal-back" href="/">
             <ArrowLeft size={17} aria-hidden="true" />
