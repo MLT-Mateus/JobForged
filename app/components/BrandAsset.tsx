@@ -8,6 +8,7 @@ const darkAssets: Record<string, string> = {
   "/brand/jobforged-loader.svg": "/brand/jobforged-loader-dark.svg",
   "/brand/jobforged-loader-alternate.svg": "/brand/jobforged-loader-alternate-dark.svg",
   "/brand/jobforged-loader-rotating.svg": "/brand/jobforged-loader-rotating-dark.svg",
+  "/brand/jobforged-loader-rotating-alternate.svg": "/brand/jobforged-loader-rotating-alternate-dark.svg",
 };
 
 type BrandAssetProps = ImgHTMLAttributes<HTMLImageElement> & { src: string };

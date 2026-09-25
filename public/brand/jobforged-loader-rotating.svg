@@ -32,7 +32,7 @@
     }
 
     @keyframes jf-loader-person-breathe {
-      0%, 100% { opacity: .94; transform: scale(.94); }
+      0%, 100% { opacity: .94; transform: scale(.8); }
       50% { opacity: 1; transform: scale(1.03); }
     }
 

@@ -128,8 +128,9 @@ const colorTokens = [
   { name: "Informação", variable: "--ds-accent", light: "#4169E1", dark: "#7E9CFF", group: "feedback", use: "Observações e casos especiais" },
 ];
 
-const animatedBrandAssets: Array<{ title: string; description: string; asset: string; reusable?: boolean }> = [
-  { title: "Carregamento JobForged", description: "Ícone central fixo; mira turquesa em rotação suave de 1,5 segundo.", asset: "/brand/jobforged-loader-rotating.svg", reusable: true },
+const animatedBrandAssets: Array<{ title: string; description: string; asset: string; reusable?: boolean; variant?: "primary" | "inverted" }> = [
+  { title: "Carregamento JobForged", description: "Ícone central pulsante; mira turquesa em rotação suave de 1,5 segundo.", asset: "/brand/jobforged-loader-rotating.svg", reusable: true, variant: "primary" },
+  { title: "Carregamento JobForged — cores invertidas", description: "Mira azul e personagem turquesa, com o mesmo movimento suave.", asset: "/brand/jobforged-loader-rotating-alternate.svg", reusable: true, variant: "inverted" },
   { title: "Animação principal", description: "Turquesa na mira e azul na pessoa.", asset: "/brand/jobforged-loader.svg" },
   { title: "Animação alternativa", description: "Azul na mira e turquesa na pessoa.", asset: "/brand/jobforged-loader-alternate.svg" },
 ];
@@ -416,7 +417,7 @@ export default function DesignSystemClient() {
             </div>
             <div className="ds-asset-section">
               <header><span>03</span><div><h3>Animações</h3><p>Assets de carregamento para transições, inicialização e processamento.</p></div></header>
-              <div className="ds-animated-assets">{animatedBrandAssets.map((asset) => <article className="ds-animated-asset" key={asset.title}><div>{asset.reusable ? <JobForgedLoadingAnimation size={76} /> : <BrandAsset src={asset.asset} alt={`${asset.title} da JobForged`} />}<span><strong>{asset.title}</strong><small>{asset.description}</small>{asset.reusable && <code className="ds-animated-asset__example">&lt;JobForgedLoadingAnimation size={112} /&gt;</code>}</span></div><a href={asset.asset} download className="ds-download-button"><Download size={15} />Baixar SVG animado</a></article>)}</div>
+              <div className="ds-animated-assets">{animatedBrandAssets.map((asset) => <article className="ds-animated-asset" key={asset.title}><div>{asset.reusable ? <JobForgedLoadingAnimation size={76} variant={asset.variant} /> : <BrandAsset src={asset.asset} alt={`${asset.title} da JobForged`} />}<span><strong>{asset.title}</strong><small>{asset.description}</small>{asset.reusable && <code className="ds-animated-asset__example">&lt;JobForgedLoadingAnimation size={112}{asset.variant === "inverted" ? ' variant="inverted"' : ""} /&gt;</code>}</span></div><a href={asset.asset} download className="ds-download-button"><Download size={15} />Baixar SVG animado</a></article>)}</div>
             </div>
           </section>
 

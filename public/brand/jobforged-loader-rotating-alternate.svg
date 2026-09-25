@@ -1,0 +1,25 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="jf-loader-title jf-loader-description" preserveAspectRatio="xMidYMid meet">
+  <title id="jf-loader-title">Animação de carregamento JobForged com cores invertidas</title>
+  <desc id="jf-loader-description">A pessoa turquesa pulsa suavemente enquanto a mira azul gira ao seu redor em um ciclo de 1,5 segundo.</desc>
+  <style>
+    .jf-loader-reticle { transform-box: fill-box; transform-origin: center; animation: jf-loader-rotate 1.5s cubic-bezier(.2, .72, .28, 1) infinite; }
+    .jf-loader-person { transform-box: fill-box; transform-origin: center; animation: jf-loader-person-breathe 1.5s cubic-bezier(.45, 0, .55, 1) infinite; }
+    @keyframes jf-loader-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes jf-loader-person-breathe { 0%, 100% { opacity: .94; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.03); } }
+    @media (prefers-reduced-motion: reduce) { .jf-loader-reticle { animation: none; } .jf-loader-person { animation: none; opacity: 1; transform: none; } }
+  </style>
+  <g transform="translate(27 27)">
+    <g class="jf-loader-reticle">
+      <path d="M14.5 36.5C9.71759 33.7205 7 29.0254 7 23.0753C7 14.1972 14.1634 7 23 7C31.8366 7 39 14.1972 39 23.0753C39 29.0254 36.2824 33.7205 31.5 36.5" stroke="#4169E1" stroke-width="3" stroke-linecap="round"/>
+      <path d="M23 8V0" stroke="#4169E1" stroke-width="3"/>
+      <path d="M23 46V36" stroke="#4169E1" stroke-width="3"/>
+      <path d="M38 24H46" stroke="#4169E1" stroke-width="3"/>
+      <path d="M-1.19209e-07 24H8" stroke="#4169E1" stroke-width="3"/>
+    </g>
+    <g class="jf-loader-person">
+      <path d="M23 13.5C25.4853 13.5 27.5 15.5147 27.5 18C27.5 20.4853 25.4853 22.5 23 22.5C20.5147 22.5 18.5 20.4853 18.5 18C18.5 15.5147 20.5147 13.5 23 13.5Z" fill="#20B2AA" stroke="#20B2AA"/>
+      <path d="M17 30.4809V37.502C17.821 39.5183 22.7726 40.3824 22.7726 39.8423V35.3417V33.3564C22.7726 32.9963 23.3967 24.3601 23.5 24L21.6603 24C18.294 24.144 17 29.9409 17 30.4809Z" fill="#20B2AA" stroke="#20B2AA"/>
+      <path d="M29 30.4809V37.5019C28.179 39.5182 23.2274 40.3824 23.2274 39.8423V35.3416V32.3797C23.2274 32.0196 23.1033 24.3601 23 24H24.5C27.8664 24.144 29 29.9408 29 30.4809Z" fill="#20B2AA" stroke="#20B2AA"/>
+    </g>
+  </g>
+</svg>
