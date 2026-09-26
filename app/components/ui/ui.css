@@ -58,6 +58,7 @@
   --jf-ui-font-size-md: 16px;
   --jf-ui-font-size-lg: 20px;
   --jf-ui-font-size-xl: 24px;
+  --jf-ui-font-size-title: 32px;
   --jf-ui-app-scrollbar-track: #e9f5f4;
   --jf-ui-app-scrollbar-edge: #eef7f6;
   --jf-ui-app-scrollbar-thumb-start: #4169e1;
@@ -269,7 +270,7 @@
 .jf-control input[type="search"]:placeholder-shown ~ .jf-search-clear { opacity: 0; pointer-events: none; }
 .jf-password-toggle:hover { background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-password-toggle:focus-visible { background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); box-shadow: 0 0 0 2px color-mix(in srgb, var(--jf-ui-brand) 28%, transparent); }
-.jf-field.is-error .jf-control { border-color: var(--jf-ui-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jf-ui-danger) 10%, transparent); }
+.jf-field.is-error .jf-control { border-color: var(--jf-ui-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jf-ui-danger) 14%, transparent); }
 .jf-field.is-error .jf-control:focus-within { border-color: var(--jf-ui-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jf-ui-danger) 26%, transparent); }
 .jf-field.is-error > small { color: var(--jf-ui-danger); }
 
@@ -638,3 +639,13 @@
   .jf-calendar,
   .jf-toast { animation: none; }
 }
+
+/* Product layouts consume the same spacing, surfaces and typography as the manual. */
+.jf-metric { display:grid; min-width:0; align-content:start; gap:var(--jf-ui-space-2); padding:var(--jf-ui-space-6); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface); }
+.jf-metric>span { color:var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); line-height:1.5; }
+.jf-metric>strong { color:var(--jf-ui-text); font:700 var(--jf-ui-font-size-title)/1.2 var(--jf-ui-font-heading); overflow-wrap:anywhere; }
+.jf-metric>small { color:var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-xs); line-height:1.5; }
+.jf-field--compact-label>.jf-field__label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.jf-field--compact-label { gap:0; }
+
+.jf-panel { min-width:0; border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface); color:var(--jf-ui-text); }

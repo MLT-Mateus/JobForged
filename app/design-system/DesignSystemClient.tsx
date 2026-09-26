@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
+import { MetricCard, Panel } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
@@ -415,6 +416,10 @@ export default function DesignSystemClient() {
             <a className="ds-button ds-button--outline" href="/manual-da-marca-jobforged-llm.md" download><Download size={16}/>Baixar documento para LLM</a>
           </section>
 
+          <section className="ds-section" hidden={activePage !== 0} aria-label="Indicador do painel">
+            <SectionHeading title="Indicadores do painel" description="Mesmo componente utilizado na Home, nas vagas e nos dashboards. Tipografia, superfície e espaçamento seguem os tokens oficiais." />
+            <MetricCard label="Vagas ativas" value="24" detail="Indicador demonstrativo"/><Panel style={{padding:"var(--jf-ui-space-6)",marginTop:"var(--jf-ui-space-6)"}}><h3>Grupo de conteúdo</h3><p>Superfície compartilhada pelas telas do painel empresarial.</p></Panel>
+          </section>
           <section className="ds-section ds-section--first" hidden={activePage !== 1} aria-label="Ativos da marca">
             <SectionHeading title="Arquivos oficiais, prontos para usar." description="Escolha a versão adequada e baixe o arquivo original sem alterar proporções ou cores." />
             <div className="ds-asset-section">

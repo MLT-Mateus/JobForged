@@ -26,3 +26,12 @@ import { DateRangeField, FieldControl, MultiFileUploadField, MultiSelectField, T
 ```
 
 O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualquer refinamento aprovado ali passa automaticamente a ser o padrão das futuras telas do aplicativo.
+
+## Painel empresarial
+
+- `AdminShell` é a estrutura única de todas as dez rotas, inclusive Home; a organização ativa substitui tokens, sem criar outro tema por tela.
+- `Panel` fornece superfície, borda e raio compartilhados. Cada módulo define apenas a disposição do conteúdo com os tokens de espaçamento.
+- `MetricCard` é o indicador comum da Home, Dashboard e Vagas. O Design System renderiza a mesma implementação.
+- Buscas e filtros usam `TextField` e `SelectField`; controles nativos específicos usam `FieldControl` sem estilos descendentes próprios.
+- Notificações usam `AppToast`, na posição global. Telas não implementam notificações locais.
+- Títulos de páginas seguem a mesma hierarquia em `admin.css`. Os módulos consomem as famílias, cores, raios e espaçamentos de `ui.css`.

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { Inbox } from "lucide-react";
 
 export function ActionButton({ variant = "primary", icon, children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "quiet" | "danger"; icon?: ReactNode }) {
@@ -17,4 +17,12 @@ export function EmptyState({ title, description, action }: { title: string; desc
 
 export function DataTable({ headers, children, label }: { headers: string[]; children: ReactNode; label: string }) {
   return <div className="jf-table-wrap"><table className="jf-table" aria-label={label}><thead><tr>{headers.map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{children}</tbody></table></div>;
+}
+
+export function MetricCard({ label, value, detail }: { label: string; value: ReactNode; detail?: string }) {
+  return <article className="jf-metric"><span>{label}</span><strong>{value}</strong>{detail && <small>{detail}</small>}</article>;
+}
+
+export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HTMLElement>&{as?:"section"|"article"|"aside"}) {
+ return <Tag {...props} className={`jf-panel ${className}`.trim()}/>;
 }
