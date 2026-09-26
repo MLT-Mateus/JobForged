@@ -191,8 +191,6 @@ body:has(.admin-shell){overflow:hidden}
 .admin-upload>.jf-action{grid-column:1/-1}
 .admin-brand-preview>div{grid-template-columns:54px 1fr;margin:var(--jf-ui-space-3)}
 .admin-brand-preview main{padding:var(--jf-ui-space-5)}
-.admin-topbar .jf-theme-selector button span{display:none}
-.admin-topbar .jf-theme-selector button{padding-inline:var(--jf-ui-space-2)}
 }
 
 @media(max-width:400px){.admin-content{padding-inline:var(--jf-ui-space-3)}

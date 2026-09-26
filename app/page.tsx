@@ -34,7 +34,9 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import { ThemeSelector } from "@/app/components/ui";
+import { InlineBrandLoader } from "./components/InlineBrandLoader";
+import { ViewportMotion } from "./components/ViewportMotion";
+import { ThemeSelector, useThemePreference } from "@/app/components/ui";
 import { plansById } from "@/app/data/plans";
 
 const WHATSAPP_URL =
@@ -213,7 +215,7 @@ function ProductMockup() {
                     <em>{column.count}</em>
                   </div>
                   {column.candidates.map((candidate, candidateIndex) => (
-                    <motion.div
+                    <ViewportMotion
                       className="candidate-card"
                       key={candidate}
                       animate={reduceMotion ? undefined : { y: [0, -3, 0, 2, 0] }}
@@ -229,7 +231,7 @@ function ProductMockup() {
                         <strong>{candidate}</strong>
                         <small>{index === 0 ? "Currículo recebido" : index === 1 ? "92% de aderência" : "WhatsApp enviado"}</small>
                       </span>
-                    </motion.div>
+                    </ViewportMotion>
                   ))}
                 </div>
               ))}
@@ -238,23 +240,23 @@ function ProductMockup() {
         </div>
       </div>
 
-      <motion.div
+      <ViewportMotion
         className="floating-card floating-card--whatsapp"
         animate={reduceMotion ? undefined : { x: [0, 14, -7, 18, 0], y: [0, -19, 7, -11, 0] }}
         transition={{ duration: 7.8, repeat: Infinity, ease: "easeInOut" }}
       >
         <span className="floating-icon"><MessageCircle size={20} /></span>
         <span><small>Entrevista enviada</small><strong>WhatsApp conectado</strong></span>
-      </motion.div>
+      </ViewportMotion>
 
-      <motion.div
+      <ViewportMotion
         className="floating-card floating-card--match"
         animate={reduceMotion ? undefined : { x: [0, -16, 8, -12, 0], y: [0, 15, -9, 10, 0] }}
         transition={{ duration: 8.6, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
       >
         <span className="match-value" role="img" aria-label="92% de aderência"><span aria-hidden="true">92%</span></span>
         <span><small>Aderência à vaga</small><strong>Perfil recomendado</strong></span>
-      </motion.div>
+      </ViewportMotion>
     </motion.div>
   );
 }
@@ -264,37 +266,32 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [annualBilling, setAnnualBilling] = useState(true);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, changeTheme } = useThemePreference();
   const [themeLoading, setThemeLoading] = useState<"light" | "dark" | null>(null);
   const themeSwitchingRef = useRef(false);
   const themeTimersRef = useRef<number[]>([]);
 
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      const currentTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-      setTheme(currentTheme);
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
-
   useEffect(() => () => themeTimersRef.current.forEach((timer) => window.clearTimeout(timer)), []);
+
+  useEffect(() => {
+    const carousel = document.querySelector<HTMLElement>(".landing-page .capability-carousel");
+    if (!carousel || !("IntersectionObserver" in window)) return;
+    let inView = false;
+    const update = () => { carousel.dataset.paused = String(!inView || document.hidden); };
+    const observer = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; update(); }, {rootMargin:"80px"});
+    observer.observe(carousel);
+    document.addEventListener("visibilitychange", update);
+    return () => { observer.disconnect(); document.removeEventListener("visibilitychange", update); };
+  }, []);
 
   const closeMenu = () => setMenuOpen(false);
   const applyTheme = (nextTheme: "light" | "dark") => {
     if (nextTheme === theme || themeSwitchingRef.current) return;
-    const root = document.documentElement;
-    const commitTheme = () => {
-      root.dataset.theme = nextTheme;
-      root.style.colorScheme = nextTheme;
-      localStorage.setItem("jobforged-theme", nextTheme);
-      setTheme(nextTheme);
-    };
+    changeTheme(nextTheme);
     themeSwitchingRef.current = true;
     setThemeLoading(nextTheme);
     themeTimersRef.current.forEach((timer) => window.clearTimeout(timer));
     themeTimersRef.current = [
-      window.setTimeout(commitTheme, 180),
       window.setTimeout(() => {
       setThemeLoading(null);
         themeSwitchingRef.current = false;
@@ -303,10 +300,10 @@ export default function Home() {
   };
 
   return (
-    <main>
+    <main className="landing-page">
       {themeLoading && <div className="app-loader app-loader--theme" data-surface-theme={themeLoading} role="status" aria-live="polite" aria-label="Atualizando tema da JobForged">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <BrandAsset className="app-loader__logo" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} />
+        <InlineBrandLoader />
       </div>}
       <header className="site-header">
         <div className="container nav-wrap">
@@ -432,20 +429,20 @@ export default function Home() {
                 <div className="chat-options"><span>Ver agendamento</span><span>Adicionar à agenda</span></div>
               </div>
             </div>
-            <motion.div
+            <ViewportMotion
               className="phone-status"
               animate={reduceMotion ? undefined : { x: [0, 9, -5, 7, 0], y: [0, -12, 5, -8, 0] }}
               transition={{ repeat: Infinity, duration: 7.4, ease: "easeInOut" }}
             >
               <CircleCheck /><span><strong>Resposta registrada</strong><small>Perfil atualizado no ATS</small></span>
-            </motion.div>
-            <motion.div
+            </ViewportMotion>
+            <ViewportMotion
               className="phone-quality"
               animate={reduceMotion ? undefined : { x: [0, -10, 6, -7, 0], y: [0, 9, -6, 11, 0] }}
               transition={{ repeat: Infinity, duration: 8.2, ease: "easeInOut", delay: 0.6 }}
             >
               <Bot /><span><strong>Agente de triagem</strong><small>Currículo analisado no WhatsApp</small></span>
-            </motion.div>
+            </ViewportMotion>
           </Reveal>
           <Reveal className="whatsapp-copy" delay={0.1}>
             <span className="eyebrow eyebrow--light">Agente de triagem no WhatsApp</span>
@@ -505,12 +502,12 @@ export default function Home() {
             <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Ver com minha marca <ArrowRight /></a>
           </Reveal>
           <Reveal className="personalization-scene" delay={0.12}>
-            <motion.div className="brand-studio-badge brand-studio-badge--white-label" aria-hidden="true"
+            <ViewportMotion className="brand-studio-badge brand-studio-badge--white-label" aria-hidden="true"
               animate={reduceMotion ? undefined : { x: [0, -16, 8, -12, 0], y: [0, 15, -9, 10, 0] }}
               transition={{ duration: 8.6, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}>
               <span className="brand-studio-badge__icon"><LayoutTemplate /></span>
               <span><strong>White Label</strong><small>Exiba a sua marca</small></span>
-            </motion.div>
+            </ViewportMotion>
             <div className="product-window personalization-window brand-studio-window">
               <div className="window-bar">
                 <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
@@ -539,12 +536,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <motion.div className="brand-studio-badge brand-studio-badge--on-demand" aria-hidden="true"
+            <ViewportMotion className="brand-studio-badge brand-studio-badge--on-demand" aria-hidden="true"
               animate={reduceMotion ? undefined : { x: [0, 14, -7, 18, 0], y: [0, -19, 7, -11, 0] }}
               transition={{ duration: 7.8, repeat: Infinity, ease: "easeInOut" }}>
               <span className="brand-studio-badge__icon"><Sparkles /></span>
               <span><strong>Sob demanda</strong><small>Flexível para seu RS.</small></span>
-            </motion.div>
+            </ViewportMotion>
           </Reveal>
         </div>
       </section>

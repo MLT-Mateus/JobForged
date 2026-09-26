@@ -19,3 +19,5 @@ export {
 export { AppToast, type ToastKind, type ToastNotice } from "./AppToast";
 export { ThemeSelector, type ThemeMode } from "./ThemeSelector";
 export { ActionButton, Panel, MetricCard, DataTable, EmptyState, StatusBadge } from "./AdminPrimitives";
+
+export { useThemePreference, setThemePreference } from "./useThemePreference";

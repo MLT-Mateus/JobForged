@@ -649,3 +649,13 @@
 .jf-field--compact-label { gap:0; }
 
 .jf-panel { min-width:0; border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface); color:var(--jf-ui-text); }
+
+.jf-theme-selector { flex:0 0 auto; max-width:none; overflow:visible; }
+.jf-theme-selector button { justify-content:center; flex-shrink:0; }
+.jf-theme-selector>.jf-theme-selector__mobile { display:none; }
+@media(max-width:680px) {
+ .jf-theme-selector { padding:0; border-radius:var(--jf-ui-control-radius); }
+ .jf-theme-selector>.jf-theme-selector__option { display:none; }
+ .jf-theme-selector>.jf-theme-selector__mobile { display:inline-flex; width:44px; height:44px; min-height:44px; padding:0; }
+ .jf-theme-selector__mobile svg { width:20px; height:20px; flex-shrink:0; }
+}

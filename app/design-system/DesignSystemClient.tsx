@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
-import { MetricCard, Panel } from "@/app/components/ui";
+import { MetricCard, Panel, useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
@@ -250,10 +250,7 @@ function AlertIcon({ kind, size = 18 }: { kind: AlertKind; size?: number }) {
 }
 
 export default function DesignSystemClient() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof document === "undefined") return "light";
-    return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-  });
+  const { theme, changeTheme } = useThemePreference();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
   const [appSidebarExpanded, setAppSidebarExpanded] = useState(true);
@@ -304,17 +301,6 @@ export default function DesignSystemClient() {
     const timer = window.setTimeout(() => setActiveAlert(null), 3600);
     return () => window.clearTimeout(timer);
   }, [activeAlert]);
-
-  function changeTheme(nextTheme: Theme) {
-    setTheme(nextTheme);
-    try {
-      window.localStorage.setItem("jobforged-theme", nextTheme);
-    } catch {
-      // O tema continua funcional mesmo quando o navegador bloqueia armazenamento local.
-    }
-    document.documentElement.dataset.theme = nextTheme;
-    document.documentElement.style.colorScheme = nextTheme;
-  }
 
   function changePage(index: number) {
     setActivePage(index);

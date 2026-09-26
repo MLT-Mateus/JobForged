@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BrandAsset } from "./BrandAsset";
+import { InlineBrandLoader } from "./InlineBrandLoader";
 
 type LoaderTheme = "light" | "dark";
 type LoaderPhase = "initial" | "navigation";
@@ -63,18 +63,13 @@ export default function NavigationLoader() {
   }, [hideLoader]);
 
   useEffect(() => {
-    startedAtRef.current = performance.now();
+    startedAtRef.current = performance.getEntriesByName("jobforged-loader-first-paint")[0]?.startTime ?? performance.now();
     const pageIsReady = () => finishAfterCompleteCycle();
     failsafeRef.current = window.setTimeout(hideLoader, LOADER_FAILSAFE_MS);
 
-    if (document.readyState === "complete") {
-      pageIsReady();
-    } else {
-      window.addEventListener("load", pageIsReady, { once: true });
-    }
+    pageIsReady();
 
     return () => {
-      window.removeEventListener("load", pageIsReady);
       window.clearTimeout(failsafeRef.current);
       window.clearTimeout(finishTimerRef.current);
     };
@@ -112,9 +107,9 @@ export default function NavigationLoader() {
   if (!active) return null;
 
   return (
-    <div className="app-loader app-loader--navigation" data-surface-theme={theme} role="status" aria-live="polite" aria-label={phase === "initial" ? "Carregando JobForged" : "Carregando próxima página"}>
+    <div className="app-loader app-loader--navigation" data-phase={phase} data-surface-theme={phase === "navigation" ? theme : undefined} role="status" aria-live="polite" aria-label={phase === "initial" ? "Carregando JobForged" : "Carregando próxima página"}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <BrandAsset className="app-loader__logo" src="/brand/jobforged-loader.svg" alt="" width={112} height={112} />
+      <InlineBrandLoader />
     </div>
   );
 }

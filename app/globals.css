@@ -5467,20 +5467,6 @@ html[data-theme="dark"] .not-found-window__body small { color: var(--ink-soft); 
     margin-left: auto;
   }
 
-  .nav-wrap > .jf-theme-selector button {
-    width: 34px;
-    min-height: 32px;
-    padding: 0;
-  }
-
-  .nav-wrap > .jf-theme-selector button span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-  }
-
   .problem-section,
   .steps-section,
   .white-label-section,
@@ -5606,11 +5592,6 @@ html[data-theme="dark"] .not-found-window__body small { color: var(--ink-soft); 
   .nav-wrap > .jf-theme-selector {
     gap: 2px;
     padding: 3px;
-  }
-
-  .nav-wrap > .jf-theme-selector button {
-    width: 31px;
-    min-height: 30px;
   }
 
   .personalization-controls {
@@ -6229,3 +6210,24 @@ html[data-theme="dark"] .jf-brand-asset--light,
 [data-theme="dark"] .jf-brand-asset--light { display: none !important; }
 html[data-theme="dark"] .jf-brand-asset--dark,
 [data-theme="dark"] .jf-brand-asset--dark { display: inline-block !important; }
+
+/* Critical loader uses the original inline SVG, without a second asset fetch. */
+.app-loader__inline { display:block; aspect-ratio:1; }
+.app-loader__inline>svg { display:block; width:100%; height:100%; }
+html[data-theme="dark"] .app-loader__inline [stroke="#20B2AA"] { stroke:#43D0C6; }
+html[data-theme="dark"] .app-loader__inline [stroke="#4169E1"] { stroke:#7E9CFF; }
+html[data-theme="dark"] .app-loader__inline [fill="#4169E1"] { fill:#7E9CFF; }
+@media(max-width:680px) {
+ .nav-wrap { gap:12px; min-width:0; }
+ .nav-wrap>.brand { min-width:0; flex:1 1 auto; }
+ .nav-wrap>.brand img { width:min(156px,100%); height:auto; }
+ .nav-wrap>.jf-theme-selector { flex:0 0 auto; margin-left:auto; padding:0; }
+ .nav-wrap>.menu-button { flex:0 0 44px; width:44px; height:44px; }
+ .app-loader--navigation { background:rgba(248,252,251,.98); backdrop-filter:none; -webkit-backdrop-filter:none; }
+ html[data-theme="dark"] .app-loader--navigation { background:rgba(7,20,18,.98); }
+ .app-loader__logo { filter:none; }
+ .landing-page>.site-header { backdrop-filter:blur(10px); }
+ .landing-page :is(.product-window,.phone-frame,.brand-studio) { isolation:isolate; }
+}
+
+.landing-page .capability-carousel[data-paused="true"] .capability-track { animation-play-state:paused; will-change:auto; }
