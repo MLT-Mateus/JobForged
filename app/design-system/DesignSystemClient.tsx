@@ -3,11 +3,12 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
-import { MetricCard, Panel, useThemePreference } from "@/app/components/ui";
+import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import {
+  X,
   ArrowLeft,
   ArrowRight,
   BookOpen,
@@ -118,26 +119,16 @@ const applicationMenu = [
   { label: "Configurações", icon: Settings2 },
 ];
 
-const colorUsage = [
-  { title: "Backgrounds", token: "--ds-bg", text: "Base das páginas e áreas amplas, sempre com baixo contraste visual." },
-  { title: "Containers", token: "--ds-surface", text: "Cards, painéis, tabelas e grupos de campos sobre o background." },
-  { title: "Pop-ups", token: "--ds-surface-raised", text: "Menus, modais e notificações que precisam se destacar com sombra." },
-  { title: "Linhas", token: "--ds-border", text: "Divisores e contornos discretos; nunca devem competir com o conteúdo." },
-  { title: "Ações", token: "--ds-brand", text: "Ações principais, progresso e pontos positivos da experiência." },
-  { title: "Informação", token: "--ds-accent", text: "Links, navegação ativa, tecnologia e destaques complementares." },
-  { title: "Foco", token: "--jf-ui-focus", text: "Indicador de foco compartilhado pelos controles do aplicativo." },
-];
-
 const colorTokens = [
   { name: "Turquesa JobForged", variable: "--jf-ui-brand", group: "brand", use: "Ações principais e progresso" },
   { name: "Azul JobForged", variable: "--jf-ui-accent", group: "brand", use: "Navegação e informação" },
-  { name: "Background", variable: "--jf-ui-surface-soft", group: "foundation", use: "Base da página" },
-  { name: "Surface", variable: "--jf-ui-surface", group: "foundation", use: "Cards e containers" },
-  { name: "Border", variable: "--jf-ui-border", group: "foundation", use: "Linhas e divisores" },
-  { name: "Text primary", variable: "--jf-ui-text", group: "foundation", use: "Texto de maior contraste" },
-  { name: "Success", variable: "--jf-ui-success", group: "feedback", use: "Conclusão positiva" },
-  { name: "Warning", variable: "--jf-ui-warning", group: "feedback", use: "Atenção necessária" },
-  { name: "Danger", variable: "--jf-ui-danger", group: "feedback", use: "Erro ou bloqueio" },
+  { name: "Fundo da página", variable: "--jf-ui-surface-soft", group: "foundation", use: "Base da página" },
+  { name: "Superfície", variable: "--jf-ui-surface", group: "foundation", use: "Cards e containers" },
+  { name: "Bordas e divisores", variable: "--jf-ui-border", group: "foundation", use: "Linhas e divisores" },
+  { name: "Texto principal", variable: "--jf-ui-text", group: "foundation", use: "Texto de maior contraste" },
+  { name: "Sucesso", variable: "--jf-ui-success", group: "feedback", use: "Conclusão positiva" },
+  { name: "Atenção", variable: "--jf-ui-warning", group: "feedback", use: "Atenção necessária" },
+  { name: "Erro", variable: "--jf-ui-danger", group: "feedback", use: "Erro ou bloqueio" },
   { name: "Informação", variable: "--jf-ui-accent", group: "feedback", use: "Observações e casos especiais" },
   { name: "Foco de controles", variable: "--jf-ui-focus", group: "interaction", use: "Borda e indicador de foco compartilhados" },
 ];
@@ -226,20 +217,17 @@ function ExampleCard({
   );
 }
 
-function PaletteColor({ token, copied, onCopy, featured = false }: { token: (typeof colorTokens)[number]; theme: Theme; copied: string | null; onCopy: (value: string, label: string) => void; featured?: boolean }) {
-  const swatchColor = `var(${token.variable})`;
-  function copyTokenValue() {
+function PaletteColor({ token, theme, copied, onCopy }: { token: (typeof colorTokens)[number]; theme: Theme; copied: string | null; onCopy: (value: string, label: string) => void }) {
+  const [value, setValue] = useState("");
+  useEffect(() => {
     const page = document.querySelector<HTMLElement>(".ds-page");
-    const value = page ? getComputedStyle(page).getPropertyValue(token.variable).trim() : "";
-    if (value) onCopy(value, token.name);
-  }
-  return (
-    <button type="button" className={`ds-palette-color ${featured ? "ds-palette-color--featured" : ""}`} style={{ "--palette-color": swatchColor } as CSSProperties} onClick={copyTokenValue} aria-label={`Copiar o valor de ${token.name}`}>
-      <span className="ds-palette-color__swatch" aria-hidden="true" />
-      <span className="ds-palette-color__content"><strong>{token.name}</strong><small>{token.use}</small><code>{token.variable}</code></span>
-      <span className="ds-palette-color__value">{copied === token.name ? <><Check size={14} />Copiado</> : <><Copy size={14} />Copiar valor</>}</span>
-    </button>
-  );
+    if (page) setValue(getComputedStyle(page).getPropertyValue(token.variable).trim());
+  }, [theme, token.variable]);
+  return <button type="button" className="ds-swatch" style={{"--swatch":`var(${token.variable})`} as CSSProperties} onClick={() => value && onCopy(value,token.name)} aria-label={`Copiar ${token.name}: ${value}`}>
+    <span className="ds-swatch__color" aria-hidden="true"/>
+    <span className="ds-swatch__body"><strong>{token.name}</strong><span>{token.use}</span><code>{token.variable}</code></span>
+    <span className="ds-swatch__footer"><code>{value || "—"}</code><span>{copied===token.name?<><Check size={16}/>Copiado</>:<><Copy size={16}/>Copiar</>}</span></span>
+  </button>;
 }
 
 function AlertIcon({ kind, size = 18 }: { kind: AlertKind; size?: number }) {
@@ -340,6 +328,13 @@ export default function DesignSystemClient() {
     setSelectedBenefits((current) => current.includes(value) ? current : [...current, value]);
   }
 
+  useEffect(()=>{
+    if(!menuOpen) return;
+    const close=(event:KeyboardEvent)=>{if(event.key==="Escape"){setMenuOpen(false);document.querySelector<HTMLButtonElement>(".ds-mobile-menu")?.focus()}};
+    document.addEventListener("keydown",close);
+    return()=>document.removeEventListener("keydown",close);
+  },[menuOpen]);
+
   const currentPage = navigation[activePage];
   const sidebarExpanded = sidebarPinned || menuOpen;
 
@@ -355,14 +350,15 @@ export default function DesignSystemClient() {
           </Link>
           <div className="ds-header__actions">
             <ThemeSelector theme={theme} onChange={changeTheme} />
-            <button type="button" className="ds-mobile-menu" aria-label={menuOpen ? "Fechar navegação" : "Abrir navegação"} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}><Menu size={20} aria-hidden="true" /></button>
+            <button type="button" className="ds-mobile-menu" aria-label={menuOpen ? "Fechar navegação" : "Abrir navegação"} aria-expanded={menuOpen} aria-controls="ds-navigation" onClick={() => setMenuOpen((open) => !open)}><Menu size={20} aria-hidden="true" /></button>
           </div>
         </div>
       </header>
 
+      {menuOpen && <button type="button" className="ds-menu-backdrop" aria-label="Fechar navegação" onClick={()=>setMenuOpen(false)}/> }
       <div className="ds-layout">
         <aside
-          className={`ds-sidebar ${menuOpen ? "is-open" : ""} ${sidebarExpanded ? "is-expanded" : "is-compact"}`}
+          id="ds-navigation" className={`ds-sidebar ${menuOpen ? "is-open" : ""} ${sidebarExpanded ? "is-expanded" : "is-compact"}`}
         >
           <div className="ds-sidebar__top">
             <span className="ds-sidebar__title"><BrandAsset src="/brand/jobforged-symbol.svg" alt="" />{sidebarExpanded && <strong>Manual</strong>}</span>
@@ -376,6 +372,7 @@ export default function DesignSystemClient() {
               {sidebarPinned ? <PanelLeftClose size={17} aria-hidden="true" /> : <PanelLeftOpen size={17} aria-hidden="true" />}
             </button>
           </div>
+          <button type="button" className="ds-sidebar-close" onClick={()=>setMenuOpen(false)} aria-label="Fechar navegação"><X size={20}/></button>
           <nav aria-label="Páginas do manual da marca">
             {navigation.map((item, index) => {
               const Icon = item.icon;
@@ -402,10 +399,6 @@ export default function DesignSystemClient() {
             <a className="ds-button ds-button--outline" href="/manual-da-marca-jobforged-llm.md" download><Download size={16}/>Baixar documento para LLM</a>
           </section>
 
-          <section className="ds-section" hidden={activePage !== 0} aria-label="Indicador do painel">
-            <SectionHeading title="Indicadores do painel" description="Mesmo componente utilizado na Home, nas vagas e nos dashboards. Tipografia, superfície e espaçamento seguem os tokens oficiais." />
-            <MetricCard label="Vagas ativas" value="24" detail="Indicador demonstrativo"/><Panel style={{padding:"var(--jf-ui-space-6)",marginTop:"var(--jf-ui-space-6)"}}><h3>Grupo de conteúdo</h3><p>Superfície compartilhada pelas telas do painel empresarial.</p></Panel>
-          </section>
           <section className="ds-section ds-section--first" hidden={activePage !== 1} aria-label="Ativos da marca">
             <SectionHeading title="Arquivos oficiais, prontos para usar." description="Escolha a versão adequada e baixe o arquivo original sem alterar proporções ou cores." />
             <div className="ds-asset-section">
@@ -431,16 +424,20 @@ export default function DesignSystemClient() {
           </section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 2} aria-label="Cores da marca">
-            <SectionHeading title="Cores com função clara em cada camada." description="A marca aparece nas ações e nos destaques. Neutros organizam o conteúdo; cores semânticas comunicam estados sem ambiguidade." />
-            <div className="ds-color-workbench">
-              <div className="ds-color-overview"><div><span>Sistema cromático</span><h3>Uma paleta orientada por função.</h3><p>As cores de marca conduzem ações; os neutros constroem hierarquia; as cores semânticas comunicam estados. Clique em qualquer token para copiar o valor do tema atual.</p></div><div className="ds-color-overview__rules"><span><b>01</b> Marca</span><span><b>02</b> Estrutura</span><span><b>03</b> Feedback</span></div></div>
-              <div className="ds-palette-group ds-palette-group--brand"><div className="ds-palette-group__heading"><span>01</span><div><strong>Cores da marca</strong><small>Ações, navegação e pontos de destaque</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--brand">{colorTokens.filter((token) => token.group === "brand").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} featured />)}</div></div>
-              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>02</span><div><strong>Base da interface</strong><small>Fundos, superfícies, linhas e leitura</small></div></div><div className="ds-palette-group__colors">{colorTokens.filter((token) => token.group === "foundation").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
-              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>03</span><div><strong>Cores de feedback</strong><small>Estados que exigem interpretação rápida</small></div></div><div className="ds-palette-group__colors ds-palette-group__colors--feedback">{colorTokens.filter((token) => token.group === "feedback").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
-              <div className="ds-palette-group"><div className="ds-palette-group__heading"><span>04</span><div><strong>Interação</strong><small>Foco visível para navegação por teclado</small></div></div><div className="ds-palette-group__colors">{colorTokens.filter((token) => token.group === "interaction").map((token) => <PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue} />)}</div></div>
-              <div className="ds-color-guidance"><div><strong>Contraste é obrigatório</strong><p>Texto e ícones devem manter leitura adequada sobre qualquer cor white label. Cores de feedback não devem ser substituídas por cores de marca.</p></div><div className="ds-color-guidance__samples"><span className="is-approved"><Check size={14}/> Combinação aprovada</span><span className="is-restricted"><CircleAlert size={14}/> Validar contraste</span></div></div>
+            <SectionHeading title="Paleta da JobForged" description="Escolha a cor pela sua função. As amostras e os valores acompanham o tema selecionado no cabeçalho." />
+            <div className="ds-colors-mode"><span>Tema {theme === "dark" ? "escuro" : "claro"}</span><p>Clique em uma amostra para copiar seu valor.</p></div>
+            <div className="ds-colors-catalog">
+              {[
+                {id:"brand",title:"Identidade da marca",description:"Turquesa para ações principais. Azul para informação e destaques complementares."},
+                {id:"foundation",title:"Estrutura e leitura",description:"Fundo, superfície, bordas e texto formam as camadas da interface."},
+                {id:"feedback",title:"Estados e mensagens",description:"Mantenha essas cores em todas as marcas. Combine-as com texto e ícones para comunicar o estado."},
+                {id:"interaction",title:"Foco e interação",description:"Indica qual controle está selecionado ao navegar pelo teclado."},
+              ].map((group,index)=><section className={`ds-color-family ds-color-family--${group.id}`} key={group.id} aria-labelledby={`color-${group.id}`}>
+                <header><span>{String(index+1).padStart(2,"0")}</span><div><h3 id={`color-${group.id}`}>{group.title}</h3><p>{group.description}</p></div></header>
+                <div className="ds-swatches">{colorTokens.filter(token=>token.group===group.id).map(token=><PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue}/>)}</div>
+              </section>)}
             </div>
-            <div className="ds-color-usage"><div className="ds-color-usage__heading"><Palette size={20} aria-hidden="true" /><div><strong>Mapa de aplicação</strong><span>Use os tokens pelo papel que exercem, não apenas pela aparência.</span></div></div><div className="ds-color-usage__grid">{colorUsage.map((usage) => <article key={usage.title}><i className="ds-color-usage__sample" style={{ "--usage-color": `var(${usage.token})` } as CSSProperties} /><div><span>{usage.title}</span><code>{usage.token}</code><p>{usage.text}</p></div></article>)}</div></div>
+            <aside className="ds-colors-note"><CircleAlert size={20} aria-hidden="true"/><p><strong>Antes de aplicar uma cor</strong>Verifique o contraste entre texto e fundo nos dois temas. Na personalização da empresa, altere as cores de marca e preserve os significados de sucesso, atenção e erro.</p></aside>
           </section>
 
           <section className="ds-section ds-section--first" hidden={activePage !== 3} aria-label="Tipografia">
