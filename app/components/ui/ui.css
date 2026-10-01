@@ -129,7 +129,7 @@
   width: 100%;
   min-width: 0;
   align-content: start;
-  grid-template-rows: 16px minmax(var(--jf-ui-control-height), auto) minmax(12px, auto);
+  grid-template-rows: minmax(20px, auto) minmax(var(--jf-ui-control-height), auto) minmax(18px, auto);
   gap: var(--jf-ui-space-2);
   font-family: var(--jf-ui-font-body);
 }
@@ -143,10 +143,10 @@
   color: var(--jf-ui-text);
 }
 
-.jf-field__label b { font-family: var(--jf-ui-font-heading); font-size: 10px; font-weight: 700; }
+.jf-field__label b { font-family: var(--jf-ui-font-heading); font-size: 14px; font-weight: 700; }
 .jf-field__label i { color: var(--jf-ui-text-soft); font-size: 8px; font-style: normal; font-weight: 600; }
 .jf-field > small,
-.jf-field__message { color: var(--jf-ui-text-soft); font-size: 8px; line-height: 1.5; }
+.jf-field__message { color: var(--jf-ui-text-soft); font-size: 12px; line-height: 1.5; }
 
 .jf-control {
   box-sizing: border-box;
@@ -218,7 +218,7 @@
   box-shadow: none !important;
   color: var(--jf-ui-text);
   font-family: var(--jf-ui-font-body);
-  font-size: 11px;
+  font-size: 16px;
 }
 
 .jf-control input[type="color"] {
@@ -231,7 +231,7 @@
   cursor: pointer;
 }
 
-.jf-field--native { grid-template-rows: 16px minmax(var(--jf-ui-control-height), auto) minmax(12px, auto); }
+.jf-field--native { grid-template-rows: minmax(20px, auto) minmax(var(--jf-ui-control-height), auto) minmax(18px, auto); }
 .jf-field--native > .jf-control > input,
 .jf-field--native > .jf-control > select,
 .jf-field--native > .jf-control > textarea { min-width: 0; }
@@ -496,7 +496,7 @@
 .jf-upload.is-filled em { border-color: color-mix(in srgb, var(--jf-ui-success) 34%, var(--jf-ui-border-strong)); color: var(--jf-ui-success); }
 
 .jf-multi-upload-field { display: grid; width: 100%; min-width: 0; align-content: start; gap: 8px; font-family: var(--jf-ui-font-body); }
-.jf-multi-upload-field > .jf-field__message { color: var(--jf-ui-text-soft); font-size: 8px; line-height: 1.5; }
+.jf-multi-upload-field > .jf-field__message { color: var(--jf-ui-text-soft); font-size: 12px; line-height: 1.5; }
 .jf-multi-upload-field.is-error > .jf-field__message { color: var(--jf-ui-danger); }
 
 .jf-multi-upload {

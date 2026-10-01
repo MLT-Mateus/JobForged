@@ -62,7 +62,6 @@ body:has(.ds-page) {
 }
 
 .ds-page button,
-.ds-page input,
 .ds-page select,
 .ds-page textarea {
   font: inherit;

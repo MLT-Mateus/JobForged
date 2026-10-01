@@ -6231,3 +6231,23 @@ html[data-theme="dark"] .app-loader__inline [fill="#4169E1"] { fill:#7E9CFF; }
 }
 
 .landing-page .capability-carousel[data-paused="true"] .capability-track { animation-play-state:paused; will-change:auto; }
+
+/* Content is readable before hydration; reveal only when it approaches view. */
+@keyframes lp-reveal-in { from { opacity:0; transform:translate3d(0,16px,0); } to { opacity:1; transform:none; } }
+.lp-reveal.is-revealed { animation:lp-reveal-in 400ms cubic-bezier(.22,1,.36,1) var(--reveal-delay,0s) backwards; }
+@media(max-width:680px) {
+ .lp-reveal.is-revealed { animation-duration:240ms; animation-delay:0s; }
+ /* Avoid relayout of the entire mobile page on every accordion frame. */
+ .landing-page .faq-answer { transition:none; }
+ .landing-page .faq-answer p { transition:none; transform:none; }
+ .landing-page .faq-answer.is-open p { animation:lp-reveal-in 160ms ease-out; }
+ .landing-page .faq-item { transition:border-color 160ms ease; }
+ .landing-page .faq-item--open { box-shadow:none; }
+ .landing-page .faq-item button { padding-block:16px; }
+ .landing-page .faq-item button span { font-size:14px; line-height:1.5; }
+ .landing-page .faq-answer p { font-size:14px; }
+ .landing-page .site-header { -webkit-backdrop-filter:none; backdrop-filter:none; background:var(--white); }
+}
+@media(prefers-reduced-motion:reduce) {
+ .lp-reveal.is-revealed,.landing-page .faq-answer.is-open p { animation:none; }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { motion, useReducedMotion } from "motion/react";
@@ -103,19 +103,19 @@ function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const reduceMotion = useReducedMotion();
-
-  return (
-    <motion.div
-      className={className}
-      initial={reduceMotion ? false : { opacity: 0, y: 28 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.68, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || !('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      element.classList.add('is-revealed');
+      observer.disconnect();
+    }, { rootMargin: '100px 0px', threshold: 0 });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={ref} className={`lp-reveal ${className ?? ''}`} style={{'--reveal-delay': `${delay}s`} as CSSProperties}>{children}</div>;
 }
 
 function SectionIntro({
@@ -173,7 +173,7 @@ function ProductMockup() {
   return (
     <motion.div
       className="product-scene"
-      initial={{ opacity: 0, scale: 0.96, y: 32 }}
+      initial={false}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
     >
@@ -261,10 +261,30 @@ function ProductMockup() {
   );
 }
 
+const FaqList = memo(function FaqList() {
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  return (
+          <div className="faq-list">
+            {faqs.map((faq, index) => {
+              const isOpen = openFaq === index;
+              return (
+                <div className={`faq-item ${isOpen ? "faq-item--open" : ""}`} key={faq.question}>
+                  <button type="button" aria-expanded={isOpen} aria-controls={`faq-answer-${index}`} onClick={() => setOpenFaq(isOpen ? null : index)}>
+                    <span>{faq.question}</span><ChevronDown />
+                  </button>
+                  <div id={`faq-answer-${index}`} className={`faq-answer ${isOpen ? "is-open" : ""}`} aria-hidden={!isOpen}>
+                    <div><p>{faq.answer}</p></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+  );
+});
+
 export default function Home() {
   const reduceMotion = useReducedMotion();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [annualBilling, setAnnualBilling] = useState(true);
   const { theme, changeTheme } = useThemePreference();
   const [themeLoading, setThemeLoading] = useState<"light" | "dark" | null>(null);
@@ -356,7 +376,7 @@ export default function Home() {
         <div className="container hero-layout">
           <motion.div
             className="hero-copy"
-            initial={{ opacity: 0, y: 24 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -662,21 +682,7 @@ export default function Home() {
             <h2>O que você precisa saber antes de transformar o <BrandPair blue="seu" teal="recrutamento." /></h2>
             <p>Respostas diretas sobre personalização, triagem por IA, WhatsApp e operação da plataforma.</p>
           </Reveal>
-          <div className="faq-list">
-            {faqs.map((faq, index) => {
-              const isOpen = openFaq === index;
-              return (
-                <Reveal className={`faq-item ${isOpen ? "faq-item--open" : ""}`} delay={index * 0.04} key={faq.question}>
-                  <button type="button" aria-expanded={isOpen} aria-controls={`faq-answer-${index}`} onClick={() => setOpenFaq(isOpen ? null : index)}>
-                    <span>{faq.question}</span><ChevronDown />
-                  </button>
-                  <div id={`faq-answer-${index}`} className={`faq-answer ${isOpen ? "is-open" : ""}`} aria-hidden={!isOpen}>
-                    <div><p>{faq.answer}</p></div>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
+          <FaqList />
         </div>
       </section>
 
