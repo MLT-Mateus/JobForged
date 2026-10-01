@@ -6,7 +6,8 @@ body:has(.admin-shell){overflow:hidden}
 .admin-brand>span{display:flex;min-width:0;align-items:center;gap:var(--jf-ui-space-2);overflow:hidden}
 .admin-brand img{width:30px;height:30px}
 .admin-brand strong{overflow:hidden;font-size:var(--jf-ui-font-size-sm);text-overflow:ellipsis;white-space:nowrap}
-.admin-brand button,.admin-menu,.admin-notice,.admin-icon{display:grid;width:38px;height:38px;flex:0 0 38px;place-items:center;padding:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted);cursor:pointer}
+.admin-menu,.admin-notice,.admin-icon{display:grid;width:38px;height:38px;flex:0 0 38px;place-items:center;padding:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted);cursor:pointer}
+.admin-brand button{display:grid;width:38px;height:38px;flex:0 0 38px;place-items:center;padding:0;cursor:pointer}
 .admin-brand svg,.admin-menu svg,.admin-notice svg,.admin-icon svg{width:18px}
 .admin-close{display:none!important}
 .admin-sidebar nav{min-height:0;overflow-y:auto;flex:1;align-content:start;display:grid;gap:var(--jf-ui-space-1);padding-top:var(--jf-ui-space-4)}
@@ -20,10 +21,11 @@ body:has(.admin-shell){overflow:hidden}
 .admin-user strong,.admin-user small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .admin-user strong{font-size:var(--jf-ui-font-size-sm)}
 .admin-user small{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
-.admin-user>button{display:grid;width:34px;height:34px;place-items:center;padding:0;border:0;border-radius:var(--jf-ui-control-radius);background:transparent;color:var(--jf-ui-text-muted);cursor:pointer}
+.admin-user>button{display:grid;width:34px;height:34px;place-items:center;padding:0;cursor:pointer}
 .admin-user svg{width:16px}
 .is-collapsed .admin-brand{justify-content:center;padding-inline:0}
-.is-collapsed .admin-brand>span,.is-collapsed .admin-sidebar nav a span,.is-collapsed .admin-user>a>span:last-child,.is-collapsed .admin-user>button{display:none}
+.is-collapsed .admin-brand>span,.is-collapsed .admin-sidebar nav a span,.is-collapsed .admin-user>a>span:last-child{display:none}
+.is-collapsed .admin-user>button{display:none}
 .is-collapsed .admin-sidebar nav a{justify-content:center;padding:0}
 .is-collapsed .admin-user{display:flex;justify-content:center}
 .admin-workspace{height:100%;min-width:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
@@ -73,8 +75,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-quality:before{grid-column:1;grid-row:1;width:74px;height:6px;border-radius:99px;background:var(--jf-ui-surface-soft);content:""}
 .admin-quality i{z-index:1;grid-column:1;grid-row:1;height:6px;border-radius:99px;background:var(--jf-ui-brand)}
 .admin-segment{display:inline-flex;padding:var(--jf-ui-space-1);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface-soft)}
-.admin-segment button{min-height:32px;padding:0 var(--jf-ui-space-2);border:0;border-radius:var(--jf-ui-control-radius);background:transparent;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs);font-weight:700}
-.admin-segment button.is-active{background:var(--jf-ui-surface);color:var(--jf-ui-text);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.admin-segment button{min-height:32px;padding:0 var(--jf-ui-space-2)}
 .admin-kanban{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:var(--jf-ui-space-2);overflow-x:auto;padding-bottom:var(--jf-ui-space-2)}
 .admin-kanban>section{min-height:510px;padding:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface-soft)}
 .admin-kanban>section>header{display:flex;align-items:center;justify-content:space-between;padding:var(--jf-ui-space-1) var(--jf-ui-space-1) var(--jf-ui-space-3)}
@@ -90,12 +91,10 @@ body:has(.admin-shell){overflow:hidden}
 .admin-column-empty{display:grid;min-height:90px;place-items:center;border:1px dashed var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
 .admin-agenda{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--jf-ui-space-3)}
 .admin-calendar>header{justify-content:center}
-.admin-calendar>header button{border:0;background:transparent;color:var(--jf-ui-text);font-size:var(--jf-ui-font-size-xl)}
 .admin-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--jf-ui-space-1);padding:var(--jf-ui-space-4)}
 .admin-calendar-grid>b{padding:var(--jf-ui-space-2);color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs);text-align:center}
-.admin-calendar-grid>button{position:relative;min-height:58px;border:1px solid transparent;border-radius:var(--jf-ui-control-radius);background:transparent;color:var(--jf-ui-text);font-size:var(--jf-ui-font-size-sm)}
-.admin-calendar-grid>button:hover,.admin-calendar-grid>button.is-selected{background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong)}
-.admin-calendar-grid>button.has-event:after{position:absolute;bottom:7px;left:50%;width:5px;height:5px;border-radius:50%;background:var(--jf-ui-accent);content:""}
+.admin-calendar-grid>button{position:relative;min-height:58px}
+.admin-calendar-grid>button.has-event:after{position:absolute;bottom:7px;left:50%;width:5px;height:5px;content:""}
 .admin-events article{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-4) var(--jf-ui-space-5);border-bottom:1px solid var(--jf-ui-border)}
 .admin-events article>strong{color:var(--jf-ui-brand-strong);font-size:var(--jf-ui-font-size-sm)}
 .admin-events article>div{display:grid;gap:var(--jf-ui-space-1)}
@@ -119,7 +118,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-brand-preview main span{color:var(--jf-ui-brand-strong);font-size:var(--jf-ui-font-size-xs);font-weight:750}
 .admin-brand-preview h3{margin:var(--jf-ui-space-2) 0;font-size:var(--jf-ui-font-size-xl)}
 .admin-brand-preview main p{max-width:340px;margin:0 0 var(--jf-ui-space-4);color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.6}
-.admin-brand-preview main button{min-height:38px;padding:0 var(--jf-ui-space-3);border:0;border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-brand);color:#fff;font-weight:750}
+.admin-brand-preview main button{min-height:38px;padding:0 var(--jf-ui-space-3)}
 .admin-brand-preview>.jf-action{margin-left:var(--jf-ui-space-5)}
 .admin-preferences{padding-bottom:var(--jf-ui-space-4)}
 .admin-preferences>label{display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-4) var(--jf-ui-space-5);border-bottom:1px solid var(--jf-ui-border)}
@@ -146,7 +145,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-profile-card hr{width:100%;margin:var(--jf-ui-space-5) 0 var(--jf-ui-space-3);border:0;border-top:1px solid var(--jf-ui-border)}
 .admin-profile-card>a{width:100%;padding:var(--jf-ui-space-2);border-radius:var(--jf-ui-control-radius);color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
 .admin-profile-card>a:hover{background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong)}
-.admin-profile-card>button{display:flex;width:100%;align-items:center;gap:var(--jf-ui-space-2);margin-top:var(--jf-ui-space-3);padding:var(--jf-ui-space-2);border:0;border-radius:var(--jf-ui-control-radius);background:transparent;color:var(--jf-ui-danger)}
+.admin-profile-card>button{display:flex;width:100%;align-items:center;gap:var(--jf-ui-space-2);margin-top:var(--jf-ui-space-3);padding:var(--jf-ui-space-2)}
 .admin-profile-card button svg{width:16px}
 .admin-form>header#seguranca{margin-top:var(--jf-ui-space-5)}
 .admin-session{margin-bottom:0}
@@ -160,7 +159,8 @@ body:has(.admin-shell){overflow:hidden}
 @media(max-width:900px){.admin-shell,.admin-shell.is-collapsed{display:block}
 .admin-sidebar{position:fixed;inset:0 auto 0 0;z-index:30;width:min(290px,86vw);height:100dvh;transform:translateX(-105%);transition:transform .25s ease}
 .admin-sidebar.is-open{transform:none}
-.admin-sidebar.is-open .admin-brand>span,.admin-sidebar.is-open nav a span,.admin-sidebar.is-open .admin-user>a>span:last-child,.admin-sidebar.is-open .admin-user>button{display:flex}
+.admin-sidebar.is-open .admin-brand>span,.admin-sidebar.is-open nav a span,.admin-sidebar.is-open .admin-user>a>span:last-child{display:flex}
+.admin-sidebar.is-open .admin-user>button{display:flex}
 .admin-sidebar.is-open .admin-user>a>span:last-child{display:grid}
 .admin-sidebar.is-open nav a{justify-content:flex-start;padding:0 var(--jf-ui-space-3)}
 .admin-sidebar .admin-brand>button:not(.admin-close){display:none}

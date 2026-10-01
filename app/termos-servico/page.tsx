@@ -3,7 +3,7 @@ import LegalPage from "@/app/components/LegalPage";
 import { termsOfServiceHtml } from "@/app/legal-documents";
 
 export const metadata: Metadata = {
-  title: "Termos de Serviço | JobForged",
+  title: "JobForged | Termos de Serviço",
   description: "Termos de Serviço da plataforma JobForged.",
 };
 

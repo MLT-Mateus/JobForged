@@ -3,7 +3,7 @@ import DesignSystemClient from "../DesignSystemClient";
 import "../design-system.css";
 
 export const metadata: Metadata = {
-  title: "JobForged",
+  title: "JobForged | Design System",
   description: "Fundamentos visuais, componentes e padrões de interface da plataforma JobForged.",
 };
 

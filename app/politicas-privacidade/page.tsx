@@ -3,7 +3,7 @@ import LegalPage from "@/app/components/LegalPage";
 import { privacyPolicyHtml } from "@/app/legal-documents";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidade | JobForged",
+  title: "JobForged | Política de Privacidade",
   description: "Política de Privacidade da plataforma JobForged.",
 };
 

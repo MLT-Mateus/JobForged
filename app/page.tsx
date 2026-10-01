@@ -335,7 +335,7 @@ export default function Home() {
             {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           </nav>
           <ThemeSelector theme={theme} onChange={applyTheme} />
-          <Link className="button button--ghost button--small header-login" href="/login">Entrar</Link>
+          <Link className="button button--ghost button--small header-login jf-action jf-action--secondary jf-action--small" href="/login">Entrar</Link>
           <button
             className="menu-button"
             type="button"
@@ -354,7 +354,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
           >
             {navItems.map((item) => <a key={item.href} href={item.href} onClick={closeMenu}>{item.label}</a>)}
-            <Link className="button button--ghost" href="/login" onClick={closeMenu}>Entrar</Link>
+            <Link className="button button--ghost jf-action jf-action--secondary" href="/login" onClick={closeMenu}>Entrar</Link>
           </motion.nav>
         )}
       </header>
@@ -385,8 +385,8 @@ export default function Home() {
               Centralize vagas, currículos, triagem automática, Kanban e histórico de candidatos em uma plataforma feita para PMEs que querem mais controle e menos retrabalho.
             </p>
             <div className="hero-actions">
-              <a className="button button--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Quero uma demonstração <ArrowRight size={19} /></a>
-              <a className="button button--ghost" href="#como-funciona"><span className="play-dot">▶</span> Ver como funciona</a>
+              <a className="button button--primary jf-action jf-action--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Quero uma demonstração <ArrowRight size={19} /></a>
+              <a className="button button--ghost jf-action jf-action--secondary" href="#como-funciona"><span className="play-dot">▶</span> Ver como funciona</a>
             </div>
           </motion.div>
           <ProductMockup />
@@ -519,7 +519,7 @@ export default function Home() {
               <span><Check /> Domínio e comunicação próprios</span>
               <span><Check /> Jornada adaptada ao seu processo</span>
             </div>
-            <a className="button button--blue" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Ver com minha marca <ArrowRight /></a>
+            <a className="button button--blue jf-action jf-action--accent" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Ver com minha marca <ArrowRight /></a>
           </Reveal>
           <Reveal className="personalization-scene" delay={0.12}>
             <ViewportMotion className="brand-studio-badge brand-studio-badge--white-label" aria-hidden="true"
@@ -631,7 +631,7 @@ export default function Home() {
               <div className="plan-head"><span>Gratuito</span><small>Para conhecer a plataforma</small></div>
               <div className="plan-price"><strong>R$ 0</strong><span>para começar</span></div>
               <p>Uma base organizada para operações menores iniciarem com clareza.</p>
-              <Link className="button button--ghost" href="/cadastro">Começar grátis <ArrowRight /></Link>
+              <Link className="button button--ghost jf-action jf-action--secondary" href="/cadastro">Começar grátis <ArrowRight /></Link>
               <ul>
                 <li><Check /> Até 2 vagas simultâneas</li>
                 <li><Check /> 1 usuário recrutador</li>
@@ -647,7 +647,7 @@ export default function Home() {
               <div className="plan-price"><strong>R$ {plansById[annualBilling ? "basico-anual" : "basico-mensal"].price}</strong><span>{plansById[annualBilling ? "basico-anual" : "basico-mensal"].suffix}</span></div>
               {annualBilling && <small className="plan-equivalent">Economize R$ 40,00 por mês — R$ 480,00 por ano</small>}
               <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
-              <Link className="button button--primary" href={`/cadastro?plano=${annualBilling ? "basico-anual" : "basico-mensal"}`}>Falar com especialista <ArrowRight /></Link>
+              <Link className="button button--primary jf-action jf-action--primary" href={`/cadastro?plano=${annualBilling ? "basico-anual" : "basico-mensal"}`}>Falar com especialista <ArrowRight /></Link>
               <ul>
                 <li><Check /> Até 5 vagas simultâneas</li>
                 <li><Check /> 3 usuários</li>
@@ -661,7 +661,7 @@ export default function Home() {
               <div className="plan-price"><strong>R$ {plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price}</strong><span>{plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].suffix}</span></div>
               {annualBilling && <small className="plan-equivalent">Economize R$ 47,00 por mês — R$ 564,00 por ano</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
-              <Link className="button button--blue" href={`/cadastro?plano=${annualBilling ? "profissional-anual" : "profissional-mensal"}`}>Falar com especialista <ArrowRight /></Link>
+              <Link className="button button--blue jf-action jf-action--accent" href={`/cadastro?plano=${annualBilling ? "profissional-anual" : "profissional-mensal"}`}>Falar com especialista <ArrowRight /></Link>
               <ul>
                 <li><Check /> Até 15 vagas simultâneas</li>
                 <li><Check /> 10 usuários</li>
@@ -696,7 +696,7 @@ export default function Home() {
               <p>Conheça o ATS white label que combina automações, critérios de seleção e suporte especializado para contratar com mais qualidade.</p>
             </div>
             <div className="cta-actions">
-              <a className="button button--outline-light" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Solicitar demonstração <ArrowRight /></a>
+              <a className="button button--outline-light jf-action jf-action--inverse" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Solicitar demonstração <ArrowRight /></a>
               <span><ShieldCheck /> Demonstração personalizada e sem compromisso.</span>
             </div>
           </Reveal>

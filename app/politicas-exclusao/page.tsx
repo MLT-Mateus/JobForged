@@ -3,7 +3,7 @@ import LegalPage from "@/app/components/LegalPage";
 import { dataDeletionPolicyHtml } from "@/app/legal-documents";
 
 export const metadata: Metadata = {
-  title: "Política de Exclusão de Dados | JobForged",
+  title: "JobForged | Política de Exclusão de Dados",
   description: "Política de Exclusão de Dados da plataforma JobForged.",
 };
 

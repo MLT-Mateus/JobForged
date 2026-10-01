@@ -61,7 +61,6 @@ body:has(.ds-page) {
   box-sizing: border-box;
 }
 
-.ds-page button,
 .ds-page select,
 .ds-page textarea {
   font: inherit;
@@ -801,57 +800,6 @@ body:has(.ds-page) {
 }
 
 .ds-component-spec { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--ds-border); color: var(--ds-text-muted); font-size: 9px; line-height: 1.65; }
-
-.ds-button {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 15px;
-  border: 1px solid transparent;
-  border-radius: var(--ds-radius-sm);
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 730;
-  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
-}
-
-.ds-button:hover:not(:disabled) { transform: translateY(-1px); }
-.ds-button:disabled { cursor: not-allowed; opacity: 0.46; }
-
-.ds-button--primary {
-  border-color: color-mix(in srgb, var(--ds-brand) 32%, transparent);
-  background: var(--ds-brand-soft);
-  color: var(--ds-brand-strong);
-}
-
-.ds-button--primary:hover:not(:disabled) {
-  border-color: var(--ds-brand);
-  background: color-mix(in srgb, var(--ds-brand-soft) 70%, var(--ds-brand) 14%);
-  box-shadow: 0 9px 22px color-mix(in srgb, var(--ds-brand) 16%, transparent);
-}
-
-.ds-button--accent {
-  border-color: color-mix(in srgb, var(--ds-accent) 28%, transparent);
-  background: var(--ds-accent-soft);
-  color: var(--ds-accent-strong);
-}
-
-.ds-button--accent:hover {
-  border-color: var(--ds-accent);
-  background: color-mix(in srgb, var(--ds-accent-soft) 74%, var(--ds-accent) 12%);
-}
-
-.ds-button--outline {
-  border-color: color-mix(in srgb, var(--ds-brand) 55%, var(--ds-border));
-  background: transparent;
-  color: var(--ds-brand-strong);
-}
-
-.ds-button--outline:hover { border-color: var(--ds-brand); background: var(--ds-brand-soft); }
-.ds-button--ghost { border-color: transparent; background: transparent; color: var(--ds-text-muted); }
-.ds-button--ghost:hover { background: var(--ds-bg-elevated); color: var(--ds-text); }
 
 .ds-icon-button {
   display: inline-grid;
@@ -1723,9 +1671,6 @@ body:has(.ds-page) {
 .ds-brand-rules > div:last-child { color: var(--ds-danger); }
 .ds-brand-rules span { display: grid; gap: 3px; color: var(--ds-text-muted); font-size: 9px; line-height: 1.5; }
 .ds-brand-rules strong { color: var(--ds-text); font-size: 10px; }
-
-.ds-button--small { min-height: 32px; padding-inline: 11px; font-size: 9px; }
-.ds-button--large { min-height: 48px; padding-inline: 20px; }
 .ds-button-row--sizes { align-items: center; }
 .ds-size-showcase { display: grid; gap: 18px; width: 100%; }
 .ds-size-showcase > div { display: grid; gap: 8px; }
@@ -1744,12 +1689,10 @@ body:has(.ds-page) {
   background: var(--ds-surface);
 }
 
-.ds-button-states .ds-button { width: 100%; }
+.ds-button-states .jf-action { width: 100%; }
 .ds-button-states > div > span { display: grid; gap: 3px; }
 .ds-button-states strong { font-family: var(--font-heading); font-size: 9px; }
 .ds-button-states small { color: var(--ds-text-muted); font-size: 8px; line-height: 1.4; }
-.ds-button.is-hover { border-color: var(--ds-brand); background: color-mix(in srgb, var(--ds-brand-soft) 70%, var(--ds-brand) 14%); box-shadow: 0 9px 22px color-mix(in srgb, var(--ds-brand) 16%, transparent); transform: translateY(-1px); }
-.ds-button.is-focus { outline: 3px solid color-mix(in srgb, var(--ds-accent) 34%, transparent); outline-offset: 2px; }
 
 /* Documentação ampliada */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
@@ -1794,7 +1737,7 @@ body:has(.ds-page) {
 .ds-empty-visual i { position: absolute; inset: -7px; border: 1px dashed color-mix(in srgb,var(--ds-brand) 45%,transparent); border-radius: 50%; }
 .ds-empty-card > strong { color: var(--ds-text); font: 720 16px/1.3 var(--font-heading); }
 .ds-empty-card > p { max-width: 390px; margin: 8px 0 16px; color: var(--ds-text-muted); font-size: 13px; line-height: 1.55; }
-.ds-empty-card > .ds-button { margin-top: 2px; }
+.ds-empty-card > .jf-action { margin-top: 2px; }
 .ds-empty-card footer { width: 100%; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--ds-border); display: grid; gap: 5px; text-align: left; color: var(--ds-text-muted); font-size: 10px; }
 .ds-empty-card footer span:first-child { color: var(--ds-success); display: flex; gap: 5px; align-items: center; }
 .ds-empty-grid.is-compact { grid-template-columns: repeat(3,minmax(0,1fr)); }
@@ -1832,7 +1775,7 @@ body:has(.ds-page) {
 .ds-chart-header > svg { flex: 0 0 auto; margin-top: 2px; }
 .ds-chart-header > div { min-width: 0; display: grid; flex: 1; gap: 4px; }
 .ds-chart-header p { margin: 0; color: var(--ds-text-muted); font-size: 10px; line-height: 1.5; }
-.ds-chart-header .ds-button { flex: 0 0 auto; min-height: 32px; white-space: nowrap; }
+.ds-chart-header .jf-action { flex: 0 0 auto; min-height: 32px; white-space: nowrap; }
 .ds-chart-note { display: grid; gap: 4px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--ds-border); color: var(--ds-text-muted); font-size: 9px; line-height: 1.45; }
 .ds-chart-note b { color: var(--ds-text); }
 .ds-advanced-funnel { display: grid; gap: 8px; align-items: center; padding: 4px 0; }.ds-advanced-funnel div{display:grid;grid-template-columns:minmax(82px,auto) minmax(0,1fr) 38px;align-items:center;gap:10px}.ds-advanced-funnel i{position:relative;display:grid;width:max(1px,var(--w));height:28px;justify-self:start;place-items:center;border-radius:6px;background:linear-gradient(90deg,var(--ds-brand),var(--ds-accent));box-shadow:0 6px 14px color-mix(in srgb,var(--ds-brand) 13%,transparent);overflow:visible}.ds-advanced-funnel i b{position:absolute;left:50%;color:#fff;font:800 11px/1 var(--font-heading);white-space:nowrap;text-shadow:0 1px 3px #071412cc;transform:translateX(-50%)}.ds-advanced-funnel span,.ds-advanced-funnel small{font-size:9px}.ds-advanced-funnel span{color:var(--ds-text-muted)}.ds-advanced-funnel small{color:var(--ds-brand-strong);text-align:right}
@@ -1861,7 +1804,7 @@ body:has(.ds-page) {
   .ds-dashboard-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (max-width: 640px) {
-  .ds-llm-manual { align-items: stretch; flex-direction: column; }.ds-llm-manual .ds-button{width:100%}
+  .ds-llm-manual { align-items: stretch; flex-direction: column; }.ds-llm-manual .jf-action{width:100%}
   .ds-icon-tools { grid-template-columns: 1fr; }.ds-icon-tools strong{justify-self:start}
   .ds-icon-grid--documented,.ds-empty-grid,.ds-empty-grid.is-compact,.ds-background-grid,.ds-chart-docs { grid-template-columns: 1fr; }
   .ds-icon-pagination { justify-content: space-between; }.ds-icon-pagination>div{display:none}
@@ -2170,3 +2113,9 @@ body:has(.ds-page) {
 }
 @media(max-width:680px) { .ds-page { --ds-header-height:64px; } .ds-brand img { width:128px; } .ds-header__inner { padding-inline:12px; gap:8px; } .ds-header__actions { gap:8px; } .ds-swatches { grid-template-columns:1fr; } .ds-colors-catalog { gap:32px; } }
 @media(prefers-reduced-motion:reduce) { .ds-layout,.ds-header,.ds-sidebar,.ds-swatch { transition:none; } }
+
+/* The rail divider and floating header share their lower alignment. */
+.ds-header { height:var(--ds-header-height); background:var(--ds-surface); border-radius:var(--ds-radius-sm); backdrop-filter:none; }
+.ds-header__inner { height:100%; }
+.ds-sidebar__top { height:var(--ds-header-height); min-height:var(--ds-header-height); padding-bottom:0; margin-bottom:16px; }
+@media(max-width:900px) { .ds-sidebar__top { height:64px; min-height:64px; } }

@@ -3,7 +3,7 @@ import HomeClient from "./HomeClient";
 import { activeOrganizationId, getHomeContext } from "./service";
 import "./home.css";
 
-export const metadata: Metadata = { title: "Home | JobForged", description: "Visão geral da organização no painel JobForged." };
+export const metadata: Metadata = { title: "JobForged | Home", description: "Visão geral da organização no painel JobForged." };
 
 export default async function HomePage() {
   const context = await getHomeContext(activeOrganizationId);
