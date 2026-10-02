@@ -1,4 +1,5 @@
 "use client";
+import { WorkspaceShell } from "../ui/WorkspaceShell";
 import { Panel } from "@/app/components/ui";
 
 /* eslint-disable react-hooks/set-state-in-effect */
@@ -16,16 +17,12 @@ const nav = [
 type OrganizationThemeRecord={palette?:Record<string,string>;theme?:{dark?:Record<string,string>}};
 
 export function AdminShell({ module, context, children }: { module: AdminModuleId | "home"; context: {organization: AwaitedAdminContext["organization"]; user: Pick<AwaitedAdminContext["user"], "name" | "role" | "initials">}; children: ReactNode }) {
-  const [collapsed,setCollapsed]=useState(false); const [menu,setMenu]=useState(false); const {theme,changeTheme}=useThemePreference();
+  const {theme}=useThemePreference();
   const [organizationTheme,setOrganizationTheme]=useState<OrganizationThemeRecord|null>(null);
   useEffect(()=>{const load=()=>{try{const raw=localStorage.getItem("jobforged.customization.published.v2");setOrganizationTheme(raw?JSON.parse(raw):null)}catch{setOrganizationTheme(null)}};load();window.addEventListener("jobforged-customization-published",load);return()=>window.removeEventListener("jobforged-customization-published",load)},[]);
   const brandPalette=theme==="dark"?organizationTheme?.theme?.dark:organizationTheme?.palette;
   const brandStyle=brandPalette?{"--teal":brandPalette.primary,"--teal-deep":brandPalette.link,"--teal-soft":brandPalette.activeItem,"--blue":brandPalette.secondary,"--app-bg":brandPalette.background,"--app-panel":brandPalette.surface,"--jf-ui-brand":brandPalette.primary,"--jf-ui-brand-strong":brandPalette.link,"--jf-ui-brand-soft":brandPalette.activeItem,"--jf-ui-focus":brandPalette.primary,"--jf-ui-focus-ring":"color-mix(in srgb, var(--jf-ui-focus) 28%, transparent)","--jf-ui-surface":brandPalette.surface,"--jf-ui-surface-soft":brandPalette.background,"--jf-ui-accent":brandPalette.secondary,"--jf-ui-text":brandPalette.text,"--jf-ui-text-muted":"color-mix(in srgb, var(--jf-ui-text) 72%, var(--jf-ui-surface))"} as CSSProperties:undefined;
-  return <main className={`admin-shell ${collapsed?"is-collapsed":""}`} data-theme={theme} style={brandStyle}>
-    <aside className={`admin-sidebar ${menu?"is-open":""}`}><div className="admin-brand"><span><img src={context.organization.logo} alt=""/><strong>{context.organization.shortName}</strong></span><button className="jf-action jf-action--quiet" onClick={()=>setCollapsed(v=>!v)} aria-label={collapsed?"Expandir menu":"Recolher menu"}>{collapsed?<PanelLeftOpen/>:<PanelLeftClose/>}</button><button className="jf-action jf-action--quiet admin-close" onClick={()=>setMenu(false)} aria-label="Fechar menu"><X/></button></div><nav aria-label="Navegação principal">{nav.map(([label,href,Icon])=><a key={href} href={href} title={collapsed?label:undefined} className={`/app/${module}`===href?"is-active":""} aria-current={`/app/${module}`===href?"page":undefined}><Icon/><span>{label}</span></a>)}</nav><div className="admin-user"><a href="/app/minha-conta"><span>{context.user.initials}</span><span><strong>{context.user.name}</strong><small>{context.user.role}</small></span></a><button className="jf-action jf-action--quiet" aria-label="Sair da conta" title="Sair da conta"><LogOut/></button></div></aside>
-    {menu&&<button className="jf-action jf-action--quiet admin-scrim" onClick={()=>setMenu(false)} aria-label="Fechar menu"/>}
-    <section className="admin-workspace"><header className="admin-topbar"><button className="jf-action jf-action--quiet admin-menu" onClick={()=>setMenu(true)} aria-label="Abrir menu"><Menu/></button><div className="admin-org"><img src={context.organization.logo} alt=""/><span><small>Organização ativa</small><strong>{context.organization.name}</strong></span></div><div><ThemeSelector theme={theme} onChange={changeTheme}/><button className="jf-action jf-action--quiet admin-notice" aria-label="Notificações"><Bell/><i/></button></div></header><div className="admin-content">{children}</div></section>
-  </main>
+  return <WorkspaceShell items={nav.map(([label,href,icon])=>({label,href,icon,active:`/app/${module}`===href}))} logo={context.organization.logo} brand={context.organization.shortName} title={context.organization.name} subtitle="Organização ativa" style={brandStyle} actions={<button className="jf-action jf-action--quiet admin-notice" aria-label="Notificações"><Bell/><i/></button>} footer={<div className="admin-user"><a href="/app/minha-conta"><span>{context.user.initials}</span><span><strong>{context.user.name}</strong><small>{context.user.role}</small></span></a><button className="jf-action jf-action--quiet" aria-label="Sair da conta"><LogOut/></button></div>}>{children}</WorkspaceShell>;
 }
 
 export function AdminPageHeader({ module, action }: { module: AdminModuleId; action?: ReactNode }) { const copy=moduleCopy[module]; return <header className="admin-page-head"><div><span>Painel / {copy.title}</span><h1>{copy.title}</h1><p>{copy.description}</p></div>{action}</header> }

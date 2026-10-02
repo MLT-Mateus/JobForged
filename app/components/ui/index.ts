@@ -21,3 +21,5 @@ export { ThemeSelector, type ThemeMode } from "./ThemeSelector";
 export { ActionButton, Panel, MetricCard, DataTable, EmptyState, StatusBadge } from "./AdminPrimitives";
 
 export { useThemePreference, setThemePreference } from "./useThemePreference";
+
+export { WidgetGroup, WidgetDivider, WidgetDialog, FocusPopover } from "./Widgets";

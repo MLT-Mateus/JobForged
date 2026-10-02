@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: "Fundamentos visuais, componentes e padrões de interface da plataforma JobForged.",
 };
 
-export default function DesignSystemSectionPage() {
-  return <DesignSystemClient />;
+export default async function DesignSystemSectionPage({params}:{params:Promise<{section:string[]}>}) {
+  const {section}=await params;
+  return <DesignSystemClient initialSection={section[0]} />;
 }

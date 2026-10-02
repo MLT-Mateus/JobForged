@@ -3,6 +3,9 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
+import { WorkspaceShell } from "../components/ui/WorkspaceShell";
+import { InlineBrandLoader } from "../components/InlineBrandLoader";
+import { WidgetsSection } from "./WidgetsSection";
 import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
@@ -86,6 +89,7 @@ const navigation = [
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
+  { id: "widgets", label: "Widgets", icon: Layers3 },
 ];
 
 const dashboardFunnel = [
@@ -237,12 +241,11 @@ function AlertIcon({ kind, size = 18 }: { kind: AlertKind; size?: number }) {
   return <Info size={size} aria-hidden="true" />;
 }
 
-export default function DesignSystemClient() {
+export default function DesignSystemClient({initialSection="fundamentos"}:{initialSection?:string}) {
   const { theme, changeTheme } = useThemePreference();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
   const [appSidebarExpanded, setAppSidebarExpanded] = useState(true);
-  const [activePage, setActivePage] = useState(0);
+  const [activePage, setActivePage] = useState(() => Math.max(0,navigation.findIndex(item=>item.id===initialSection)));
   const [copied, setCopied] = useState<string | null>(null);
   const [activeAlert, setActiveAlert] = useState<ToastNotice | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -292,9 +295,8 @@ export default function DesignSystemClient() {
 
   function changePage(index: number) {
     setActivePage(index);
-    setMenuOpen(false);
     window.history.pushState(null, "", `/design-system/${navigation[index].id}`);
-    document.querySelector(".ds-content")?.scrollTo({ top: 0, behavior: "auto" });
+    document.querySelector(".admin-workspace")?.scrollTo({ top: 0, behavior: "auto" });
   }
 
   async function copyValue(value: string, label: string) {
@@ -328,71 +330,19 @@ export default function DesignSystemClient() {
     setSelectedBenefits((current) => current.includes(value) ? current : [...current, value]);
   }
 
-  useEffect(()=>{
-    if(!menuOpen) return;
-    const close=(event:KeyboardEvent)=>{if(event.key==="Escape"){setMenuOpen(false);document.querySelector<HTMLButtonElement>(".ds-mobile-menu")?.focus()}};
-    document.addEventListener("keydown",close);
-    return()=>document.removeEventListener("keydown",close);
-  },[menuOpen]);
-
   const currentPage = navigation[activePage];
-  const sidebarExpanded = sidebarPinned || menuOpen;
 
   return (
-    <main className={`ds-page ${sidebarPinned ? "is-sidebar-pinned" : "is-sidebar-compact"}`} data-theme={theme} suppressHydrationWarning>
+    <WorkspaceShell logo="/brand/jobforged-symbol.svg" brand="JobForged" title="Design System" subtitle="Manual da marca" collapsed={!sidebarPinned} onCollapsedChange={value=>setSidebarPinned(!value)} items={navigation.map((item,index)=>({label:item.label,href:`/design-system/${item.id}`,icon:item.icon,active:activePage===index,onSelect:()=>changePage(index)}))} footer={<div className="admin-user"><a href="/"><span>JF</span><span><strong>JobForged</strong><small>Voltar ao site</small></span></a></div>}>
+      <div className="ds-page ds-page--workspace" data-theme={theme} suppressHydrationWarning>
       <a className="ds-skip-link" href="#painel-atual">Ir para o conteúdo</a>
-
-      <header className="ds-header">
-        <div className="ds-header__inner">
-          <Link className="ds-brand" href="/" aria-label="Voltar para a página inicial da JobForged">
-            <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
-            <span>Manual da marca</span>
-          </Link>
-          <div className="ds-header__actions">
-            <ThemeSelector theme={theme} onChange={changeTheme} />
-            <button type="button" className="ds-mobile-menu" aria-label={menuOpen ? "Fechar navegação" : "Abrir navegação"} aria-expanded={menuOpen} aria-controls="ds-navigation" onClick={() => setMenuOpen((open) => !open)}><Menu size={20} aria-hidden="true" /></button>
-          </div>
-        </div>
-      </header>
-
-      {menuOpen && <button type="button" className="ds-menu-backdrop" aria-label="Fechar navegação" onClick={()=>setMenuOpen(false)}/> }
-      <div className="ds-layout">
-        <aside
-          id="ds-navigation" className={`ds-sidebar ${menuOpen ? "is-open" : ""} ${sidebarExpanded ? "is-expanded" : "is-compact"}`}
-        >
-          <div className="ds-sidebar__top">
-            <span className="ds-sidebar__title"><BrandAsset src="/brand/jobforged-symbol.svg" alt="" />{sidebarExpanded && <strong>Manual</strong>}</span>
-            <button
-              type="button"
-              className="ds-sidebar__pin"
-              aria-label={sidebarPinned ? "Recolher menu para ícones" : "Fixar menu expandido"}
-              aria-pressed={sidebarPinned}
-              onClick={() => setSidebarPinned((pinned) => !pinned)}
-            >
-              {sidebarPinned ? <PanelLeftClose size={17} aria-hidden="true" /> : <PanelLeftOpen size={17} aria-hidden="true" />}
-            </button>
-          </div>
-          <button type="button" className="ds-sidebar-close" onClick={()=>setMenuOpen(false)} aria-label="Fechar navegação"><X size={20}/></button>
-          <nav aria-label="Páginas do manual da marca">
-            {navigation.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <button key={item.id} type="button" title={!sidebarExpanded ? item.label : undefined} className={activePage === index ? "is-active" : ""} aria-current={activePage === index ? "page" : undefined} onClick={() => changePage(index)}>
-                  <span className="ds-sidebar__icon"><Icon size={18} strokeWidth={1.8} aria-hidden="true" /></span>
-                  <strong>{item.label}</strong>
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
-
-        <div className="ds-content" id="painel-atual">
+      <div className="ds-content" id="painel-atual">
           <div className="ds-content__inner">
           <div className="ds-page-meta"><strong><span>{String(activePage + 1).padStart(2, "0")} -</span> {currentPage.label}</strong></div>
 
           <section className="ds-hero" hidden={activePage !== 0} aria-label="Fundamentos da marca">
             <div className="ds-hero__copy"><span className="ds-kicker">Identidade visual · v1.3</span><h1>Interfaces <em className="ds-highlight-pair"><span className="ds-highlight-blue">claras</span> <span className="ds-highlight-teal">e humanas.</span></em><br />Decisões mais inteligentes.</h1><p>O sistema visual da JobForged une precisão, proximidade e tecnologia. Esta base mantém o produto consistente em qualquer tela, nos temas claro e escuro.</p><div className="ds-hero__tags" aria-label="Princípios da marca"><span>Humano</span><span>Confiável</span><span>Objetivo</span><span>Adaptável</span></div></div>
-            <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><JobForgedLoadingAnimation className="ds-hero__loader" size={112} /><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
+            <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><div className="ds-hero__loader"><InlineBrandLoader /></div><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
           </section>
           <section className="ds-llm-manual" hidden={activePage !== 0} aria-label="Manual da marca para LLM">
             <div><FileText size={22} aria-hidden="true"/><span><strong>Manual da marca para LLM</strong><small>Este documento será ampliado quando o Design System estiver concluído e servirá para transportar as regras visuais da JobForged entre ferramentas e modelos de linguagem.</small></span></div>
@@ -600,12 +550,14 @@ export default function DesignSystemClient() {
             </div>
           </section>
 
+          {activePage === 12 && <WidgetsSection />}
+
           <nav className="ds-pager" aria-label="Navegação entre páginas"><button type="button" onClick={() => changePage(activePage - 1)} disabled={activePage === 0}><ArrowLeft size={16} /><span>Anterior</span></button><div>{navigation.map((item, index) => <button key={item.id} type="button" className={activePage === index ? "is-active" : ""} onClick={() => changePage(index)} aria-label={`Abrir página ${index + 1}: ${item.label}`}>{index + 1}</button>)}</div><button type="button" onClick={() => changePage(activePage + 1)} disabled={activePage === navigation.length - 1}><span>Próxima</span><ArrowRight size={16} /></button></nav>
           </div>
         </div>
       </div>
 
       {activeAlert && <AppToast notice={activeAlert} onClose={() => setActiveAlert(null)} />}
-    </main>
+    </WorkspaceShell>
   );
 }
