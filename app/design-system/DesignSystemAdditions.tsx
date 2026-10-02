@@ -12,9 +12,12 @@ import {
 } from "lucide-react";
 import { SelectField, TextField, type SelectOption } from "@/app/components/ui";
 
+import { WidgetsIcon } from "../components/ui/Icons";
+
 type IconType = ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>;
 
 export const iconCatalog: Array<{ id: string; name: string; category: string; meaning: string; example: string; icon: IconType }> = [
+  ["widgets","Widgets","Navegação","Grupos, containers e sobreposições","Menu do Design System",WidgetsIcon],
   ["home","Home","Navegação","Página inicial","Menu principal",House],
   ["dashboard","Dashboard","Dados","Visão analítica","Indicadores",BarChart3],
   ["empresa","Empresa","Organização","Empresa cliente","Cadastro",Building2],

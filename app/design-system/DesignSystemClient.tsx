@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { WorkspaceShell } from "../components/ui/WorkspaceShell";
 import { InlineBrandLoader } from "../components/InlineBrandLoader";
+import { WidgetsIcon } from "../components/ui/Icons";
 import { WidgetsSection } from "./WidgetsSection";
 import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
@@ -84,12 +85,12 @@ const navigation = [
   { id: "botoes", label: "Botões", icon: MousePointerClick },
   { id: "formularios", label: "Formulários", icon: SlidersHorizontal },
   { id: "componentes", label: "Biblioteca", icon: Layers3 },
+  { id: "widgets", label: "Widgets", icon: WidgetsIcon },
   { id: "fundos", label: "Background", icon: PanelsTopLeft },
   { id: "espacamento", label: "Espaçamento", icon: Ruler },
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
-  { id: "widgets", label: "Widgets", icon: Layers3 },
 ];
 
 const dashboardFunnel = [
@@ -340,16 +341,16 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
           <div className="ds-content__inner">
           <div className="ds-page-meta"><strong><span>{String(activePage + 1).padStart(2, "0")} -</span> {currentPage.label}</strong></div>
 
-          <section className="ds-hero" hidden={activePage !== 0} aria-label="Fundamentos da marca">
+          <section className="ds-hero" hidden={currentPage.id !== "fundamentos"} aria-label="Fundamentos da marca">
             <div className="ds-hero__copy"><span className="ds-kicker">Identidade visual · v1.3</span><h1>Interfaces <em className="ds-highlight-pair"><span className="ds-highlight-blue">claras</span> <span className="ds-highlight-teal">e humanas.</span></em><br />Decisões mais inteligentes.</h1><p>O sistema visual da JobForged une precisão, proximidade e tecnologia. Esta base mantém o produto consistente em qualquer tela, nos temas claro e escuro.</p><div className="ds-hero__tags" aria-label="Princípios da marca"><span>Humano</span><span>Confiável</span><span>Objetivo</span><span>Adaptável</span></div></div>
             <div className="ds-hero__visual" aria-hidden="true"><div className="ds-orbit ds-orbit--one" /><div className="ds-orbit ds-orbit--two" /><div className="ds-hero__loader"><InlineBrandLoader /></div><span className="ds-visual-label ds-visual-label--one">Dados organizados</span><span className="ds-visual-label ds-visual-label--two">Entrevistas no WhatsApp</span><span className="ds-visual-label ds-visual-label--three">Triagem inteligente</span><span className="ds-visual-label ds-visual-label--four">Marca própria</span><span className="ds-visual-label ds-visual-label--five">Decisões seguras</span><span className="ds-visual-label ds-visual-label--six">Processos ágeis</span></div>
           </section>
-          <section className="ds-llm-manual" hidden={activePage !== 0} aria-label="Manual da marca para LLM">
+          <section className="ds-llm-manual" hidden={currentPage.id !== "fundamentos"} aria-label="Manual da marca para LLM">
             <div><FileText size={22} aria-hidden="true"/><span><strong>Manual da marca para LLM</strong><small>Este documento será ampliado quando o Design System estiver concluído e servirá para transportar as regras visuais da JobForged entre ferramentas e modelos de linguagem.</small></span></div>
             <a className="jf-action jf-action--secondary" href="/manual-da-marca-jobforged-llm.md" download><Download size={16}/>Baixar documento para LLM</a>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 1} aria-label="Ativos da marca">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "marca"} aria-label="Ativos da marca">
             <SectionHeading title="Arquivos oficiais, prontos para usar." description="Escolha a versão adequada e baixe o arquivo original sem alterar proporções ou cores." />
             <div className="ds-asset-section">
               <header><span>01</span><div><h3>Logos</h3><p>Assinaturas horizontais para cabeçalhos, documentos e comunicações.</p></div></header>
@@ -373,7 +374,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             </div>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 2} aria-label="Cores da marca">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "cores"} aria-label="Cores da marca">
             <SectionHeading title="Paleta da JobForged" description="Escolha a cor pela sua função. As amostras e os valores acompanham o tema selecionado no cabeçalho." />
             <div className="ds-colors-mode"><span>Tema {theme === "dark" ? "escuro" : "claro"}</span><p>Clique em uma amostra para copiar seu valor.</p></div>
             <div className="ds-colors-catalog">
@@ -390,13 +391,13 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <aside className="ds-colors-note"><CircleAlert size={20} aria-hidden="true"/><p><strong>Antes de aplicar uma cor</strong>Verifique o contraste entre texto e fundo nos dois temas. Na personalização da empresa, altere as cores de marca e preserve os significados de sucesso, atenção e erro.</p></aside>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 3} aria-label="Tipografia">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "tipografia"} aria-label="Tipografia">
             <SectionHeading title="Duas fontes, uma hierarquia fácil de reconhecer." description="Montserrat lidera; Open Sans sustenta a leitura. A combinação equilibra personalidade de marca e clareza em interfaces densas." />
             <div className="ds-type-families"><article className="ds-type-family ds-type-family--montserrat"><span>Aa</span><div><strong>Montserrat Variable</strong><em>Fonte primária</em><p>Títulos, navegação, botões, métricas e labels curtas. Use pesos de 600 a 780 para dar direção e presença.</p></div></article><article className="ds-type-family ds-type-family--opensans"><span>Aa</span><div><strong>Open Sans Variable</strong><em>Fonte secundária</em><p>Parágrafos, campos, tabelas, descrições e conteúdos longos. Use pesos de 400 a 650 para maximizar a leitura.</p></div></article></div>
             <div className="ds-type-scale"><div><span>Display · Montserrat 52/58</span><strong>Talentos que movem negócios.</strong></div><div><span>Heading · Montserrat 32/40</span><strong>Visão completa do processo.</strong></div><div><span>Body · Open Sans 15/24</span><p>Informação organizada para o RH decidir com mais segurança, contexto e agilidade.</p></div><div><span>Label · Montserrat 12/16</span><small>ETAPA ATUAL · ENTREVISTA</small></div></div>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 4} aria-label="Botões">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "botoes"} aria-label="Botões">
             <SectionHeading title="Botões compactos, claros e consistentes." description="Cantos discretos e cores leves mantêm as ações acessíveis sem competir com o conteúdo." />
             <div className="ds-examples-grid">
               <ExampleCard title="Principais · com e sem ícone"><div className="ds-button-row"><button type="button" className="jf-action jf-action--primary"><Plus size={16} />Nova vaga</button><button type="button" className="jf-action jf-action--accent">Ver candidatos</button></div><p className="ds-component-spec">Altura 40 px · padding 14 px · gap 8 px · raio 8 px. Use ícone de 16 px quando ele acelerar o reconhecimento da ação.</p></ExampleCard>
@@ -410,7 +411,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <ButtonSpecs />
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 5} aria-label="Formulários">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "formularios"} aria-label="Formulários">
             <SectionHeading title="Controles limpos, previsíveis e prontos para o produto." description="O manual agora utiliza a mesma biblioteca oficial das futuras telas. Estados, dimensões, foco e comportamento serão reaproveitados sem reconstruir componentes por página." />
             <div className="ds-form-showcase">
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
@@ -471,7 +472,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             </div>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 6} aria-label="Biblioteca">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "componentes"} aria-label="Biblioteca">
             <SectionHeading title="Peças pequenas que formam experiências completas." description="Combine status, pessoas e notificações com o mesmo vocabulário visual em todo o produto." />
             <div className="ds-components-grid">
               <ExampleCard title="Status"><div className="ds-badge-list"><span className="ds-badge ds-badge--success"><CircleCheck size={14} />Aprovado</span><span className="ds-badge ds-badge--warning"><Clock3 size={14} />Em avaliação</span><span className="ds-badge ds-badge--danger"><CircleX size={14} />Não selecionado</span><span className="ds-badge ds-badge--info"><CircleAlert size={14} />Novo</span></div></ExampleCard>
@@ -481,9 +482,9 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <IconLibrary/>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 7} aria-label="Background"><BackgroundsSection/></section>
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "fundos"} aria-label="Background"><BackgroundsSection/></section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 8} aria-label="Espaçamento">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "espacamento"} aria-label="Espaçamento">
             <SectionHeading title="Espaço também comunica hierarquia." description="A interface deve respirar. Margens, gutters e intervalos consistentes separam contextos, reduzem a sensação de sufoco e ajudam cada informação a ocupar o espaço certo." />
             <div className="ds-spacing-principle"><div><span>Princípio prioritário</span><h3>Organizar sem comprimir.</h3><p>Proximidade indica relação; distância indica mudança de assunto. Nunca compense excesso de conteúdo diminuindo indiscriminadamente os espaços. Reorganize, agrupe e priorize.</p></div><div className="ds-spacing-breath" aria-label="Comparação entre conteúdo comprimido e conteúdo com respiro"><article className="is-tight"><span/><span/><span/><span/></article><i>→</i><article className="is-correct"><span/><span/><span/><span/></article></div></div>
             <div className="ds-spacing-scale" aria-label="Escala oficial de espaçamento">{spacingScale.map(({token,value,label})=><article key={token}><span style={{"--space":`var(${token})`} as CSSProperties}/><strong>{value} px</strong><small>{label}</small><code>{token}</code></article>)}</div>
@@ -495,9 +496,9 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <div className="ds-spacing-guidance"><article className="is-do"><span><Check/> Faça</span><ul><li>Separe seções antes de adicionar bordas.</li><li>Use 24–32 px dentro de containers principais.</li><li>Mantenha alinhamento vertical entre blocos relacionados.</li><li>Reduza colunas antes de reduzir o espaço interno.</li></ul></article><article className="is-avoid"><span><CircleX/> Evite</span><ul><li>Conteúdo encostado na borda do viewport.</li><li>Cards dentro de cards sem necessidade.</li><li>Intervalos diferentes para relações equivalentes.</li><li>Comprimir formulários para ocupar menos altura.</li></ul></article></div>
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 9} aria-label="Empty States"><EmptyStatesSection/></section>
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "empty-states"} aria-label="Empty States"><EmptyStatesSection/></section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 10} aria-label="Dashboards">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "dashboards"} aria-label="Dashboards">
             <SectionHeading title="Elementos para dashboards." description="Referências visuais reutilizáveis para indicadores e gráficos da aplicação." />
             <div className="ds-dashboard-catalog">
               <article className="ds-dashboard-template ds-dashboard-template--funnel">
@@ -523,7 +524,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <AdvancedCharts />
           </section>
 
-          <section className="ds-section ds-section--first" hidden={activePage !== 11} aria-label="Aplicação">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "aplicacao"} aria-label="Aplicação">
             <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
             <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
               <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">
@@ -550,9 +551,9 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             </div>
           </section>
 
-          {activePage === 12 && <WidgetsSection />}
+          {currentPage.id === "widgets" && <WidgetsSection />}
 
-          <nav className="ds-pager" aria-label="Navegação entre páginas"><button type="button" onClick={() => changePage(activePage - 1)} disabled={activePage === 0}><ArrowLeft size={16} /><span>Anterior</span></button><div>{navigation.map((item, index) => <button key={item.id} type="button" className={activePage === index ? "is-active" : ""} onClick={() => changePage(index)} aria-label={`Abrir página ${index + 1}: ${item.label}`}>{index + 1}</button>)}</div><button type="button" onClick={() => changePage(activePage + 1)} disabled={activePage === navigation.length - 1}><span>Próxima</span><ArrowRight size={16} /></button></nav>
+          <nav className="ds-pager" aria-label="Navegação entre páginas"><button type="button" onClick={() => changePage(activePage - 1)} disabled={currentPage.id === "fundamentos"}><ArrowLeft size={16} /><span>Anterior</span></button><div>{navigation.map((item, index) => <button key={item.id} type="button" className={activePage === index ? "is-active" : ""} onClick={() => changePage(index)} aria-label={`Abrir página ${index + 1}: ${item.label}`}>{index + 1}</button>)}</div><button type="button" onClick={() => changePage(activePage + 1)} disabled={activePage === navigation.length - 1}><span>Próxima</span><ArrowRight size={16} /></button></nav>
           </div>
         </div>
       </div>

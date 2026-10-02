@@ -21,3 +21,20 @@
 .jf-focus-group__panel { position:absolute; z-index:35; top:calc(100% + 8px); left:0; display:grid; gap:var(--jf-ui-space-4); width:min(300px,calc(100vw - 80px)); padding:var(--jf-ui-space-5); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface-raised); box-shadow:var(--jf-ui-shadow); color:var(--jf-ui-text); }
 @keyframes jf-widget-enter { from {opacity:0;transform:translateY(8px)} to {opacity:1;transform:none} }
 @media(prefers-reduced-motion:reduce) { .jf-widget-dialog[open] {animation:none} }
+/* Mobile overlays keep their own scroll and leave browser safe areas free. */
+.jf-widget-dialog { max-height:calc(var(--widget-viewport,100dvh) - 32px); outline:none; }
+.jf-widget-dialog[data-state="closing"] { animation:jf-widget-exit 200ms ease-in forwards; pointer-events:none; }
+.jf-widget-dialog--sheet { max-height:calc(var(--widget-viewport,100dvh) - max(24px,env(safe-area-inset-top))); overflow:hidden; transform:translateY(var(--sheet-drag,0px)); transition:transform 180ms ease-out; }
+.jf-widget-dialog--sheet[open] { animation:jf-sheet-enter 240ms cubic-bezier(.22,1,.36,1); }
+.jf-widget-dialog--sheet[data-state="closing"] { animation:jf-sheet-exit 200ms ease-in forwards; }
+.jf-widget-dialog--sheet[data-dragging] { transition:none; animation:none; }
+.jf-sheet-grip { display:grid; flex:0 0 32px; width:100%; height:32px; padding:0; place-items:center; border:0; background:transparent; cursor:grab; touch-action:none; }
+.jf-sheet-grip .jf-sheet-handle { margin:0; }
+.jf-widget-dialog--sheet .jf-widget-dialog__header { padding:4px 24px 20px; }
+.jf-widget-dialog--sheet .jf-widget-dialog__body { padding:20px 24px; -webkit-overflow-scrolling:touch; }
+.jf-widget-dialog--sheet .jf-widget-dialog__footer { padding:16px 24px max(16px,env(safe-area-inset-bottom)); }
+.jf-widget-dialog--sheet .jf-action { min-height:44px; }
+@keyframes jf-sheet-enter { from{transform:translateY(100%)} to{transform:translateY(0)} }
+@keyframes jf-sheet-exit { to{transform:translateY(100%);opacity:.6} }
+@keyframes jf-widget-exit { to{opacity:0;transform:translateY(8px)} }
+@media(prefers-reduced-motion:reduce){.jf-widget-dialog[open],.jf-widget-dialog[data-state="closing"]{animation:none;transition:none}}
