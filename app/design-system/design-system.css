@@ -274,16 +274,7 @@ body:has(.ds-page) {
   white-space: nowrap;
 }
 
-.ds-highlight-pair::after {
-  position: absolute;
-  right: 0;
-  bottom: -7px;
-  left: 0;
-  height: 8px;
-  border-radius: 50%;
-  background: url("data:image/svg+xml,%3Csvg width='200' height='12' viewBox='0 0 200 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 8C55 1 120 2 198 7' stroke='%234169E1' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-  content: "";
-}
+
 
 .ds-highlight-blue { color: var(--ds-accent); }
 .ds-highlight-teal { color: var(--ds-brand); }
