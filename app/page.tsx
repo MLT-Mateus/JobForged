@@ -1,5 +1,6 @@
 "use client";
 
+import { PhoneFrame } from "./components/ui/PhoneFrame";
 import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { BrandAsset } from "@/app/components/BrandAsset";
@@ -408,8 +409,7 @@ export default function Home() {
         <div className="container whatsapp-layout">
           <Reveal className="phone-area">
             <div className="phone-glow" />
-            <div className="phone">
-              <div className="phone-notch" />
+            <PhoneFrame className="phone" label="Prévia da entrevista pelo WhatsApp">
               <div className="chat-head">
                 <span className="chat-avatar"><MessageCircle /></span>
                 <span><strong>Sua Empresa Jobs</strong><small>online</small></span>
@@ -422,7 +422,7 @@ export default function Home() {
                 <div className="chat-bubble chat-bubble--user">Sim, confirmado! 😊</div>
                 <div className="chat-options"><span>Ver agendamento</span><span>Adicionar à agenda</span></div>
               </div>
-            </div>
+            </PhoneFrame>
             <ViewportMotion
               className="phone-status"
               animate={reduceMotion ? undefined : { x: [0, 9, -5, 7, 0], y: [0, -12, 5, -8, 0] }}

@@ -1,0 +1,9 @@
+.jf-phone-frame {
+  position:relative; display:flex; flex-direction:column; isolation:isolate;
+  width:min(304px,100%); min-width:0; border:8px solid var(--jf-ui-device-frame);
+  border-radius:45px; background:var(--jf-ui-surface-soft);
+  box-shadow:0 0 0 2px var(--jf-ui-device-edge),var(--jf-ui-shadow);
+}
+.jf-phone-frame__screen { position:relative; flex:1; min-height:0; overflow:hidden; border-radius:36px; }
+.jf-phone-frame__notch { position:absolute; z-index:4; top:8px; left:50%; width:95px; height:22px; border-radius:999px; background:var(--jf-ui-device-frame); transform:translateX(-50%); pointer-events:none; }
+.jf-phone-frame__home { position:absolute; z-index:4; bottom:7px; left:50%; width:84px; height:4px; border-radius:4px; background:var(--jf-ui-device-edge); transform:translateX(-50%); pointer-events:none; }

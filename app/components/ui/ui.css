@@ -1,4 +1,6 @@
 :root {
+  --jf-ui-device-frame: #102e2c;
+  --jf-ui-device-edge: #64827d;
   --jf-ui-fixed-dark: #072f2d;
   --jf-ui-on-dark: #f5fffd;
   --jf-ui-brand: #20b2aa;

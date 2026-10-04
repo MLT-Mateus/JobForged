@@ -1258,29 +1258,11 @@ main {
 }
 
 .phone {
-  position: relative;
-  z-index: 2;
-  width: 304px;
-  min-height: 570px;
-  margin: auto;
-  overflow: hidden;
-  border: 8px solid #102e2c;
-  border-radius: 45px;
-  background: #edf5f1;
-  box-shadow: 0 38px 80px rgba(0, 0, 0, 0.38);
-  transform: rotate(-3deg);
-}
-
-.phone-notch {
-  position: absolute;
-  z-index: 3;
-  top: 8px;
-  left: 50%;
-  width: 95px;
-  height: 22px;
-  border-radius: 999px;
-  background: #102e2c;
-  transform: translateX(-50%);
+  z-index:2;
+  width:304px;
+  min-height:570px;
+  margin:auto;
+  transform:rotate(-3deg);
 }
 
 .chat-head {
@@ -3258,7 +3240,7 @@ html[data-theme="dark"] .step-number { background: var(--teal-soft); color: var(
 html[data-theme="dark"] .faq-item--open { border-color: rgba(67, 208, 198, 0.38); }
 html[data-theme="dark"] .faq-item button:hover { background: var(--teal-pale); }
 
-html[data-theme="dark"] .phone { border-color: #061a18; background: #0b1e1b; }
+
 html[data-theme="dark"] .chat-body { background: #0e201d; color: var(--ink); }
 html[data-theme="dark"] .chat-date { background: rgba(21, 48, 44, 0.9); color: #91aaa6; }
 html[data-theme="dark"] .chat-bubble--bot { background: var(--app-panel-raised); color: var(--ink); }
