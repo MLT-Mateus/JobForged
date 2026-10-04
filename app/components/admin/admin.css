@@ -241,3 +241,12 @@ body:has(.admin-shell){overflow:hidden}
  .admin-org strong { overflow-wrap:anywhere; }
 }
 @media(prefers-reduced-motion:reduce) { .admin-shell * { transition:none!important; animation:none!important; scroll-behavior:auto!important; } }
+
+/* Approved complete signature; compact navigation moves the symbol to the header. */
+.admin-brand img.admin-brand__full-logo { width:160px; max-width:100%; height:auto; object-fit:contain; }
+.admin-org .admin-org__brand-icon { display:none; flex:0 0 32px; }
+.is-collapsed .admin-org .admin-org__brand-icon { display:flex; }
+@media(max-width:900px) {
+  .has-full-brand .admin-org .admin-org__brand-icon { display:flex; }
+  .has-full-brand.is-menu-open .admin-org .admin-org__brand-icon { display:none; }
+}

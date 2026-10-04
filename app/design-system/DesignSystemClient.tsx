@@ -334,7 +334,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const currentPage = navigation[activePage];
 
   return (
-    <WorkspaceShell logo="/brand/jobforged-symbol.svg" brand="JobForged" title="Design System" subtitle="Manual da marca" collapsed={!sidebarPinned} onCollapsedChange={value=>setSidebarPinned(!value)} items={navigation.map((item,index)=>({label:item.label,href:`/design-system/${item.id}`,icon:item.icon,active:activePage===index,onSelect:()=>changePage(index)}))} footer={<div className="ds-sidebar-return"><a className="jf-action jf-action--secondary" href="/" aria-label="Voltar à LP" title="Voltar à LP"><ArrowLeft aria-hidden="true"/><span>Voltar à LP</span></a></div>}>
+    <WorkspaceShell fullLogo="/brand/jobforged-logo-primary.svg" logo="/brand/jobforged-symbol.svg" brand="JobForged" title="Design System" subtitle="Manual da marca" collapsed={!sidebarPinned} onCollapsedChange={value=>setSidebarPinned(!value)} items={navigation.map((item,index)=>({label:item.label,href:`/design-system/${item.id}`,icon:item.icon,active:activePage===index,onSelect:()=>changePage(index)}))} footer={<div className="ds-sidebar-return"><a className="jf-action jf-action--secondary" href="/" aria-label="Voltar à LP" title="Voltar à LP"><ArrowLeft aria-hidden="true"/><span>Voltar à LP</span></a></div>}>
       <div className="ds-page ds-page--workspace" data-theme={theme} suppressHydrationWarning>
       <a className="ds-skip-link" href="#painel-atual">Ir para o conteúdo</a>
       <div className="ds-content" id="painel-atual">
