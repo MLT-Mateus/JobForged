@@ -1,4 +1,5 @@
 :root {
+  --jf-ui-header-control-height: 42px;
   --jf-ui-device-frame: #102e2c;
   --jf-ui-device-edge: #64827d;
   --jf-ui-fixed-dark: #072f2d;
@@ -116,7 +117,7 @@
   --jf-ui-scrollbar-thumb-hover: var(--jf-ui-brand-strong);
 }
 
-.jf-theme-selector { display: inline-flex; padding: 3px; border: 1px solid var(--jf-ui-border); border-radius: 10px; background: var(--jf-ui-surface-soft); font-family: var(--jf-ui-font-heading); }
+.jf-theme-selector { min-height:var(--jf-ui-header-control-height); display: inline-flex; padding: 3px; border: 1px solid var(--jf-ui-border); border-radius: 10px; background: var(--jf-ui-surface-soft); font-family: var(--jf-ui-font-heading); }
 .jf-theme-selector button { display: inline-flex; min-height: 34px; align-items: center; gap: 6px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--jf-ui-text-muted); cursor: pointer; font-size: 12px; font-weight: 700; }
 .jf-theme-selector button.is-active { background: var(--jf-ui-surface); box-shadow: 0 3px 12px rgba(6, 47, 44, 0.1); color: var(--jf-ui-text); }
 .jf-theme-selector button:hover { color: var(--jf-ui-brand-strong); }
@@ -655,6 +656,7 @@
 .jf-theme-selector button { justify-content:center; flex-shrink:0; }
 .jf-theme-selector>.jf-theme-selector__mobile { display:none; }
 @media(max-width:680px) {
+ :root { --jf-ui-header-control-height:46px; }
  .jf-theme-selector { padding:0; border-radius:var(--jf-ui-control-radius); }
  .jf-theme-selector>.jf-theme-selector__option { display:none; }
  .jf-theme-selector>.jf-theme-selector__mobile { display:inline-flex; width:44px; height:44px; min-height:44px; padding:0; }

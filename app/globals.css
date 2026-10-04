@@ -279,6 +279,7 @@ main {
 }
 
 .header-login { flex: 0 0 auto; }
+.header-login.jf-action { min-height:var(--jf-ui-header-control-height); font-size:12px; }
 
 .button {
   letter-spacing: -0.01em;

@@ -17,6 +17,7 @@ import {
   FileText,
   ImageIcon,
   LayoutTemplate,
+  LogIn,
   Mail,
   Menu,
   MessageCircle,
@@ -310,7 +311,7 @@ export default function Home() {
             {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           </nav>
           <ThemeSelector theme={theme} onChange={changeTheme} />
-          <Link className="button button--ghost button--small header-login jf-action jf-action--secondary jf-action--small" href="/login">Entrar</Link>
+          <Link className="header-login jf-action jf-action--secondary" href="/login"><LogIn aria-hidden="true" />Entrar</Link>
           <button
             className="menu-button"
             type="button"
