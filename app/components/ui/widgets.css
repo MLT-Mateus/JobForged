@@ -8,7 +8,11 @@
 .jf-widget-dialog { padding:0; width:min(560px,calc(100vw - 32px)); max-width:none; max-height:calc(100dvh - 32px); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface); color:var(--jf-ui-text); box-shadow:var(--jf-ui-shadow); font-family:var(--jf-ui-font-body); }
 .jf-widget-dialog[open] { display:flex; flex-direction:column; animation:jf-widget-enter 180ms ease-out; }
 .jf-widget-dialog::backdrop { background:rgb(0 0 0 / .48); }
-.jf-widget-dialog--drawer { position:fixed; inset:16px 16px 16px auto; margin:0; height:calc(100dvh - 32px); width:min(440px,calc(100vw - 32px)); }
+.jf-widget-dialog--modal { position:fixed; inset:0; margin:auto; }
+.jf-widget-dialog--drawer { position:fixed; inset:0 0 0 auto; margin:0; height:var(--widget-viewport,100dvh); width:min(440px,100vw); border-width:0 0 0 1px; border-radius:0; overflow:hidden; }
+.jf-widget-dialog--drawer .jf-widget-dialog__body { flex:1; }
+.jf-widget-dialog--drawer .jf-widget-dialog__header { padding-top:max(var(--jf-ui-space-6),env(safe-area-inset-top)); }
+.jf-widget-dialog--drawer .jf-widget-dialog__footer { padding-bottom:max(var(--jf-ui-space-5),env(safe-area-inset-bottom)); }
 .jf-widget-dialog--sheet { position:fixed; inset:auto 0 0; margin:0 auto; width:100%; max-height:85dvh; border-radius:var(--jf-ui-radius-card) var(--jf-ui-radius-card) 0 0; padding-bottom:env(safe-area-inset-bottom); }
 .jf-widget-dialog__header { display:flex; flex-shrink:0; align-items:start; justify-content:space-between; gap:var(--jf-ui-space-4); padding:var(--jf-ui-space-6); border-bottom:1px solid var(--jf-ui-border); }
 .jf-widget-dialog__header h3 { margin:0; font:700 20px/1.4 var(--jf-ui-font-heading); }
@@ -24,6 +28,9 @@
 /* Mobile overlays keep their own scroll and leave browser safe areas free. */
 .jf-widget-dialog { max-height:calc(var(--widget-viewport,100dvh) - 32px); outline:none; }
 .jf-widget-dialog[data-state="closing"] { animation:jf-widget-exit 200ms ease-in forwards; pointer-events:none; }
+.jf-widget-dialog--drawer { max-height:var(--widget-viewport,100dvh); }
+.jf-widget-dialog--drawer[open] { animation:jf-drawer-enter 180ms ease-out; }
+.jf-widget-dialog--drawer[data-state="closing"] { animation:jf-drawer-exit 200ms ease-in forwards; }
 .jf-widget-dialog--sheet { max-height:calc(var(--widget-viewport,100dvh) - max(24px,env(safe-area-inset-top))); overflow:hidden; transform:translateY(var(--sheet-drag,0px)); transition:transform 180ms ease-out; }
 .jf-widget-dialog--sheet[open] { animation:jf-sheet-enter 240ms cubic-bezier(.22,1,.36,1); }
 .jf-widget-dialog--sheet[data-state="closing"] { animation:jf-sheet-exit 200ms ease-in forwards; }
@@ -37,4 +44,6 @@
 @keyframes jf-sheet-enter { from{transform:translateY(100%)} to{transform:translateY(0)} }
 @keyframes jf-sheet-exit { to{transform:translateY(100%);opacity:.6} }
 @keyframes jf-widget-exit { to{opacity:0;transform:translateY(8px)} }
+@keyframes jf-drawer-enter { from{transform:translateX(100%)} to{transform:translateX(0)} }
+@keyframes jf-drawer-exit { to{transform:translateX(100%)} }
 @media(prefers-reduced-motion:reduce){.jf-widget-dialog[open],.jf-widget-dialog[data-state="closing"]{animation:none;transition:none}}

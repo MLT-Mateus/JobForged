@@ -1,4 +1,6 @@
 :root {
+  --jf-ui-fixed-dark: #072f2d;
+  --jf-ui-on-dark: #f5fffd;
   --jf-ui-brand: #20b2aa;
   --jf-ui-brand-bright: #30cbc1;
   --jf-ui-brand-strong: #087a76;
@@ -713,3 +715,9 @@
 
 .jf-action.is-active,.jf-action.is-selected { border-color:var(--jf-ui-brand); background:var(--jf-ui-brand-soft); color:var(--jf-ui-brand-strong); }
 .jf-action[aria-pressed="true"] { border-color:var(--jf-ui-brand); background:var(--jf-ui-brand-soft); color:var(--jf-ui-brand-strong); }
+
+/* Fixed dark surfaces retain contrast regardless of the page theme. */
+.jf-action--on-dark { color:var(--jf-ui-on-dark); border-color:var(--jf-ui-on-dark); background:var(--jf-ui-fixed-dark); }
+.jf-action--on-dark:hover { background:var(--jf-ui-on-dark); color:var(--jf-ui-fixed-dark); }
+a[href], button, [role="button"] { -webkit-user-select:none; user-select:none; -webkit-user-drag:none; }
+a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }

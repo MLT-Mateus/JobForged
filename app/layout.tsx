@@ -3,6 +3,7 @@ import "@fontsource-variable/montserrat";
 import "@fontsource-variable/open-sans";
 import "./globals.css";
 import "./components/ui/ui.css";
+import GlobalInteractions from "./components/GlobalInteractions";
 import NavigationLoader from "./components/NavigationLoader";
 
 export const metadata: Metadata = {
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <NavigationLoader />
+        <GlobalInteractions />
         <script dangerouslySetInnerHTML={{__html:'performance.mark("jobforged-loader-first-paint");'}}/>
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />

@@ -34,14 +34,12 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import { InlineBrandLoader } from "./components/InlineBrandLoader";
 import { ViewportMotion } from "./components/ViewportMotion";
 import { ThemeSelector, useThemePreference } from "@/app/components/ui";
 import { plansById } from "@/app/data/plans";
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=5561991630130&text=Ol%C3%A1%2C+quero+conhecer+a+JobForged.&type=phone_number&app_absent=0";
-const THEME_LOADER_CYCLE_MS = 3200;
 
 const navItems = [
   { label: "Diferenciais", href: "#diferenciais" },
@@ -287,12 +285,6 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [annualBilling, setAnnualBilling] = useState(true);
   const { theme, changeTheme } = useThemePreference();
-  const [themeLoading, setThemeLoading] = useState<"light" | "dark" | null>(null);
-  const themeSwitchingRef = useRef(false);
-  const themeTimersRef = useRef<number[]>([]);
-
-  useEffect(() => () => themeTimersRef.current.forEach((timer) => window.clearTimeout(timer)), []);
-
   useEffect(() => {
     const carousel = document.querySelector<HTMLElement>(".landing-page .capability-carousel");
     if (!carousel || !("IntersectionObserver" in window)) return;
@@ -305,26 +297,8 @@ export default function Home() {
   }, []);
 
   const closeMenu = () => setMenuOpen(false);
-  const applyTheme = (nextTheme: "light" | "dark") => {
-    if (nextTheme === theme || themeSwitchingRef.current) return;
-    changeTheme(nextTheme);
-    themeSwitchingRef.current = true;
-    setThemeLoading(nextTheme);
-    themeTimersRef.current.forEach((timer) => window.clearTimeout(timer));
-    themeTimersRef.current = [
-      window.setTimeout(() => {
-      setThemeLoading(null);
-        themeSwitchingRef.current = false;
-      }, THEME_LOADER_CYCLE_MS),
-    ];
-  };
-
   return (
     <main className="landing-page">
-      {themeLoading && <div className="app-loader app-loader--theme" data-surface-theme={themeLoading} role="status" aria-live="polite" aria-label="Atualizando tema da JobForged">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <InlineBrandLoader />
-      </div>}
       <header className="site-header">
         <div className="container nav-wrap">
           <a className="brand" href="#inicio" aria-label="JobForged — início">
@@ -334,7 +308,7 @@ export default function Home() {
           <nav className="desktop-nav" aria-label="Navegação principal">
             {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           </nav>
-          <ThemeSelector theme={theme} onChange={applyTheme} />
+          <ThemeSelector theme={theme} onChange={changeTheme} />
           <Link className="button button--ghost button--small header-login jf-action jf-action--secondary jf-action--small" href="/login">Entrar</Link>
           <button
             className="menu-button"
@@ -696,7 +670,7 @@ export default function Home() {
               <p>Conheça o ATS white label que combina automações, critérios de seleção e suporte especializado para contratar com mais qualidade.</p>
             </div>
             <div className="cta-actions">
-              <a className="button button--outline-light jf-action jf-action--inverse" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Solicitar demonstração <ArrowRight /></a>
+              <a className="jf-action jf-action--on-dark" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Solicitar demonstração <ArrowRight /></a>
               <span><ShieldCheck /> Demonstração personalizada e sem compromisso.</span>
             </div>
           </Reveal>

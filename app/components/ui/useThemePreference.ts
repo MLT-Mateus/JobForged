@@ -4,10 +4,14 @@ import { useSyncExternalStore } from "react";
 import type { ThemeMode } from "./ThemeSelector";
 
 const KEY = "jobforged-theme";
-const EVENT = "jobforged-theme-change";
+export const THEME_TRANSITION_MS = 3200;
+let transitionUntil = 0;
+export const EVENT = "jobforged-theme-change";
 const valid = (value: unknown): value is ThemeMode => value === "light" || value === "dark";
 
 export function setThemePreference(theme: ThemeMode) {
+  if (snapshot() === theme || Date.now() < transitionUntil) return;
+  transitionUntil = Date.now() + THEME_TRANSITION_MS;
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
   try { localStorage.setItem(KEY, theme); } catch { /* Cookie keeps navigation persistent when storage is blocked. */ }

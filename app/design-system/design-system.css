@@ -1368,6 +1368,7 @@ body:has(.ds-page) {
 
 .ds-animated-assets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .ds-animated-asset { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 18px; padding: 18px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-surface); }
+.ds-animated-asset > .ds-download-button { flex-shrink:0; white-space:nowrap; }
 .ds-animated-asset > div { display: flex; min-width: 0; align-items: center; gap: 15px; }
 .ds-animated-asset img { width: 76px; height: 76px; flex: 0 0 auto; border-radius: 14px; background: var(--ds-bg-elevated); }
 .ds-animated-asset span { display: grid; min-width: 0; gap: 4px; }
@@ -1904,6 +1905,11 @@ body:has(.ds-page) {
 
 /* Chrome is provided by WorkspaceShell, shared with the company panel. */
 .ds-page.ds-page--workspace { position:static; inset:auto; height:auto; min-height:0; overflow:visible; background:transparent; }
+.ds-sidebar-return { flex-shrink:0; padding-top:var(--jf-ui-space-3); }
+.ds-sidebar-return .jf-action { width:100%; min-height:44px; }
+.is-collapsed .ds-sidebar-return .jf-action { padding-inline:0; }
+.is-collapsed .ds-sidebar-return span { display:none; }
+.admin-sidebar.is-open .ds-sidebar-return span { display:inline; }
 .ds-page--workspace .ds-content { margin:0; padding:0; height:auto; overflow:visible; }
 .ds-page--workspace .ds-content__inner { width:100%; max-width:none; }
 .ds-page--workspace .ds-hero__loader .app-loader__inline { width:112px; height:112px; }
