@@ -44,3 +44,6 @@ next-env.d.ts
 # compiler caches and local credentials
 *.tsbuildinfo
 *.key
+
+!deploy/.env.live.example
+!deploy/.env.test.example

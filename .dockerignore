@@ -1,0 +1,15 @@
+.git
+node_modules
+dist
+.next
+.wrangler
+.sites-runtime
+outputs
+work
+.env*
+**/.env*
+*.pem
+**/*.pem
+*.key
+**/*.key
+*.tsbuildinfo

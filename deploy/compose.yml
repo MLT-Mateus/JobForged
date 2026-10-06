@@ -1,0 +1,31 @@
+services:
+  app:
+    image: ${JBFD_IMAGE:?Defina JBFD_IMAGE com a imagem validada}
+    env_file:
+      - ${JBFD_ENV_FILE:?Defina o caminho absoluto do arquivo de ambiente}
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:${JBFD_HOST_PORT:?Defina a porta local}:3000"
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

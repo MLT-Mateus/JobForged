@@ -15,7 +15,10 @@
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next --max-warnings=0",
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate",
     "typecheck": "tsc --noEmit --incremental false",
-    "check": "npm run lint && npm run typecheck && npm test"
+    "check": "npm run lint && npm run typecheck && npm test",
+    "build:node": "JBFD_RUNTIME=node vinext build",
+    "start:node": "node dist/standalone/server.js",
+    "test:node": "npm run build:node && node scripts/test-node-runtime.mjs"
   },
   "dependencies": {
     "@fontsource-variable/montserrat": "^5.3.0",

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: process.env.JBFD_RUNTIME === "node" ? "standalone" : undefined,
 };
 
 export default nextConfig;
