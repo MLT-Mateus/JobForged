@@ -1047,39 +1047,85 @@ export function RadioField({ label, ...inputProps }: ChoiceFieldProps) {
 
 type RichTextFieldProps = {
   label: string;
-  initialHtml: string;
+  placeholder?: string;
+  initialHtml?: string;
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, initialHtml, onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", onChange }: RichTextFieldProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const selectionRef = useRef<Range | null>(null);
+  const initial = useRef(initialHtml);
+  const [imageError, setImageError] = useState("");
+  const [size, setSize] = useState("3");
+  const errorId = useId();
 
-  function format(command: "bold" | "italic" | "insertUnorderedList" | "createLink") {
-    editorRef.current?.focus();
-    if (command === "createLink") document.execCommand(command, false, "https://jobforged.com");
-    else document.execCommand(command);
-    if (editorRef.current) onChange?.(editorRef.current.innerHTML);
+  function saveSelection() {
+    const selection = window.getSelection();
+    if (selection?.rangeCount && editorRef.current?.contains(selection.anchorNode) && editorRef.current?.contains(selection.focusNode)) selectionRef.current = selection.getRangeAt(0).cloneRange();
   }
-
-  return (
+  function restoreSelection() {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const selection = window.getSelection();
+    const saved = selectionRef.current;
+    const range = saved && editor.contains(saved.commonAncestorContainer) ? saved : document.createRange();
+    if (range !== saved) { range.selectNodeContents(editor); range.collapse(false); }
+    selection?.removeAllRanges(); selection?.addRange(range);
+  }
+  function changed() {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const empty = !editor.textContent?.trim() && !editor.querySelector("img");
+    editor.dataset.empty = String(empty);
+    onChange?.(empty ? "" : editor.innerHTML);
+    saveSelection();
+  }
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (editor) editor.dataset.empty = String(!editor.textContent?.trim() && !editor.querySelector("img"));
+  }, []);
+  function format(command: string, value?: string) {
+    restoreSelection();
+    document.execCommand(command, false, value);
+    changed();
+  }
+  function addImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setImageError("Selecione uma imagem PNG, JPG, WEBP ou GIF de até 5 MB."); return;
+    }
+    setImageError("");
+    const reader = new FileReader();
+    reader.onerror = () => setImageError("Não foi possível ler a imagem. Tente novamente.");
+    reader.onload = () => {
+      if (!editorRef.current || typeof reader.result !== "string") return;
+      format("insertImage", reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+  return <div className="jf-rich-text-field">
     <div className="jf-rich-text">
-      <span className="jf-visually-hidden">{label}</span>
       <div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto">
-        <button type="button" aria-label="Negrito" onMouseDown={(event) => { event.preventDefault(); format("bold"); }}><Bold size={15} /></button>
-        <button type="button" aria-label="Itálico" onMouseDown={(event) => { event.preventDefault(); format("italic"); }}><Italic size={15} /></button>
-        <button type="button" aria-label="Lista" onMouseDown={(event) => { event.preventDefault(); format("insertUnorderedList"); }}><List size={15} /></button>
-        <button type="button" aria-label="Adicionar link" onMouseDown={(event) => { event.preventDefault(); format("createLink"); }}><Link2 size={15} /></button>
+        <button type="button" aria-label="Negrito" title="Negrito" onMouseDown={e => e.preventDefault()} onClick={() => format("bold")}><Bold size={16}/></button>
+        <button type="button" aria-label="Itálico" title="Itálico" onMouseDown={e => e.preventDefault()} onClick={() => format("italic")}><Italic size={16}/></button>
+        <button type="button" aria-label="Lista" title="Lista" onMouseDown={e => e.preventDefault()} onClick={() => format("insertUnorderedList")}><List size={16}/></button>
+        <button type="button" aria-label="Adicionar link" title="Adicionar link" onMouseDown={e => e.preventDefault()} onClick={() => format("createLink", "https://jobforged.com")}><Link2 size={16}/></button>
+        <button type="button" aria-label="Adicionar imagem" title="Adicionar imagem" onMouseDown={e => e.preventDefault()} onClick={() => { saveSelection(); inputRef.current?.click(); }}><ImagePlus size={16}/></button>
+        <select className="jf-rich-text__size" aria-label="Tamanho do texto" title="Tamanho do texto" value={size} onChange={e => { setSize(e.target.value); format("fontSize", e.target.value); }}>
+          <option value="3">Normal · 16 px</option><option value="4">Grande · 18 px</option><option value="5">Maior · 24 px</option><option value="6">Título · 32 px</option>
+        </select>
       </div>
-      <div
-        ref={editorRef}
-        className="jf-rich-text__editor"
-        role="textbox"
-        aria-label={label}
-        contentEditable
-        suppressContentEditableWarning
-        dangerouslySetInnerHTML={{ __html: initialHtml }}
-        onInput={(event) => onChange?.(event.currentTarget.innerHTML)}
-      />
+      <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={addImage}/>
+      <div className="jf-rich-text__body">
+        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial.current} contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: initial.current }} onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
+        <span className="jf-rich-text__placeholder" aria-hidden="true">{placeholder}</span>
+      </div>
     </div>
-  );
+    {imageError && <p className="jf-rich-text__error" id={errorId} role="alert">{imageError}</p>}
+  </div>;
 }

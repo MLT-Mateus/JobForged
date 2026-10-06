@@ -467,7 +467,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                 </div>
               </ExampleCard>
               <ExampleCard title="Rich text">
-                <RichTextField label="Descrição da vaga" initialHtml="<strong>Sobre a oportunidade</strong><br />Descreva responsabilidades, resultados esperados e como o time trabalha." />
+                <RichTextField label="Descrição da vaga" placeholder="Descreva responsabilidades, resultados esperados e como o time trabalha." />
               </ExampleCard>
             </div>
           </section>
