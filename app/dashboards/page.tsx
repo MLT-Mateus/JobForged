@@ -1,0 +1,2 @@
+import { AdminPage, metadataFor } from "@/app/components/admin/AdminPage";
+export const metadata=metadataFor("dashboards"); export default function Page(){return <AdminPage module="dashboards"/>}

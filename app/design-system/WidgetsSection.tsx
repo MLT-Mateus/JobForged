@@ -1,0 +1,46 @@
+"use client";
+import { useEffect, useState, type ReactNode } from "react";
+import { ActionButton, CheckboxField, StatusBadge, TextField } from "../components/ui";
+import { PhoneFrame } from "../components/ui/PhoneFrame";
+import { FocusPopover, WidgetDialog, WidgetDivider, WidgetGroup } from "../components/ui/Widgets";
+import { WidgetsIcon } from "../components/ui/Icons";
+import "./widgets-section.css";
+
+function Demo({number,title,description,children}:{number:string;title:string;description:string;children:ReactNode}) {
+ return <section className="ds-widget-demo"><header><span className="ds-widget-index">{number}</span><div><h2>{title}</h2><p>{description}</p></div></header><div className="ds-widget-demo__stage">{children}</div></section>;
+}
+function OverlayPreview({kind}:{kind:"modal"|"focus"|"drawer"}) {
+ return <div className={`ds-overlay-preview ds-overlay-preview--${kind}`} aria-hidden="true"><div className="ds-overlay-preview__nav"><i/><i/><i/></div><div className="ds-overlay-preview__lines"><i/><i/><i/></div><div className="ds-overlay-preview__panel"><i/><i/><b/></div></div>;
+}
+export function WidgetsSection() {
+ const [overlay,setOverlay]=useState<"modal"|"drawer"|"sheet"|null>(null),[onlyActive,setOnlyActive]=useState(true),[sheetChoice,setSheetChoice]=useState(true),[preview,setPreview]=useState(true);
+ const close=()=>setOverlay(null);
+ useEffect(()=>{const media=matchMedia("(max-width:680px)");const update=()=>{if(!media.matches)setOverlay(current=>current==="sheet"?null:current)};media.addEventListener("change",update);return()=>media.removeEventListener("change",update)},[]);
+ return <section className="ds-widgets" aria-labelledby="widgets-title">
+ <header className="ds-widgets-intro"><span className="ds-widget-emblem"><WidgetsIcon size={28}/></span><div><h1 id="widgets-title">Widgets</h1><p>Do conteúdo principal aos detalhes: escolha a superfície e o comportamento para cada contexto.</p></div></header>
+ <Demo number="01" title="Uma base, três superfícies" description="Compare o mesmo conteúdo em diferentes níveis de destaque.">
+  <div className="ds-surface-comparison">{([
+   ['card','Cartão','Resumos e informações principais.'],['outline','Contorno','Conteúdos relacionados, sem uma nova camada.'],['plain','Grupo aberto','Agrupamento com espaço em branco.']
+  ] as const).map(([variant,title,description])=><article className="ds-surface-example" key={variant}><div className="ds-widget-canvas"><WidgetGroup variant={variant}><StatusBadge tone="info">Em andamento</StatusBadge><h3>Processo de seleção</h3><p>Time de relacionamento</p><WidgetDivider/><div className="ds-widget-inline"><span>Candidaturas</span><strong>28</strong></div></WidgetGroup></div><h3>{title}</h3><p>{description}</p></article>)}</div>
+ </Demo>
+ <Demo number="02" title="Composição e respiro" description="Aproxime o que está relacionado. Use intervalos maiores para mudar de assunto.">
+  <div className="ds-composition-grid"><article className="ds-composition-collection"><header><h3>Coleções de cartões</h3><p>Uma hierarquia consistente, do desktop ao celular.</p></header><div className="ds-widget-grid">{[['Vagas abertas','12'],['Em entrevista','28'],['Contratações','4']].map(([label,value])=><WidgetGroup key={label}><span>{label}</span><strong className="ds-widget-number">{value}</strong><span className="ds-widget-caption">Neste mês</span></WidgetGroup>)}</div><WidgetDivider label="Outro grupo de informações"/><div className="ds-widget-inline"><span>Última atualização</span><StatusBadge tone="positive">Agora</StatusBadge></div></article>
+  <article className="ds-spacing-guide"><h3>Escala de espaçamento</h3><div className="ds-widget-spacing">{[8,16,24,32].map(n=><div key={n}><strong>{n} px</strong><div className="ds-widget-space-sample"><i style={{width:n}}/></div><span>{n===8?'Itens próximos':n===16?'Entre controles':n===24?'Dentro do grupo':'Entre seções'}</span></div>)}</div><p className="ds-widget-caption">Divisórias separam assuntos. Espaço em branco conecta os elementos do mesmo grupo.</p></article></div>
+ </Demo>
+ <Demo number="03" title="Detalhes no momento certo" description="Três formas de revelar opções sem sair da página. Experimente cada comportamento.">
+  <div className="ds-overlay-examples">
+   <article><OverlayPreview kind="modal"/><div className="ds-overlay-copy"><span className="ds-widget-caption">POP-UP</span><h3>Uma decisão breve</h3><p>Centralizado na tela para confirmações e formulários curtos.</p><ActionButton onClick={()=>setOverlay('modal')}>Abrir pop-up</ActionButton></div></article>
+   <article><OverlayPreview kind="focus"/><div className="ds-overlay-copy"><span className="ds-widget-caption">GROUP FOCUS</span><h3>Opções junto ao controle</h3><p>Um grupo ancorado ao botão para ajustes rápidos na visualização.</p><FocusPopover label="Ajustar visualização"><strong>Preferências da lista</strong><CheckboxField label="Somente vagas ativas" checked={onlyActive} onChange={e=>setOnlyActive(e.target.checked)}/></FocusPopover></div></article>
+   <article><OverlayPreview kind="drawer"/><div className="ds-overlay-copy"><span className="ds-widget-caption">PAINEL LATERAL</span><h3>Mais espaço para detalhes</h3><p>Fixo à direita, com altura integral e rolagem independente.</p><ActionButton variant="secondary" onClick={()=>setOverlay('drawer')}>Abrir painel lateral</ActionButton></div></article>
+  </div>
+ </Demo>
+ <Demo number="04" title="BottomSheet mobile" description="Uma superfície que desliza pela base da tela e mantém as ações próximas às mãos.">
+  <div className="ds-sheet-layout"><div className="ds-sheet-guide"><h3>O contexto continua à vista</h3><p>Use para filtros, escolhas rápidas e ações complementares. A página permanece ao fundo enquanto o usuário decide.</p><ul><li><strong>Conteúdo</strong><span>Rolagem dentro do painel.</span></li><li><strong>Fechamento</strong><span>Alça, toque fora ou botão de fechar.</span></li><li><strong>Área segura</strong><span>Espaço reservado para os controles do celular.</span></li></ul><ActionButton className="ds-sheet-mobile-trigger" onClick={()=>setOverlay('sheet')}>Experimentar no celular</ActionButton><ActionButton className="ds-sheet-desktop-trigger" variant="secondary" onClick={()=>setPreview(v=>!v)}>{preview?'Recolher prévia':'Abrir prévia'}</ActionButton></div>
+   <figure className="ds-device-stage"><PhoneFrame className="ds-sheet-preview" label="Prévia interativa do BottomSheet em um celular"><div className="ds-sheet-preview__context"><span className="ds-device-time">9:41</span><span className="ds-kicker">JobForged</span><strong>Vagas da empresa</strong><div className="ds-phone-job"><strong>Customer Success</strong><span>Relacionamento · Híbrido</span></div><div className="ds-phone-job"><strong>Analista de Marketing</strong><span>Marketing · Remoto</span></div><ActionButton variant="secondary" onClick={()=>setPreview(true)}>Opções da lista</ActionButton></div><div className={`ds-sheet-preview__surface ${preview?'is-open':''}`} inert={!preview||undefined} aria-hidden={!preview}><button type="button" className="jf-sheet-grip" aria-label="Recolher prévia" onClick={()=>setPreview(false)}><span className="jf-sheet-handle"/></button><h3>Visualização da lista</h3><p>Mostre o que é relevante para você.</p><CheckboxField label="Somente vagas ativas" checked={sheetChoice} onChange={e=>setSheetChoice(e.target.checked)}/><ActionButton onClick={()=>setPreview(false)}>Aplicar na prévia</ActionButton></div></PhoneFrame><figcaption>Prévia interativa do celular</figcaption></figure>
+  </div>
+ </Demo>
+ <WidgetDialog open={overlay==='modal'} onClose={close} title="Salvar preferências" description="Uma ação breve sem perder o contexto." footer={<><ActionButton variant="quiet" onClick={close}>Cancelar</ActionButton><ActionButton onClick={close}>Concluir exemplo</ActionButton></>}><TextField label="Nome da visualização" placeholder="Ex.: Vagas do time comercial"/><p className="ds-widget-caption">Demonstração visual. Nenhuma configuração será alterada.</p></WidgetDialog>
+ <WidgetDialog open={overlay==='drawer'} onClose={close} kind="drawer" title="Detalhes da vaga" description="Informações adicionais no contexto da lista." footer={<ActionButton variant="secondary" onClick={close}>Fechar detalhes</ActionButton>}><StatusBadge tone="positive">Publicada</StatusBadge><h3>Analista de Customer Success</h3><p>Time de relacionamento · Híbrido</p><WidgetDivider label="Sobre a oportunidade"/><p>Acompanhe a experiência dos clientes, organize demandas e apoie o crescimento das contas.</p><WidgetGroup variant="outline"><strong>Próxima etapa</strong><p>Entrevista com a liderança.</p></WidgetGroup></WidgetDialog>
+ <WidgetDialog open={overlay==='sheet'} onClose={close} kind="sheet" title="Visualização da lista" description="Escolha quais vagas deseja visualizar." footer={<ActionButton onClick={close}>Aplicar na demonstração</ActionButton>}><CheckboxField label="Somente vagas ativas" checked={sheetChoice} onChange={e=>setSheetChoice(e.target.checked)}/><p className="ds-widget-sheet-hint">Arraste a alça para baixo para fechar. Esta seleção altera apenas o exemplo.</p></WidgetDialog>
+ </section>;
+}
