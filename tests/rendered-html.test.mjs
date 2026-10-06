@@ -51,3 +51,20 @@ test("signup renders the plan supplied by the URL and falls back for invalid pla
     assert.ok(html.includes(`Plano selecionado</span><strong>${selected}</strong>`), query || "default plan");
   }
 });
+
+// Runtime/dependency updates must keep existing entry pages and branded SVGs renderable.
+test("existing system pages render with shared brand assets", async () => {
+  const { default: worker } = await import("../dist/server/index.js");
+  for (const path of ["/", "/design-system", "/app/home", "/app/vagas/nova"]) {
+    const response = await worker.fetch(
+      new Request(`http://localhost${path}`, { headers: { accept: "text/html" } }),
+      { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+      { waitUntil() {}, passThroughOnException() {} },
+    );
+    assert.equal(response.status, 200, path);
+    const html = await response.text();
+    assert.match(html, /src="\/brand\/jobforged-(?:logo-primary|symbol)\.svg"/, path);
+    assert.match(html, /jf-brand-asset--light/, path);
+    assert.match(html, /jf-brand-asset--dark/, path);
+  }
+});

@@ -2,11 +2,11 @@
 import { WorkspaceShell } from "../ui/WorkspaceShell";
 import { Panel } from "@/app/components/ui";
 
-/* eslint-disable react-hooks/set-state-in-effect */
+
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { Bell, BriefcaseBusiness, CalendarDays, ChartNoAxesCombined, Check, ChevronDown, CircleDollarSign, Download, FileText, House, LayoutDashboard, ListFilter, LogOut, Menu, MoreHorizontal, Palette, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings2, ShieldCheck, SlidersHorizontal, UserRound, UsersRound, WalletCards, X } from "lucide-react";
-import { useThemePreference, ActionButton, DataTable, FieldControl, StatusBadge, TextAreaField, TextField, ThemeSelector, ToggleSwitch, MetricCard } from "@/app/components/ui";
+import { Bell, BriefcaseBusiness, CalendarDays, Download, FileText, House, LayoutDashboard, ListFilter, LogOut, MoreHorizontal, Palette, Plus, Search, Settings2, ShieldCheck, SlidersHorizontal, UsersRound, WalletCards } from "lucide-react";
+import { useThemePreference, ActionButton, DataTable, FieldControl, StatusBadge, TextAreaField, TextField, ToggleSwitch, MetricCard } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { moduleCopy, type AdminModuleId } from "./admin-data";
 import type { AwaitedAdminContext } from "./admin-types";

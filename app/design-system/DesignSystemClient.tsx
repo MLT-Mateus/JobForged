@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
+
 
 import Link from "next/link";
 import { WorkspaceShell } from "../components/ui/WorkspaceShell";
@@ -11,68 +11,9 @@ import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
-import {
-  X,
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Bell,
-  BriefcaseBusiness,
-  CalendarDays,
-  Check,
-  CircleAlert,
-  CircleCheck,
-  CircleX,
-  Clock3,
-  Copy,
-  Download,
-  FileText,
-  House,
-  Info,
-  Layers3,
-  LayoutDashboard,
-  LockKeyhole,
-  Mail,
-  Menu,
-  MoreHorizontal,
-  MousePointerClick,
-  Palette,
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelsTopLeft,
-  Plus,
-  Ruler,
-  Search,
-  Settings2,
-  ShieldCheck,
-  SlidersHorizontal,
-  Sparkles,
-  TrendingUp,
-  Type,
-  UserRound,
-  UserRoundCheck,
-  UsersRound,
-  WalletCards,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Bell, BriefcaseBusiness, CalendarDays, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, House, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, ShieldCheck, SlidersHorizontal, Sparkles, TrendingUp, Type, UserRound, UserRoundCheck, UsersRound, WalletCards } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
-import {
-  CheckboxField,
-  AppToast,
-  DateField,
-  DateRangeField,
-  FileUploadField,
-  MultiFileUploadField,
-  MultiSelectField,
-  RadioField,
-  RichTextField,
-  SelectField,
-  TextField,
-  ToggleSwitch,
-  ThemeSelector,
-  type ToastNotice,
-  type DateRangeValue,
-  type SelectOption,
-} from "@/app/components/ui";
+import { CheckboxField, AppToast, DateField, DateRangeField, FileUploadField, MultiFileUploadField, MultiSelectField, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, type ToastNotice, type DateRangeValue, type SelectOption } from "@/app/components/ui";
 
 type AlertKind = "success" | "info" | "warning" | "danger";
 
@@ -250,7 +191,7 @@ function AlertIcon({ kind, size = 18 }: { kind: AlertKind; size?: number }) {
 }
 
 export default function DesignSystemClient({initialSection="fundamentos"}:{initialSection?:string}) {
-  const { theme, changeTheme } = useThemePreference();
+  const { theme } = useThemePreference();
   const [sidebarPinned, setSidebarPinned] = useState(true);
   const [appSidebarExpanded, setAppSidebarExpanded] = useState(true);
   const [activePage, setActivePage] = useState(() => Math.max(0,navigation.findIndex(item=>item.id===initialSection)));

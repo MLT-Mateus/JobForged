@@ -8,7 +8,7 @@ export default function NotFound() {
       <div className="not-found-grid" aria-hidden="true" />
       <header className="not-found-header container">
         <Link className="brand" href="/" aria-label="JobForged — início">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          { }
           <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
         </Link>
       </header>

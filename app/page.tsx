@@ -5,37 +5,7 @@ import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode }
 import Link from "next/link";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { motion, useReducedMotion } from "motion/react";
-import {
-  ArrowRight,
-  BarChart3,
-  Bot,
-  BrainCircuit,
-  BriefcaseBusiness,
-  Check,
-  ChevronDown,
-  CircleCheck,
-  FileText,
-  ImageIcon,
-  LayoutTemplate,
-  LogIn,
-  Mail,
-  Menu,
-  MessageCircle,
-  Monitor,
-  Paintbrush,
-  PanelTop,
-  Palette,
-  SearchCheck,
-  ShieldCheck,
-  Smartphone,
-  SquareKanban,
-  Sparkles,
-  Star,
-  Type,
-  Upload,
-  UsersRound,
-  X,
-} from "lucide-react";
+import { ArrowRight, BarChart3, Bot, BrainCircuit, BriefcaseBusiness, Check, ChevronDown, CircleCheck, FileText, LayoutTemplate, LogIn, Mail, Menu, MessageCircle, Paintbrush, PanelTop, ShieldCheck, SquareKanban, Sparkles, Star, UsersRound, X } from "lucide-react";
 import { ViewportMotion } from "./components/ViewportMotion";
 import { ThemeSelector, useThemePreference } from "@/app/components/ui";
 import { plansById } from "@/app/data/plans";
@@ -304,7 +274,7 @@ export default function Home() {
       <header className="site-header">
         <div className="container nav-wrap">
           <a className="brand" href="#inicio" aria-label="JobForged — início">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} fetchPriority="high" />
           </a>
           <nav className="desktop-nav" aria-label="Navegação principal">
@@ -682,7 +652,7 @@ export default function Home() {
         <div className="container footer-shell">
           <div className="footer-grid">
             <div className="footer-brand">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
               <p>ATS white label com WhatsApp integrado e agente de triagem por IA.</p>
               <address>

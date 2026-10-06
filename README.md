@@ -1,64 +1,68 @@
-# JobForged — Landing Page
+# JobForged (JBFD) — versão 0.00
 
-Landing Page comercial da JobForged, um ATS white label para recrutamento e seleção. O projeto apresenta personalização de marca e domínio, entrevistas pelo WhatsApp, triagem automatizada, pipeline Kanban e indicadores de gestão.
+Base inicial para a migração do sistema completo para uma VPS. A versão técnica
+no npm é `0.0.0`; o nome usado no projeto é **0.00**.
 
-## Tecnologias
+## O que existe hoje
 
-- React 19 e TypeScript
-- Vinext e Vite 8
-- Motion para animações
-- Lucide React para iconografia
-- CSS responsivo com identidade visual própria
-- ESLint e testes automatizados
+Landing page, Design System e biblioteca compartilhada, páginas de autenticação,
+Home, telas administrativas e módulo demonstrativo de vagas e candidaturas.
+Os serviços dessas telas usam dados simulados e, em alguns fluxos, armazenamento
+no navegador. Não equivalem a autenticação real nem a um banco de produção.
+Supabase, n8n e Asaas ainda não estão integrados.
 
-## Desenvolvimento local
+## Executar e validar
 
-Pré-requisito: Node.js 22 ou superior.
+Use Node.js 22 (arquivo `.nvmrc`) e o lockfile do repositório:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Para validar uma versão pronta para publicação:
+Antes de publicar:
 
 ```bash
-npm run lint
-npm test
+npm run check
 ```
 
-## Ambientes e branches
+Esse comando exige zero erros e zero avisos de ESLint, verifica TypeScript,
+constrói o artefato e executa os testes de HTML renderizado. O CI executa essas
+mesmas verificações nos pushes e Pull Requests para `main` e `develop`.
 
-| Branch | Ambiente | Finalidade |
-|---|---|---|
-| `main` | Produção / live | Versão aprovada e disponível no domínio oficial |
-| `develop` | Homologação / teste | Validação de conteúdo, layout e funcionalidades antes da produção |
-| `feature/*` | Desenvolvimento | Alterações isoladas antes de entrarem em homologação |
+## Publicação atual e migração
 
-Fluxo recomendado:
+Até a migração terminar, o Sites continua sendo a origem oficial: implementar,
+validar e publicar no Sites; só depois sincronizar exatamente o código publicado
+com o GitHub, conforme `AGENTS.md`. A Vercel não faz parte desse fluxo.
 
-1. Criar uma branch `feature/nome-da-alteracao` a partir de `develop`.
-2. Abrir um Pull Request da feature para `develop`.
-3. Validar a publicação de homologação.
-4. Abrir um Pull Request de `develop` para `main`.
-5. Publicar em produção somente após aprovação.
+O objetivo da próxima etapa é empacotar **todo este sistema** em Docker e criar
+produção e homologação na VPS. As branches não criam ambientes por si só.
+Cada ambiente precisará de configuração, domínio, credenciais e dados isolados.
+O build atual usa o runtime Cloudflare do Sites; o funcionamento em Node/Docker
+precisa ser validado antes de mudar o domínio oficial.
 
-O workflow em `.github/workflows/quality.yml` valida automaticamente pushes e Pull Requests direcionados a `main` e `develop`.
+Após a migração e sua validação, atualizar `AGENTS.md` para tornar o GitHub a origem
+oficial. Desenvolvimento com IA/MCP deve gerar alterações revisáveis no Git,
+passar pelo CI e promover a mesma versão testada para produção.
 
-## Estrutura principal
+## Estrutura
 
-- `app/page.tsx`: conteúdo, componentes e interações da página
-- `app/globals.css`: identidade visual e responsividade
-- `app/layout.tsx`: metadados, SEO e dados estruturados
-- `app/design-system/`: catálogo de fundamentos e componentes com temas claro e escuro
-- `public/brand/`: logos oficiais da JobForged
+- `app/`: páginas e telas do sistema.
+- `app/components/ui/`: componentes e tokens compartilhados.
+- `app/design-system/`: referência visual oficial.
+- `public/brand/`: arquivos de marca.
+- `worker/`, `build/`, `.openai/`: publicação atual no Sites.
+- `db/`: preparação para D1; não há banco de produção configurado.
+- `tests/`: verificações de HTML renderizado.
+- `docs/INSPECAO-MIGRACAO.md`: inspeção e critérios da migração.
 
-A página de referência visual fica disponível em `/design-system` e salva a preferência de tema no navegador.
+## Histórico e recuperação
 
-## Identidade visual
+Preservar os commits antigos. Falhas históricas de um deploy não alteram o estado
+da versão atual. A versão 0.00 estabelece uma nova base sem perder a capacidade
+de recuperar alterações. Reverter mudanças com novos commits; nunca reescrever
+`main` com force push.
 
-- Turquesa principal: `#20B2AA`
-- Azul de destaque: `#4169E1`
-- Azul muito claro: `#F1F8FF`
-- Verde profundo: `#072F2D`
-- Tipografia: Montserrat Variable
+Credenciais e arquivos `.env` ficam fora do Git. Antes de cada promoção, revisar
+as mudanças, executar as verificações e registrar o commit utilizado.

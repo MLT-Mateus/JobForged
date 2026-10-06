@@ -108,7 +108,7 @@ export default function NavigationLoader() {
 
   return (
     <div className="app-loader app-loader--navigation" data-phase={phase} data-surface-theme={phase === "navigation" ? theme : undefined} role="status" aria-live="polite" aria-label={phase === "initial" ? "Carregando JobForged" : "Carregando próxima página"}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      { }
       <InlineBrandLoader />
     </div>
   );

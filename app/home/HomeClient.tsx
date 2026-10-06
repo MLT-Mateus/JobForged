@@ -1,16 +1,13 @@
 "use client";
+import { BrandAsset } from "@/app/components/BrandAsset";
 import { Panel } from "@/app/components/ui";
 
-/* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import {
-  Bell, BriefcaseBusiness, CalendarDays, Check, ChevronLeft, ChevronRight, CircleAlert,
-  ClipboardCheck, FileUser, House, LayoutDashboard, Menu, Palette, PanelLeftClose, PanelLeftOpen,
-  Settings2, ShieldCheck, Sparkles, UserPlus, UsersRound, WalletCards, X,
-} from "lucide-react";
+
+import { useEffect, useMemo, useState } from "react";
+import { BriefcaseBusiness, CalendarDays, Check, ChevronLeft, ChevronRight, CircleAlert, ClipboardCheck, FileUser, Settings2, ShieldCheck, Sparkles, UserPlus, UsersRound } from "lucide-react";
 import { CheckboxField, ActionButton, MetricCard } from "@/app/components/ui";
-import type { ActivityKind, HomePermission, HomeViewState, NavItem, OrganizationTheme } from "./types";
+import type { ActivityKind, HomePermission, HomeViewState } from "./types";
 import type { HomeContext } from "./service";
 import { AdminShell } from "@/app/components/admin/AdminModuleClient";
 import "@/app/components/admin/admin.css";
@@ -44,12 +41,12 @@ export default function HomeClient({ initialContext }: { initialContext: HomeCon
   return (
     <AdminShell module="home" context={{ organization, user: {name:user.name, role:user.role, initials:user.avatarInitials} }}>
         <div className="home-content">
-          <section className="home-welcome"><div><span>Home</span><h1>Olá, {user.name}!</h1><p>Acompanhe as principais informações da sua empresa e continue de onde parou.</p></div><div className="home-company-mark"><img src={organization.logo} alt={`Logo de ${organization.name}`} /><span><small>Visão geral de</small><strong>{organization.name}</strong></span></div></section>
+          <section className="home-welcome"><div><span>Home</span><h1>Olá, {user.name}!</h1><p>Acompanhe as principais informações da sua empresa e continue de onde parou.</p></div><div className="home-company-mark"><BrandAsset src={organization.logo} alt={`Logo de ${organization.name}`} /><span><small>Visão geral de</small><strong>{organization.name}</strong></span></div></section>
 
           <section className="home-banner" aria-label="Destaques da organização">
             {currentBanner ? <>
               <div className="home-banner-copy"><span>{currentBanner.eyebrow}</span><h2>{currentBanner.title}</h2><p>{currentBanner.description}</p>{currentBanner.link && <a href={currentBanner.link.href}>{currentBanner.link.label}<ChevronRight /></a>}</div>
-              <div className="home-banner-art" aria-hidden="true"><i /><i /><i /><img src={organization.logo} alt="" /></div>
+              <div className="home-banner-art" aria-hidden="true"><i /><i /><i /><BrandAsset src={organization.logo} alt="" /></div>
               {banners.length > 1 && <div className="home-banner-controls"><button aria-label="Banner anterior" onClick={() => setBannerIndex((bannerIndex - 1 + banners.length) % banners.length)}><ChevronLeft /></button><span>{banners.map((banner, index) => <button key={banner.id} className={index === bannerIndex ? "is-active" : ""} aria-label={`Exibir banner ${index + 1}`} onClick={() => setBannerIndex(index)} />)}</span><button aria-label="Próximo banner" onClick={() => setBannerIndex((bannerIndex + 1) % banners.length)}><ChevronRight /></button></div>}
             </> : <div className="home-banner-empty"><Sparkles /><strong>Espaço para comunicados da sua empresa</strong><span>Os banners configurados em Personalização aparecerão aqui.</span></div>}
           </section>

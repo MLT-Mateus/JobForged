@@ -18,7 +18,7 @@ export default function LegalPage({ title, description, documentHtml, downloadHr
       <header className="legal-header">
         <div className="legal-shell legal-header__inner">
           <Link className="legal-brand" href="/" aria-label="JobForged — página inicial">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={159} height={46} />
           </Link>
           <Link className="legal-back" href="/">

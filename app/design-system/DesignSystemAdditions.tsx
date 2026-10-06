@@ -1,15 +1,7 @@
 "use client";
 
 import { useMemo, useState, type CSSProperties, type ComponentType } from "react";
-import {
-  Activity, AppWindow, Archive, ArrowDownToLine, AtSign, BadgeCheck, BarChart3, Bell, Bot, BriefcaseBusiness,
-  Building2, CalendarDays, Camera, ChartNoAxesCombined, Check, ChevronLeft, ChevronRight, CircleDollarSign,
-  ClipboardCheck, Clock3, CloudUpload, Columns3, Contact, CreditCard, Database, Download, Eye, FileCheck2,
-  FileSearch, FileText, Filter, Flag, FolderKanban, Funnel, Gauge, Globe2, GraduationCap, Handshake,
-  HardDriveUpload, House, Image, KeyRound, Laptop, Link2, ListChecks, LockKeyhole, Mail, MapPin, MessageCircle,
-  Monitor, Moon, Palette, PanelLeft, PencilRuler, Phone, PieChart, Search, Settings2, ShieldCheck, Smartphone,
-  Sparkles, Sun, Target, Type, Upload, UserCog, UserRound, UserRoundCheck, UsersRound, Video, WandSparkles,
-} from "lucide-react";
+import { Activity, Archive, AtSign, BadgeCheck, BarChart3, Bell, Bot, BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, Check, ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck, Clock3, CloudUpload, Columns3, Contact, CreditCard, Download, Eye, FileCheck2, FileSearch, FileText, Filter, Flag, FolderKanban, Funnel, Gauge, Globe2, GraduationCap, Handshake, House, Image, KeyRound, Laptop, Link2, LockKeyhole, Mail, MapPin, MessageCircle, Monitor, Moon, Palette, PanelLeft, Phone, PieChart, Search, Settings2, ShieldCheck, Smartphone, Sparkles, Sun, Target, Upload, UserCog, UserRound, UserRoundCheck, UsersRound, Video, WandSparkles } from "lucide-react";
 import { SelectField, TextField, type SelectOption } from "@/app/components/ui";
 
 import { WidgetsIcon } from "../components/ui/Icons";

@@ -1,9 +1,9 @@
 "use client";
 import { Panel } from "@/app/components/ui";
 /* eslint-disable @next/next/no-html-link-for-pages */
-import { useEffect,useMemo,useState } from "react";
+import { useCallback,useEffect,useMemo,useState } from "react";
 import { Archive,BriefcaseBusiness,Copy,Eye,Grid2X2,List,MoreHorizontal,Pause,Play,Plus,Search,Trash2 } from "lucide-react";
-import { AppToast, ActionButton,EmptyState,StatusBadge,TextField,SelectField,MetricCard } from "@/app/components/ui";
+import { AppToast, EmptyState, StatusBadge, TextField, SelectField, MetricCard } from "@/app/components/ui";
 import { AdminPageHeader,AdminShell } from "@/app/components/admin/AdminModuleClient";
 import type { AwaitedAdminContext } from "@/app/components/admin/admin-types";
 import { getCompletion,jobService } from "./job-service";
@@ -12,7 +12,7 @@ import "./jobs.css";
 const tone=(s:JobStatus)=>s==="Publicada"?"positive":s==="Pausada"?"warning":s==="Rascunho"?"neutral":s==="Arquivada"?"danger":"info";
 export default function JobsListClient({context}:{context:AwaitedAdminContext}){
  const [jobs,setJobs]=useState<Job[]>([]),[loading,setLoading]=useState(true),[query,setQuery]=useState(""),[status,setStatus]=useState("Todos"),[sort,setSort]=useState("recent"),[view,setView]=useState<"cards"|"list">("cards"),[menu,setMenu]=useState<string|null>(null),[notice,setNotice]=useState("");
- const load=()=>jobService.listJobs(context.organization.id).then(setJobs).finally(()=>setLoading(false)); useEffect(()=>{void load()},[]);
+ const load=useCallback(()=>jobService.listJobs(context.organization.id).then(setJobs).finally(()=>setLoading(false)),[context.organization.id]); useEffect(()=>{void load()},[load]);
  const filtered=useMemo(()=>jobs.filter(j=>(status==="Todos"||j.status===status)&&`${j.title} ${j.area} ${j.city}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>sort==="title"?a.title.localeCompare(b.title):b.updatedAt.localeCompare(a.updatedAt)),[jobs,query,status,sort]);
  const change=async(j:Job,next:JobStatus)=>{await jobService.changeJobStatus(j.id,next);setNotice(`Status alterado para ${next.toLowerCase()}.`);setMenu(null);await load()};
  const duplicate=async(j:Job)=>{await jobService.duplicateJob(j.id);setNotice("Vaga duplicada como rascunho.");setMenu(null);await load()};

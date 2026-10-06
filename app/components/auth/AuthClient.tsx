@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, LockKeyhole, Mail, Phone, QrCode, ShieldCheck, UserRound } from "lucide-react";
 import { BrandAsset } from "@/app/components/BrandAsset";
-import { useThemePreference, ActionButton, AppToast, CheckboxField, RadioField, TextField, ThemeSelector, type ThemeMode, type ToastNotice } from "@/app/components/ui";
+import { useThemePreference, ActionButton, AppToast, CheckboxField, RadioField, TextField, ThemeSelector, type ToastNotice } from "@/app/components/ui";
 import { commercialPlans, plansById, type PlanId } from "@/app/data/plans";
 import { isEmail, cardBrand, maskCard, maskCnpj, maskDocument, maskExpiry, maskCpf, maskPhone, normalizeText, passwordRules, validateCard, validateLogin, validateSignup, type CardValues, type LoginValues, type SignupValues } from "./auth-validation";
 import { simulateAuthentication } from "./auth-service";
