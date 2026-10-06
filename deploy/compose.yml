@@ -7,6 +7,18 @@ services:
       NODE_ENV: production
       PORT: "3000"
       HOST: 0.0.0.0
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${JBFD_DOCKER_NETWORK:?Defina a rede do Traefik}
+      - traefik.http.routers.jbfd-${APP_ENV}.rule=Host(`${APP_ORIGIN:?Defina o domínio deste ambiente}`)
+      - traefik.http.routers.jbfd-${APP_ENV}.entrypoints=websecure
+      - traefik.http.routers.jbfd-${APP_ENV}.tls=true
+      - traefik.http.routers.jbfd-${APP_ENV}.tls.certresolver=letsencrypt
+      - traefik.http.routers.jbfd-${APP_ENV}.service=jbfd-${APP_ENV}
+      - traefik.http.services.jbfd-${APP_ENV}.loadbalancer.server.port=3000
+    networks:
+      - default
+      - traefik
     ports:
       - "127.0.0.1:${JBFD_HOST_PORT:?Defina a porta local}:3000"
     restart: unless-stopped
@@ -29,3 +41,10 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+networks:
+  default:
+    name: jbfd-${APP_ENV}-internal
+  traefik:
+    name: ${JBFD_DOCKER_NETWORK:?Defina a rede do Traefik}
+    external: true

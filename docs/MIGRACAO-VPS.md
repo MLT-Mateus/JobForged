@@ -18,16 +18,22 @@ esse servidor e não depende da hospedagem Sites ou da Vercel.
   no Test e promover a mesma imagem para Live, sem reconstruir.
 - Projetos Compose separados: `jbfd-test` e `jbfd-live`, com redes separadas.
 - Configurações externas: `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`.
-- Portas sugeridas: 3101 e 3100, somente em 127.0.0.1. Conferir disponibilidade
-  antes de instalar. O acesso HTTPS será configurado no proxy da VPS.
+- Cada ambiente tem uma rede privada própria. A aplicação também entra na rede
+  existente do Traefik (`jobforged_jobforged_network`) para receber HTTPS; n8n,
+  Evolution API, PostgreSQL e Redis não entram na rede privada da JBFD.
+- O Traefik já usa `websecure` e o certificado automático `letsencrypt`.
+  Test usa `test.jobforged.com`; Live usa `jobforged.com` quando ocorrer a troca.
+- Portas 3101 (Test) e 3100 (Live) ficam acessíveis apenas por 127.0.0.1 para
+  diagnóstico; o tráfego público passa pelo Traefik.
 - Supabase, volumes e credenciais de integrações terão isolamento entre ambientes
   quando forem implementados. Não usar dados de produção nos testes.
 
 ## Primeiro instalar Test
 
-Antes destes comandos, verificar arquitetura, memória, disco, Docker, Compose,
-portas e serviços existentes. Não remover containers, redes ou volumes existentes.
-A integração com o proxy depende desse levantamento; não alterar o DNS ainda.
+O levantamento confirmou arquitetura, memória, disco, Docker, Compose, containers
+e rede do Traefik. Não remover containers, redes ou volumes existentes. Antes de
+subir o Test, verificar que o DNS `test.jobforged.com` aponta para esta VPS e que
+a porta 3101 está livre. Não alterar o DNS Live nesta etapa.
 
 No checkout do repositório na VPS:
 
@@ -49,7 +55,7 @@ bash scripts/deploy-vps.sh test up
 curl --fail http://127.0.0.1:3101/api/health
 ```
 
-Após configurar HTTPS do Test, validar navegação, telas e assets no navegador.
+O certificado HTTPS do Test será servido pelo Traefik. Validar navegação, telas e assets no navegador.
 Somente depois preparar Live com seu próprio arquivo de ambiente e a mesma
 imagem validada. A troca do domínio acontecerá após essa validação.
 

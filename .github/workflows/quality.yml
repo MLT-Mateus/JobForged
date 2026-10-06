@@ -58,12 +58,14 @@ jobs:
           node-version-file: .nvmrc
       - name: Construir aplicação completa
         run: docker build --build-arg APP_COMMIT="$GITHUB_SHA" -t jbfd:ci .
+      - name: Preparar rede externa do proxy
+        run: docker network create jbfd-ci-network
       - name: Executar dois ambientes isolados
         shell: bash
         run: |
           for environment in test live; do
             env_file="$RUNNER_TEMP/jbfd-$environment.env"
-            sed 's/jbfd:SUBSTITUA_PELO_COMMIT/jbfd:ci/' "deploy/.env.$environment.example" > "$env_file"
+            sed -e 's/jbfd:SUBSTITUA_PELO_COMMIT/jbfd:ci/' -e 's/jobforged_jobforged_network/jbfd-ci-network/' "deploy/.env.$environment.example" > "$env_file"
             JBFD_ENV_FILE="$env_file" docker compose --project-name "jbfd-$environment" --env-file "$env_file" -f deploy/compose.yml config --quiet
             JBFD_ENV_FILE="$env_file" docker compose --project-name "jbfd-$environment" --env-file "$env_file" -f deploy/compose.yml up -d --wait --wait-timeout 120
           done
@@ -80,3 +82,4 @@ jobs:
               JBFD_ENV_FILE="$env_file" docker compose --project-name "jbfd-$environment" --env-file "$env_file" -f deploy/compose.yml down
             fi
           done
+          docker network rm jbfd-ci-network || true
