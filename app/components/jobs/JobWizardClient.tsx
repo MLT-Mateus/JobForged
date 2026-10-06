@@ -15,12 +15,12 @@ const states=["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","
 const benefits=["Vale-transporte","Vale-alimentação","Vale-refeição","Plano de saúde","Plano odontológico","Seguro de vida","Auxílio home office","Bônus","Participação nos lucros e resultados","Folga no aniversário","Benefício de atividades físicas","Auxílio-creche","Auxílio-educação","Stock options"];
 const labels={Identificação:"Defina os dados que ajudam candidatos a reconhecer a oportunidade.","Sobre a função":"Explique impacto, rotina e requisitos com objetividade.","Perfil e diferenciais":"Registre conhecimentos e características que agregam valor.",Benefícios:"Apresente a proposta de valor oferecida pela organização.","Cultura e contexto":"Dê contexto sobre o time, desafios e forma de trabalho.","Processo seletivo":"Configure as etapas e os compromissos com candidatos."} as const;
 function Field({label,children,required}:{label:string;children:React.ReactNode;required?:boolean}){
- const parts=Children.toArray(children); const control=parts.find(isValidElement) as React.ReactElement<Record<string, any>> | undefined;
+ const parts=Children.toArray(children); const control=parts.find(isValidElement);
  const extra=parts.filter(child=>child!==control);
  const common={label,className:"job-field",requiredLabel:required?"Obrigatório":undefined,helpText:extra.map(child=>isValidElement(child)?Children.toArray((child.props as {children?:React.ReactNode}).children).join(""):String(child)).join(" ") || undefined};
- if(control?.type===Select) return <SelectField {...common} value={control.props.value} onValueChange={control.props.onChange} options={control.props.items.map((value:string)=>({value,label:value}))} placeholder={control.props.placeholder}/>;
- if(control?.type==="input") return <TextField {...common} {...control.props}/>;
- if(control?.type==="textarea") return <TextAreaField {...common} {...control.props}/>;
+ if(control?.type===Select) { const props=control.props as React.ComponentProps<typeof Select>; return <SelectField {...common} value={props.value} onValueChange={props.onChange} options={props.items.map(value=>({value,label:value}))} placeholder={props.placeholder}/>; }
+ if(control?.type==="input") return <TextField {...common} {...control.props as React.ComponentProps<"input">}/>;
+ if(control?.type==="textarea") return <TextAreaField {...common} {...control.props as React.ComponentProps<"textarea">}/>;
  return <FieldControl {...common}>{children}</FieldControl>;
 }
 function Select({value,onChange,items,placeholder="Selecione"}:{value:string;onChange:(v:string)=>void;items:string[];placeholder?:string}){return <FieldControl className="jf-field--compact-label" label="Selecionar opção"><select value={value} onChange={e=>onChange(e.target.value)}><option value="">{placeholder}</option>{items.map(x=><option key={x}>{x}</option>)}</select></FieldControl>}

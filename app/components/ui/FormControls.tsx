@@ -1056,7 +1056,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<Range | null>(null);
-  const initial = useRef(initialHtml);
+  const [initial] = useState(initialHtml);
   const [imageError, setImageError] = useState("");
   const [size, setSize] = useState("3");
   const errorId = useId();
@@ -1122,7 +1122,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
       </div>
       <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={addImage}/>
       <div className="jf-rich-text__body">
-        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial.current} contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: initial.current }} onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
+        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial} contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: initial }} onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
         <span className="jf-rich-text__placeholder" aria-hidden="true">{placeholder}</span>
       </div>
     </div>

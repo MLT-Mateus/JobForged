@@ -10,7 +10,7 @@ import { WidgetsSection } from "./WidgetsSection";
 import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import {
   X,
   ArrowLeft,
@@ -74,7 +74,6 @@ import {
   type SelectOption,
 } from "@/app/components/ui";
 
-type Theme = "light" | "dark";
 type AlertKind = "success" | "info" | "warning" | "danger";
 
 const navigation = [
@@ -222,12 +221,20 @@ function ExampleCard({
   );
 }
 
-function PaletteColor({ token, theme, copied, onCopy }: { token: (typeof colorTokens)[number]; theme: Theme; copied: string | null; onCopy: (value: string, label: string) => void }) {
-  const [value, setValue] = useState("");
-  useEffect(() => {
+function subscribeToPalette(onChange: () => void) {
+  const page = document.querySelector<HTMLElement>(".ds-page");
+  if (!page) return () => {};
+  const observer = new MutationObserver(onChange);
+  observer.observe(page, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => observer.disconnect();
+}
+
+function PaletteColor({ token, copied, onCopy }: { token: (typeof colorTokens)[number]; copied: string | null; onCopy: (value: string, label: string) => void }) {
+  const readValue = useCallback(() => {
     const page = document.querySelector<HTMLElement>(".ds-page");
-    if (page) setValue(getComputedStyle(page).getPropertyValue(token.variable).trim());
-  }, [theme, token.variable]);
+    return page ? getComputedStyle(page).getPropertyValue(token.variable).trim() : "";
+  }, [token.variable]);
+  const value = useSyncExternalStore(subscribeToPalette, readValue, () => "");
   return <button type="button" className="ds-swatch" style={{"--swatch":`var(${token.variable})`} as CSSProperties} onClick={() => value && onCopy(value,token.name)} aria-label={`Copiar ${token.name}: ${value}`}>
     <span className="ds-swatch__color" aria-hidden="true"/>
     <span className="ds-swatch__body"><strong>{token.name}</strong><span>{token.use}</span><code>{token.variable}</code></span>
@@ -334,7 +341,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const currentPage = navigation[activePage];
 
   return (
-    <WorkspaceShell fullLogo="/brand/jobforged-logo-primary.svg" logo="/brand/jobforged-symbol.svg" brand="JobForged" title="Design System" subtitle="Manual da marca" collapsed={!sidebarPinned} onCollapsedChange={value=>setSidebarPinned(!value)} items={navigation.map((item,index)=>({label:item.label,href:`/design-system/${item.id}`,icon:item.icon,active:activePage===index,onSelect:()=>changePage(index)}))} footer={<div className="ds-sidebar-return"><a className="jf-action jf-action--secondary" href="/" aria-label="Voltar à LP" title="Voltar à LP"><ArrowLeft aria-hidden="true"/><span>Voltar à LP</span></a></div>}>
+    <WorkspaceShell fullLogo="/brand/jobforged-logo-primary.svg" logo="/brand/jobforged-symbol.svg" brand="JobForged" title="Design System" subtitle="Manual da marca" collapsed={!sidebarPinned} onCollapsedChange={value=>setSidebarPinned(!value)} items={navigation.map((item,index)=>({label:item.label,href:`/design-system/${item.id}`,icon:item.icon,active:activePage===index,onSelect:()=>changePage(index)}))} footer={<div className="ds-sidebar-return"><Link className="jf-action jf-action--secondary" href="/" aria-label="Voltar à LP" title="Voltar à LP"><ArrowLeft aria-hidden="true"/><span>Voltar à LP</span></Link></div>}>
       <div className="ds-page ds-page--workspace" data-theme={theme} suppressHydrationWarning>
       <a className="ds-skip-link" href="#painel-atual">Ir para o conteúdo</a>
       <div className="ds-content" id="painel-atual">
@@ -385,7 +392,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                 {id:"interaction",title:"Foco e interação",description:"Indica qual controle está selecionado ao navegar pelo teclado."},
               ].map((group,index)=><section className={`ds-color-family ds-color-family--${group.id}`} key={group.id} aria-labelledby={`color-${group.id}`}>
                 <header><span>{String(index+1).padStart(2,"0")}</span><div><h3 id={`color-${group.id}`}>{group.title}</h3><p>{group.description}</p></div></header>
-                <div className="ds-swatches">{colorTokens.filter(token=>token.group===group.id).map(token=><PaletteColor key={token.variable} token={token} theme={theme} copied={copied} onCopy={copyValue}/>)}</div>
+                <div className="ds-swatches">{colorTokens.filter(token=>token.group===group.id).map(token=><PaletteColor key={token.variable} token={token} copied={copied} onCopy={copyValue}/>)}</div>
               </section>)}
             </div>
             <aside className="ds-colors-note"><CircleAlert size={20} aria-hidden="true"/><p><strong>Antes de aplicar uma cor</strong>Verifique o contraste entre texto e fundo nos dois temas. Na personalização da empresa, altere as cores de marca e preserve os significados de sucesso, atenção e erro.</p></aside>

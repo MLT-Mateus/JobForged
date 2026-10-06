@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { CircleAlert, CircleCheck, CircleX, Info } from "lucide-react";
 
@@ -19,11 +19,13 @@ function ToastIcon({ kind }: { kind: ToastKind }) {
   return <Info size={19} aria-hidden="true" />;
 }
 
+const subscribeToMount = () => () => {};
+const clientMounted = () => true;
+const serverMounted = () => false;
+
 export function AppToast({ notice, onClose }: { notice: ToastNotice; onClose: () => void }) {
   const urgent = notice.kind === "danger" || notice.kind === "warning";
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeToMount, clientMounted, serverMounted);
 
   if (!mounted) return null;
 
