@@ -1,34 +1,33 @@
-# JobForged: official Site and GitHub publication order
+# JobForged: GitHub, Live e Test
 
-- Native official Sites project: `appgprj_6a7e58d9c9f48191a05c0c8feb3acb12`, slug `jobforged-landing-page`.
-- Treat this Sites checkout and the live official Site as the source for changes requested through Sites. Do not use GitHub as the implementation base.
-- Complete the requested change in the Sites source, publish it through native Sites tools, and verify the successful published version before accessing `MLT-Mateus/JobForged` on GitHub.
-- Only after the official Site is verified live, synchronize the exact published source tree to the project's already-linked official GitHub branch. Preserve unrelated changes and both histories. Never force-push or overwrite concurrent work.
-- Compare Git tree hashes to verify the GitHub commit contains the same tracked source as the published Site. Do not include unrelated changes.
-- If Site publication or verification fails, stop before GitHub. If the linked GitHub branch cannot be identified or safely updated after publication, report the Site as published and the GitHub sync as incomplete.
-- Never store credentials in this repository. This is an execution rule for agents working on the project, not a background webhook or scheduled service.
+## Origem oficial do código
 
-## Permanent Design System rule for JobForged work
+- O repositório `MLT-Mateus/JobForged` é a origem oficial do código e do histórico.
+- `develop` representa o ambiente Test (`https://test.jobforged.com`). `main` representa Live (`https://jobforged.com`).
+- A VPS executa as imagens; não editar código diretamente dentro do container ou release implantado.
+- Trabalhar em branch de tarefa e Pull Request. O CI deve passar antes de integrar em `develop` ou `main`.
+- Test recebe a versão de `develop` após CI aprovado e configuração explícita do deploy automático.
+- Live é promovido manualmente a partir de um SHA já integrado em `main` e que tenha sido validado em Test. Exigir aprovação do ambiente protegido `jbfd-live`.
+- Nunca iniciar deploy Live, alterar DNS ou alterar a configuração de produção sem instrução explícita do usuário na conversa.
+- Nunca guardar, imprimir, copiar para Git ou solicitar que o usuário cole aqui valores de `.env`, tokens, chaves SSH ou senhas. `.env` reais vivem apenas na VPS; GitHub Actions usa secrets e variables protegidos.
+- Não usar Vercel nem Sites como origem da implementação deste projeto.
+- Não reescrever histórico nem fazer force push.
 
-The Design System and shared UI library are the single source of truth for
-visual tokens and reusable components across the application. For every future
-JobForged creation or update:
+## Limites atuais do produto
 
-1. Inspect the Design System, shared tokens, and existing components before
-   editing screens.
-2. Reuse approved tokens and components before creating a new visual element.
-3. Do not duplicate component implementations or page-level color, size, or
-   state styles when a shared definition exists.
-4. Add any missing component or state to the shared UI library and Design
-   System, then use that same implementation on every affected screen.
-5. Validate affected pages after each change and confirm they still use the
-   shared definitions.
-6. Report the tokens and components reused or changed, and identify and fix
-   any related page-level definitions before considering the update complete.
+A base 0.00 contém a landing page, Design System, biblioteca compartilhada e telas existentes com dados demonstrativos. Não afirmar que autenticação real, banco de produção, Supabase, Asaas ou integração de n8n já estejam implementados.
 
-## Triage badge
+## Regra permanente do Design System
 
-The latest approved additional 34px downward correction is defined in `app/globals.css`:
-`.phone-quality` uses `top: 420px` by default and `top: 450px` in its existing
-responsive rule. Keep one source of truth for this position. Do not reintroduce
-`app/phone-layout-overrides.css` or an overriding `!important` rule.
+O Design System e a biblioteca compartilhada de UI são a única fonte de verdade para tokens visuais e componentes reutilizáveis. Para cada criação ou atualização:
+
+1. Inspecionar o Design System, tokens compartilhados e componentes existentes antes de editar telas.
+2. Reutilizar tokens e componentes aprovados antes de criar elementos visuais.
+3. Não duplicar implementações de componentes nem estilos de cor, tamanho ou estado no nível da página quando já existir definição compartilhada.
+4. Incluir componentes ou estados ausentes na biblioteca compartilhada e no Design System, usando a mesma implementação nas telas afetadas.
+5. Validar as páginas afetadas depois de cada mudança e confirmar que continuam usando as definições compartilhadas.
+6. Relatar tokens e componentes reutilizados ou alterados e corrigir definições duplicadas relacionadas.
+
+## Badge de triagem
+
+A correção vertical adicional aprovada de 34px está em `app/globals.css`: `.phone-quality` usa `top: 420px` por padrão e `top: 450px` na regra responsiva existente. Manter uma única fonte de verdade. Não reintroduzir `app/phone-layout-overrides.css` nem regra `!important` de sobrescrita.

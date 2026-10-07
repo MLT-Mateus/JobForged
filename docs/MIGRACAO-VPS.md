@@ -1,72 +1,32 @@
-# JBFD na VPS: preparação da versão 0.00
+# JBFD na VPS: estado da migração 0.00
 
-## O que está pronto no código
+## Estado atual
 
-O Docker executa a aplicação inteira existente: landing page, Design System,
-autenticação visual e painéis existentes. Os painéis usam dados demonstrativos;
-essa migração não implementa autenticação real, banco Supabase ou integrações.
-O endpoint `/api/health` verifica apenas a aplicação, não serviços futuros.
+A base 0.00 está implantada nos dois ambientes da VPS, com o domínio oficial apontando para Live:
 
-O build padrão continua atendendo ao Sites durante a transição. `npm run
-build:node` gera o servidor independente em `dist/standalone`. O Docker usa
-esse servidor e não depende da hospedagem Sites ou da Vercel.
+- Test: <https://test.jobforged.com>
+- Live: <https://jobforged.com>
+- VPS: `187.77.229.27`
+- Commit implantado nos dois ambientes: `40a560ad1d04be44125d8fd02744acc020010e8e`
 
-## Live e Test
+Os endpoints `/api/health` foram validados pelo usuário. Cada ambiente usa um container, rede Compose, configuração `.env` e porta local diferentes. Ambos passam pelo Traefik compartilhado; n8n, Evolution API, Postgres e Redis existentes não foram incorporados à rede interna JBFD.
 
-- `main`: código aprovado para Live; `develop`: desenvolvimento e Test.
-- Cada implantação usa uma imagem identificada pelo commit. Validar essa imagem
-  no Test e promover a mesma imagem para Live, sem reconstruir.
-- Projetos Compose separados: `jbfd-test` e `jbfd-live`, com redes separadas.
-- Configurações externas: `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`.
-- Cada ambiente tem uma rede privada própria. A aplicação também entra na rede
-  existente do Traefik (`jobforged_jobforged_network`) para receber HTTPS; n8n,
-  Evolution API, PostgreSQL e Redis não entram na rede privada da JBFD.
-- O Traefik já usa `websecure` e o certificado automático `letsencrypt`.
-  Test usa `test.jobforged.com`; Live usa `jobforged.com` quando ocorrer a troca.
-- Portas 3101 (Test) e 3100 (Live) ficam acessíveis apenas por 127.0.0.1 para
-  diagnóstico; o tráfego público passa pelo Traefik.
-- Supabase, volumes e credenciais de integrações terão isolamento entre ambientes
-  quando forem implementados. Não usar dados de produção nos testes.
+## O que está no sistema
 
-## Primeiro instalar Test
+O Docker executa todas as páginas e assets existentes na base: landing page, Design System, telas administrativas e de candidato que já estão no código, e fluxos demonstrativos. Ainda não há autenticação real, banco de produção, Supabase, Asaas ou integração funcional da aplicação com n8n. O endpoint `/api/health` confirma a saúde do app, não desses serviços futuros.
 
-O levantamento confirmou arquitetura, memória, disco, Docker, Compose, containers
-e rede do Traefik. Não remover containers, redes ou volumes existentes. Antes de
-subir o Test, verificar que o DNS `test.jobforged.com` aponta para esta VPS e que
-a porta 3101 está livre. Não alterar o DNS Live nesta etapa.
+O build Node independente e Docker não dependem de Sites ou Vercel. O domínio `jobforged.com` já está na VPS. O código e o histórico ficam no GitHub `MLT-Mateus/JobForged`.
 
-No checkout do repositório na VPS:
+## Separação Live/Test
 
-```bash
-revision="$(git rev-parse HEAD)"
-docker build --build-arg APP_COMMIT="$revision" -t "jbfd:$revision" .
-sudo install -d -m 700 /opt/jbfd/test
-sudo install -m 600 deploy/.env.test.example /opt/jbfd/test/.env
-sudo nano /opt/jbfd/test/.env
-```
+- `develop` alimenta Test; `main` representa Live.
+- Configurações ficam somente em `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`.
+- O Compose e as redes internas são separados; somente o Traefik é compartilhado.
+- A mesma imagem versionada por SHA deve ser validada em Test e promovida a Live.
+- Supabase, integrações e dados precisarão de projetos/credenciais independentes ao serem adicionados.
 
-No editor, trocar `JBFD_IMAGE` por `jbfd:` seguido do commit completo usado no
-build. Os exemplos não contêm segredos. Nunca enviar os arquivos reais ao GitHub.
-Não executar `config` sem `--quiet` ou compartilhar logs contendo credenciais.
+## Próxima etapa operacional
 
-```bash
-bash scripts/deploy-vps.sh test config
-bash scripts/deploy-vps.sh test up
-curl --fail http://127.0.0.1:3101/api/health
-```
+A publicação automatizada foi preparada no repositório, mas ainda depende de configurar Environments, secrets, variables, GHCR e usuário SSH restrito na VPS. O passo a passo está em [`OPERACAO-GITHUB-VPS.md`](OPERACAO-GITHUB-VPS.md). Até concluir esse checklist, deploy automático permanece desativado.
 
-O certificado HTTPS do Test será servido pelo Traefik. Validar navegação, telas e assets no navegador.
-Somente depois preparar Live com seu próprio arquivo de ambiente e a mesma
-imagem validada. A troca do domínio acontecerá após essa validação.
-
-## Atualizações e recuperação
-
-Construir uma nova imagem com um novo commit, validar no Test e promover para
-Live. Manter a imagem anterior: para voltar, alterar apenas `JBFD_IMAGE` no arquivo
-do ambiente e executar `up` novamente. Alterações futuras de banco exigirão plano
-próprio de migração e backup; voltar a imagem não desfaz alterações de dados.
-
-O script `down` não remove volumes. Este kit não faz deploy automático na VPS,
-não reescreve histórico e não instala MCP. A conexão MCP será configurada depois
-com autenticação e ferramentas limitadas para inspecionar, atualizar Test e
-promover versões. GitHub mantém o código completo; containers executam o build.
+A implantação do MCP também é uma etapa futura. A arquitetura e limites de acesso propostos estão descritos no mesmo guia; não há endpoint MCP publicado ainda.
