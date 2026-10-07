@@ -33,13 +33,13 @@ Para Test automático, criar repository variable `JBFD_AUTO_DEPLOY_TEST=true` de
 
 O workflow de Test cria uma imagem privada no GitHub Container Registry. Na VPS, o usuário de deploy precisa fazer login no GHCR com um token pessoal somente de leitura de pacotes (`read:packages`). O token fica no armazenamento Docker desse usuário na VPS, nunca no GitHub, no repositório ou em `.env`.
 
-Faça o login interativo como usuário de deploy:
+Faça o login interativo como usuário de deploy, para que o arquivo de credenciais fique sob a conta certa:
 
 ```bash
 docker login ghcr.io --username SEU_USUARIO_GITHUB
 ```
 
-Cole o token somente no prompt do Docker. Não passe o token como argumento de comando. Verifique no GHCR que o pacote `jobforged` foi criado após a primeira publicação de Test.
+Cole o token somente no prompt do Docker. Não passe o token como argumento de comando. Mantenha `~/.docker/config.json` acessível apenas ao usuário de deploy. Verifique no GHCR que o pacote `jobforged` foi criado após a primeira publicação de Test.
 
 ## 3. Criar o usuário de deploy restrito na VPS
 
@@ -56,7 +56,7 @@ restrict,command="/opt/jbfd/bin/jbfd-deploy-gateway.sh live" ssh-ed25519 CHAVE_P
 
 Copie cada chave privada apenas para o Secret `VPS_DEPLOY_KEY` do Environment correspondente. A chave de Test não consegue publicar Live, mesmo que seja usada fora do workflow.
 
-O gateway aceita somente `deploy test <SHA>` ou `deploy live <SHA>`, conforme a chave. Não dá shell, encaminhamento de portas nem comando Docker arbitrário. O helper valida o SHA, obtém o commit público, atualiza apenas `JBFD_IMAGE`, baixa a imagem, valida o Compose, aguarda healthcheck e restaura a imagem anterior se o deploy falhar.
+O gateway aceita somente `deploy test <SHA>` ou `deploy live <SHA>`, conforme a chave. Não dá shell, encaminhamento de portas nem comando Docker arbitrário. O helper valida o SHA, obtém o commit público, atualiza apenas `JBFD_IMAGE`, baixa a imagem, confere se o rótulo da imagem corresponde ao mesmo SHA, valida o Compose, aguarda healthcheck e restaura a imagem anterior se o deploy falhar. Os `.env` precisam continuar com modo `600` e ser legíveis pelo usuário que executa Compose.
 
 ## 4. Fazer a primeira publicação
 
