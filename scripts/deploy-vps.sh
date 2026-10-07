@@ -30,12 +30,17 @@ case "$command" in
       write_image "$current_image"
       "${compose[@]}" up -d --wait --wait-timeout 120 || true
     }
-    write_image "$image"
-    if ! docker pull "$image" || ! "${compose[@]}" config --quiet || ! "${compose[@]}" up -d --wait --wait-timeout 120; then
+    fail_deploy() {
       echo "Deploy falhou; restaurando a imagem anterior." >&2
       restore_image
       exit 1
-    fi
+    }
+    write_image "$image"
+    docker pull "$image" || fail_deploy
+    image_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image")"
+    [[ "$image_revision" == "$revision" ]] || fail_deploy
+    "${compose[@]}" config --quiet || fail_deploy
+    "${compose[@]}" up -d --wait --wait-timeout 120 || fail_deploy
     printf 'Deploy concluído: ambiente=%s commit=%s\n' "$environment" "$revision"
     ;;
 esac
