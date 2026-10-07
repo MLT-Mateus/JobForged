@@ -1,0 +1,65 @@
+name: Publicar Test na VPS
+
+on:
+  workflow_run:
+    workflows: [Qualidade da JBFD]
+    types: [completed]
+    branches: [develop]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: jbfd-test-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-test:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'develop' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      vars.JBFD_AUTO_DEPLOY_TEST == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: jbfd-test
+    steps:
+      - name: Baixar o commit aprovado pelo CI
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Publicar imagem versionada no GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ghcr.io/mlt-mateus/jobforged
+          REVISION: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          if docker manifest inspect "$IMAGE:$REVISION" >/dev/null 2>&1; then
+            echo "Imagem deste commit já publicada; preservando o artefato existente."
+          else
+            docker build --build-arg APP_COMMIT="$REVISION" \
+              --label "org.opencontainers.image.revision=$REVISION" \
+              -t "$IMAGE:$REVISION" .
+            docker push "$IMAGE:$REVISION"
+          fi
+
+      - name: Implantar somente no ambiente Test
+        env:
+          VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          REVISION: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/jbfd_deploy"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/jbfd_deploy" "$HOME/.ssh/known_hosts"
+          ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST" "deploy test $REVISION"

@@ -1,0 +1,62 @@
+name: Promover versão para Live
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: SHA completo da imagem já validada em Test e integrada em main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: jbfd-live-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-live:
+    if: vars.JBFD_LIVE_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: jbfd-live
+    steps:
+      - name: Baixar o histórico de main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Confirmar SHA integrado em main e imagem publicada
+        env:
+          REVISION: ${{ inputs.commit_sha }}
+          IMAGE: ghcr.io/mlt-mateus/jobforged
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]] || { echo "SHA inválido" >&2; exit 64; }
+          git merge-base --is-ancestor "$REVISION" origin/main || {
+            echo "O commit ainda não está integrado em main" >&2
+            exit 1
+          }
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker manifest inspect "$IMAGE:$REVISION" >/dev/null
+
+      - name: Implantar a mesma imagem aprovada em Live
+        env:
+          VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          REVISION: ${{ inputs.commit_sha }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/jbfd_deploy"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/jbfd_deploy" "$HOME/.ssh/known_hosts"
+          ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST" "deploy live $REVISION"
