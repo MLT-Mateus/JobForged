@@ -1,0 +1,53 @@
+{
+  "realm": "jbfd", "enabled": true, "sslRequired": "external",
+  "registrationAllowed": false, "resetPasswordAllowed": false,
+  "bruteForceProtected": true, "accessTokenLifespan": 300,
+  "clientScopes": [{
+    "name": "jbfd:read", "protocol": "openid-connect",
+    "attributes": {"include.in.token.scope": "true", "display.on.consent.screen": "true"},
+    "protocolMappers": [{
+      "name": "jbfd-subject",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-sub-mapper",
+      "config": {"access.token.claim": "true", "introspection.token.claim": "true"}
+    }, {
+      "name": "jbfd-mcp-audience", "protocol": "openid-connect",
+      "protocolMapper": "oidc-audience-mapper",
+      "config": {
+        "included.client.audience": "jbfd-mcp-resource",
+        "included.custom.audience": "https://mcp.jobforged.com/mcp",
+        "access.token.claim": "true", "id.token.claim": "false"
+      }
+    }]
+  }],
+  "defaultDefaultClientScopes": ["jbfd:read"],
+  "defaultOptionalClientScopes": [],
+  "clients": [{
+    "clientId": "jbfd-mcp-resource",
+    "name": "JBFD protected MCP resource",
+    "enabled": true,
+    "protocol": "openid-connect",
+    "bearerOnly": true,
+    "standardFlowEnabled": false,
+    "implicitFlowEnabled": false,
+    "directAccessGrantsEnabled": false,
+    "attributes": {"resource_url": "https://mcp.jobforged.com/mcp"}
+  }, {
+    "clientId": "jbfd-codex",
+    "name": "Codex JBFD read-only",
+    "enabled": true,
+    "protocol": "openid-connect",
+    "publicClient": true,
+    "standardFlowEnabled": true,
+    "implicitFlowEnabled": false,
+    "directAccessGrantsEnabled": false,
+    "serviceAccountsEnabled": false,
+    "consentRequired": true,
+    "redirectUris": ["http://127.0.0.1:5555/callback"],
+    "webOrigins": [],
+    "defaultClientScopes": ["jbfd:read"],
+    "optionalClientScopes": [],
+    "attributes": {"pkce.code.challenge.method": "S256", "exclude.issuer.from.auth.response": "false"}
+  }],
+  "users": []
+}

@@ -1,0 +1,13 @@
+# Copiar este bloco para a configuração do Codex após ativar e validar o servidor.
+# Não contém tokens ou senhas. Não substitui a configuração existente.
+[mcp_servers.jbfd]
+url = "https://mcp.jobforged.com/mcp"
+enabled_tools = ["jbfd_status", "jbfd_diagnostics"]
+default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 15
+
+[mcp_servers.jbfd.oauth]
+client_id = "jbfd-codex"
+callback_url = "http://127.0.0.1:5555/callback"
+callback_port = 5555

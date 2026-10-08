@@ -10,13 +10,14 @@ read -r action environment revision extra <<< "${SSH_ORIGINAL_COMMAND:-}"
 }
 
 root=/opt/jbfd
-install -d -m 700 "$root/releases"
-[[ -w "$root/releases" && -w "$root" ]] || { echo "Diretório de deploy sem permissão de escrita" >&2; exit 73; }
-exec 9>"$root/deploy.lock"
+releases="$root/releases"
+install -d -m 700 "$releases"
+[[ -w "$releases" ]] || { echo "Diretório de releases sem permissão de escrita" >&2; exit 73; }
+exec 9>"$releases/.deploy.lock"
 flock -n 9 || { echo "Já existe um deploy em andamento" >&2; exit 75; }
-release="$root/releases/$revision"
+release="$releases/$revision"
 if [[ ! -x "$release/scripts/deploy-vps.sh" || ! -f "$release/deploy/compose.yml" ]]; then
-  temporary="$root/releases/.${revision}.tmp"
+  temporary="$releases/.${revision}.tmp"
   rm -rf -- "$temporary"
   git clone --no-checkout https://github.com/MLT-Mateus/JobForged.git "$temporary"
   git -C "$temporary" checkout --detach "$revision"

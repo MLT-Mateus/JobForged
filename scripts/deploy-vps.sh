@@ -37,7 +37,9 @@ case "$command" in
     }
     write_image "$image"
     docker pull "$image" || fail_deploy
-    image_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image")"
+    if ! image_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image")"; then
+      fail_deploy
+    fi
     [[ "$image_revision" == "$revision" ]] || fail_deploy
     "${compose[@]}" config --quiet || fail_deploy
     "${compose[@]}" up -d --wait --wait-timeout 120 || fail_deploy

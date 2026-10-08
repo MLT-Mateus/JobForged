@@ -18,6 +18,29 @@ permissions:
   contents: read
 
 jobs:
+  mcp:
+    name: Validar MCP operacional
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: services/mcp
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configurar Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: services/mcp/package-lock.json
+      - name: Instalar dependências fixadas
+        run: npm ci
+      - name: Testar autenticação, ferramentas e transporte MCP
+        run: npm test
+      - name: Auditar dependências de produção
+        run: npm audit --omit=dev --audit-level=high
+
   validate:
     name: Validar código e build
     runs-on: ubuntu-latest
