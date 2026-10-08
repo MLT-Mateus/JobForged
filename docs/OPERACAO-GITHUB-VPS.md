@@ -45,7 +45,7 @@ Cole o token somente no prompt do Docker. Não passe o token como argumento de c
 
 A chave SSH de deploy não pode ser a chave root. Crie um usuário próprio, adicione-o ao grupo `docker` (o acesso ao socket Docker equivale a controle elevado da VPS), e não conceda sudo. A conta só poderá executar o gateway forçado em `authorized_keys`.
 
-Instale os arquivos versionados do repositório em `/opt/jbfd/bin/` e deixe-os sem escrita para o usuário de deploy. O diretório `/opt/jbfd/releases/` e o arquivo de lock devem ser graváveis pelo usuário. Preserve os `.env` e containers existentes.
+Instale os arquivos versionados do repositório em `/opt/jbfd/bin/` e deixe-os sem escrita para o usuário de deploy. Somente `/opt/jbfd/releases/` precisa ser gravável por ele; o lock fica dentro desse diretório. Preserve `/opt/jbfd`, as pastas `test` e `live`, os `.env` e containers existentes. Os `.env` devem permanecer no modo `600` e legíveis pelo usuário que executa Compose.
 
 Gere duas chaves Ed25519 distintas: uma só para Test e outra só para Live. Em `~/.ssh/authorized_keys` do usuário de deploy, use linhas equivalentes a estas, substituindo as chaves públicas:
 
@@ -69,13 +69,13 @@ O gateway aceita somente `deploy test <SHA>` ou `deploy live <SHA>`, conforme a 
 
 O workflow de Live valida que o SHA informado está na história de `main` e que a imagem desse mesmo SHA existe no GHCR antes de solicitar o deploy à VPS.
 
-## 5. MCP para Codex e outras IAs
+## 5. MCP, código e publicação
 
-A conexão ainda não está publicada. O endpoint planejado é `https://mcp.jobforged.com/mcp`, separado do site e do n8n. O MCP deve expor somente saúde/versão, status de deploy, publicação em Test, solicitação de promoção Live e rollback por SHA; sem shell geral, acesso a `.env` ou consultas a segredos.
+O MCP está publicado em `https://mcp.jobforged.com/mcp` e conectado ao Codex por OAuth. Atualmente oferece somente `jbfd_status` e `jbfd_diagnostics`, ferramentas de consulta que leem snapshots filtrados. Não têm acesso ao GitHub, shell, socket Docker, arquivos `.env` nem publicação.
 
-Antes de conectar, é necessário implementar e testar o servidor Streamable HTTP, configurar autenticação OAuth 2.1 compatível com os clientes desejados, definir scopes e autorização por ferramenta, criar o DNS/TLS e executar testes com token válido e inválido. Não habilitar ferramentas de escrita enquanto autenticação e autorização não estiverem verificadas. Use um provedor OAuth existente em vez de criar um fluxo criptográfico próprio.
+O Codex altera o código no checkout local do repositório e registra as mudanças no GitHub. Depois que os segredos/configurações deste guia forem instalados, o workflow publica em Test após CI aprovado. Você valida Test; Live é iniciado separadamente pelo workflow manual e passa pela aprovação protegida do GitHub. Assim existem apenas dois ambientes publicados, sem um terceiro servidor de desenvolvimento.
 
-No Codex, depois do endpoint e OAuth prontos, adicionar a URL MCP remota pela configuração de MCP do Codex e completar o login. Para reutilizar o mesmo MCP em outra IA, ela precisa suportar MCP remoto Streamable HTTP e o mesmo OAuth.
+O código MCP está versionado em `services/mcp`, `scripts/mcp` e `deploy/mcp`. A cópia atualmente executada na VPS veio do pacote de preparação. Atualizar o MCP é uma operação separada do deploy do site e deve ser feita apenas quando houver uma alteração específica no serviço MCP.
 
 ## Segurança básica
 
