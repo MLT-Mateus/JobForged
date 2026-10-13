@@ -6,7 +6,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=jobforged_jobforged_network
-      - traefik.http.routers.supabase-studio.rule=Host(`supabase.jobforged.com`)
+      - traefik.http.routers.supabase-studio.rule=Host(`test.supabase.jobforged.com`)
       - traefik.http.routers.supabase-studio.priority=100
       - traefik.http.routers.supabase-studio.entrypoints=websecure
       - traefik.http.routers.supabase-studio.tls=true
