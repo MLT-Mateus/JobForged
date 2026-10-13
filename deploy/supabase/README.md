@@ -26,6 +26,7 @@ API_EXTERNAL_URL=https://test.jobforged.com/auth/v1
 SITE_URL=https://test.jobforged.com
 ADDITIONAL_REDIRECT_URLS=https://test.jobforged.com/api/auth/callback
 API_GW_HTTP_PORT=127.0.0.1:8210
+DISABLE_SIGNUP=true
 ENABLE_EMAIL_SIGNUP=true
 ENABLE_EMAIL_AUTOCONFIRM=true
 ENABLE_ANONYMOUS_USERS=false
@@ -74,7 +75,7 @@ ENABLE_ANONYMOUS_USERS=false
 ENABLE_PHONE_SIGNUP=false
 ```
 
-Set `STUDIO_BASIC_AUTH_USERS` to a bcrypt `htpasswd -B` entry in the root-owned Live `.env`; keep the file at mode `600`. Configure SMTP before opening production signups. Leave email auto-confirm disabled in Live.
+Set `STUDIO_BASIC_AUTH_USERS` to a bcrypt `htpasswd -B` entry in the root-owned Live `.env`; keep the file at mode `600`. `DISABLE_SIGNUP=true` keeps Live signup closed until SMTP is configured. Then set `DISABLE_SIGNUP=false` while leaving email auto-confirm disabled.
 
 Copy `docker-compose.live.override.yml` into the Live directory and start it with a unique Compose project name so all default networks and named volumes are distinct:
 
