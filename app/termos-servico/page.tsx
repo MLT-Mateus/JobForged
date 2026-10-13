@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
 import LegalPage from "@/app/components/LegalPage";
 import { termsOfServiceHtml } from "@/app/legal-documents";
+import { publicPageMetadata } from "@/app/seo";
 
-export const metadata: Metadata = {
-  title: "JobForged | Termos de Serviço",
-  description: "Termos de Serviço da plataforma JobForged.",
-};
+export const metadata = publicPageMetadata("JobForged | Termos de Serviço", "Consulte as condições de acesso e uso dos produtos, serviços e recursos oferecidos pela JobForged.", "/termos-servico");
 
 export default function TermsOfServicePage() {
   return (

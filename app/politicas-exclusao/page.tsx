@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
 import LegalPage from "@/app/components/LegalPage";
 import { dataDeletionPolicyHtml } from "@/app/legal-documents";
+import { publicPageMetadata } from "@/app/seo";
 
-export const metadata: Metadata = {
-  title: "JobForged | Política de Exclusão de Dados",
-  description: "Política de Exclusão de Dados da plataforma JobForged.",
-};
+export const metadata = publicPageMetadata("JobForged | Política de Exclusão de Dados", "Veja como solicitar a exclusão de dados e quais critérios se aplicam às contas e informações da JobForged.", "/politicas-exclusao");
 
 export default function DataDeletionPolicyPage() {
   return (

@@ -39,10 +39,7 @@ function rscPayload(html) {
     .join("\n");
 }
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-
-test("renders development preview metadata", async () => {
+test("renders canonical SEO metadata and JobForged structured data", async () => {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
@@ -63,7 +60,50 @@ test("renders development preview metadata", async () => {
     response.headers.get("content-type") ?? "",
     /^text\/html\b/i,
   );
-  assert.match(await response.text(), developmentPreviewMeta);
+  const html = await response.text();
+  assert.match(html, /<title>JobForged \| Recrutamento e seleção com a sua marca<\/title>/i);
+  assert.match(html, /<meta name="description" content="Organize vagas, currículos e etapas de recrutamento/i);
+  assert.match(html, /<link rel="canonical" href="https:\/\/jobforged\.com\/"/i);
+  assert.match(html, /<meta property="og:title" content="JobForged \| Recrutamento e seleção com a sua marca"/i);
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image"/i);
+  assert.match(html, /application\/ld\+json/);
+  assert.match(html, /"@type":"SoftwareApplication"/);
+  assert.ok(rscPayload(html).includes("Recrute com a "), "main LP copy is present in the server-rendered RSC payload");
+});
+
+test("Test and private routes are noindex, while the Live sitemap lists only approved URLs", async () => {
+  const { default: worker } = await import("../dist/server/index.js");
+  const env = { ASSETS: assets };
+  const ctx = { waitUntil() {}, passThroughOnException() {} };
+
+  const testHome = await worker.fetch(new Request("https://test.jobforged.com/", { headers: { accept: "text/html" } }), env, ctx);
+  assert.equal(testHome.headers.get("x-robots-tag"), "noindex, nofollow, noarchive");
+
+  const privateLogin = await worker.fetch(new Request("https://jobforged.com/login", { headers: { accept: "text/html" } }), env, ctx);
+  assert.match(await privateLogin.text(), /<meta name="robots" content="noindex, nofollow"/i);
+  assert.equal(privateLogin.headers.get("x-robots-tag"), "noindex, nofollow, noarchive");
+
+  const liveHome = await worker.fetch(new Request("https://jobforged.com/", { headers: { accept: "text/html" } }), env, ctx);
+  assert.equal(liveHome.headers.get("x-robots-tag"), null);
+
+  const liveSitemap = await worker.fetch(new Request("https://jobforged.com/sitemap.xml"), env, ctx);
+  assert.equal(liveSitemap.status, 200);
+  const liveXml = await liveSitemap.text();
+  assert.match(liveXml, /https:\/\/jobforged\.com\//);
+  assert.doesNotMatch(liveXml, /test\.jobforged\.com|\/login|\/cadastro|\/app|design-system/i);
+
+  const testSitemap = await worker.fetch(new Request("https://test.jobforged.com/sitemap.xml"), env, ctx);
+  assert.equal(testSitemap.status, 200);
+  const testSitemapXml = await testSitemap.text();
+  assert.doesNotMatch(testSitemapXml, /test\.jobforged\.com|\/login|\/cadastro|\/app|design-system/i);
+  assert.equal((testSitemapXml.match(/<url>/g) ?? []).length, 4);
+
+  const testRobots = await worker.fetch(new Request("https://test.jobforged.com/robots.txt"), env, ctx);
+  const testRobotsText = await testRobots.text();
+  assert.doesNotMatch(testRobotsText, /Sitemap:/i);
+
+  const liveRobots = await worker.fetch(new Request("https://jobforged.com/robots.txt"), env, ctx);
+  assert.match(await liveRobots.text(), /Sitemap:\s*https:\/\/jobforged\.com\/sitemap\.xml/i);
 });
 
 // Signup must remain on the free plan while billing is not available.

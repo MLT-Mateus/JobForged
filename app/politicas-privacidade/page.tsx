@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
 import LegalPage from "@/app/components/LegalPage";
 import { privacyPolicyHtml } from "@/app/legal-documents";
+import { publicPageMetadata } from "@/app/seo";
 
-export const metadata: Metadata = {
-  title: "JobForged | Política de Privacidade",
-  description: "Política de Privacidade da plataforma JobForged.",
-};
+export const metadata = publicPageMetadata("JobForged | Política de Privacidade", "Entenda como a JobForged trata dados pessoais e protege a privacidade durante o uso da plataforma.", "/politicas-privacidade");
 
 export default function PrivacyPolicyPage() {
   return (

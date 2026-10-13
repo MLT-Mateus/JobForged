@@ -1486,6 +1486,21 @@ main {
   font-size: 7px;
 }
 
+@keyframes lp-float-candidate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes lp-float-whatsapp { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-7px, -9px, 0); } }
+@keyframes lp-float-match { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(8px, 7px, 0); } }
+@keyframes lp-float-status { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(5px, -7px, 0); } }
+@keyframes lp-float-quality { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-6px, 5px, 0); } }
+@keyframes lp-float-brand-left { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-8px, 7px, 0); } }
+@keyframes lp-float-brand-right { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(7px, -9px, 0); } }
+.candidate-card { animation: lp-float-candidate 7.5s ease-in-out infinite; }
+.floating-card--whatsapp { animation: lp-float-whatsapp 7.8s ease-in-out infinite; }
+.floating-card--match { animation: lp-float-match 8.6s ease-in-out 800ms infinite; }
+.phone-status { animation: lp-float-status 7.4s ease-in-out infinite; }
+.phone-quality { animation: lp-float-quality 8.2s ease-in-out 600ms infinite; }
+.brand-studio-badge--white-label { animation: lp-float-brand-left 8.6s ease-in-out 800ms infinite; }
+.brand-studio-badge--on-demand { animation: lp-float-brand-right 7.8s ease-in-out infinite; }
+
 .eyebrow--light {
   color: #76ddd5;
 }
@@ -6130,4 +6145,9 @@ html[data-theme="dark"] .app-loader__inline [fill="#4169E1"] { fill:#7E9CFF; }
 }
 @media(prefers-reduced-motion:reduce) {
  .lp-reveal.is-revealed,.landing-page .faq-answer.is-open p { animation:none; }
+ .landing-page .capability-track { animation:none; }
+ .landing-page .faq-answer,.landing-page .faq-item,.landing-page .site-header,.app-loader { transition:none; }
+ .app-loader--theme::before,.app-loader--theme .app-loader__logo { animation:none; }
+ .candidate-card,.floating-card--whatsapp,.floating-card--match,.phone-status,.phone-quality,.brand-studio-badge--white-label,.brand-studio-badge--on-demand { animation:none; }
+ html { scroll-behavior:auto; }
 }
