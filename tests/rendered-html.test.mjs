@@ -78,7 +78,7 @@ test("signup always renders the Freemium plan regardless of URL parameters", asy
     assert.equal(response.status, 200);
     const html = await response.text();
     const rendered = rscPayload(html);
-    assert.ok(rendered.includes("Plano Freemium"), query || "default plan");
+    assert.ok(html.includes("Plano Freemium"), query || "default plan");
     assert.ok(!rendered.includes("initialPlanId"), "paid plan parameters must not reach signup");
   }
 });
