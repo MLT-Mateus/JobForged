@@ -41,7 +41,7 @@ docker compose -f docker-compose.yml -f docker-compose.override.yml config --qui
 docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --wait
 ```
 
-The Supabase Studio dashboard has no public Traefik route. The API gateway is published only on loopback port `8210` and is exposed externally through TLS on the Test hostname. Its API paths are routed before the Test app router. The app container uses `http://supabase-envoy:8000` on `jbfd-test-internal`.
+Supabase Studio is exposed only through the HTTPS host `supabase.jobforged.com`, protected by Traefik Basic Auth. Set `STUDIO_BASIC_AUTH_USERS` in the root-owned Supabase `.env` to a quoted `htpasswd -B` user/hash entry before starting the stack. The Studio service is not published on a host port. The API gateway remains published only on loopback port `8210` and is externally exposed through the Test hostname; its API paths are routed before the Test app router. The app container uses `http://supabase-envoy:8000` on `jbfd-test-internal`.
 
 After the first start, apply the versioned SQL migrations from the repository in order using `psql` inside the Supabase database container. Do not use the existing Keycloak database or any Live database.
 
