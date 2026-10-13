@@ -37,6 +37,8 @@ O GitHub Actions também executa lint, TypeScript, testes de HTML renderizado e 
 
 O deploy automático de Test está habilitado e validado. A publicação Live continua protegida: o Environment `jbfd-live`, sua aprovação obrigatória e as credenciais próprias ainda precisam ser preparados antes de habilitar a variável de proteção.
 
+O procedimento obrigatório de paridade entre código, migrations e bancos está em [`docs/GUIA-PROMOCAO-TEST-LIVE.md`](docs/GUIA-PROMOCAO-TEST-LIVE.md). O deploy de app em Test é automático; migrations ainda exigem execução operacional controlada.
+
 ## Código e segredos
 
 O código completo fica no GitHub. Os containers na VPS executam uma imagem identificada por commit. Arquivos `.env` reais ficam em `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`; não enviar esses arquivos ao GitHub, ao chat ou ao Codex. Exemplos sem segredos ficam em `deploy/`.

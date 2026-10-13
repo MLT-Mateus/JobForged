@@ -44,6 +44,16 @@ jobs:
           printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
           docker manifest inspect "$IMAGE:$REVISION" >/dev/null
 
+      - name: Confirmar que o mesmo SHA está ativo em Test
+        env:
+          REVISION: ${{ inputs.commit_sha }}
+        run: |
+          test_revision="$(curl --fail --silent --show-error https://test.jobforged.com/api/health | jq -er '.commit')"
+          [[ "$test_revision" == "$REVISION" ]] || {
+            echo "O SHA informado não é a versão atualmente saudável em Test." >&2
+            exit 1
+          }
+
       - name: Implantar a mesma imagem aprovada em Live
         env:
           VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}

@@ -16,7 +16,7 @@ Versão técnica: `0.0.0`. Revisão inicial: 2026-10-06. Estado operacional atua
 
 ## Estado em produção
 
-A imagem do commit `344febc3cbb7306c8ad650c27fea41ea72a15b6a` foi implantada em Test após o workflow de deploy ser corrigido e reexecutado. Em 2026-10-13, `/api/health` respondeu HTTP 200 em Test e Live. Test tem configuração de autenticação Supabase; Live continua com a versão anterior do aplicativo e `/api/auth/config` responde 404. Existem stacks Supabase independentes para Test e Live, ambas saudáveis. Migrations de autenticação estão registradas/aplicadas nos dois bancos; nenhum dado de usuário foi copiado entre os ambientes.
+A imagem do commit `76815bb00767cf1621fd52eb61ae6d393bee7c81` está implantada em Test. Em 2026-10-13, `/api/health` respondeu HTTP 200 em Test e Live. Test tem configuração de autenticação Supabase; Live continua com a versão anterior do aplicativo e `/api/auth/config` responde 404. Existem stacks Supabase independentes para Test e Live, ambas saudáveis. Migrations de autenticação estão registradas/aplicadas nos dois bancos; nenhum dado de usuário foi copiado entre os ambientes.
 
 ## Itens restantes de operação
 
