@@ -42,7 +42,7 @@ if [[ "$mode" == "--baseline-existing" ]]; then
   [[ "$environment" == test ]] || { echo "Baseline is restricted to the existing Test database." >&2; exit 64; }
   [[ ${CONFIRM_BASELINE_EXISTING:-} == yes ]] || { echo "Set CONFIRM_BASELINE_EXISTING=yes only after verifying the existing schema." >&2; exit 64; }
   schema_ok=$(psql -Atqc "SELECT (to_regclass('public.companies') IS NOT NULL AND to_regclass('public.company_members') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='companies' AND column_name='terms_accepted_at') AND EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='companies' AND policyname='Active members can read their company') AND EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='company_members' AND policyname='Active members can read their organization roster') AND to_regprocedure('app_private.is_company_member(uuid)') IS NOT NULL)::text")
-  [[ "$schema_ok" == t ]] || { echo "Existing Test schema does not match the current migrations; baseline was not recorded." >&2; exit 65; }
+  [[ "$schema_ok" == true ]] || { echo "Existing Test schema does not match the current migrations; baseline was not recorded." >&2; exit 65; }
   for filename in "${migrations[@]}"; do
     checksum=$(sha256sum "$migrations_dir/$filename" | cut -d ' ' -f 1)
     existing=$(psql -Atqc "SELECT checksum FROM public.jbfd_schema_migrations WHERE filename = '$filename'")
