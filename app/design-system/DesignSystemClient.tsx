@@ -31,8 +31,8 @@ const navigation = [
   { id: "espacamento", label: "Espaçamento", icon: Ruler },
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
-  { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
   { id: "emails", label: "E-mails", icon: Mail },
+  { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
 ];
 
 const dashboardFunnel = [

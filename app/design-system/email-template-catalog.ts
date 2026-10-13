@@ -163,7 +163,9 @@ function palette(theme: EmailTheme) {
         border: "#29413d",
         brand: "#43d0c6",
         accent: "#7e9cff",
-        buttonText: "#073a36",
+        buttonBackground: "#102b27",
+        buttonBorder: "#245a54",
+        buttonText: "#73e2da",
       }
     : {
         canvas: "#f1f8ff",
@@ -174,7 +176,9 @@ function palette(theme: EmailTheme) {
         border: "#dce8e6",
         brand: "#087a76",
         accent: "#4169e1",
-        buttonText: "#ffffff",
+        buttonBackground: "#dff5f2",
+        buttonBorder: "#a6dcd7",
+        buttonText: "#087a76",
       };
 }
 
@@ -190,7 +194,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
     .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;">${valueFor(paragraph, preview)}</p>`)
     .join("");
   const button = copy.button
-    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="center" bgcolor="${colors.brand}" style="border-radius:8px;"><a href="${valueFor(copy.button.url, preview)}" style="display:inline-block;padding:14px 22px;border:1px solid ${colors.brand};border-radius:8px;color:${colors.buttonText};font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-decoration:none;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
+    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="center" bgcolor="${colors.buttonBackground}" style="min-height:40px;padding:11px 14px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};"><a href="${valueFor(copy.button.url, preview)}" style="display:inline-block;color:${colors.buttonText};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.4;text-decoration:none;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
     : "";
   const note = copy.note
     ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;">${valueFor(copy.note, preview)}</p></td></tr>`
