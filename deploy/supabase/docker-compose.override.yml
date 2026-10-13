@@ -1,0 +1,29 @@
+services:
+  api-gw:
+    networks:
+      default:
+        aliases:
+          - envoy
+          - kong
+      jbfd-test:
+        aliases:
+          - supabase-envoy
+      traefik: {}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.http.routers.jbfd-test-supabase-api.rule=Host(`test.jobforged.com`) && (PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
+      - traefik.http.routers.jbfd-test-supabase-api.priority=100
+      - traefik.http.routers.jbfd-test-supabase-api.entrypoints=websecure
+      - traefik.http.routers.jbfd-test-supabase-api.tls=true
+      - traefik.http.routers.jbfd-test-supabase-api.tls.certresolver=letsencrypt
+      - traefik.http.routers.jbfd-test-supabase-api.service=jbfd-test-supabase-api
+      - traefik.http.services.jbfd-test-supabase-api.loadbalancer.server.port=8000
+
+networks:
+  jbfd-test:
+    external: true
+    name: jbfd-test-internal
+  traefik:
+    external: true
+    name: jobforged_jobforged_network
