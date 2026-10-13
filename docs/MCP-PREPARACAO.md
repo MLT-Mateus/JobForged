@@ -18,7 +18,7 @@ Esta documentação acompanha o código do serviço para manutenção versionada
 | deploy/mcp/codex.config.example.toml | Bloco para adicionar ao Codex sem substituir configurações existentes |
 | scripts/mcp/install.sh | Etapas separadas de preparação, instalação, verificação e parada |
 
-O banco da identidade armazena contas/sessões OAuth. Não é o banco do produto JBFD nem substitui o futuro Supabase.
+O banco da identidade armazena contas/sessões OAuth. Não é o banco do produto JBFD: o Supabase self-hosted do produto opera em projetos isolados para Test e Live.
 
 ### Ferramentas atualmente publicadas
 

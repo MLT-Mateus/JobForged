@@ -1,6 +1,6 @@
 # Inspeção da JBFD — base 0.00
 
-Versão técnica: `0.0.0`. Revisão inicial: 2026-10-06. Estado de migração atualizado: 2026-10-07.
+Versão técnica: `0.0.0`. Revisão inicial: 2026-10-06. Estado operacional atualizado: 2026-10-13.
 
 ## Melhorias incluídas na base
 
@@ -16,17 +16,18 @@ Versão técnica: `0.0.0`. Revisão inicial: 2026-10-06. Estado de migração at
 
 ## Estado em produção
 
-A imagem do commit `40a560ad1d04be44125d8fd02744acc020010e8e` está implantada em `https://test.jobforged.com` e `https://jobforged.com`. O usuário validou os health checks dos dois ambientes. O código contém as páginas e componentes existentes, mas não contém ainda autenticação real, Supabase, Asaas ou integração operacional da aplicação com n8n.
+A imagem do commit `344febc3cbb7306c8ad650c27fea41ea72a15b6a` foi implantada em Test após o workflow de deploy ser corrigido e reexecutado. Em 2026-10-13, `/api/health` respondeu HTTP 200 em Test e Live. Test tem configuração de autenticação Supabase; Live continua com a versão anterior do aplicativo e `/api/auth/config` responde 404. Existem stacks Supabase independentes para Test e Live, ambas saudáveis. Migrations de autenticação estão registradas/aplicadas nos dois bancos; nenhum dado de usuário foi copiado entre os ambientes.
 
 ## Itens restantes de operação
 
-- [ ] Configurar os GitHub Environments `jbfd-test` e `jbfd-live`.
-- [ ] Cadastrar secrets/variables para as chaves SSH próprias por ambiente.
-- [ ] Criar usuário SSH sem sudo, gateway forçado e login GHCR somente leitura na VPS.
-- [ ] Validar workflow automático em Test com um commit de mudança controlado.
-- [ ] Ativar proteção de aprovação para Live e testar promoção manual.
-- [ ] Implementar e testar o servidor MCP com OAuth 2.1 antes de publicar escrita.
-- [ ] Planejar Supabase e integrações futuras com isolamento de dados e credenciais.
+- [x] Configurar deploy automático de Test e validar publicação após corrigir a permissão de travessia do diretório do gateway.
+- [x] Provisionar Supabase isolado em Test e Live, com migrations versionadas e backups verificados.
+- [ ] Preparar Environment `jbfd-live` com aprovador obrigatório, credenciais de deploy separadas e proteção ativada.
+- [ ] Configurar SMTP de Live antes de habilitar cadastro público e promover autenticação do aplicativo.
+- [ ] Criar DNS `supabase-live.jobforged.com` apontando para a VPS, caso ainda não exista.
+- [ ] Implementar pagamento/Asaas e integração operacional da aplicação com n8n.
+
+A restauração de dados Live → Test deve ser uma operação manual, com backup de Test e sanitização de dados pessoais. Ainda não foi executada nesta preparação.
 
 A CI verde confirma apenas os testes definidos. Não certifica os recursos ainda não implementados nem substitui revisão de segurança.
 
