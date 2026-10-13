@@ -9,7 +9,7 @@ O GitHub guarda o código e o histórico. A VPS executa a aplicação em dois am
 
 ## O que existe hoje
 
-Landing page, Design System, biblioteca compartilhada, páginas visuais de autenticação, Home, telas administrativas e módulos demonstrativos de vagas e candidaturas. As telas usam dados simulados e, em alguns fluxos, armazenamento no navegador. Isso ainda não é autenticação real nem banco de produção. Supabase, Asaas e integração da aplicação com n8n ainda não estão configurados.
+Landing page, Design System, biblioteca compartilhada, cadastro empresarial freemium e autenticação Supabase em Test, além de Home, telas administrativas e módulos demonstrativos de vagas e candidaturas. Test e Live têm stacks Supabase self-hosted separadas, bancos e volumes independentes. Live ainda executa uma versão do aplicativo sem a integração de autenticação e mantém cadastros públicos desabilitados até a promoção do código e a configuração de SMTP. Asaas/pagamentos e integração funcional da aplicação com n8n ainda não estão implementados.
 
 ## Como desenvolver
 
@@ -35,7 +35,7 @@ O GitHub Actions também executa lint, TypeScript, testes de HTML renderizado e 
 3. Promover a mesma imagem/commit validado para `main` por Pull Request.
 4. Executar a publicação Live pelo workflow manual, com aprovação do ambiente `jbfd-live`.
 
-Os deploys automatizados só funcionam depois de configurar ambientes, secrets, variables e a chave restrita na VPS descritos no guia. A publicação Live permanece desligada até a variável de proteção ser ativada.
+O deploy automático de Test está habilitado e validado. A publicação Live continua protegida: o Environment `jbfd-live`, sua aprovação obrigatória e as credenciais próprias ainda precisam ser preparados antes de habilitar a variável de proteção.
 
 ## Código e segredos
 
@@ -47,7 +47,7 @@ O código completo fica no GitHub. Os containers na VPS executam uma imagem iden
 - `app/components/ui/`: componentes e tokens compartilhados.
 - `app/design-system/`: referência visual oficial.
 - `public/brand/`: identidade visual.
-- `db/`: preparação para banco; não representa uma base de produção ativa.
+- `db/`: schema e preparação para banco; as migrations Supabase versionadas ficam em `supabase/migrations/`.
 - `deploy/`: Docker Compose e exemplos de ambiente.
 - `scripts/`: build, validação e publicação controlada na VPS.
 - `docs/`: operação, inspeção e arquitetura.

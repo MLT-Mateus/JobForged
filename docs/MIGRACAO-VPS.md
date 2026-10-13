@@ -13,7 +13,7 @@ Cada aplicativo usa seu próprio container, rede Compose, `.env` e porta local. 
 
 ## O que está no sistema
 
-O Supabase self-hosted de Test está conectado à rede privada de Test. O Supabase Live deve usar outro projeto Compose, outro banco, novos segredos e a rede privada Live. Nenhum dos bancos do Supabase reutiliza o PostgreSQL da automação ou o banco de identidade do MCP.
+Supabase self-hosted está provisionado em dois projetos Compose independentes: `/opt/jbfd/supabase` (Test) e `/opt/jbfd/supabase-live` (Live), cada um com banco, segredos, volumes e rede próprios. Os dois ambientes estavam saudáveis na última verificação (2026-10-13). Nenhum dos bancos reutiliza o PostgreSQL da automação ou o banco de identidade do MCP. A stack Live está pronta no backend, mas a aplicação Live ainda não aponta para ela e os cadastros públicos permanecem desabilitados até configurar SMTP e promover o código.
 
 O build Node independente e Docker não dependem de Sites ou Vercel. O domínio `jobforged.com` já está na VPS. O código e o histórico ficam no GitHub `MLT-Mateus/JobForged`.
 
@@ -31,4 +31,4 @@ O build Node independente e Docker não dependem de Sites ou Vercel. O domínio 
 
 A publicação usa imagens imutáveis. O workflow de Live promove manualmente um SHA aprovado; atualizar uma imagem não copia nem restaura dados de banco. O passo a passo está em [`OPERACAO-GITHUB-VPS.md`](OPERACAO-GITHUB-VPS.md).
 
-A implantação do MCP também é uma etapa futura. A arquitetura e limites de acesso propostos estão descritos no mesmo guia; não há endpoint MCP publicado ainda.
+O MCP está publicado separadamente em `https://mcp.jobforged.com/mcp`; ele não faz parte das stacks da aplicação nem dos projetos Supabase. O painel Studio de Live está configurado para `supabase-live.jobforged.com`; confira/crie o DNS A para `187.77.229.27` antes de acessar. `supabase.jobforged.com` continua associado a Test.

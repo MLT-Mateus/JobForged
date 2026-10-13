@@ -4,7 +4,7 @@ Este guia prepara publicação contínua com limites claros: `develop` pode publ
 
 ## Estado da configuração
 
-O código contém os workflows e o gateway restrito, mas ainda falta configuração de conta. Enquanto os itens deste guia não estiverem completos, nenhum deploy automático deve ser habilitado. Os serviços atuais continuam no ar.
+O deploy automático de Test está habilitado e validado em 2026-10-13. A publicação Live continua protegida e indisponível até existir o Environment `jbfd-live` com aprovador obrigatório, credenciais próprias e a variável `JBFD_LIVE_DEPLOY_ENABLED=true` habilitada deliberadamente. Os serviços atuais continuam no ar.
 
 - Test: `https://test.jobforged.com` — `/opt/jbfd/test/.env` — porta local 3101.
 - Live: `https://jobforged.com` — `/opt/jbfd/live/.env` — porta local 3100.
@@ -13,21 +13,21 @@ O código contém os workflows e o gateway restrito, mas ainda falta configuraç
 
 ## 1. Preparar a conta GitHub
 
-No repositório `MLT-Mateus/JobForged`, criar dois Environments: `jbfd-test` e `jbfd-live`.
+No repositório `MLT-Mateus/JobForged`, `jbfd-test` já está configurado. Criar o Environment `jbfd-live` antes de preparar a promoção.
 
-Para ambos, adicionar Variables:
+Para cada ambiente, adicionar Variables próprias:
 
 - `VPS_DEPLOY_HOST`: IP ou host SSH da VPS.
 - `VPS_DEPLOY_USER`: usuário de deploy restrito.
 
-Para ambos, adicionar Secrets:
+Para cada ambiente, adicionar Secrets independentes:
 
 - `VPS_DEPLOY_KEY`: chave privada própria do ambiente.
 - `VPS_KNOWN_HOSTS`: linha verificada da chave pública SSH do host. Obter a impressão digital por um canal confiável; não confiar cegamente em `ssh-keyscan`.
 
 No Environment `jbfd-live`, configurar o usuário Mateus como required reviewer e impedir que a pessoa que iniciou o deploy aprove a própria execução, se essa opção estiver disponível. Criar ainda a repository variable `JBFD_LIVE_DEPLOY_ENABLED=true` somente depois de confirmar essa proteção.
 
-Para Test automático, criar repository variable `JBFD_AUTO_DEPLOY_TEST=true` depois de concluir a instalação da chave restrita. Se ausente ou `false`, o workflow não publica.
+Test usa a variável de repositório `JBFD_AUTO_DEPLOY_TEST=true`; a publicação foi validada após a instalação da chave restrita e o ajuste de permissão do gateway.
 
 ## 2. Preparar a imagem no GHCR
 
@@ -77,4 +77,5 @@ O código MCP está versionado em `services/mcp`, `scripts/mcp` e `deploy/mcp`. 
 - Não abrir portas Docker 3100/3101 para a internet; elas devem continuar em localhost.
 - Nunca permitir que a chave do Test publique Live.
 - Manter proteção de aprovação ativa no Environment `jbfd-live`.
-- Fazer rollback da imagem não desfaz mudanças futuras no banco; quando o Supabase entrar, será necessário planejar backup e migrações reversíveis.
+- Fazer rollback da imagem não desfaz mudanças no banco. Faça backup verificado antes das migrations e aplique migrations versionadas com cuidado. Scripts de backup/migration estão em `scripts/` e a operação por ambiente está descrita em `docs/MIGRACAO-VPS.md`.
+- Test e Live têm projetos Supabase isolados. Nunca copie dados Live para Test sem backup, consentimento operacional e sanitização dos dados pessoais.
