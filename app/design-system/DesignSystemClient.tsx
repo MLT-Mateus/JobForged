@@ -7,6 +7,7 @@ import { WorkspaceShell } from "../components/ui/WorkspaceShell";
 import { InlineBrandLoader } from "../components/InlineBrandLoader";
 import { WidgetsIcon } from "../components/ui/Icons";
 import { WidgetsSection } from "./WidgetsSection";
+import { EmailTemplatesSection } from "./EmailTemplatesSection";
 import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
@@ -31,6 +32,7 @@ const navigation = [
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
+  { id: "emails", label: "E-mails", icon: Mail },
 ];
 
 const dashboardFunnel = [
@@ -498,6 +500,8 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               </div>
             </div>
           </section>
+
+          {currentPage.id === "emails" && <EmailTemplatesSection />}
 
           {currentPage.id === "widgets" && <WidgetsSection />}
 
