@@ -8,14 +8,13 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 concurrency:
   group: jbfd-test-deploy
   cancel-in-progress: false
 
 jobs:
-  deploy-test:
+  publish-image:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'develop' &&
@@ -23,7 +22,9 @@ jobs:
       vars.JBFD_AUTO_DEPLOY_TEST == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment: jbfd-test
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Baixar o commit aprovado pelo CI
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -47,19 +48,31 @@ jobs:
             docker push "$IMAGE:$REVISION"
           fi
 
+  deploy-test:
+    needs: publish-image
+    if: needs.publish-image.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: jbfd-test
+    permissions:
+      contents: read
+      packages: read
+    steps:
       - name: Implantar somente no ambiente Test
         env:
           VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
           VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
           VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USERNAME: ${{ github.actor }}
           REVISION: ${{ github.event.workflow_run.head_sha }}
         run: |
           install -d -m 700 "$HOME/.ssh"
           printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/jbfd_deploy"
           printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/jbfd_deploy" "$HOME/.ssh/known_hosts"
-          ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+          printf '%s\n%s\n' "$GH_USERNAME" "$GH_TOKEN" | ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
             -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             "$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST" "deploy test $REVISION"

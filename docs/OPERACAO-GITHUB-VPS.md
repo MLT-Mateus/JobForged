@@ -31,32 +31,25 @@ Para Test automático, criar repository variable `JBFD_AUTO_DEPLOY_TEST=true` de
 
 ## 2. Preparar a imagem no GHCR
 
-O workflow de Test cria uma imagem privada no GitHub Container Registry. Na VPS, o usuário de deploy precisa fazer login no GHCR com um token pessoal somente de leitura de pacotes (`read:packages`). O token fica no armazenamento Docker desse usuário na VPS, nunca no GitHub, no repositório ou em `.env`.
+O workflow de Test cria uma imagem privada no GitHub Container Registry. A publicação usa `packages: write`; o job de deploy separado recebe somente `packages: read`. O `GITHUB_TOKEN` de curta duração segue pelo canal SSH criptografado como entrada padrão, é usado em um `DOCKER_CONFIG` temporário sob `/run` e removido ao terminar. Nenhum token do registry fica salvo na VPS. O pacote precisa permitir acesso ao repositório `MLT-Mateus/JobForged`.
 
-Faça o login interativo como usuário de deploy, para que o arquivo de credenciais fique sob a conta certa:
-
-```bash
-docker login ghcr.io --username SEU_USUARIO_GITHUB
-```
-
-Cole o token somente no prompt do Docker. Não passe o token como argumento de comando. Mantenha `~/.docker/config.json` acessível apenas ao usuário de deploy. Verifique no GHCR que o pacote `jobforged` foi criado após a primeira publicação de Test.
+Verifique no GHCR que o pacote `jobforged` permite que o repositório use seu `GITHUB_TOKEN`. O deploy não grava credenciais Docker persistentes na VPS.
 
 ## 3. Criar o usuário de deploy restrito na VPS
 
-A chave SSH de deploy não pode ser a chave root. Crie um usuário próprio, adicione-o ao grupo `docker` (o acesso ao socket Docker equivale a controle elevado da VPS), e não conceda sudo. A conta só poderá executar o gateway forçado em `authorized_keys`.
+A chave SSH de deploy não pode ser a chave root. Para Test, crie o usuário `jbfd-deploy` sem senha e sem associação ao grupo `docker`. O socket Docker equivale a controle elevado da VPS. O usuário pode executar somente o gateway forçado e uma regra `sudoers` validada com `visudo` que permite o script root-owned `/opt/jbfd/bin/jbfd-deploy-test-root.sh`, sem argumentos. O `.env` permanece `root:root` com modo `600`.
 
-Instale os arquivos versionados do repositório em `/opt/jbfd/bin/` e deixe-os sem escrita para o usuário de deploy. Somente `/opt/jbfd/releases/` precisa ser gravável por ele; o lock fica dentro desse diretório. Preserve `/opt/jbfd`, as pastas `test` e `live`, os `.env` e containers existentes. Os `.env` devem permanecer no modo `600` e legíveis pelo usuário que executa Compose.
+Instale `scripts/deploy-vps.sh`, `scripts/jbfd-deploy-gateway-test.sh`, `scripts/jbfd-deploy-test-root.sh` e `deploy/compose.yml` nos caminhos usados pelo gateway, sempre de propriedade de root e sem escrita pelo usuário de deploy. Preserve `/opt/jbfd`, as pastas `test` e `live`, os `.env` e containers existentes.
 
-Gere duas chaves Ed25519 distintas: uma só para Test e outra só para Live. Em `~/.ssh/authorized_keys` do usuário de deploy, use linhas equivalentes a estas, substituindo as chaves públicas:
+Gere uma chave Ed25519 para Test. Em `/home/jbfd-deploy/.ssh/authorized_keys`, instale a linha abaixo com a chave pública Test. O gateway valida o comando original `deploy test <SHA completo>`:
 
 ```text
-restrict,command="/opt/jbfd/bin/jbfd-deploy-gateway.sh test" ssh-ed25519 CHAVE_PUBLICA_TEST
-restrict,command="/opt/jbfd/bin/jbfd-deploy-gateway.sh live" ssh-ed25519 CHAVE_PUBLICA_LIVE
+restrict,command="/opt/jbfd/bin/jbfd-deploy-gateway-test.sh" ssh-ed25519 CHAVE_PUBLICA_TEST
 ```
 
-Copie cada chave privada apenas para o Secret `VPS_DEPLOY_KEY` do Environment correspondente. A chave de Test não consegue publicar Live, mesmo que seja usada fora do workflow.
+Copie a chave privada Test para o Secret `VPS_DEPLOY_KEY` do Environment `jbfd-test`; ela não será exibida no chat. A chave Test não tem caminho para publicar Live. A configuração de Live permanece separada e inalterada.
 
-O gateway aceita somente `deploy test <SHA>` ou `deploy live <SHA>`, conforme a chave. Não dá shell, encaminhamento de portas nem comando Docker arbitrário. O helper valida o SHA, obtém o commit público, atualiza apenas `JBFD_IMAGE`, baixa a imagem, confere se o rótulo da imagem corresponde ao mesmo SHA, valida o Compose, aguarda healthcheck e restaura a imagem anterior se o deploy falhar. Os `.env` precisam continuar com modo `600` e ser legíveis pelo usuário que executa Compose.
+O gateway Test aceita somente `deploy test <SHA>` e o token temporário do registry pela entrada padrão. Não dá shell, encaminhamento de portas nem comando Docker arbitrário. O helper valida o SHA, atualiza apenas `JBFD_IMAGE`, baixa a imagem, confere se o rótulo corresponde ao mesmo SHA, valida o Compose, aguarda healthcheck e restaura a imagem anterior se o deploy falhar.
 
 ## 4. Fazer a primeira publicação
 
