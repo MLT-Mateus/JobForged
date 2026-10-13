@@ -1,19 +1,19 @@
-# JBFD na VPS: estado da migração 0.00
+# JobForged na VPS: operação dos ambientes
 
 ## Estado atual
 
-A base 0.00 está implantada nos dois ambientes da VPS, com o domínio oficial apontando para Live:
+O aplicativo tem ambientes independentes na mesma VPS:
 
 - Test: <https://test.jobforged.com>
 - Live: <https://jobforged.com>
 - VPS: `187.77.229.27`
-- Commit implantado nos dois ambientes: `40a560ad1d04be44125d8fd02744acc020010e8e`
+- Test usa `develop`; Live usa uma versão integrada e promovida manualmente de `main`.
 
-Os endpoints `/api/health` foram validados pelo usuário. Cada ambiente usa um container, rede Compose, configuração `.env` e porta local diferentes. Ambos passam pelo Traefik compartilhado; n8n, Evolution API, Postgres e Redis existentes não foram incorporados à rede interna JBFD.
+Cada aplicativo usa seu próprio container, rede Compose, `.env` e porta local. Os dois passam pelo Traefik compartilhado. A pilha de automações — n8n, Evolution API, PostgreSQL e Redis — permanece isolada.
 
 ## O que está no sistema
 
-O Docker executa todas as páginas e assets existentes na base: landing page, Design System, telas administrativas e de candidato que já estão no código, e fluxos demonstrativos. Ainda não há autenticação real, banco de produção, Supabase, Asaas ou integração funcional da aplicação com n8n. O endpoint `/api/health` confirma a saúde do app, não desses serviços futuros.
+O Supabase self-hosted de Test está conectado à rede privada de Test. O Supabase Live deve usar outro projeto Compose, outro banco, novos segredos e a rede privada Live. Nenhum dos bancos do Supabase reutiliza o PostgreSQL da automação ou o banco de identidade do MCP.
 
 O build Node independente e Docker não dependem de Sites ou Vercel. O domínio `jobforged.com` já está na VPS. O código e o histórico ficam no GitHub `MLT-Mateus/JobForged`.
 
@@ -23,10 +23,12 @@ O build Node independente e Docker não dependem de Sites ou Vercel. O domínio 
 - Configurações ficam somente em `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`.
 - O Compose e as redes internas são separados; somente o Traefik é compartilhado.
 - A mesma imagem versionada por SHA deve ser validada em Test e promovida a Live.
-- Supabase, integrações e dados precisarão de projetos/credenciais independentes ao serem adicionados.
+- Cada ambiente Supabase mantém Auth, banco, Storage, chaves e volumes próprios.
+- Migrations versionadas são aplicadas primeiro em Test e depois em Live; dados não acompanham o deploy da imagem.
+- Um refresh de Live para Test é uma restauração manual, com backup de Test e sanitização de dados pessoais.
 
 ## Próxima etapa operacional
 
-A publicação automatizada foi preparada no repositório, mas ainda depende de configurar Environments, secrets, variables, GHCR e usuário SSH restrito na VPS. O passo a passo está em [`OPERACAO-GITHUB-VPS.md`](OPERACAO-GITHUB-VPS.md). Até concluir esse checklist, deploy automático permanece desativado.
+A publicação usa imagens imutáveis. O workflow de Live promove manualmente um SHA aprovado; atualizar uma imagem não copia nem restaura dados de banco. O passo a passo está em [`OPERACAO-GITHUB-VPS.md`](OPERACAO-GITHUB-VPS.md).
 
 A implantação do MCP também é uma etapa futura. A arquitetura e limites de acesso propostos estão descritos no mesmo guia; não há endpoint MCP publicado ainda.

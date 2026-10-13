@@ -13,9 +13,9 @@
 - Não usar Vercel nem Sites como origem da implementação deste projeto.
 - Não reescrever histórico nem fazer force push.
 
-## Limites atuais do produto
+## Estado atual do produto
 
-A base 0.00 contém a landing page, Design System, biblioteca compartilhada e telas existentes com dados demonstrativos. Não afirmar que autenticação real, banco de produção, Supabase, Asaas ou integração de n8n já estejam implementados.
+Test possui cadastro empresarial freemium e login Supabase self-hosted, com sessões em cookies HttpOnly e isolamento empresarial por RLS. O banco de Live deve permanecer separado e só pode receber cadastros públicos com SMTP configurado e confirmação de e-mail ativa. Asaas/pagamentos e integração funcional do aplicativo com n8n ainda não estão implementados. Não afirmar que esses recursos existem até verificar o código e a configuração do ambiente.
 
 ## Regra permanente do Design System
 
