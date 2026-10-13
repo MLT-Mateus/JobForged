@@ -1,5 +1,7 @@
 # JBFD: preparação do MCP
 
+Para conectar o MCP remoto a um assistente diferente ou migrar do ChatGPT, siga o guia portátil [`GUIA-MCP-OUTRAS-IAS.md`](GUIA-MCP-OUTRAS-IAS.md). Este documento de preparação inclui detalhes de operação e instalação.
+
 ## Situação em 08/10/2026
 
 O servidor MCP está instalado em `https://mcp.jobforged.com/mcp`, autenticado por OAuth e conectado ao Codex. As consultas confirmaram Live e Test saudáveis no commit `40a560ad1d04be44125d8fd02744acc020010e8e`.

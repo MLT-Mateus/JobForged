@@ -39,6 +39,8 @@ O deploy automático de Test está habilitado e validado. A publicação Live co
 
 O procedimento obrigatório de paridade entre código, migrations e bancos está em [`docs/GUIA-PROMOCAO-TEST-LIVE.md`](docs/GUIA-PROMOCAO-TEST-LIVE.md). O deploy de app em Test é automático; migrations ainda exigem execução operacional controlada.
 
+Para conectar o MCP de operação a outro assistente de IA, consulte [`docs/GUIA-MCP-OUTRAS-IAS.md`](docs/GUIA-MCP-OUTRAS-IAS.md).
+
 ## Código e segredos
 
 O código completo fica no GitHub. Os containers na VPS executam uma imagem identificada por commit. Arquivos `.env` reais ficam em `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`; não enviar esses arquivos ao GitHub, ao chat ou ao Codex. Exemplos sem segredos ficam em `deploy/`.
