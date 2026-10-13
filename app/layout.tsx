@@ -7,31 +7,10 @@ import GlobalInteractions from "./components/GlobalInteractions";
 import NavigationLoader from "./components/NavigationLoader";
 
 export const metadata: Metadata = {
-  title: "JobForged",
+  metadataBase: new URL("https://jobforged.com"),
+  title: "JobForged | Recrutamento e seleção para empresas",
   description:
     "Centralize vagas, currículos, triagem automática, Kanban e histórico de candidatos em uma plataforma feita para PMEs.",
-  keywords: [
-    "ATS white label",
-    "software de recrutamento e seleção",
-    "triagem de currículos",
-    "entrevista pelo WhatsApp",
-    "página de carreiras",
-    "gestão de candidatos",
-  ],
-  openGraph: {
-    title: "JobForged",
-    description: "Recrutamento organizado para PMEs, com vagas, currículos, Kanban, histórico de candidatos e triagem assistida por IA.",
-    type: "website",
-    locale: "pt_BR",
-    images: [{ url: "/brand/jobforged-logo.png", width: 636, height: 184, alt: "JobForged" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "JobForged",
-    description: "Recrute com a sua marca. Contrate com inteligência.",
-    images: ["/brand/jobforged-logo.png"],
-  },
-  other: { "codex-preview": "development" },
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     shortcut: "/favicon.svg",
@@ -39,15 +18,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "JobForged",
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
-    description: "ATS white label para recrutamento e seleção, com triagem por IA, entrevistas pelo WhatsApp e personalização de marca e domínio.",
-  };
-
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
@@ -63,7 +33,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <GlobalInteractions />
         <script dangerouslySetInnerHTML={{__html:'performance.mark("jobforged-loader-first-paint");'}}/>
         {children}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </body>
     </html>
   );

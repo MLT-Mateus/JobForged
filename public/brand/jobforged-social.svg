@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="background" x1="48" y1="40" x2="1124" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FCFB"/>
+      <stop offset="1" stop-color="#EAF7F5"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="160" y1="137" x2="972" y2="546" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4169E1"/>
+      <stop offset="1" stop-color="#20B2AA"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#background)" d="M0 0h1200v630H0z"/>
+  <circle cx="1036" cy="108" r="230" fill="#20B2AA" fill-opacity=".08"/>
+  <circle cx="106" cy="590" r="218" fill="#4169E1" fill-opacity=".07"/>
+  <rect x="68" y="72" width="1064" height="486" rx="36" fill="#fff" fill-opacity=".94"/>
+  <rect x="68.75" y="72.75" width="1062.5" height="484.5" rx="35.25" stroke="#DDEBE8" stroke-width="1.5"/>
+  <rect x="112" y="121" width="14" height="55" rx="7" fill="#4169E1"/>
+  <rect x="134" y="121" width="14" height="55" rx="7" fill="#20B2AA"/>
+  <text x="172" y="163" fill="#073B39" font-family="Montserrat, Arial, sans-serif" font-size="43" font-weight="700" letter-spacing="-1.4">JobForged</text>
+  <text x="112" y="286" fill="#102A2A" font-family="Montserrat, Arial, sans-serif" font-size="55" font-weight="700" letter-spacing="-1.8">Recrute com a sua marca.</text>
+  <text x="112" y="354" fill="#102A2A" font-family="Montserrat, Arial, sans-serif" font-size="55" font-weight="700" letter-spacing="-1.8">Contrate com inteligência.</text>
+  <text x="115" y="416" fill="#526765" font-family="Arial, sans-serif" font-size="25">Vagas, candidatos e etapas em um fluxo claro para sua empresa.</text>
+  <rect x="112" y="463" width="318" height="55" rx="16" fill="url(#accent)"/>
+  <text x="138" y="498" fill="#fff" font-family="Arial, sans-serif" font-size="19" font-weight="700">Recrutamento e seleção</text>
+  <g opacity=".95">
+    <rect x="806" y="412" width="260" height="88" rx="18" fill="#fff" stroke="#DDEBE8" stroke-width="2"/>
+    <circle cx="844" cy="456" r="17" fill="#E4F6F2"/>
+    <path d="m836 456 6 6 11-13" stroke="#15998F" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <rect x="876" y="442" width="141" height="10" rx="5" fill="#173C3A" fill-opacity=".8"/>
+    <rect x="876" y="461" width="103" height="8" rx="4" fill="#7E9693" fill-opacity=".55"/>
+  </g>
+</svg>
