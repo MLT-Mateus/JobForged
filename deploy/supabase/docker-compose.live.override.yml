@@ -1,5 +1,6 @@
 services:
   studio:
+    container_name: supabase-live-studio
     networks:
       default: {}
       traefik: {}
@@ -18,6 +19,7 @@ services:
       - traefik.http.middlewares.supabase-live-studio-auth.basicauth.removeheader=true
 
   api-gw:
+    container_name: supabase-live-envoy
     networks:
       default:
         aliases:
@@ -38,7 +40,32 @@ services:
       - traefik.http.routers.jbfd-live-supabase-api.service=jbfd-live-supabase-api
       - traefik.http.services.jbfd-live-supabase-api.loadbalancer.server.port=8000
 
+  auth:
+    container_name: supabase-live-auth
+
+  db:
+    container_name: supabase-live-db
+
+  functions:
+    container_name: supabase-live-edge-functions
+
+  imgproxy:
+    container_name: supabase-live-imgproxy
+
+  meta:
+    container_name: supabase-live-meta
+
+  realtime:
+    container_name: supabase-live-realtime
+
+  rest:
+    container_name: supabase-live-rest
+
+  storage:
+    container_name: supabase-live-storage
+
   supavisor:
+    container_name: supabase-live-pooler
     ports: !override
       - "127.0.0.1:15432:5432"
       - "127.0.0.1:16543:6543"
