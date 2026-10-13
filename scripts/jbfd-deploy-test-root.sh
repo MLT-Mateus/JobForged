@@ -22,7 +22,7 @@ IFS= read -r registry_token || {
   echo "Usuário do registry inválido." >&2
   exit 64
 }
-[[ "$registry_token" =~ ^[A-Za-z0-9_]{20,512}$ ]] || {
+[[ "$registry_token" =~ ^[[:graph:]]{20,512}$ ]] || {
   echo "Token temporário do registry inválido." >&2
   exit 64
 }
