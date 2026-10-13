@@ -66,15 +66,10 @@ test("renders development preview metadata", async () => {
   assert.match(await response.text(), developmentPreviewMeta);
 });
 
-// A plan linked from the landing page must reach the signup client on first render.
-test("signup renders the plan supplied by the URL and falls back for invalid plans", async () => {
+// Signup must remain on the free plan while billing is not available.
+test("signup always renders the Freemium plan regardless of URL parameters", async () => {
   const { default: worker } = await import("../dist/server/index.js");
-  for (const [query, initialPlanId] of [
-    ["plano=basico-mensal", "basico-mensal"],
-    ["plano=basico&ciclo=anual", "basico-anual"],
-    ["plano=invalido", "profissional-anual"],
-    ["", "profissional-anual"],
-  ]) {
+  for (const query of ["plano=basico-mensal", "plano=basico&ciclo=anual", "plano=invalido", ""]) {
     const response = await worker.fetch(
       new Request(`http://localhost/cadastro?${query}`, { headers: { accept: "text/html" } }),
       { ASSETS: assets },
@@ -83,10 +78,8 @@ test("signup renders the plan supplied by the URL and falls back for invalid pla
     assert.equal(response.status, 200);
     const html = await response.text();
     const rendered = rscPayload(html);
-    assert.ok(
-      rendered.includes(`\"initialPlanId\":\"${initialPlanId}\"`),
-      query || "default plan",
-    );
+    assert.ok(rendered.includes("Plano Freemium"), query || "default plan");
+    assert.ok(!rendered.includes("initialPlanId"), "paid plan parameters must not reach signup");
   }
 });
 
