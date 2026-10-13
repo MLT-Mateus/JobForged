@@ -13,6 +13,17 @@
 - Não usar Vercel nem Sites como origem da implementação deste projeto.
 - Não reescrever histórico nem fazer force push.
 
+## Regra permanente de paridade Test → Live
+
+- `develop` é a área de validação. Nenhuma mudança de produto deve ser feita diretamente em Live ou apenas na branch `main`.
+- Uma publicação Live só pode usar o mesmo SHA de aplicação que está atualmente saudável em Test e foi aprovado pelo usuário. Não reconstruir uma imagem diferente para Live.
+- Mudanças de banco devem vir em uma migration SQL numerada, nova e imutável em `supabase/migrations/`. Nunca editar migrations já aplicadas nem fazer alteração de schema manual no Studio.
+- Aplicar e validar migrations em Test com backup verificado antes de considerar a funcionalidade pronta. Aplicar em Live exatamente as migrations do SHA aprovado, após backup Live e autorização do ambiente protegido. Se uma migration ou verificação falhar, interromper a publicação do app.
+- Migrations de produção devem ser compatíveis com a imagem Live anterior para permitir rollback do app sem rollback improvisado do banco.
+- A mesma promoção deve incluir frontend, backend, dependências e migrations do SHA Test. Segredos, DNS, configurações específicas de ambiente, usuários e dados de clientes não são copiados entre ambientes.
+- Nunca copiar o banco ou dados pessoais de Live para Test como parte de deploy. Refresh de dados é operação separada, manual e sanitizada.
+- O deploy atual aplica automaticamente a imagem em Test; não aplica migrations automaticamente. Até a automação de migrations ser concluída e verificada, uma publicação que dependa de alteração de schema fica bloqueada até a migration ter sido aplicada e confirmada em Test e existir um passo controlado equivalente para Live.
+
 ## Estado atual do produto
 
 Test possui cadastro empresarial freemium e login Supabase self-hosted, com sessões em cookies HttpOnly e isolamento empresarial por RLS. O banco de Live deve permanecer separado e só pode receber cadastros públicos com SMTP configurado e confirmação de e-mail ativa. Asaas/pagamentos e integração funcional do aplicativo com n8n ainda não estão implementados. Não afirmar que esses recursos existem até verificar o código e a configuração do ambiente.

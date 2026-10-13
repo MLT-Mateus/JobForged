@@ -27,6 +27,8 @@ O build Node independente e Docker não dependem de Sites ou Vercel. O domínio 
 - Migrations versionadas são aplicadas primeiro em Test e depois em Live; dados não acompanham o deploy da imagem.
 - Um refresh de Live para Test é uma restauração manual, com backup de Test e sanitização de dados pessoais.
 
+Toda promoção deve seguir [`GUIA-PROMOCAO-TEST-LIVE.md`](GUIA-PROMOCAO-TEST-LIVE.md): o app Live usa o mesmo SHA validado em Test e cada migration do SHA é aplicada e conferida separadamente em cada banco. Hoje a aplicação de migrations ainda é manual; o workflow de deploy não deve ser tratado como se sincronizasse schema automaticamente.
+
 ## Próxima etapa operacional
 
 A publicação usa imagens imutáveis. O workflow de Live promove manualmente um SHA aprovado; atualizar uma imagem não copia nem restaura dados de banco. O passo a passo está em [`OPERACAO-GITHUB-VPS.md`](OPERACAO-GITHUB-VPS.md).
