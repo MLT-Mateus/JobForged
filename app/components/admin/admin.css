@@ -250,3 +250,49 @@ body:has(.admin-shell){overflow:hidden}
   .has-full-brand .admin-org .admin-org__brand-icon { display:flex; }
   .has-full-brand.is-menu-open .admin-org .admin-org__brand-icon { display:none; }
 }
+
+/* Shared company-panel finish: all modules inherit the approved UI tokens. */
+.admin-shell {
+  background:var(--jf-ui-surface-soft);
+  color:var(--jf-ui-text);
+  font-family:var(--jf-ui-font-body);
+}
+.admin-shell .admin-workspace { background:var(--jf-ui-surface-soft); }
+.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) {
+  border-color:var(--jf-ui-border);
+  border-radius:var(--jf-ui-radius-card);
+  background:var(--jf-ui-surface);
+  color:var(--jf-ui-text);
+}
+.admin-shell :is(.admin-metrics,.admin-chart-grid,.admin-settings-grid,.admin-agenda,.admin-account) {
+  gap:var(--jf-ui-space-4);
+}
+.admin-shell .admin-card > header {
+  min-height:76px;
+  padding:var(--jf-ui-space-5) var(--jf-ui-space-6);
+}
+.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) :is(h2,h3,h4) {
+  color:var(--jf-ui-text);
+  font-family:var(--jf-ui-font-heading);
+}
+.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) :is(p,small,dd,dt,label) {
+  font-family:var(--jf-ui-font-body);
+}
+.admin-shell .jf-table-wrap { border-radius:0 0 var(--jf-ui-radius-card) var(--jf-ui-radius-card); }
+.admin-shell .jf-table th {
+  background:var(--jf-ui-surface-soft);
+  color:var(--jf-ui-text-muted);
+  font-family:var(--jf-ui-font-heading);
+  letter-spacing:.035em;
+}
+.admin-shell .jf-table td { color:var(--jf-ui-text); line-height:1.5; }
+.admin-shell .admin-page-head > div:first-child { max-width:760px; }
+.admin-shell .admin-page-head > div:first-child > span { letter-spacing:.06em; }
+.admin-shell .admin-toolbar { gap:var(--jf-ui-space-4); }
+.admin-shell .admin-kanban { gap:var(--jf-ui-space-3); }
+.admin-shell .admin-kanban > section { border-radius:var(--jf-ui-radius-card); }
+.admin-shell .admin-kanban article { border-radius:var(--jf-ui-control-radius); }
+@media(max-width:680px) {
+  .admin-shell .admin-card > header { padding:var(--jf-ui-space-4); }
+  .admin-shell :is(.admin-metrics,.admin-chart-grid,.admin-settings-grid,.admin-agenda,.admin-account) { gap:var(--jf-ui-space-3); }
+}

@@ -1,5 +1,27 @@
 export type EmailTheme = "light" | "dark";
 
+export type EmailTypography = {
+  font?: string;
+  heading?: string;
+  body?: string;
+};
+
+const fontStacks: Record<string, string> = {
+  Montserrat: '"Montserrat Variable", "Montserrat", Arial, sans-serif',
+  "Open Sans": '"Open Sans Variable", "Open Sans", Arial, sans-serif',
+  Poppins: '"Poppins", Arial, sans-serif',
+};
+
+function fontStack(value: string | undefined, fallback: string) {
+  const families = value
+    ?.split(",")
+    .map((family) => family.trim().replace(/^['"]|['"]$/g, "").replace(/[^\w -]/g, ""))
+    .filter(Boolean);
+  return (families?.length ? families : fallback.split(",").map((family) => family.trim().replace(/^['"]|['"]$/g, "")))
+    .map((family) => `"${family}"`)
+    .join(", ");
+}
+
 export function resolveEmailTheme(preferredTheme: string | null | undefined): EmailTheme {
   return preferredTheme === "dark" ? "dark" : "light";
 }
@@ -182,22 +204,25 @@ function palette(theme: EmailTheme) {
       };
 }
 
-export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview = false) {
+export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview = false, typography: EmailTypography = {}) {
   const template = emailTemplates.find((item) => item.id === id);
   if (!template) throw new Error(`Template de e-mail desconhecido: ${id}`);
 
   const copy = copyFor(id);
   const colors = palette(theme);
+  const preferredFont = fontStacks[typography.font ?? "Montserrat"] ?? fontStacks.Montserrat;
+  const headingFont = fontStack(typography.heading ?? preferredFont, fontStacks.Montserrat);
+  const bodyFont = fontStack(typography.body ?? preferredFont, fontStacks["Open Sans"]);
   const subject = valueFor(template.subject, preview);
   const preheader = valueFor(copy.preheader, preview);
   const paragraphs = copy.paragraphs
-    .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;">${valueFor(paragraph, preview)}</p>`)
+    .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:${bodyFont};font-size:16px;line-height:1.65;">${valueFor(paragraph, preview)}</p>`)
     .join("");
   const button = copy.button
-    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="center" bgcolor="${colors.buttonBackground}" style="min-height:40px;padding:11px 14px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};"><a href="${valueFor(copy.button.url, preview)}" style="display:inline-block;color:${colors.buttonText};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.4;text-decoration:none;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
+    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="center" bgcolor="${colors.buttonBackground}" style="min-height:40px;padding:11px 14px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};"><a href="${valueFor(copy.button.url, preview)}" style="display:inline-block;color:${colors.buttonText};font-family:${headingFont};font-size:12px;font-weight:700;line-height:1.4;text-decoration:none;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
     : "";
   const note = copy.note
-    ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;">${valueFor(copy.note, preview)}</p></td></tr>`
+    ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">${valueFor(copy.note, preview)}</p></td></tr>`
     : "";
   const previewSubject = preview ? subject : template.subject;
 
@@ -218,18 +243,18 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
           <img src="https://jobforged.com/brand/jobforged-logo.png" width="164" height="47" alt="JobForged" style="display:block;width:164px;height:auto;max-width:100%;border:0;">
         </td></tr>
         <tr><td style="padding:32px 32px 10px;">
-          <p style="margin:0 0 12px;color:${colors.accent};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1.1px;line-height:1.4;">${copy.eyebrow}</p>
-          <h1 style="margin:0 0 22px;color:${colors.text};font-family:Arial,Helvetica,sans-serif;font-size:27px;font-weight:700;line-height:1.25;">${copy.title}</h1>
+          <p style="margin:0 0 12px;color:${colors.accent};font-family:${headingFont};font-size:11px;font-weight:bold;letter-spacing:1.1px;line-height:1.4;">${copy.eyebrow}</p>
+          <h1 style="margin:0 0 22px;color:${colors.text};font-family:${headingFont};font-size:27px;font-weight:700;line-height:1.25;">${copy.title}</h1>
           ${paragraphs}
           ${button}
         </td></tr>
         ${note}
         <tr><td style="padding:20px 32px;border-top:1px solid ${colors.border};">
-          <p style="margin:0 0 6px;color:${colors.muted};font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;">Enviado por <strong style="color:${colors.text};">JobForged &lt;suporte@jobforged.com&gt;</strong></p>
-          <p style="margin:0;color:${colors.muted};font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;">Recrutamento organizado para empresas.</p>
+          <p style="margin:0 0 6px;color:${colors.muted};font-family:${bodyFont};font-size:12px;line-height:1.5;">Enviado por <strong style="color:${colors.text};font-family:${headingFont};">JobForged &lt;suporte@jobforged.com&gt;</strong></p>
+          <p style="margin:0;color:${colors.muted};font-family:${bodyFont};font-size:12px;line-height:1.5;">Recrutamento organizado para empresas.</p>
         </td></tr>
       </table>
-      <p style="margin:16px 0 0;color:${colors.muted};font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">Esta é uma mensagem transacional da JobForged.</p>
+      <p style="margin:16px 0 0;color:${colors.muted};font-family:${bodyFont};font-size:11px;line-height:1.5;">Esta é uma mensagem transacional da JobForged.</p>
     </td></tr>
   </table>
 </body>
