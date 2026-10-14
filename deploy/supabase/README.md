@@ -42,7 +42,7 @@ docker compose -f docker-compose.yml -f docker-compose.override.yml config --qui
 docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --wait
 ```
 
-Test Studio is exposed only through the HTTPS host `test.supabase.jobforged.com`, protected by Traefik Basic Auth. Set `STUDIO_BASIC_AUTH_USERS` in the root-owned Test Supabase `.env` to a quoted `htpasswd -B` user/hash entry before starting the stack. The Studio service is not published on a host port. The API gateway remains published only on loopback port `8210` and is externally exposed through the Test app hostname; its API paths are routed before the Test app router. The app container uses `http://supabase-envoy:8000` on `jbfd-test-internal`.
+Test Studio is exposed only through the HTTPS host `test.supabase.jobforged.com`, protected by Traefik Basic Auth. The `test.supabase` A record must point to the VPS before using the hostname. Set `STUDIO_BASIC_AUTH_USERS` in the root-owned Test Supabase `.env` to a quoted `htpasswd -B` user/hash entry before starting the stack. The Studio service is not published on a host port. The API gateway remains published only on loopback port `8210` and is externally exposed through the Test app hostname; its API paths are routed before the Test app router. The app container uses `http://supabase-envoy:8000` on `jbfd-test-internal`.
 
 After the first start, apply the versioned SQL migrations from the repository in order using `psql` inside the matching Supabase database container. Never use the automation Postgres or MCP identity database.
 
