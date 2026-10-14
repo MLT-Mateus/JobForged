@@ -9,16 +9,16 @@ const SENDER = { name: "JobForged", email: "suporte@jobforged.com" };
 export type BrevoSendResult = "sent" | "not-configured" | "failed";
 
 function appHomeUrl() {
-  const fallback = process.env.APP_ENV === "test"
-    ? "https://test.jobforged.com/app/home"
-    : "https://jobforged.com/app/home";
+  const origin = process.env.APP_ENV === "test"
+    ? "https://test.jobforged.com"
+    : "https://jobforged.com";
   const configured = process.env.APP_PUBLIC_URL;
   try {
-    const url = new URL(configured || fallback);
-    if (url.protocol !== "https:" || !["test.jobforged.com", "jobforged.com"].includes(url.hostname)) return fallback;
-    return new URL("/app/home", url).toString();
+    const url = new URL(configured || origin);
+    if (url.origin !== origin || url.username || url.password) return `${origin}/app/home`;
+    return new URL("/app/home", origin).toString();
   } catch {
-    return fallback;
+    return `${origin}/app/home`;
   }
 }
 
@@ -36,16 +36,15 @@ export async function sendCompanyWelcomeEmail({
   const apiKey = process.env.BREVO_API_KEY?.trim();
   if (!apiKey) return "not-configured";
 
-  const firstName = responsible.trim().split(/\s+/)[0]?.slice(0, 80) || "";
-  const companyName = company.trim().slice(0, 160);
-  const htmlContent = renderEmailHtml("company-welcome", resolveEmailTheme(preferredTheme), false, {}, {
-    FIRST_NAME: firstName,
-    COMPANY_NAME: companyName,
-    APP_URL: appHomeUrl(),
-  });
-  const safeSubjectName = firstName.replace(/[\r\n\u0000-\u001f\u007f]/g, " ").slice(0, 80);
-
   try {
+    const firstName = responsible.trim().split(/\s+/)[0]?.slice(0, 80) || "";
+    const companyName = company.trim().slice(0, 160);
+    const htmlContent = renderEmailHtml("company-welcome", resolveEmailTheme(preferredTheme), false, {}, {
+      FIRST_NAME: firstName,
+      COMPANY_NAME: companyName,
+      APP_URL: appHomeUrl(),
+    });
+    const safeSubjectName = firstName.replace(/[\r\n\u0000-\u001f\u007f]/g, " ").slice(0, 80);
     const response = await fetch(BREVO_SEND_URL, {
       method: "POST",
       cache: "no-store",
