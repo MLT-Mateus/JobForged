@@ -30,7 +30,7 @@ SMTP_ADMIN_EMAIL=suporte@jobforged.com
 SMTP_SENDER_NAME=JobForged
 ```
 
-O `docker-compose.override.yml` deste repositório aponta `GOTRUE_MAILER_TEMPLATES_RECOVERY` para o modelo do domínio Test. A lista `GOTRUE_URI_ALLOW_LIST` já deve aceitar o domínio Test; o `GOTRUE_SITE_URL` confirmado é `https://test.jobforged.com`. O helper valida o Compose com `config --quiet` e recria apenas o serviço `auth` do stack Test. Não imprima `.env` nem a saída completa de `docker compose config`.
+O `docker-compose.override.yml` deste repositório aponta `GOTRUE_MAILER_TEMPLATES_RECOVERY` para o modelo do domínio Test e define o assunto aprovado. O helper grava essa configuração em `/opt/jbfd/supabase/docker-compose.jbfd-email-template.override.yml`, sem substituir o override de rotas da stack; valida o Compose com `config --quiet` e recria apenas o serviço `auth` do stack Test. A lista `GOTRUE_URI_ALLOW_LIST` já deve aceitar o domínio Test; o `GOTRUE_SITE_URL` confirmado é `https://test.jobforged.com`. Não imprima `.env` nem a saída completa de `docker compose config`.
 
 O remetente deve continuar `suporte@jobforged.com`, já verificado na Brevo. Test e Live podem usar a mesma conta SMTP, desde que os valores sejam cadastrados separadamente em cada GitHub Environment e provisionados independentemente em cada Supabase. Nunca copie `.env` entre ambientes. Live não é configurado por este workflow e só deve ser habilitado após aprovação de Test.
 
