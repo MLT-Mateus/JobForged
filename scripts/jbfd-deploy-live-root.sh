@@ -46,9 +46,15 @@ supabase_root=/opt/jbfd/supabase-live
 supabase_env="$supabase_root/.env"
 supabase_compose="$supabase_root/docker-compose.yml"
 supabase_override="$supabase_root/docker-compose.live.override.yml"
-for required_file in "$app_env" "$supabase_env" "$supabase_compose" "$supabase_override"; do
-  [[ -f "$required_file" && "$(stat -c '%u:%a' "$required_file")" == "0:600" ]] || {
+for private_env in "$app_env" "$supabase_env"; do
+  [[ -f "$private_env" && "$(stat -c '%u:%a' "$private_env")" == "0:600" ]] || {
     echo "A configuração privada Live está ausente ou com permissões inesperadas." >&2
+    exit 66
+  }
+done
+for compose_file in "$supabase_compose" "$supabase_override"; do
+  [[ -f "$compose_file" && "$(stat -c '%u' "$compose_file")" == "0" ]] || {
+    echo "A configuração Compose Live está ausente ou com proprietário inesperado." >&2
     exit 66
   }
 done
