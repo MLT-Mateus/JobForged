@@ -10,6 +10,14 @@ IFS= read -r brevo_smtp_key || {
   echo "A chave SMTP da Brevo está ausente." >&2
   exit 64
 }
+trim_outer_whitespace() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+brevo_smtp_user="$(trim_outer_whitespace "$brevo_smtp_user")"
+brevo_smtp_key="$(trim_outer_whitespace "$brevo_smtp_key")"
 [[ "$brevo_smtp_user" =~ ^[[:graph:]]{3,255}$ ]] || {
   echo "O login SMTP da Brevo é inválido." >&2
   exit 64
