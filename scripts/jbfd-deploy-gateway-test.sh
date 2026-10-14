@@ -24,7 +24,7 @@ if [[ "${SSH_ORIGINAL_COMMAND:-}" == "configure smtp test" ]]; then
     echo "O login SMTP da Brevo é inválido." >&2
     exit 64
   }
-  [[ "$brevo_smtp_key" =~ ^[[:graph:]]{20,512}$ ]] || {
+  [[ "$brevo_smtp_key" =~ ^[[:graph:]]{15,512}$ ]] || {
     echo "A chave SMTP da Brevo é inválida." >&2
     exit 64
   }
