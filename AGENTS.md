@@ -6,7 +6,9 @@
 - `develop` representa o ambiente Test (`https://test.jobforged.com`). `main` representa Live (`https://jobforged.com`).
 - A VPS executa as imagens; não editar código diretamente dentro do container ou release implantado.
 - Trabalhar em branch de tarefa e Pull Request. O CI deve passar antes de integrar em `develop` ou `main`.
-- Test recebe a versão de `develop` após CI aprovado e configuração explícita do deploy automático.
+- Test (`https://test.jobforged.com`) é o destino padrão de toda implementação da JBFD feita para desenvolvimento. Depois de CI aprovado e integração de `develop` pelo fluxo existente, execute o deploy de Test automaticamente, sem pedir uma nova confirmação ao usuário. Se houver um comando de deploy de Test já configurado, use-o e verifique o SHA publicado e o healthcheck; não pare em “pronto para deploy”.
+- Se o deploy não puder ser concluído por falta de secret, acesso administrativo, aprovação externa ou configuração do pipeline, finalize tudo que for possível e informe a pendência concreta e o local exato onde ela deve ser resolvida. Não substitua a execução por uma confirmação repetida.
+- A autorização permanente acima cobre apenas Test. Live continua dependendo de aprovação explícita do usuário e das proteções existentes.
 - Live é promovido manualmente a partir de um SHA já integrado em `main` e que tenha sido validado em Test. Exigir aprovação do ambiente protegido `jbfd-live`.
 - Nunca iniciar deploy Live, alterar DNS ou alterar a configuração de produção sem instrução explícita do usuário na conversa.
 - Nunca guardar, imprimir, copiar para Git ou solicitar que o usuário cole aqui valores de `.env`, tokens, chaves SSH ou senhas. `.env` reais vivem apenas na VPS; GitHub Actions usa secrets e variables protegidos.
