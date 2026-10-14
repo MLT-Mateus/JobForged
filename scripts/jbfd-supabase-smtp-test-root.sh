@@ -87,6 +87,12 @@ done
 chmod 600 "$candidate"
 chown root:root "$candidate"
 
+if cmp -s -- "$candidate" "$env_file"; then
+  unset brevo_smtp_user brevo_smtp_key smtp_values
+  echo "SMTP do Supabase Auth Test já está atualizado."
+  exit 0
+fi
+
 compose() {
   (cd "$stack_dir" && docker compose --env-file "$1" -f "$compose_file" -f "$override_file" "${@:2}")
 }
