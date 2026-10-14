@@ -233,16 +233,16 @@
 .jobs-toolbar>.jobs-search { flex:2; min-width:240px; }
 .job-steps button { line-height:1.5; cursor:pointer; }
 .job-steps button i { flex-shrink:0; }
-.job-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--jf-ui-space-6); }
+.job-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--jf-ui-space-6) var(--jf-ui-space-7); }
 .job-field { margin-bottom:var(--jf-ui-space-5); }
-.job-benefits .jf-choice { padding:var(--jf-ui-space-3); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-control-radius); }
+.job-benefits .jf-choice { min-height:48px; padding:var(--jf-ui-space-3) var(--jf-ui-space-4); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-control-radius); }
 .job-stage>.jf-choice { margin-block:var(--jf-ui-space-4); }
 .job-settings .jf-toggle-row { margin-bottom:var(--jf-ui-space-4); }
 .job-settings .jf-field { margin-bottom:var(--jf-ui-space-4); }
 .job-card>header { flex-wrap:wrap; gap:var(--jf-ui-space-2); }
 .job-card h2 { line-height:1.5; }
 .job-card footer span { text-transform:none; }
-.job-card:hover { transform:none; box-shadow:none; }
+.job-card:hover { transform:none; box-shadow:0 4px 16px color-mix(in srgb,var(--jf-ui-text) 7%,transparent); }
 .jobs-collection.is-list .job-card{ grid-template-columns:140px minmax(0,1fr) minmax(240px,1fr); }
 .job-detail-head>div:nth-child(2) { min-width:220px; }
 @media(max-width:900px) { .jobs-collection.is-list .job-card{ display:block; } .job-about { grid-template-columns:minmax(0,1fr); } }

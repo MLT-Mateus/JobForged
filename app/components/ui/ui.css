@@ -672,7 +672,7 @@
   border: 1px solid transparent;
   border-radius: var(--jf-ui-control-radius);
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 730;
   transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
