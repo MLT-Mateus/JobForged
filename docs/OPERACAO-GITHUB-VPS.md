@@ -39,7 +39,7 @@ Verifique no GHCR que o pacote `jobforged` permite que o repositório use seu `G
 
 A chave SSH de deploy não pode ser a chave root. Para Test, crie o usuário `jbfd-deploy` sem senha e sem associação ao grupo `docker`. O socket Docker equivale a controle elevado da VPS. O usuário pode executar somente o gateway forçado e uma regra `sudoers` validada com `visudo` que permite o script root-owned `/opt/jbfd/bin/jbfd-deploy-test-root.sh`, sem argumentos. O `.env` permanece `root:root` com modo `600`.
 
-Instale `scripts/deploy-vps.sh`, `scripts/jbfd-deploy-gateway-test.sh`, `scripts/jbfd-deploy-test-root.sh` e `deploy/compose.yml` nos caminhos usados pelo gateway, sempre de propriedade de root e sem escrita pelo usuário de deploy. Preserve `/opt/jbfd`, as pastas `test` e `live`, os `.env` e containers existentes.
+Instale `scripts/deploy-vps.sh`, `scripts/jbfd-deploy-gateway-test.sh`, `scripts/jbfd-deploy-test-root.sh`, `scripts/jbfd-supabase-smtp-test-root.sh` e `deploy/compose.yml` nos caminhos usados pelo gateway, sempre de propriedade de root e sem escrita pelo usuário de deploy. Preserve `/opt/jbfd`, as pastas `test` e `live`, os `.env` e containers existentes. A regra `sudoers`, validada com `visudo`, permite executar sem argumentos somente `/opt/jbfd/bin/jbfd-deploy-test-root.sh` e `/opt/jbfd/bin/jbfd-supabase-smtp-test-root.sh`.
 
 Gere uma chave Ed25519 para Test. Em `/home/jbfd-deploy/.ssh/authorized_keys`, instale a linha abaixo com a chave pública Test. O gateway valida o comando original `deploy test <SHA completo>`:
 
@@ -49,7 +49,7 @@ restrict,command="/opt/jbfd/bin/jbfd-deploy-gateway-test.sh" ssh-ed25519 CHAVE_P
 
 Copie a chave privada Test para o Secret `VPS_DEPLOY_KEY` do Environment `jbfd-test`; ela não será exibida no chat. A chave Test não tem caminho para publicar Live. A configuração de Live permanece separada e inalterada.
 
-O gateway Test aceita somente `deploy test <SHA>` e os dados temporários do registry e da Brevo pela entrada padrão. Não dá shell, encaminhamento de portas nem comando Docker arbitrário. O helper valida o SHA, atualiza apenas `JBFD_IMAGE`, grava a chave Brevo em `/opt/jbfd/test/.env` com modo `600`, baixa a imagem, confere se o rótulo corresponde ao mesmo SHA, valida o Compose, aguarda healthcheck e restaura a imagem anterior se o deploy falhar. Antes do deploy, o workflow exige a resposta do comando `probe brevo test`; assim, um gateway antigo não publica uma imagem que ficaria sem o secret.
+O gateway Test aceita `deploy test <SHA>` para o app e `configure smtp test` para o SMTP do Supabase Auth; ambos recebem os dados somente pela entrada padrão e não dão shell, encaminhamento de portas ou comando Docker arbitrário. O deploy do app mantém a função de validar o SHA, atualizar somente `JBFD_IMAGE` e `BREVO_API_KEY`, verificar a imagem, o Compose e o healthcheck. O comando SMTP escreve somente o `.env` root-only do Supabase Test, valida o Compose e recria somente `auth`, com restauração da configuração anterior se falhar. Cada workflow verifica seu próprio protocolo antes de alterar o ambiente.
 
 ## 4. Fazer a primeira publicação
 

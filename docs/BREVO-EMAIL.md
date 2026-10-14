@@ -18,10 +18,13 @@ O gateway Test instalado na VPS precisa ser atualizado uma vez com os arquivos d
 
 - `scripts/jbfd-deploy-gateway-test.sh`
 - `scripts/jbfd-deploy-test-root.sh`
+- `scripts/jbfd-supabase-smtp-test-root.sh`
 
-Essa instalação requer uma sessão administrativa na VPS, pois o usuário SSH de deploy não pode alterar o gateway/root helper. Até a versão nova responder ao comando de verificação `probe brevo test`, o workflow interrompe antes de substituir a imagem Test. Não use a API de atualização de Docker Compose para esse passo: ela recria o projeto e não substitui com segurança os arquivos root-owned do gateway.
+Essa instalação requer uma sessão administrativa na VPS, pois o usuário SSH de deploy não pode alterar o gateway/root helper. O `sudoers` restrito deve permitir tanto `/opt/jbfd/bin/jbfd-deploy-test-root.sh` quanto `/opt/jbfd/bin/jbfd-supabase-smtp-test-root.sh`, sem argumentos. Até o gateway atualizado responder a `probe brevo test`, o deploy interrompe antes de substituir a imagem Test. O workflow manual **Configurar SMTP do Supabase Test** exige que o mesmo gateway responda a `probe smtp test`. Não use a API de atualização de Docker Compose para instalar os scripts: ela recria o projeto e não substitui com segurança os arquivos root-owned.
 
-O secret não é copiado para Live. Após aprovação de Test e antes de promover uma versão que envie e-mails, crie `BREVO_API_KEY` também no Environment `jbfd-live` e aplique o mesmo mecanismo de configuração, sem copiar `.env` ou dados entre ambientes.
+Para o Supabase Auth, configure os secrets `BREVO_SMTP_USER` (Login SMTP mostrado pela Brevo) e `BREVO_SMTP_KEY` no Environment `jbfd-test`. Em seguida, execute **Configurar SMTP do Supabase Test** em Actions. Esse workflow grava as variáveis SMTP apenas em `/opt/jbfd/supabase/.env` com modo `600`, valida o Compose sem imprimir os valores e recria somente o serviço `auth` de Test. A chave SMTP nunca é enviada ao container do app nem gravada em logs/artefatos. O deploy regular do site não altera o SMTP do Supabase.
+
+Após aprovação de Test, cadastre os valores SMTP e `BREVO_API_KEY` de forma independente no Environment `jbfd-live` e configure Live por um procedimento próprio, sem copiar `.env` ou dados entre ambientes. É possível usar a mesma conta Brevo nos dois ambientes, mantendo os secrets e arquivos `.env` separados. Este workflow não altera Live.
 
 ## Teste controlado
 
