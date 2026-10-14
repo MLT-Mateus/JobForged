@@ -1,0 +1,1 @@
+jbfd-live-deploy ALL=(root) NOPASSWD: /opt/jbfd/bin/jbfd-deploy-live-root.sh *
