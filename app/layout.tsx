@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "@fontsource-variable/montserrat";
 import "@fontsource-variable/open-sans";
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/700.css";
 import "./globals.css";
 import "./components/ui/ui.css";
 import GlobalInteractions from "./components/GlobalInteractions";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Copy, Download, Mail, Moon, Sun } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Download, Mail, Moon, Sun } from "lucide-react";
 import {
   downloadFileName,
   emailTemplates,
@@ -69,13 +69,19 @@ function EmailVariantPreview({ templateId, theme }: { templateId: EmailTemplateI
 export function EmailTemplatesSection() {
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplateId>(emailTemplates[0].id);
   const current = emailTemplates.find((item) => item.id === selectedTemplate)!;
+  const selectedIndex = emailTemplates.findIndex((item) => item.id === selectedTemplate);
+
+  function selectRelativeTemplate(offset: number) {
+    const nextIndex = (selectedIndex + offset + emailTemplates.length) % emailTemplates.length;
+    setSelectedTemplate(emailTemplates[nextIndex].id);
+  }
 
   return (
     <section className="ds-section ds-section--first ds-email-templates" aria-labelledby="ds-emails-title">
       <header className="ds-section-heading ds-email-templates__heading">
         <span>COMUNICAÇÃO · BREVO</span>
         <h2 id="ds-emails-title">E-mails com a identidade JobForged.</h2>
-        <p>Modelos transacionais responsivos, preparados em versões clara e escura. Escolha um modelo para comparar as duas versões e copiar ou baixar o HTML.</p>
+        <p>Quatro modelos transacionais, cada um com versões clara e escura. Escolha um cartão para entender quando o e-mail é enviado e comparar as duas versões antes de copiar ou baixar o HTML.</p>
       </header>
 
       <aside className="ds-email-templates__notice" aria-label="Regra de tema e situação de envio">
@@ -89,21 +95,23 @@ export function EmailTemplatesSection() {
 
       <div className="ds-email-templates__layout">
         <nav className="ds-email-library" aria-label="Modelos de e-mail">
-          <div className="ds-email-library__heading"><strong>Biblioteca</strong><span>{emailTemplates.length} modelos</span></div>
-          {emailTemplates.map((template, index) => (
-            <button
-              className={`ds-email-library__item ${selectedTemplate === template.id ? "is-active" : ""}`}
-              type="button"
-              key={template.id}
-              aria-pressed={selectedTemplate === template.id}
-              onClick={() => setSelectedTemplate(template.id)}
-            >
-              <span className="ds-email-library__number">{String(index + 1).padStart(2, "0")}</span>
-              <span className="ds-email-library__copy"><strong>{template.name}</strong><small>{template.audience}</small></span>
-              <span className="ds-email-library__arrow" aria-hidden="true">›</span>
-            </button>
-          ))}
-          <div className="ds-email-library__rule"><strong>Regra de seleção</strong><p>Preferência salva do usuário → tema correspondente. Preferência ausente → claro.</p></div>
+          <div className="ds-email-library__heading"><div><strong>Biblioteca de modelos</strong><small>Selecione um e-mail para ver o conteúdo e as duas versões.</small></div><span>{emailTemplates.length} modelos</span></div>
+          <div className="ds-email-library__items">
+            {emailTemplates.map((template, index) => (
+              <button
+                className={`ds-email-library__item ${selectedTemplate === template.id ? "is-active" : ""}`}
+                type="button"
+                key={template.id}
+                aria-pressed={selectedTemplate === template.id}
+                onClick={() => setSelectedTemplate(template.id)}
+              >
+                <span className="ds-email-library__number">{String(index + 1).padStart(2, "0")}</span>
+                <span className="ds-email-library__copy"><strong>{template.name}</strong><small>{template.audience}</small><small>{template.trigger}</small></span>
+                <span className="ds-email-library__arrow" aria-hidden="true">›</span>
+              </button>
+            ))}
+          </div>
+          <div className="ds-email-library__rule"><strong>Regra de tema</strong><p>Usamos a preferência salva no perfil; quando ela não existe, o padrão é claro.</p></div>
         </nav>
 
         <div className="ds-email-template-detail">
@@ -117,6 +125,11 @@ export function EmailTemplatesSection() {
               <div><dt>Quando</dt><dd>{current.trigger}</dd></div>
               <div><dt>Assunto</dt><dd>{current.subject}</dd></div>
             </dl>
+            <nav className="ds-email-template-detail__navigation" aria-label="Navegação entre modelos">
+              <button type="button" className="jf-action jf-action--secondary" onClick={() => selectRelativeTemplate(-1)} aria-label="Ver modelo anterior"><ChevronLeft size={16} aria-hidden="true"/><span>Anterior</span></button>
+              <span aria-live="polite">{String(selectedIndex + 1).padStart(2, "0")} / {String(emailTemplates.length).padStart(2, "0")}</span>
+              <button type="button" className="jf-action jf-action--secondary" onClick={() => selectRelativeTemplate(1)} aria-label="Ver próximo modelo"><span>Próximo</span><ChevronRight size={16} aria-hidden="true"/></button>
+            </nav>
           </div>
           <div className="ds-email-variants" aria-label={`Duas versões do modelo ${current.name}`}>
             {themes.map(({ id }) => <EmailVariantPreview key={`${current.id}-${id}`} templateId={current.id} theme={id} />)}
