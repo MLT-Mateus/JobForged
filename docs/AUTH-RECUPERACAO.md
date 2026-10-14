@@ -17,7 +17,7 @@ A API key já usada pelo app não autentica o relay SMTP. A Brevo exige o login 
 
 O secret `BREVO_SMTP_KEY` já deve estar no Environment `jbfd-test`. Adicione também `BREVO_SMTP_USER` com o **Login SMTP** exibido em Brevo → SMTP & API → SMTP. Não use o e-mail da conta Brevo por suposição: use o identificador apresentado como Login SMTP. Os dois valores ficam no GitHub Environment, nunca no chat.
 
-Depois que o gateway root-owned de Test estiver atualizado, execute manualmente o workflow **Configurar SMTP do Supabase Test** em Actions. Ele encaminha os secrets por SSH protegido, grava apenas a configuração SMTP no `.env` root-only `/opt/jbfd/supabase/.env`, valida o Compose sem exibir a configuração e recria somente o serviço `auth`. O workflow é exclusivo de Test.
+Depois que o gateway root-owned de Test estiver atualizado, o workflow existente de deploy em `develop` encaminha os secrets por SSH protegido, grava apenas a configuração SMTP no `.env` root-only `/opt/jbfd/supabase/.env`, valida o Compose sem exibir a configuração e recria somente o serviço `auth`. Se os dois secrets ainda não existirem ou o gateway não suportar o protocolo SMTP, a etapa é adiada sem alterar o Supabase. Se a configuração já estiver igual, o Auth não é reiniciado.
 
 Os valores aplicados no `.env` são:
 
@@ -30,7 +30,7 @@ SMTP_ADMIN_EMAIL=suporte@jobforged.com
 SMTP_SENDER_NAME=JobForged
 ```
 
-O `docker-compose.override.yml` deste repositório aponta `GOTRUE_MAILER_TEMPLATES_RECOVERY` para o modelo do domínio Test. A lista `GOTRUE_URI_ALLOW_LIST` já deve aceitar o domínio Test; o `GOTRUE_SITE_URL` confirmado é `https://test.jobforged.com`. Depois de cadastrar os valores, valide o compose com `config --quiet` e recrie apenas o serviço `auth` do stack Test. Não imprima `.env` nem a saída completa de `docker compose config`.
+O `docker-compose.override.yml` deste repositório aponta `GOTRUE_MAILER_TEMPLATES_RECOVERY` para o modelo do domínio Test. A lista `GOTRUE_URI_ALLOW_LIST` já deve aceitar o domínio Test; o `GOTRUE_SITE_URL` confirmado é `https://test.jobforged.com`. O helper valida o Compose com `config --quiet` e recria apenas o serviço `auth` do stack Test. Não imprima `.env` nem a saída completa de `docker compose config`.
 
 O remetente deve continuar `suporte@jobforged.com`, já verificado na Brevo. Test e Live podem usar a mesma conta SMTP, desde que os valores sejam cadastrados separadamente em cada GitHub Environment e provisionados independentemente em cada Supabase. Nunca copie `.env` entre ambientes. Live não é configurado por este workflow e só deve ser habilitado após aprovação de Test.
 

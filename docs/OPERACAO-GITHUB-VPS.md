@@ -49,7 +49,7 @@ restrict,command="/opt/jbfd/bin/jbfd-deploy-gateway-test.sh" ssh-ed25519 CHAVE_P
 
 Copie a chave privada Test para o Secret `VPS_DEPLOY_KEY` do Environment `jbfd-test`; ela não será exibida no chat. A chave Test não tem caminho para publicar Live. A configuração de Live permanece separada e inalterada.
 
-O gateway Test aceita `deploy test <SHA>` para o app e `configure smtp test` para o SMTP do Supabase Auth; ambos recebem os dados somente pela entrada padrão e não dão shell, encaminhamento de portas ou comando Docker arbitrário. O deploy do app mantém a função de validar o SHA, atualizar somente `JBFD_IMAGE` e `BREVO_API_KEY`, verificar a imagem, o Compose e o healthcheck. O comando SMTP escreve somente o `.env` root-only do Supabase Test, valida o Compose e recria somente `auth`, com restauração da configuração anterior se falhar. Cada workflow verifica seu próprio protocolo antes de alterar o ambiente.
+O gateway Test aceita `deploy test <SHA>` para o app e `configure smtp test` para o SMTP do Supabase Auth; ambos recebem os dados somente pela entrada padrão e não dão shell, encaminhamento de portas ou comando Docker arbitrário. O deploy do app mantém a função de validar o SHA, atualizar somente `JBFD_IMAGE` e `BREVO_API_KEY`, verificar a imagem, o Compose e o healthcheck. Quando os dois secrets SMTP existem, o workflow verifica o protocolo e chama o comando SMTP, que escreve somente o `.env` root-only do Supabase Test, valida o Compose e recria somente `auth`, com restauração da configuração anterior se falhar. Sem secrets completos ou suporte no gateway, a etapa SMTP é adiada; se a configuração já estiver atual, o serviço não reinicia.
 
 ## 4. Fazer a primeira publicação
 
