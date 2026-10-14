@@ -1,72 +1,36 @@
-# JBFD na VPS: preparação da versão 0.00
+# JobForged na VPS: operação dos ambientes
 
-## O que está pronto no código
+## Estado atual
 
-O Docker executa a aplicação inteira existente: landing page, Design System,
-autenticação visual e painéis existentes. Os painéis usam dados demonstrativos;
-essa migração não implementa autenticação real, banco Supabase ou integrações.
-O endpoint `/api/health` verifica apenas a aplicação, não serviços futuros.
+O aplicativo tem ambientes independentes na mesma VPS:
 
-O build padrão continua atendendo ao Sites durante a transição. `npm run
-build:node` gera o servidor independente em `dist/standalone`. O Docker usa
-esse servidor e não depende da hospedagem Sites ou da Vercel.
+- Test: <https://test.jobforged.com>
+- Live: <https://jobforged.com>
+- VPS: `187.77.229.27`
+- Test usa `develop`; Live usa uma versão integrada e promovida manualmente de `main`.
 
-## Live e Test
+Cada aplicativo usa seu próprio container, rede Compose, `.env` e porta local. Os dois passam pelo Traefik compartilhado. A pilha de automações — n8n, Evolution API, PostgreSQL e Redis — permanece isolada.
 
-- `main`: código aprovado para Live; `develop`: desenvolvimento e Test.
-- Cada implantação usa uma imagem identificada pelo commit. Validar essa imagem
-  no Test e promover a mesma imagem para Live, sem reconstruir.
-- Projetos Compose separados: `jbfd-test` e `jbfd-live`, com redes separadas.
-- Configurações externas: `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`.
-- Cada ambiente tem uma rede privada própria. A aplicação também entra na rede
-  existente do Traefik (`jobforged_jobforged_network`) para receber HTTPS; n8n,
-  Evolution API, PostgreSQL e Redis não entram na rede privada da JBFD.
-- O Traefik já usa `websecure` e o certificado automático `letsencrypt`.
-  Test usa `test.jobforged.com`; Live usa `jobforged.com` quando ocorrer a troca.
-- Portas 3101 (Test) e 3100 (Live) ficam acessíveis apenas por 127.0.0.1 para
-  diagnóstico; o tráfego público passa pelo Traefik.
-- Supabase, volumes e credenciais de integrações terão isolamento entre ambientes
-  quando forem implementados. Não usar dados de produção nos testes.
+## O que está no sistema
 
-## Primeiro instalar Test
+Supabase self-hosted está provisionado em dois projetos Compose independentes: `/opt/jbfd/supabase` (Test) e `/opt/jbfd/supabase-live` (Live), cada um com banco, segredos, volumes e rede próprios. Os dois ambientes estavam saudáveis na última verificação (2026-10-13). Nenhum dos bancos reutiliza o PostgreSQL da automação ou o banco de identidade do MCP. A stack Live está pronta no backend, mas a aplicação Live ainda não aponta para ela e os cadastros públicos permanecem desabilitados até configurar SMTP e promover o código.
 
-O levantamento confirmou arquitetura, memória, disco, Docker, Compose, containers
-e rede do Traefik. Não remover containers, redes ou volumes existentes. Antes de
-subir o Test, verificar que o DNS `test.jobforged.com` aponta para esta VPS e que
-a porta 3101 está livre. Não alterar o DNS Live nesta etapa.
+O build Node independente e Docker não dependem de Sites ou Vercel. O domínio `jobforged.com` já está na VPS. O código e o histórico ficam no GitHub `MLT-Mateus/JobForged`.
 
-No checkout do repositório na VPS:
+## Separação Live/Test
 
-```bash
-revision="$(git rev-parse HEAD)"
-docker build --build-arg APP_COMMIT="$revision" -t "jbfd:$revision" .
-sudo install -d -m 700 /opt/jbfd/test
-sudo install -m 600 deploy/.env.test.example /opt/jbfd/test/.env
-sudo nano /opt/jbfd/test/.env
-```
+- `develop` alimenta Test; `main` representa Live.
+- Configurações ficam somente em `/opt/jbfd/test/.env` e `/opt/jbfd/live/.env`.
+- O Compose e as redes internas são separados; somente o Traefik é compartilhado.
+- A mesma imagem versionada por SHA deve ser validada em Test e promovida a Live.
+- Cada ambiente Supabase mantém Auth, banco, Storage, chaves e volumes próprios.
+- Migrations versionadas são aplicadas primeiro em Test e depois em Live; dados não acompanham o deploy da imagem.
+- Um refresh de Live para Test é uma restauração manual, com backup de Test e sanitização de dados pessoais.
 
-No editor, trocar `JBFD_IMAGE` por `jbfd:` seguido do commit completo usado no
-build. Os exemplos não contêm segredos. Nunca enviar os arquivos reais ao GitHub.
-Não executar `config` sem `--quiet` ou compartilhar logs contendo credenciais.
+Toda promoção deve seguir [`GUIA-PROMOCAO-TEST-LIVE.md`](GUIA-PROMOCAO-TEST-LIVE.md): o app Live usa o mesmo SHA validado em Test e cada migration do SHA é aplicada e conferida separadamente em cada banco. Hoje a aplicação de migrations ainda é manual; o workflow de deploy não deve ser tratado como se sincronizasse schema automaticamente.
 
-```bash
-bash scripts/deploy-vps.sh test config
-bash scripts/deploy-vps.sh test up
-curl --fail http://127.0.0.1:3101/api/health
-```
+## Próxima etapa operacional
 
-O certificado HTTPS do Test será servido pelo Traefik. Validar navegação, telas e assets no navegador.
-Somente depois preparar Live com seu próprio arquivo de ambiente e a mesma
-imagem validada. A troca do domínio acontecerá após essa validação.
+A publicação usa imagens imutáveis. O workflow de Live promove manualmente um SHA aprovado; atualizar uma imagem não copia nem restaura dados de banco. O passo a passo está em [`OPERACAO-GITHUB-VPS.md`](OPERACAO-GITHUB-VPS.md).
 
-## Atualizações e recuperação
-
-Construir uma nova imagem com um novo commit, validar no Test e promover para
-Live. Manter a imagem anterior: para voltar, alterar apenas `JBFD_IMAGE` no arquivo
-do ambiente e executar `up` novamente. Alterações futuras de banco exigirão plano
-próprio de migração e backup; voltar a imagem não desfaz alterações de dados.
-
-O script `down` não remove volumes. Este kit não faz deploy automático na VPS,
-não reescreve histórico e não instala MCP. A conexão MCP será configurada depois
-com autenticação e ferramentas limitadas para inspecionar, atualizar Test e
-promover versões. GitHub mantém o código completo; containers executam o build.
+O MCP está publicado separadamente em `https://mcp.jobforged.com/mcp`; ele não faz parte das stacks da aplicação nem dos projetos Supabase. O painel Studio de Live está configurado para `supabase-live.jobforged.com`; confira/crie o DNS A para `187.77.229.27` antes de acessar. `supabase.jobforged.com` continua associado a Test.

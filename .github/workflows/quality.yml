@@ -18,6 +18,29 @@ permissions:
   contents: read
 
 jobs:
+  mcp:
+    name: Validar MCP operacional
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: services/mcp
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configurar Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: services/mcp/package-lock.json
+      - name: Instalar dependências fixadas
+        run: npm ci
+      - name: Testar autenticação, ferramentas e transporte MCP
+        run: npm test
+      - name: Auditar dependências de produção
+        run: npm audit --omit=dev --audit-level=high
+
   validate:
     name: Validar código e build
     runs-on: ubuntu-latest
@@ -83,3 +106,99 @@ jobs:
             fi
           done
           docker network rm jbfd-ci-network || true
+
+  publish-test-image:
+    name: Publicar imagem Test
+    needs: [mcp, validate, docker]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/develop' &&
+      vars.JBFD_AUTO_DEPLOY_TEST == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Baixar o commit aprovado pelo CI
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Publicar imagem versionada no GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ghcr.io/mlt-mateus/jobforged
+          REVISION: ${{ github.sha }}
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          if docker manifest inspect "$IMAGE:$REVISION" >/dev/null 2>&1; then
+            echo "Imagem deste commit já publicada; preservando o artefato existente."
+          else
+            docker build --build-arg APP_COMMIT="$REVISION" \
+              --label "org.opencontainers.image.revision=$REVISION" \
+              -t "$IMAGE:$REVISION" .
+            docker push "$IMAGE:$REVISION"
+          fi
+
+  deploy-test:
+    name: Implantar Test
+    needs: [mcp, validate, docker, publish-test-image]
+    if: needs.publish-test-image.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: jbfd-test
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Implantar somente no ambiente Test
+        env:
+          VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SMTP_USER: ${{ secrets.BREVO_SMTP_USER }}
+          BREVO_SMTP_KEY: ${{ secrets.BREVO_SMTP_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USERNAME: ${{ github.actor }}
+          REVISION: ${{ github.sha }}
+        run: |
+          if [[ -z "$BREVO_API_KEY" ]]; then
+            echo "O secret BREVO_API_KEY não está configurado no Environment jbfd-test." >&2
+            exit 78
+          fi
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/jbfd_deploy"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/jbfd_deploy" "$HOME/.ssh/known_hosts"
+          ssh_args=(-i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          target="$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST"
+          protocol="$(ssh "${ssh_args[@]}" "$target" "probe brevo test" 2>/dev/null)" || {
+            echo "O gateway restrito da VPS ainda não aceita a configuração segura do secret Brevo. Atualize os scripts de deploy Test conforme docs/BREVO-EMAIL.md." >&2
+            exit 78
+          }
+          if [[ "$protocol" != "brevo-test-protocol-v1" ]]; then
+            echo "O gateway da VPS respondeu com uma versão incompatível para a integração Brevo." >&2
+            exit 78
+          fi
+          printf '%s\n%s\n%s\n' "$GH_USERNAME" "$GH_TOKEN" "$BREVO_API_KEY" | \
+            ssh "${ssh_args[@]}" "$target" "deploy test $REVISION"
+          if [[ -z "$BREVO_SMTP_USER" || -z "$BREVO_SMTP_KEY" ]]; then
+            echo "SMTP do Supabase Test adiado: configure BREVO_SMTP_USER e BREVO_SMTP_KEY no Environment jbfd-test."
+            exit 0
+          fi
+          if protocol="$(ssh "${ssh_args[@]}" "$target" "probe smtp test" 2>/dev/null)"; then
+            if [[ "$protocol" != "supabase-smtp-test-protocol-v1" ]]; then
+              echo "O gateway da VPS respondeu com uma versão incompatível para SMTP Test." >&2
+              exit 78
+            fi
+            printf '%s\n%s\n' "$BREVO_SMTP_USER" "$BREVO_SMTP_KEY" | \
+              ssh "${ssh_args[@]}" "$target" "configure smtp test"
+          else
+            echo "SMTP do Supabase Test adiado: o gateway root-owned da VPS ainda precisa ser atualizado conforme docs/BREVO-EMAIL.md."
+          fi

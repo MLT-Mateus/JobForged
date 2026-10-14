@@ -1,54 +1,515 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, LockKeyhole, Mail, Phone, QrCode, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowLeft, Building2, Check, LockKeyhole, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { BrandAsset } from "@/app/components/BrandAsset";
-import { useThemePreference, ActionButton, AppToast, CheckboxField, RadioField, TextField, ThemeSelector, type ToastNotice } from "@/app/components/ui";
-import { commercialPlans, plansById, type PlanId } from "@/app/data/plans";
-import { isEmail, cardBrand, maskCard, maskCnpj, maskDocument, maskExpiry, maskCpf, maskPhone, normalizeText, passwordRules, validateCard, validateLogin, validateSignup, type CardValues, type LoginValues, type SignupValues } from "./auth-validation";
-import { simulateAuthentication } from "./auth-service";
+import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, useThemePreference, type ToastNotice } from "@/app/components/ui";
+import { maskCnpj, maskPhone, normalizeText, passwordRules, validateLogin, validateSignup, type LoginValues, type SignupValues } from "./auth-validation";
+import { requestPasswordRecovery, signInCompany, signUpCompany, updateRecoveredPassword, verifyPasswordRecovery } from "./auth-service";
 import "./auth.css";
 
-type FieldErrors<T> = Partial<Record<keyof T,string>>;
-function AuthShell({children,compact=false}:{children:ReactNode;compact?:boolean}){const{theme,changeTheme}=useThemePreference();return <main className={`auth-page ${compact?"auth-page--compact":""}`}><div className="auth-grid" aria-hidden="true"/><header className="site-header auth-official-header"><div className="container nav-wrap"><Link href="/" className="brand" aria-label="JobForged — página inicial"><BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184}/></Link><ThemeSelector theme={theme} onChange={changeTheme}/></div></header><div className="auth-layout"><aside className="auth-context"><span className="auth-context__icon"><Building2/></span><p className="auth-eyebrow">Conta empresarial JobForged</p><h2>Recrutamento estruturado desde o primeiro acesso.</h2><p>Ambiente exclusivo para empresas e administradores responsáveis.</p><ul><li><ShieldCheck/>Dados consistentes da organização</li><li><UserRound/>Acesso inicial do administrador</li><li><LockKeyhole/>Sem armazenamento nesta demonstração</li></ul></aside><section className="auth-card">{children}</section></div></main>}
-function LoadingLabel({loading,idle}:{loading:boolean;idle:string}){return loading?<><span className="auth-spinner"/>Processando...</>:<>{idle}</>}
+type FieldErrors<T> = Partial<Record<keyof T, string>>;
 
-export function LoginClient(){const[values,setValues]=useState<LoginValues>({identifier:"",password:""});const[errors,setErrors]=useState<FieldErrors<LoginValues>>({});const[loading,setLoading]=useState(false);const[success,setSuccess]=useState(false);const[notice,setNotice]=useState<ToastNotice|null>(null);const submit=async(e:FormEvent)=>{e.preventDefault();const next=validateLogin(values);setErrors(next);if(Object.keys(next).length){setNotice({kind:"danger",title:"Revise os campos",text:"Corrija os dados destacados para continuar."});return}setLoading(true);try{await simulateAuthentication("login",values.identifier);setValues(v=>({...v,password:""}));setSuccess(true);setNotice({kind:"success",title:"Demonstração concluída",text:"Os campos foram validados sem criar uma sessão."})}finally{setLoading(false)}};if(success)return <AuthShell compact><div className="auth-confirmation"><span><Check/></span><p className="auth-eyebrow">Demonstração concluída</p><h1>Dados validados</h1><p>Nenhuma autenticação ou sessão real foi criada.</p><div className="auth-confirmation__actions"><button className="jf-action jf-action--secondary" onClick={()=>setSuccess(false)}>Revisar acesso</button><Link className="jf-action jf-action--primary" href="/">Voltar ao início</Link></div></div>{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>;return <AuthShell compact><div className="auth-heading"><p className="auth-eyebrow">Bem-vindo de volta</p><h1>Acesse sua conta</h1><p>Demonstração visual: nenhuma credencial será armazenada.</p></div><form className="auth-form" noValidate onSubmit={submit}><TextField placeholder="Digite seu e-mail ou CPF" label="E-mail ou CPF" icon={Mail} value={values.identifier} maxLength={254} onChange={e=>{const raw=e.target.value;setValues(v=>({...v,identifier:/^[\d.\-\s]*$/.test(raw)?maskCpf(raw):raw.slice(0,254)}));setErrors(x=>({...x,identifier:undefined}))}} error={errors.identifier} autoComplete="username"/><TextField placeholder="Digite sua senha" label="Senha" icon={LockKeyhole} type="password" value={values.password} maxLength={72} onChange={e=>{setValues(v=>({...v,password:e.target.value}));setErrors(x=>({...x,password:undefined}))}} error={errors.password} autoComplete="current-password"/><Link className="auth-link-button auth-recovery" href="/recuperar-senha">Esqueci minha senha</Link><ActionButton type="submit" disabled={loading} className="auth-submit"><LoadingLabel loading={loading} idle="Entrar"/></ActionButton></form><div className="auth-switch"><span>Sua empresa ainda não possui conta?</span><Link href="/cadastro">Cadastrar empresa</Link></div><Link className="auth-back" href="/"><ArrowLeft/>Voltar ao início</Link>{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>}
+function AuthShell({ children, compact = false }: { children: ReactNode; compact?: boolean }) {
+  const { theme, changeTheme } = useThemePreference();
 
-const emptySignup:SignupValues={responsible:"",company:"",cnpj:"",phone:"",email:"",password:"",confirmPassword:""};
-const emptyCard:CardValues={holder:"",number:"",expiry:"",cvv:"",document:""};
-export function SignupClient({ initialPlanId = "profissional-anual" }: { initialPlanId?: PlanId }){const[step,setStep]=useState<1|2>(1);const[values,setValues]=useState(emptySignup);const[errors,setErrors]=useState<FieldErrors<SignupValues>>({});const[planId,setPlanId]=useState<PlanId>(initialPlanId);const[payment,setPayment]=useState<"card"|"pix">("card");const[card,setCard]=useState(emptyCard);const[cardErrors,setCardErrors]=useState<FieldErrors<CardValues>>({});const[terms,setTerms]=useState(false);const[loading,setLoading]=useState(false);const[success,setSuccess]=useState(false);const[notice,setNotice]=useState<ToastNotice|null>(null);const plan=plansById[planId];const rules=passwordRules(values.password);const set=<K extends keyof SignupValues>(key:K,value:SignupValues[K])=>{setValues(v=>({...v,[key]:value}));setErrors(e=>({...e,[key]:undefined}))};const setCardValue=<K extends keyof CardValues>(key:K,value:CardValues[K])=>{setCard(v=>({...v,[key]:value}));setCardErrors(e=>({...e,[key]:undefined}))};const goCheckout=(e:FormEvent)=>{e.preventDefault();const next=validateSignup(values);setErrors(next);if(Object.keys(next).length){setNotice({kind:"danger",title:"Revise os dados cadastrais",text:"Corrija os campos destacados antes de avançar."});return}setStep(2);scrollTo({top:0,behavior:"smooth"})};const finish=async(e:FormEvent)=>{e.preventDefault();const next=payment==="card"?validateCard(card):{};setCardErrors(next);if(Object.keys(next).length||!terms){setNotice({kind:"danger",title:"Checkout incompleto",text:!terms?"Aceite os termos para concluir a demonstração.":"Revise os dados do pagamento demonstrativo."});return}setLoading(true);await new Promise(r=>setTimeout(r,850));setCard(emptyCard);setLoading(false);setSuccess(true);setNotice({kind:"success",title:"Demonstração concluída",text:"Nenhum cadastro ou pagamento foi registrado."})};if(success)return <AuthShell><div className="auth-confirmation"><span><Check/></span><p className="auth-eyebrow">Confirmação demonstrativa</p><h1>Fluxo validado com sucesso</h1><p>Nenhum cadastro, autenticação ou pagamento foi registrado. Os dados do cartão foram descartados.</p><div className="auth-selected-plan"><span><b>{plan.name}</b><small>Ciclo {plan.billing.toLowerCase()}</small></span><strong>R$ {plan.price}<small>{plan.suffix}</small></strong></div><div className="auth-confirmation__actions"><button className="jf-action jf-action--secondary" onClick={()=>{setSuccess(false);setStep(2)}}>Voltar e revisar</button><Link className="jf-action jf-action--primary" href="/">Voltar ao início</Link></div></div>{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>;
-const planCards=<div className="auth-plan-options">{commercialPlans.map(p=><button type="button" key={p.id} className={`jf-action jf-action--quiet ${p.id===planId?"is-selected":""}`} onClick={()=>setPlanId(p.id)}><span><b>{p.name}</b><small>{p.billing}</small></span><strong>R$ {p.price}<small>{p.suffix}</small></strong>{p.id===planId&&<Check/>}</button>)}</div>;
-return <AuthShell><div className="auth-stepper" aria-label="Progresso do cadastro"><div className={step===1?"is-active":"is-complete"}><i>{step===2?<Check/>:1}</i><span>Dados cadastrais</span></div><b/><div className={step===2?"is-active":""}><i>2</i><span>Plano e pagamento</span></div></div>{step===1?<><div className="auth-heading"><p className="auth-eyebrow">Adesão empresarial</p><h1>Dados da empresa</h1><p>Informe a organização e o administrador responsável.</p></div><form className="auth-form auth-form--signup" noValidate onSubmit={goCheckout}><TextField placeholder="Digite seu nome completo" label="Nome completo do responsável" icon={UserRound} value={values.responsible} maxLength={120} onChange={e=>set("responsible",normalizeText(e.target.value).slice(0,120))} error={errors.responsible}/><TextField placeholder="Digite o nome da empresa" label="Nome da empresa" icon={Building2} value={values.company} maxLength={150} onChange={e=>set("company",normalizeText(e.target.value).slice(0,150))} error={errors.company}/><div className="auth-field-row"><TextField placeholder="00.000.000/0000-00" label="CNPJ" icon={Building2} value={values.cnpj} maxLength={18} inputMode="numeric" onChange={e=>set("cnpj",maskCnpj(e.target.value))} error={errors.cnpj}/><TextField placeholder="(00) 00000-0000" label="Telefone" icon={Phone} value={values.phone} maxLength={15} inputMode="tel" onChange={e=>set("phone",maskPhone(e.target.value))} error={errors.phone}/></div><TextField placeholder="nome@empresa.com" label="E-mail" icon={Mail} value={values.email} maxLength={254} inputMode="email" onChange={e=>set("email",e.target.value.slice(0,254))} error={errors.email}/><div className="auth-field-row"><TextField placeholder="Digite sua senha" label="Senha" icon={LockKeyhole} type="password" value={values.password} minLength={8} maxLength={72} onChange={e=>set("password",e.target.value)} error={errors.password}/><TextField placeholder="Digite a senha novamente" label="Confirmação da senha" icon={LockKeyhole} type="password" value={values.confirmPassword} minLength={8} maxLength={72} onChange={e=>set("confirmPassword",e.target.value)} error={errors.confirmPassword}/></div><div className="auth-password-guide"><span>Requisitos da senha</span><ul>{[["length","8 a 72 caracteres"],["upper","Letra maiúscula"],["lower","Letra minúscula"],["number","Número"],["special","Caractere especial"]].map(([k,l])=><li className={rules[k as keyof typeof rules]?"is-valid":""} key={k}><Check/>{l}</li>)}</ul></div><div className="auth-plan-compact"><div><span>Plano selecionado</span><strong>{plan.name} · {plan.billing}</strong><small>R$ {plan.price}{plan.suffix}</small></div><button className="jf-action jf-action--quiet" type="button" onClick={()=>document.getElementById("plans")?.showPopover()}>Alterar plano</button></div><div id="plans" popover="auto" className="auth-plan-popover"><header><strong>Escolha o plano e o ciclo</strong><button className="jf-action jf-action--quiet" type="button" popoverTarget="plans" popoverTargetAction="hide">×</button></header>{planCards}</div><ActionButton type="submit" className="auth-submit">Continuar para pagamento <ArrowRight/></ActionButton></form></>:<><div className="auth-heading"><p className="auth-eyebrow">Checkout transparente demonstrativo</p><h1>Plano e pagamento</h1><p>Nenhuma cobrança será realizada e nenhuma informação será armazenada.</p></div><div className="auth-checkout-grid"><div><section className="auth-summary"><header><div><span>Plano escolhido</span><h2>{plan.name} · {plan.billing}</h2></div><button className="jf-action jf-action--quiet" type="button" popoverTarget="checkout-plans">Alterar plano</button></header><strong>R$ {plan.price}<small>{plan.suffix}</small></strong><ul>{plan.benefits.map(x=><li key={x}><Check/>{x}</li>)}</ul></section><div id="checkout-plans" popover="auto" className="auth-plan-popover"><header><strong>Alterar plano e ciclo</strong><button className="jf-action jf-action--quiet" type="button" popoverTarget="checkout-plans" popoverTargetAction="hide">×</button></header>{planCards}</div><section className="auth-company-summary"><span>Empresa</span><b>{values.company}</b><small>{values.cnpj} · {values.email}</small></section></div><form className="auth-form" onSubmit={finish} noValidate><div className="auth-payment-methods"><RadioField name="payment" label={<><CreditCard/>Cartão</>} value="card" checked={payment==="card"} onChange={()=>setPayment("card")}/><RadioField name="payment" label={<><QrCode/>Pix recorrente</>} value="pix" checked={payment==="pix"} onChange={()=>setPayment("pix")}/></div>{payment==="card"?<div className="auth-card-fields"><TextField placeholder="Nome como aparece no cartão" label="Nome impresso no cartão" value={card.holder} maxLength={120} autoComplete="off" onChange={e=>setCardValue("holder",normalizeText(e.target.value).slice(0,120))} error={cardErrors.holder}/><TextField placeholder="0000 0000 0000 0000" label="Número do cartão" value={card.number} maxLength={23} inputMode="numeric" autoComplete="off" endAdornment={<em className="auth-card-brand">{cardBrand(card.number)}</em>} onChange={e=>setCardValue("number",maskCard(e.target.value))} error={cardErrors.number}/><div className="auth-field-row"><TextField label="Validade" value={card.expiry} maxLength={5} inputMode="numeric" placeholder="MM/AA" autoComplete="off" onChange={e=>setCardValue("expiry",maskExpiry(e.target.value))} error={cardErrors.expiry}/><TextField placeholder="000" label="CVV" type="password" value={card.cvv} maxLength={4} inputMode="numeric" autoComplete="off" onChange={e=>setCardValue("cvv",e.target.value.replace(/\D/g,"").slice(0,4))} error={cardErrors.cvv}/></div><TextField placeholder="Digite o CPF ou CNPJ do titular" label="CPF ou CNPJ do titular" value={card.document} maxLength={18} inputMode="numeric" autoComplete="off" onChange={e=>setCardValue("document",maskDocument(e.target.value))} error={cardErrors.document}/><p className="auth-security-note"><LockKeyhole/>Dados mantidos somente na memória desta página e descartados ao sair ou atualizar.</p></div>:<div className="auth-pix-flow"><QrCode/><div><strong>Como funcionará futuramente</strong><ol><li>Você autorizará a recorrência no ambiente seguro do gateway.</li><li>O gateway confirmará a autorização à JobForged.</li><li>As cobranças futuras seguirão o ciclo escolhido.</li></ol><small>Este protótipo não gera QR Code, cobrança ou autorização bancária.</small></div></div>}<div className="auth-consent"><CheckboxField label={<>Confirmo o plano e ciclo selecionados e aceito os <Link href="/termos-servico" target="_blank">Termos de Serviço</Link> e a <Link href="/politicas-privacidade" target="_blank">Política de Privacidade</Link>.</>} checked={terms} onChange={e=>setTerms(e.target.checked)}/></div><div className="auth-checkout-actions"><ActionButton type="button" variant="secondary" onClick={()=>setStep(1)}><ArrowLeft/>Anterior</ActionButton><ActionButton type="submit" disabled={loading}><LoadingLabel loading={loading} idle="Confirmar demonstração"/></ActionButton></div></form></div></>}{step===1&&<><div className="auth-switch"><span>Sua empresa já possui conta?</span><Link href="/login">Entrar</Link></div><Link className="auth-back" href="/"><ArrowLeft/>Voltar ao início</Link></>}{notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</AuthShell>}
+  return (
+    <main className={`auth-page ${compact ? "auth-page--compact" : ""}`}>
+      <div className="auth-grid" aria-hidden="true" />
+      <header className="site-header auth-official-header">
+        <div className="container nav-wrap">
+          <Link href="/" className="brand" aria-label="JobForged — página inicial">
+            <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
+          </Link>
+          <ThemeSelector theme={theme} onChange={changeTheme} />
+        </div>
+      </header>
+      <div className="auth-layout">
+        <aside className="auth-context">
+          <span className="auth-context__icon"><Building2 /></span>
+          <p className="auth-eyebrow">Conta empresarial JobForged</p>
+          <h2>Recrutamento estruturado desde o primeiro acesso.</h2>
+          <p>Ambiente exclusivo para empresas e administradores responsáveis.</p>
+          <ul>
+            <li><ShieldCheck />Plano Freemium sem cobrança</li>
+            <li><UserRound />Conta vinculada à organização</li>
+            <li><LockKeyhole />Autenticação segura pelo Supabase</li>
+          </ul>
+        </aside>
+        <section className="auth-card">{children}</section>
+      </div>
+    </main>
+  );
+}
 
-export function PasswordRecoveryClient({ reset = false }: { reset?: boolean }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmation, setConfirmation] = useState("");
-  const [errors, setErrors] = useState<{email?: string; password?: string; confirmation?: string}>({});
-  const [complete, setComplete] = useState(false);
-  function submit(event: FormEvent) {
+function LoadingLabel({ loading, idle }: { loading: boolean; idle: string }) {
+  return loading ? <><span className="auth-spinner" />Processando...</> : idle;
+}
+
+export function LoginClient() {
+  const router = useRouter();
+  const [values, setValues] = useState<LoginValues>({ identifier: "", password: "" });
+  const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
+  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState<ToastNotice | null>(null);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const next: typeof errors = {};
-    if (reset) {
-      if (password.length > 72 || Object.values(passwordRules(password)).some(ok => !ok)) next.password = "Use pelo menos 8 caracteres, com maiúscula, minúscula, número e símbolo.";
-      if (!confirmation || password !== confirmation) next.confirmation = "As senhas não coincidem.";
-    } else if (!isEmail(email)) next.email = "Informe um e-mail válido.";
+    const next = validateLogin(values);
     setErrors(next);
-    if (Object.keys(next).length) return;
-    setPassword(""); setConfirmation(""); setEmail(""); setComplete(true);
+    if (Object.keys(next).length) {
+      setNotice({ kind: "danger", title: "Revise os campos", text: "Informe um e-mail válido e sua senha." });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await signInCompany(values);
+      if (!result.ok) {
+        setNotice({ kind: "danger", title: "Não foi possível entrar", text: result.message });
+        return;
+      }
+      setValues(current => ({ ...current, password: "" }));
+      router.replace("/app/home");
+    } finally {
+      setLoading(false);
+    }
   }
-  return <AuthShell compact>
-    <div className="auth-heading"><p className="auth-eyebrow">Recuperação de acesso</p><h1>{complete ? "Demonstração concluída" : reset ? "Defina uma nova senha" : "Esqueceu sua senha?"}</h1><p>{complete ? reset ? "Os campos foram validados. Nenhuma senha foi alterada." : "E-mail validado. Esta demonstração não envia mensagens." : reset ? "Demonstração visual: nenhuma senha será armazenada ou alterada." : "Informe o e-mail da sua conta. O envio do link será habilitado com a autenticação real."}</p></div>
-    {!complete && <form className="auth-form" noValidate onSubmit={submit}>
-      {reset ? <>
-        <TextField placeholder="Crie uma nova senha" label="Nova senha" name="new-password" type="password" icon={LockKeyhole} autoComplete="new-password" maxLength={72} value={password} error={errors.password} helpText="Pelo menos 8 caracteres, com maiúscula, minúscula, número e símbolo." onChange={e => {setPassword(e.target.value);setErrors({});}} />
-        <TextField placeholder="Digite a nova senha novamente" label="Confirme a nova senha" name="confirm-password" type="password" icon={LockKeyhole} autoComplete="new-password" maxLength={72} value={confirmation} error={errors.confirmation} onChange={e => {setConfirmation(e.target.value);setErrors(x => ({...x,confirmation:undefined}));}} />
-      </> : <TextField label="E-mail da conta" name="email" type="email" icon={Mail} placeholder="nome@empresa.com" autoComplete="email" maxLength={254} value={email} error={errors.email} onChange={e => {setEmail(e.target.value);setErrors({});}} />}
-      <ActionButton type="submit" className="auth-submit">{reset ? "Validar nova senha (demonstração)" : "Validar e-mail (demonstração)"}</ActionButton>
-    </form>}
-    {complete && !reset && <Link className="jf-action jf-action--primary" href="/redefinir-senha">Visualizar redefinição de senha</Link>}
-    <Link className="auth-back" href="/login"><ArrowLeft/>Voltar ao login</Link>
-  </AuthShell>;
+
+  return (
+    <AuthShell compact>
+      <div className="auth-heading">
+        <p className="auth-eyebrow">Bem-vindo de volta</p>
+        <h1>Acesse sua conta</h1>
+        <p>Entre com o e-mail e a senha da sua conta empresarial.</p>
+      </div>
+      <form className="auth-form" noValidate onSubmit={submit}>
+        <TextField
+          name="email"
+          type="email"
+          placeholder="nome@empresa.com"
+          label="E-mail"
+          icon={Mail}
+          value={values.identifier}
+          maxLength={254}
+          autoComplete="username"
+          onChange={event => {
+            setValues(current => ({ ...current, identifier: event.target.value.slice(0, 254) }));
+            setErrors(current => ({ ...current, identifier: undefined }));
+          }}
+          error={errors.identifier}
+        />
+        <TextField
+          name="password"
+          placeholder="Digite sua senha"
+          label="Senha"
+          icon={LockKeyhole}
+          type="password"
+          value={values.password}
+          maxLength={72}
+          autoComplete="current-password"
+          onChange={event => {
+            setValues(current => ({ ...current, password: event.target.value }));
+            setErrors(current => ({ ...current, password: undefined }));
+          }}
+          error={errors.password}
+        />
+        <Link className="auth-link-button auth-recovery" href="/recuperar-senha">Esqueci minha senha</Link>
+        <ActionButton type="submit" disabled={loading} className="auth-submit">
+          <LoadingLabel loading={loading} idle="Entrar" />
+        </ActionButton>
+      </form>
+      <div className="auth-switch">
+        <span>Sua empresa ainda não possui conta?</span>
+        <Link href="/cadastro">Cadastrar empresa grátis</Link>
+      </div>
+      <Link className="auth-back" href="/"><ArrowLeft />Voltar ao início</Link>
+      {notice && <AppToast notice={notice} onClose={() => setNotice(null)} />}
+    </AuthShell>
+  );
+}
+
+const emptySignup: SignupValues = {
+  responsible: "",
+  company: "",
+  cnpj: "",
+  phone: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
+
+export function SignupClient() {
+  const router = useRouter();
+  const [values, setValues] = useState(emptySignup);
+  const [errors, setErrors] = useState<FieldErrors<SignupValues>>({});
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [created, setCreated] = useState(false);
+  const [requiresConfirmation, setRequiresConfirmation] = useState(false);
+  const [notice, setNotice] = useState<ToastNotice | null>(null);
+  const rules = passwordRules(values.password);
+
+  function update<K extends keyof SignupValues>(key: K, value: SignupValues[K]) {
+    setValues(current => ({ ...current, [key]: value }));
+    setErrors(current => ({ ...current, [key]: undefined }));
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const next = validateSignup(values);
+    setErrors(next);
+    if (Object.keys(next).length || !acceptedTerms) {
+      setNotice({
+        kind: "danger",
+        title: "Revise os dados cadastrais",
+        text: !acceptedTerms ? "Aceite os termos para criar a conta." : "Corrija os campos destacados antes de continuar.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await signUpCompany(values);
+      if (!result.ok) {
+        setNotice({ kind: "danger", title: "Cadastro não concluído", text: result.message });
+        return;
+      }
+      setRequiresConfirmation(Boolean(result.requiresConfirmation));
+      setCreated(true);
+      if (!result.requiresConfirmation) router.replace("/app/home");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (created) {
+    return (
+      <AuthShell>
+        <div className="auth-confirmation">
+          <span><Check /></span>
+          <p className="auth-eyebrow">Conta empresarial</p>
+          <h1>{requiresConfirmation ? "Confirme seu e-mail" : "Conta Freemium criada"}</h1>
+          <p>
+            {requiresConfirmation
+              ? `Enviamos as instruções para ${values.email}. Depois de confirmar, entre com seu e-mail e senha.`
+              : "Seu acesso inicial está ativo. Você será direcionado ao painel empresarial."}
+          </p>
+          <div className="auth-selected-plan">
+            <span><b>Plano Freemium</b><small>Sem pagamento nesta etapa</small></span>
+            <strong>R$ 0<small>/mês</small></strong>
+          </div>
+          {requiresConfirmation && <Link className="jf-action jf-action--primary" href="/login">Ir para login</Link>}
+        </div>
+        {notice && <AppToast notice={notice} onClose={() => setNotice(null)} />}
+      </AuthShell>
+    );
+  }
+
+  return (
+    <AuthShell>
+      <div className="auth-stepper" aria-label="Progresso do cadastro">
+        <div className="is-active"><i>1</i><span>Dados cadastrais</span></div>
+        <b />
+        <div className="is-active"><i>2</i><span>Acesso Freemium</span></div>
+      </div>
+      <div className="auth-heading">
+        <p className="auth-eyebrow">Adesão empresarial gratuita</p>
+        <h1>Cadastre sua empresa</h1>
+        <p>Crie o acesso do responsável e comece sem cobrança ou dados de pagamento.</p>
+      </div>
+      <form className="auth-form auth-form--signup" noValidate onSubmit={submit}>
+        <TextField
+          name="responsible"
+          label="Nome do responsável"
+          placeholder="Seu nome completo"
+          icon={UserRound}
+          autoComplete="name"
+          maxLength={120}
+          value={values.responsible}
+          onChange={event => update("responsible", normalizeText(event.target.value).slice(0, 120))}
+          error={errors.responsible}
+        />
+        <TextField
+          name="company"
+          label="Nome da empresa"
+          placeholder="Razão social ou nome de uso"
+          icon={Building2}
+          autoComplete="organization"
+          maxLength={160}
+          value={values.company}
+          onChange={event => update("company", normalizeText(event.target.value).slice(0, 160))}
+          error={errors.company}
+        />
+        <div className="auth-field-row">
+          <TextField
+            name="cnpj"
+            label="CNPJ"
+            placeholder="00.000.000/0000-00"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={18}
+            value={values.cnpj}
+            onChange={event => update("cnpj", maskCnpj(event.target.value))}
+            error={errors.cnpj}
+          />
+          <TextField
+            name="phone"
+            label="Telefone com DDD"
+            placeholder="(00) 00000-0000"
+            icon={Phone}
+            inputMode="tel"
+            autoComplete="tel"
+            maxLength={16}
+            value={values.phone}
+            onChange={event => update("phone", maskPhone(event.target.value))}
+            error={errors.phone}
+          />
+        </div>
+        <TextField
+          name="email"
+          type="email"
+          label="E-mail de acesso"
+          placeholder="nome@empresa.com"
+          icon={Mail}
+          autoComplete="email"
+          maxLength={254}
+          value={values.email}
+          onChange={event => update("email", event.target.value.slice(0, 254))}
+          error={errors.email}
+        />
+        <TextField
+          name="new-password"
+          label="Crie uma senha"
+          placeholder="Mínimo de 8 caracteres"
+          icon={LockKeyhole}
+          type="password"
+          autoComplete="new-password"
+          maxLength={72}
+          value={values.password}
+          onChange={event => update("password", event.target.value)}
+          error={errors.password}
+        />
+        <ul className="auth-password-requirements" aria-label="Requisitos da senha">
+          {[
+            [rules.length, "8 caracteres"],
+            [rules.upper && rules.lower, "Maiúscula e minúscula"],
+            [rules.number, "Um número"],
+            [rules.special, "Um símbolo"],
+          ].map(([valid, label]) => (
+            <li className={valid ? "is-valid" : ""} key={String(label)}>
+              <Check aria-hidden="true" />{label}
+            </li>
+          ))}
+        </ul>
+        <TextField
+          name="confirm-password"
+          label="Confirme a senha"
+          placeholder="Digite a senha novamente"
+          icon={LockKeyhole}
+          type="password"
+          autoComplete="new-password"
+          maxLength={72}
+          value={values.confirmPassword}
+          onChange={event => update("confirmPassword", event.target.value)}
+          error={errors.confirmPassword}
+        />
+        <div className="auth-selected-plan">
+          <span><b>Plano Freemium</b><small>Acesso inicial · sem cobrança</small></span>
+          <strong>R$ 0<small>/mês</small></strong>
+        </div>
+        <div className="auth-consent">
+          <CheckboxField
+            label={<>Li e aceito os <Link href="/termos-servico" target="_blank">Termos de Serviço</Link> e a <Link href="/politicas-privacidade" target="_blank">Política de Privacidade</Link>.</>}
+            checked={acceptedTerms}
+            onChange={event => setAcceptedTerms(event.target.checked)}
+          />
+        </div>
+        <ActionButton type="submit" disabled={loading} className="auth-submit">
+          <LoadingLabel loading={loading} idle="Criar conta grátis" />
+        </ActionButton>
+      </form>
+      <div className="auth-switch"><span>Sua empresa já possui conta?</span><Link href="/login">Entrar</Link></div>
+      <Link className="auth-back" href="/"><ArrowLeft />Voltar ao início</Link>
+      {notice && <AppToast notice={notice} onClose={() => setNotice(null)} />}
+    </AuthShell>
+  );
+}
+
+export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", recoveryType = "" }: { reset?: boolean; initialTokenHash?: string; recoveryType?: string }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  const [notice, setNotice] = useState<ToastNotice | null>(null);
+  const [recoveryStatus, setRecoveryStatus] = useState<"checking" | "link" | "ready" | "done" | "invalid">(
+    !reset ? "checking" : recoveryType === "recovery" && initialTokenHash ? "link" : "invalid",
+  );
+  const [tokenHash, setTokenHash] = useState(initialTokenHash);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const rules = passwordRules(password);
+
+  async function sendRecovery(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setNotice({ kind: "danger", title: "Confira o e-mail", text: "Informe um endereço de e-mail válido." });
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await requestPasswordRecovery(email);
+      if (!result.ok) {
+        setNotice({ kind: "danger", title: "Não foi possível solicitar", text: result.message });
+        return;
+      }
+      setRequestSent(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function verifyRecoveryLink() {
+    setLoading(true);
+    try {
+      const result = await verifyPasswordRecovery(tokenHash);
+      if (result.ok) {
+        window.history.replaceState(null, "", "/redefinir-senha");
+        setTokenHash("");
+        setRecoveryStatus("ready");
+      } else {
+        if ((result.status ?? 500) < 500) {
+          window.history.replaceState(null, "", "/redefinir-senha");
+          setTokenHash("");
+          setRecoveryStatus("invalid");
+        }
+        setNotice({ kind: "danger", title: "Link indisponível", text: result.message });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveNewPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (Object.values(rules).some((valid) => !valid)) {
+      setPasswordError("Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
+      setConfirmPasswordError("");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setPasswordError("");
+      setConfirmPasswordError("As senhas não coincidem.");
+      return;
+    }
+    setPasswordError("");
+    setConfirmPasswordError("");
+    setLoading(true);
+    try {
+      const result = await updateRecoveredPassword(password, confirmPassword);
+      if (!result.ok) {
+        setNotice({ kind: "danger", title: "Não foi possível atualizar", text: result.message });
+        if (result.message.toLowerCase().includes("expirou")) setRecoveryStatus("invalid");
+        return;
+      }
+      setPassword("");
+      setConfirmPassword("");
+      setRecoveryStatus("done");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <AuthShell compact>
+      <div className="auth-heading">
+        <p className="auth-eyebrow">Recuperação de acesso</p>
+        <h1>{reset ? "Defina uma nova senha" : requestSent ? "Confira seu e-mail" : "Esqueceu sua senha?"}</h1>
+        <p>{reset
+          ? "Use o link de recuperação enviado para seu e-mail e crie uma nova senha segura."
+          : requestSent
+            ? "Se houver uma conta associada a esse endereço, enviaremos as instruções para redefinir a senha."
+            : "Informe o e-mail da sua conta empresarial para receber um link seguro de recuperação."}</p>
+      </div>
+      {!reset && !requestSent && <form className="auth-form" noValidate onSubmit={sendRecovery}>
+        <TextField
+          name="email"
+          type="email"
+          label="E-mail da conta"
+          placeholder="nome@empresa.com"
+          icon={Mail}
+          autoComplete="email"
+          maxLength={254}
+          value={email}
+          onChange={event => setEmail(event.target.value.slice(0, 254))}
+        />
+        <div className="auth-security-note"><LockKeyhole />Por segurança, a página sempre confirma a solicitação sem revelar se o e-mail está cadastrado.</div>
+        <ActionButton type="submit" disabled={loading} className="auth-submit">
+          <LoadingLabel loading={loading} idle="Enviar link de recuperação" />
+        </ActionButton>
+      </form>}
+      {!reset && requestSent && <button type="button" className="auth-link-button" onClick={() => setRequestSent(false)}>Usar outro e-mail ou solicitar outro link</button>}
+
+      {reset && recoveryStatus === "checking" && <p role="status" className="auth-security-note">Preparando a validação do link…</p>}
+      {reset && recoveryStatus === "link" && <div className="auth-form">
+        <div className="auth-security-note"><LockKeyhole />O link será validado somente quando você continuar. Isso evita consumir a recuperação apenas pela pré-visualização automática do e-mail.</div>
+        <ActionButton type="button" disabled={loading} className="auth-submit" onClick={verifyRecoveryLink}>
+          <LoadingLabel loading={loading} idle="Validar link e continuar" />
+        </ActionButton>
+      </div>}
+
+      {reset && recoveryStatus === "ready" && <form className="auth-form" noValidate onSubmit={saveNewPassword}>
+        <TextField
+          name="new-password"
+          type="password"
+          label="Nova senha"
+          placeholder="Crie uma senha segura"
+          icon={LockKeyhole}
+          autoComplete="new-password"
+          maxLength={72}
+          value={password}
+          onChange={event => { setPassword(event.target.value); setPasswordError(""); }}
+          error={passwordError}
+        />
+        <ul className="auth-password-requirements" aria-label="Requisitos da senha">
+          {[
+            [rules.length, "8 caracteres"],
+            [rules.upper && rules.lower, "Maiúscula e minúscula"],
+            [rules.number, "Um número"],
+            [rules.special, "Um símbolo"],
+          ].map(([valid, label]) => <li className={valid ? "is-valid" : ""} key={String(label)}><Check aria-hidden="true" />{label}</li>)}
+        </ul>
+        <TextField
+          name="confirm-password"
+          type="password"
+          label="Confirme a nova senha"
+          placeholder="Digite a senha novamente"
+          icon={LockKeyhole}
+          autoComplete="new-password"
+          maxLength={72}
+          value={confirmPassword}
+          onChange={event => { setConfirmPassword(event.target.value); setConfirmPasswordError(""); }}
+          error={confirmPasswordError}
+        />
+        <div className="auth-security-note"><LockKeyhole />Ao concluir, as sessões anteriores da conta serão encerradas.</div>
+        <ActionButton type="submit" disabled={loading} className="auth-submit">
+          <LoadingLabel loading={loading} idle="Salvar nova senha" />
+        </ActionButton>
+      </form>}
+
+      {reset && recoveryStatus === "done" && <div className="auth-confirmation">
+        <span><Check /></span>
+        <h2>Senha atualizada</h2>
+        <p>Sua nova senha já pode ser usada para entrar na JobForged. Por segurança, entre novamente com a nova senha.</p>
+      </div>}
+
+      {reset && recoveryStatus === "invalid" && <div className="auth-security-note"><LockKeyhole />Este link é inválido ou expirou. Solicite uma nova recuperação para continuar.</div>}
+      <Link className="auth-back" href="/login"><ArrowLeft />Voltar ao login</Link>
+      {reset && recoveryStatus === "invalid" && <Link className="auth-back" href="/recuperar-senha"><Mail />Solicitar outro link</Link>}
+      {notice && <AppToast notice={notice} onClose={() => setNotice(null)} />}
+    </AuthShell>
+  );
 }

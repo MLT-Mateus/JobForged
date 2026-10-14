@@ -1,0 +1,52 @@
+services:
+  auth:
+    environment:
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: https://test.jobforged.com/api/auth/email-templates/password-recovery
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: Redefina sua senha na JobForged
+
+  studio:
+    networks:
+      default: {}
+      traefik: {}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.http.routers.supabase-studio.rule=Host(`test.supabase.jobforged.com`)
+      - traefik.http.routers.supabase-studio.priority=100
+      - traefik.http.routers.supabase-studio.entrypoints=websecure
+      - traefik.http.routers.supabase-studio.tls=true
+      - traefik.http.routers.supabase-studio.tls.certresolver=letsencrypt
+      - traefik.http.routers.supabase-studio.middlewares=supabase-studio-auth
+      - traefik.http.routers.supabase-studio.service=supabase-studio
+      - traefik.http.services.supabase-studio.loadbalancer.server.port=3000
+      - traefik.http.middlewares.supabase-studio-auth.basicauth.users=${STUDIO_BASIC_AUTH_USERS:?configure_studio_basic_auth}
+      - traefik.http.middlewares.supabase-studio-auth.basicauth.removeheader=true
+
+  api-gw:
+    networks:
+      default:
+        aliases:
+          - envoy
+          - kong
+      jbfd-test:
+        aliases:
+          - supabase-envoy
+      traefik: {}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.http.routers.jbfd-test-supabase-api.rule=Host(`test.jobforged.com`) && (PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
+      - traefik.http.routers.jbfd-test-supabase-api.priority=100
+      - traefik.http.routers.jbfd-test-supabase-api.entrypoints=websecure
+      - traefik.http.routers.jbfd-test-supabase-api.tls=true
+      - traefik.http.routers.jbfd-test-supabase-api.tls.certresolver=letsencrypt
+      - traefik.http.routers.jbfd-test-supabase-api.service=jbfd-test-supabase-api
+      - traefik.http.services.jbfd-test-supabase-api.loadbalancer.server.port=8000
+
+networks:
+  jbfd-test:
+    external: true
+    name: jbfd-test-internal
+  traefik:
+    external: true
+    name: jobforged_jobforged_network

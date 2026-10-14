@@ -1,0 +1,84 @@
+services:
+  auth:
+    environment:
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: https://jobforged.com/api/auth/email-templates/password-recovery
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: Redefina sua senha na JobForged
+
+  studio:
+    container_name: supabase-live-studio
+    networks:
+      default: {}
+      traefik: {}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.http.routers.supabase-live-studio.rule=Host(`supabase.jobforged.com`)
+      - traefik.http.routers.supabase-live-studio.priority=100
+      - traefik.http.routers.supabase-live-studio.entrypoints=websecure
+      - traefik.http.routers.supabase-live-studio.tls=true
+      - traefik.http.routers.supabase-live-studio.tls.certresolver=letsencrypt
+      - traefik.http.routers.supabase-live-studio.middlewares=supabase-live-studio-auth
+      - traefik.http.routers.supabase-live-studio.service=supabase-live-studio
+      - traefik.http.services.supabase-live-studio.loadbalancer.server.port=3000
+      - traefik.http.middlewares.supabase-live-studio-auth.basicauth.users=${STUDIO_BASIC_AUTH_USERS:?configure_studio_basic_auth}
+      - traefik.http.middlewares.supabase-live-studio-auth.basicauth.removeheader=true
+
+  api-gw:
+    container_name: supabase-live-envoy
+    networks:
+      default:
+        aliases:
+          - envoy
+          - kong
+      jbfd-live:
+        aliases:
+          - supabase-live-envoy
+      traefik: {}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.http.routers.jbfd-live-supabase-api.rule=Host(`jobforged.com`) && (PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
+      - traefik.http.routers.jbfd-live-supabase-api.priority=100
+      - traefik.http.routers.jbfd-live-supabase-api.entrypoints=websecure
+      - traefik.http.routers.jbfd-live-supabase-api.tls=true
+      - traefik.http.routers.jbfd-live-supabase-api.tls.certresolver=letsencrypt
+      - traefik.http.routers.jbfd-live-supabase-api.service=jbfd-live-supabase-api
+      - traefik.http.services.jbfd-live-supabase-api.loadbalancer.server.port=8000
+
+  auth:
+    container_name: supabase-live-auth
+
+  db:
+    container_name: supabase-live-db
+
+  functions:
+    container_name: supabase-live-edge-functions
+
+  imgproxy:
+    container_name: supabase-live-imgproxy
+
+  meta:
+    container_name: supabase-live-meta
+
+  realtime:
+    container_name: supabase-live-realtime
+
+  rest:
+    container_name: supabase-live-rest
+
+  storage:
+    container_name: supabase-live-storage
+
+  supavisor:
+    container_name: supabase-live-pooler
+    ports: !override
+      - "127.0.0.1:15432:5432"
+      - "127.0.0.1:16543:6543"
+
+networks:
+  jbfd-live:
+    external: true
+    name: jbfd-live-internal
+  traefik:
+    external: true
+    name: jobforged_jobforged_network

@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh JBFD snapshots every minute
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=60s
+AccuracySec=5s
+Unit=jbfd-mcp-collector.service
+
+[Install]
+WantedBy=timers.target

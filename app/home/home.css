@@ -1,6 +1,6 @@
 .home-welcome { display: flex; align-items: center; justify-content: space-between; gap: var(--jf-ui-space-6); margin-bottom: var(--jf-ui-space-6); }
 
-.home-welcome>div:first-child>span,.home-eyebrow,.home-banner-copy>span { color: var(--jf-ui-brand-strong); font-family: var(--font-heading); font-size:var(--jf-ui-font-size-xs); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.home-welcome>div:first-child>span,.home-eyebrow,.home-banner-copy>span { color: var(--jf-ui-brand-strong); font-family: var(--jf-ui-font-heading); font-size:var(--jf-ui-font-size-xs); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 
 
 
@@ -25,7 +25,7 @@
 
 .home-banner-copy p { max-width: 590px; margin: 0; color: var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); line-height: 1.65; }
 
-.home-banner-copy>a { display: inline-flex; width: max-content; align-items: center; gap: var(--jf-ui-space-1); margin-top: var(--jf-ui-space-4); color: var(--jf-ui-brand-strong); font-family: var(--font-heading); font-size:var(--jf-ui-font-size-sm); font-weight: 800; }
+.home-banner-copy>a { display: inline-flex; width: max-content; align-items: center; gap: var(--jf-ui-space-2); margin-top: var(--jf-ui-space-5); color: var(--jf-ui-brand-strong); font-family: var(--jf-ui-font-heading); font-size:var(--jf-ui-font-size-sm); font-weight: 800; }
 
 .home-banner-copy>a svg { width: 15px; }
 
@@ -62,13 +62,13 @@
 
 .home-section>header>p { max-width: 460px; margin: 0; color: var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); line-height: 1.5; text-align: right; }
 
-.home-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--jf-ui-space-2); }
+.home-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--jf-ui-space-4); }
 
-.home-lower-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: var(--jf-ui-space-3); margin-top: var(--jf-ui-space-7); }
+.home-lower-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: var(--jf-ui-space-5); margin-top: var(--jf-ui-space-7); }
 
 .home-panel{ min-width:0;padding:var(--jf-ui-space-5); }
 
-.home-onboarding>header>strong { color: var(--jf-ui-brand-strong); font-family: var(--font-heading); font-size:var(--jf-ui-font-size-lg); }
+.home-onboarding>header>strong { color: var(--jf-ui-brand-strong); font-family: var(--jf-ui-font-heading); font-size:var(--jf-ui-font-size-lg); }
 
 .home-progress { height: 8px; overflow:hidden;border-radius:99px;background:var(--jf-ui-surface-soft); }
 .home-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--jf-ui-brand),var(--jf-ui-accent));transition:width .5s ease}

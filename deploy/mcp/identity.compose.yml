@@ -1,0 +1,65 @@
+name: jbfd-identity
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: jbfd_identity
+      POSTGRES_USER: jbfd_identity
+      POSTGRES_PASSWORD: ${JBFD_IDENTITY_DB_PASSWORD:?Execute prepare primeiro}
+    volumes: ["database:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jbfd_identity -d jbfd_identity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    mem_limit: 256m
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    command: ["start", "--import-realm", "--features=resource-indicators"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://database:5432/jbfd_identity
+      KC_DB_USERNAME: jbfd_identity
+      KC_DB_PASSWORD: ${JBFD_IDENTITY_DB_PASSWORD:?Execute prepare primeiro}
+      KC_BOOTSTRAP_ADMIN_USERNAME: jbfd-admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${JBFD_IDENTITY_ADMIN_PASSWORD:?Execute prepare primeiro}
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HOSTNAME: https://auth.jobforged.com
+      KC_HOSTNAME_ADMIN: http://localhost:8082
+      KC_HEALTH_ENABLED: "true"
+      JAVA_OPTS_KC_HEAP: "-Xms128m -Xmx512m"
+    volumes: ["./realm.json:/opt/keycloak/data/import/jbfd-realm.json:ro"]
+    ports: ["127.0.0.1:8082:8080"]
+    networks: [default, traefik]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.http.routers.jbfd-identity.rule=Host(`auth.jobforged.com`) && (PathPrefix(`/realms/`) || PathPrefix(`/resources/`))
+      - traefik.http.routers.jbfd-identity.entrypoints=websecure
+      - traefik.http.routers.jbfd-identity.tls=true
+      - traefik.http.routers.jbfd-identity.tls.certresolver=letsencrypt
+      - traefik.http.services.jbfd-identity.loadbalancer.server.port=8080
+    depends_on:
+      database: {condition: service_healthy}
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: "1.0"
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+volumes:
+  database:
+    name: jbfd-identity-database
+networks:
+  default:
+    name: jbfd-identity-internal
+  traefik:
+    name: jobforged_jobforged_network
+    external: true

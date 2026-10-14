@@ -1,0 +1,36 @@
+name: jbfd-mcp
+services:
+  mcp:
+    build:
+      context: ${JBFD_MCP_SOURCE:?Execute prepare primeiro}
+    image: jbfd-mcp:0.1.0
+    env_file: ["${JBFD_MCP_ENV_FILE:-/opt/jbfd/mcp/.env}"]
+    volumes: ["${JBFD_MCP_SNAPSHOT_DIR:-/opt/jbfd/mcp/snapshots}:/snapshots:ro"]
+    ports: ["127.0.0.1:8787:8787"]
+    networks: [default, traefik]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.http.routers.jbfd-mcp.rule=Host(`mcp.jobforged.com`)
+      - traefik.http.routers.jbfd-mcp.entrypoints=websecure
+      - traefik.http.routers.jbfd-mcp.tls=true
+      - traefik.http.routers.jbfd-mcp.tls.certresolver=letsencrypt
+      - traefik.http.services.jbfd-mcp.loadbalancer.server.port=8787
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    cpus: "0.50"
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+networks:
+  default:
+    name: jbfd-mcp-internal
+  traefik:
+    name: jobforged_jobforged_network
+    external: true
