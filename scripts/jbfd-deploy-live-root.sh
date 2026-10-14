@@ -130,10 +130,36 @@ write_updated_env() {
   chown root:root "$destination"
 }
 
-write_updated_env "$app_env" "$app_candidate" "BREVO_API_KEY=$brevo_api_key"
+# Resolve the public Auth key from this environment's running stack. Never use
+# Test credentials or expose the resolved Docker configuration in logs.
+live_anon_key="$(docker inspect supabase-live-studio supabase-live-auth | python3 -c '
+import base64, hashlib, hmac, json, sys
+containers = json.load(sys.stdin)
+def env(container):
+    return dict(item.split("=", 1) for item in container["Config"]["Env"])
+key = env(containers[0]).get("SUPABASE_ANON_KEY", "")
+secret = env(containers[1]).get("GOTRUE_JWT_SECRET", "")
+def decode(value):
+    return base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
+parts = key.split(".")
+if len(parts) != 3 or not secret:
+    sys.exit("A chave pública do Auth Live não está disponível.")
+header, claims = json.loads(decode(parts[0])), json.loads(decode(parts[1]))
+signature = hmac.new(secret.encode(), ".".join(parts[:2]).encode(), hashlib.sha256).digest()
+if header.get("alg") != "HS256" or claims.get("role") != "anon" or not hmac.compare_digest(signature, decode(parts[2])):
+    sys.exit("A chave pública não corresponde ao Auth Live.")
+sys.stdout.write(key)
+')"
+write_updated_env "$app_env" "$app_candidate" "BREVO_API_KEY=$brevo_api_key" \
+  SUPABASE_INTERNAL_URL=http://supabase-live-envoy:8000 \
+  "SUPABASE_ANON_KEY=$live_anon_key"
+unset live_anon_key
 write_updated_env "$supabase_env" "$smtp_candidate" \
   SMTP_HOST=smtp-relay.brevo.com \
   SMTP_PORT=587 \
+  DISABLE_SIGNUP=false \
+  ENABLE_EMAIL_SIGNUP=true \
+  ENABLE_EMAIL_AUTOCONFIRM=false \
   "SMTP_USER=$brevo_smtp_user" \
   "SMTP_PASS=$brevo_smtp_key" \
   SMTP_ADMIN_EMAIL=suporte@jobforged.com \
@@ -169,6 +195,23 @@ compose_auth() {
 }
 compose_app "$app_candidate" config --quiet
 compose_auth "$smtp_candidate" config --quiet
+# Enabling public signup requires working TLS-protected SMTP authentication.
+# Inspect resolved configuration only inside this process; never log it.
+compose_auth "$smtp_candidate" config --format json | python3 -c '
+import json, smtplib, ssl, sys
+env = json.load(sys.stdin)["services"]["auth"]["environment"]
+if env.get("GOTRUE_SMTP_HOST") != "smtp-relay.brevo.com" or str(env.get("GOTRUE_SMTP_PORT")) != "587":
+    sys.exit("Servidor SMTP Live inesperado; cadastro continua protegido.")
+try:
+    with smtplib.SMTP("smtp-relay.brevo.com", 587, timeout=20) as smtp:
+        smtp.ehlo()
+        smtp.starttls(context=ssl.create_default_context())
+        smtp.ehlo()
+        smtp.login(env["GOTRUE_SMTP_USER"], env["GOTRUE_SMTP_PASS"])
+except Exception as error:
+    sys.exit("Falha na verificação SMTP Live: " + type(error).__name__)
+print("SMTP Live: conexão TLS e autenticação validadas, sem envio de mensagem.")
+'
 
 mv -f -- "$app_candidate" "$app_env"
 app_candidate=""

@@ -2,14 +2,14 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 <test|live> [--baseline-existing]" >&2
+  echo "Usage: $0 <test|live> [--baseline-existing|--check]" >&2
   exit 64
 }
 
 [[ $# -ge 1 && $# -le 2 ]] || usage
 environment=$1
 mode=${2:-apply}
-[[ "$mode" == "apply" || "$mode" == "--baseline-existing" ]] || usage
+[[ "$mode" == "apply" || "$mode" == "--baseline-existing" || "$mode" == "--check" ]] || usage
 [[ $(id -u) -eq 0 ]] || { echo "Run this script as root on the VPS." >&2; exit 77; }
 
 case "$environment" in
@@ -33,7 +33,9 @@ psql() {
   docker exec -i "$database_container" psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
 }
 
-psql -c 'CREATE TABLE IF NOT EXISTS public.jbfd_schema_migrations (filename text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now()); REVOKE ALL ON public.jbfd_schema_migrations FROM PUBLIC, anon, authenticated;' >/dev/null
+if [[ "$mode" != "--check" ]]; then
+  psql -c 'CREATE TABLE IF NOT EXISTS public.jbfd_schema_migrations (filename text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now()); REVOKE ALL ON public.jbfd_schema_migrations FROM PUBLIC, anon, authenticated;' >/dev/null
+fi
 
 mapfile -t migrations < <(find "$migrations_dir" -maxdepth 1 -type f -name '[0-9]*.sql' -printf '%f\n' | sort)
 [[ ${#migrations[@]} -gt 0 ]] || { echo "No SQL migrations found." >&2; exit 66; }
@@ -61,6 +63,7 @@ for filename in "${migrations[@]}"; do
     echo "Already applied: $filename"
     continue
   fi
+  [[ "$mode" != "--check" ]] || { echo "Migration pendente: $filename. Aplique com backup antes do deploy." >&2; exit 65; }
   {
     printf 'BEGIN;\n'
     cat "$migrations_dir/$filename"

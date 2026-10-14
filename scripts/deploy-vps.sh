@@ -16,6 +16,8 @@ case "$command" in
     revision="${3:-}"
     [[ "$revision" =~ ^[0-9a-f]{40}$ ]] || { echo "Informe o SHA completo do commit" >&2; exit 64; }
     image="ghcr.io/mlt-mateus/jobforged:${revision}"
+    # A matching image alone does not prove database or Auth readiness.
+    bash "$root/scripts/supabase-migrate.sh" "$environment" --check
     current_image="$(awk -F= '$1 == "JBFD_IMAGE" { sub(/^[^=]*=/, ""); print; count++ } END { if (count != 1) exit 1 }' "$JBFD_ENV_FILE")" || {
       echo "O .env precisa ter exatamente uma linha JBFD_IMAGE" >&2; exit 65;
     }
@@ -43,6 +45,7 @@ case "$command" in
     [[ "$image_revision" == "$revision" ]] || fail_deploy
     "${compose[@]}" config --quiet || fail_deploy
     "${compose[@]}" up -d --wait --wait-timeout 120 || fail_deploy
+    "${compose[@]}" exec -T app node --input-type=module < "$root/scripts/verify-auth-readiness.mjs" || fail_deploy
     printf 'Deploy concluído: ambiente=%s commit=%s\n' "$environment" "$revision"
     ;;
 esac

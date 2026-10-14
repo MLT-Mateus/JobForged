@@ -76,4 +76,5 @@ unset registry_token
 update_brevo_key
 unset brevo_api_key
 
-/opt/jbfd/bin/deploy-vps.sh test deploy "$revision"
+export SSH_ORIGINAL_COMMAND="deploy test $revision"
+/opt/jbfd/bin/jbfd-deploy-vps-gateway.sh test
