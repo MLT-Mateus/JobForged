@@ -1,0 +1,50 @@
+name: Configurar SMTP do Supabase Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jbfd-test-supabase-smtp
+  cancel-in-progress: false
+
+jobs:
+  configure-test-smtp:
+    name: Configurar SMTP Brevo no Auth Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: jbfd-test
+    steps:
+      - name: Configurar SMTP somente no Supabase Test
+        env:
+          VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          BREVO_SMTP_USER: ${{ secrets.BREVO_SMTP_USER }}
+          BREVO_SMTP_KEY: ${{ secrets.BREVO_SMTP_KEY }}
+        run: |
+          if [[ -z "$BREVO_SMTP_USER" || -z "$BREVO_SMTP_KEY" ]]; then
+            echo "Configure BREVO_SMTP_USER e BREVO_SMTP_KEY no Environment jbfd-test." >&2
+            exit 78
+          fi
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/jbfd_deploy"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/jbfd_deploy" "$HOME/.ssh/known_hosts"
+          ssh_args=(-i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          target="$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST"
+          protocol="$(ssh "${ssh_args[@]}" "$target" "probe smtp test" 2>/dev/null)" || {
+            echo "O gateway restrito da VPS não está preparado para configurar o SMTP do Supabase Test. Consulte docs/BREVO-EMAIL.md." >&2
+            exit 78
+          }
+          if [[ "$protocol" != "supabase-smtp-test-protocol-v1" ]]; then
+            echo "O gateway da VPS respondeu com uma versão incompatível para SMTP Test." >&2
+            exit 78
+          fi
+          printf '%s\n%s\n' "$BREVO_SMTP_USER" "$BREVO_SMTP_KEY" | \
+            ssh "${ssh_args[@]}" "$target" "configure smtp test"

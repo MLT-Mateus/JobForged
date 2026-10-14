@@ -15,20 +15,24 @@ Nenhuma `SERVICE_ROLE_KEY`/`SUPABASE_SECRET_KEY` é adicionada ao app. A recuper
 
 A API key já usada pelo app não autentica o relay SMTP. A Brevo exige o login SMTP da conta e uma **SMTP key** separada. A documentação oficial confirma essa separação: [SMTP relay da Brevo](https://developers.brevo.com/docs/smtp-integration).
 
-No `.env` root-only do stack Test `/opt/jbfd/supabase/.env`, defina estas variáveis sem colocá-las no repositório:
+O secret `BREVO_SMTP_KEY` já deve estar no Environment `jbfd-test`. Adicione também `BREVO_SMTP_USER` com o **Login SMTP** exibido em Brevo → SMTP & API → SMTP. Não use o e-mail da conta Brevo por suposição: use o identificador apresentado como Login SMTP. Os dois valores ficam no GitHub Environment, nunca no chat.
+
+Depois que o gateway root-owned de Test estiver atualizado, execute manualmente o workflow **Configurar SMTP do Supabase Test** em Actions. Ele encaminha os secrets por SSH protegido, grava apenas a configuração SMTP no `.env` root-only `/opt/jbfd/supabase/.env`, valida o Compose sem exibir a configuração e recria somente o serviço `auth`. O workflow é exclusivo de Test.
+
+Os valores aplicados no `.env` são:
 
 ```dotenv
 SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
-SMTP_USER=<login SMTP exibido pela Brevo>
-SMTP_PASS=<SMTP key exclusiva de Test>
+SMTP_USER=<login SMTP da Brevo>
+SMTP_PASS=<SMTP key da Brevo>
 SMTP_ADMIN_EMAIL=suporte@jobforged.com
 SMTP_SENDER_NAME=JobForged
 ```
 
 O `docker-compose.override.yml` deste repositório aponta `GOTRUE_MAILER_TEMPLATES_RECOVERY` para o modelo do domínio Test. A lista `GOTRUE_URI_ALLOW_LIST` já deve aceitar o domínio Test; o `GOTRUE_SITE_URL` confirmado é `https://test.jobforged.com`. Depois de cadastrar os valores, valide o compose com `config --quiet` e recrie apenas o serviço `auth` do stack Test. Não imprima `.env` nem a saída completa de `docker compose config`.
 
-O remetente deve continuar `suporte@jobforged.com`, já verificado na Brevo. Use uma SMTP key exclusiva para Test; a chave Live deverá ser provisionada separadamente após a aprovação de Test, sem copiar `.env` ou configuração secreta entre os ambientes.
+O remetente deve continuar `suporte@jobforged.com`, já verificado na Brevo. Test e Live podem usar a mesma conta SMTP, desde que os valores sejam cadastrados separadamente em cada GitHub Environment e provisionados independentemente em cada Supabase. Nunca copie `.env` entre ambientes. Live não é configurado por este workflow e só deve ser habilitado após aprovação de Test.
 
 ## Live
 

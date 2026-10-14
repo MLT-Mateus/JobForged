@@ -6,6 +6,38 @@ if [[ "${SSH_ORIGINAL_COMMAND:-}" == "probe brevo test" ]]; then
   exit 0
 fi
 
+if [[ "${SSH_ORIGINAL_COMMAND:-}" == "probe smtp test" ]]; then
+  echo "supabase-smtp-test-protocol-v1"
+  exit 0
+fi
+
+if [[ "${SSH_ORIGINAL_COMMAND:-}" == "configure smtp test" ]]; then
+  IFS= read -r brevo_smtp_user || {
+    echo "O login SMTP da Brevo não foi recebido." >&2
+    exit 64
+  }
+  IFS= read -r brevo_smtp_key || {
+    echo "A chave SMTP da Brevo não foi recebida." >&2
+    exit 64
+  }
+  [[ "$brevo_smtp_user" =~ ^[[:graph:]]{3,255}$ ]] || {
+    echo "O login SMTP da Brevo é inválido." >&2
+    exit 64
+  }
+  [[ "$brevo_smtp_key" =~ ^[[:graph:]]{20,512}$ ]] || {
+    echo "A chave SMTP da Brevo é inválida." >&2
+    exit 64
+  }
+
+  set +e
+  printf '%s\n%s\n' "$brevo_smtp_user" "$brevo_smtp_key" |
+    sudo -n /opt/jbfd/bin/jbfd-supabase-smtp-test-root.sh
+  result=$?
+  set -e
+  unset brevo_smtp_user brevo_smtp_key
+  exit "$result"
+fi
+
 if [[ "${SSH_ORIGINAL_COMMAND:-}" =~ ^deploy\ test\ ([0-9a-f]{40})$ ]]; then
   revision="${BASH_REMATCH[1]}"
 else
