@@ -11,6 +11,7 @@ export type SupabaseAuthConfig = { url: string; anonKey: string };
 
 const ACCESS_COOKIE = "jf_auth_access";
 const REFRESH_COOKIE = "jf_auth_refresh";
+const PASSWORD_RECOVERY_COOKIE = "jf_password_recovery";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 export function getSupabaseConfig(): SupabaseAuthConfig | null {
@@ -41,6 +42,19 @@ export function setSessionCookies(headers: Headers, session: SupabaseSessionPayl
   if (session.refresh_token) headers.append("Set-Cookie", serializeCookie(REFRESH_COOKIE, session.refresh_token, COOKIE_MAX_AGE));
 }
 
+export function setPasswordRecoveryCookie(headers: Headers) {
+  headers.append("Set-Cookie", serializeCookie(PASSWORD_RECOVERY_COOKIE, "1", 15 * 60));
+}
+
+export function hasPasswordRecoveryCookie(request: NextRequest) {
+  return getCookie(request, PASSWORD_RECOVERY_COOKIE) === "1";
+}
+
+export function clearPasswordRecoveryCookie(headers: Headers) {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  headers.append("Set-Cookie", `${PASSWORD_RECOVERY_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`);
+}
+
 export function clearSessionCookies(headers: Headers) {
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
   for (const name of [ACCESS_COOKIE, REFRESH_COOKIE]) {
@@ -48,11 +62,11 @@ export function clearSessionCookies(headers: Headers) {
   }
 }
 
-export async function requestAuth(path: string, body?: unknown, accessToken?: string) {
+export async function requestAuth(path: string, body?: unknown, accessToken?: string, method?: "GET" | "POST" | "PUT") {
   const config = getSupabaseConfig();
   if (!config) return { configured: false as const, response: null, payload: null };
   const response = await fetch(`${config.url}/auth/v1/${path}`, {
-    method: body === undefined ? "GET" : "POST",
+    method: method ?? (body === undefined ? "GET" : "POST"),
     cache: "no-store",
     headers: {
       apikey: config.anonKey,

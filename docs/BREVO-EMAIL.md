@@ -8,7 +8,7 @@
 - Falha ou ausência da Brevo não invalida o cadastro. O servidor registra apenas resultado/código HTTP, nunca destinatário, corpo da mensagem ou chave.
 - A chave da API só é lida pelo servidor em `BREVO_API_KEY`. A chave MCP não é necessária para envio.
 
-As notificações de candidatura ainda dependem dos fluxos de vagas/candidaturas. Confirmação de conta, recuperação de senha e reenvio de e-mail do Supabase também continuam fora desta fase: essas mensagens usam SMTP do Supabase, que exige configuração separada e credencial SMTP da Brevo. A chave da API não deve ser tratada como credencial SMTP.
+As notificações de candidatura ainda dependem dos fluxos de vagas/candidaturas. Confirmação e recuperação de senha são fluxos do Supabase Auth e usam SMTP Brevo, separado da API transacional. A chave `BREVO_API_KEY` não é credencial SMTP. O fluxo de recuperação está descrito em [AUTH-RECUPERACAO.md](AUTH-RECUPERACAO.md).
 
 ## GitHub e aplicação em Test
 

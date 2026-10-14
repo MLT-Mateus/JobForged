@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { LoginValues, SignupValues } from "./auth-validation";
 
-type AuthResult = { ok: true; requiresConfirmation?: boolean } | { ok: false; message: string };
+type AuthResult = { ok: true; requiresConfirmation?: boolean; message?: string; status?: number } | { ok: false; message: string; status?: number };
 export type AuthSessionState = {
   authenticated: boolean;
   checking: boolean;
@@ -20,8 +20,8 @@ async function postAuth(path: string, body?: unknown): Promise<AuthResult> {
       body: JSON.stringify(body ?? {}),
     });
     const payload = (await response.json().catch(() => ({}))) as { message?: string; requiresConfirmation?: boolean };
-    if (!response.ok) return { ok: false, message: payload.message || "Não foi possível concluir a solicitação." };
-    return { ok: true, requiresConfirmation: payload.requiresConfirmation };
+    if (!response.ok) return { ok: false, message: payload.message || "Não foi possível concluir a solicitação.", status: response.status };
+    return { ok: true, requiresConfirmation: payload.requiresConfirmation, message: payload.message, status: response.status };
   } catch {
     return { ok: false, message: "Serviço de autenticação indisponível. Tente novamente em instantes." };
   }
@@ -42,6 +42,18 @@ export function signUpCompany(values: SignupValues) {
     confirmPassword: values.confirmPassword,
     acceptedTerms: true,
   });
+}
+
+export function requestPasswordRecovery(email: string) {
+  return postAuth("recover", { email: email.trim().toLowerCase() });
+}
+
+export function verifyPasswordRecovery(tokenHash: string) {
+  return postAuth("recovery/session", { tokenHash, type: "recovery" });
+}
+
+export function updateRecoveredPassword(password: string, confirmPassword: string) {
+  return postAuth("recovery/password", { password, confirmPassword });
 }
 
 export async function signOutCompany() {

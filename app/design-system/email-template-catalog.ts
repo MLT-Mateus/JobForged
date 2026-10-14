@@ -18,12 +18,13 @@ const fontStacks: Record<string, string> = {
 };
 
 function fontStack(value: string | undefined, fallback: string) {
+  const genericFamilies = new Set(["serif", "sans-serif", "monospace", "system-ui", "cursive", "fantasy"]);
   const families = value
     ?.split(",")
     .map((family) => family.trim().replace(/^['"]|['"]$/g, "").replace(/[^\w -]/g, ""))
     .filter(Boolean);
   return (families?.length ? families : fallback.split(",").map((family) => family.trim().replace(/^['"]|['"]$/g, "")))
-    .map((family) => `"${family}"`)
+    .map((family) => genericFamilies.has(family.toLowerCase()) ? family : `"${family}"`)
     .join(", ");
 }
 
@@ -33,6 +34,7 @@ export function resolveEmailTheme(preferredTheme: string | null | undefined): Em
 
 export type EmailTemplateId =
   | "auth-confirmation"
+  | "password-recovery"
   | "company-welcome"
   | "application-received"
   | "new-application";
@@ -56,6 +58,15 @@ export const emailTemplates: EmailTemplateDefinition[] = [
     channel: "Supabase Auth · SMTP Brevo",
     subject: "Confirme seu e-mail na JobForged",
     description: "Confirma o endereço usado no cadastro antes de continuar.",
+  },
+  {
+    id: "password-recovery",
+    name: "Recuperação de senha",
+    audience: "Conta JobForged",
+    trigger: "Após solicitar recuperação de acesso",
+    channel: "Supabase Auth · SMTP Brevo",
+    subject: "Redefina sua senha na JobForged",
+    description: "Entrega um link de uso único para definir uma nova senha sem revelar se o e-mail está cadastrado.",
   },
   {
     id: "company-welcome",
@@ -98,6 +109,8 @@ type EmailCopy = {
 const previewValues: Record<string, string> = {
   "{{ .Email }}": "pessoa@empresa.com",
   "{{ .ConfirmationURL }}": "https://jobforged.com/",
+  "{{ .SiteURL }}": "https://test.jobforged.com",
+  "{{ .TokenHash }}": "token-de-exemplo",
   "{{ params.FIRST_NAME }}": "Alex",
   "{{ params.COMPANY_NAME }}": "Empresa Exemplo",
   "{{ params.CANDIDATE_NAME }}": "Larissa Rocha",
@@ -121,6 +134,18 @@ function copyFor(id: EmailTemplateId): EmailCopy {
         ],
         button: { label: "Confirmar meu e-mail", url: "{{ .ConfirmationURL }}" },
         note: "Se você não iniciou este cadastro, pode ignorar esta mensagem.",
+      };
+    case "password-recovery":
+      return {
+        preheader: "Use o link seguro para escolher uma nova senha para sua conta JobForged.",
+        eyebrow: "SEGURANÇA DA CONTA",
+        title: "Redefina sua senha",
+        paragraphs: [
+          "Recebemos uma solicitação para redefinir a senha da sua conta JobForged.",
+          "O link é de uso único e expira. Você precisará confirmar a solicitação antes de criar a nova senha.",
+        ],
+        button: { label: "Redefinir minha senha", url: "{{ .SiteURL }}/redefinir-senha?token_hash={{ .TokenHash }}&amp;type=recovery" },
+        note: "Se você não solicitou a recuperação, ignore esta mensagem. Sua senha não será alterada.",
       };
     case "company-welcome":
       return {
@@ -231,14 +256,14 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   const colors = palette(theme);
   const preferredFont = fontStacks[typography.font ?? "Montserrat"] ?? fontStacks.Montserrat;
   const headingFont = fontStack(typography.heading ?? preferredFont, fontStacks.Montserrat);
-  const bodyFont = fontStack(typography.body ?? preferredFont, fontStacks["Open Sans"]);
+  const bodyFont = fontStack(typography.body ?? (typography.font ? preferredFont : fontStacks["Open Sans"]), fontStacks["Open Sans"]);
   const subject = valueFor(template.subject, preview, variables);
   const preheader = valueFor(copy.preheader, preview, variables);
   const paragraphs = copy.paragraphs
     .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:${bodyFont};font-size:16px;line-height:1.65;">${valueFor(paragraph, preview, variables)}</p>`)
     .join("");
   const button = copy.button
-    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="center" bgcolor="${colors.buttonBackground}" style="min-height:40px;padding:11px 14px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};"><a href="${valueFor(copy.button.url, preview, variables)}" style="display:inline-block;color:${colors.buttonText};font-family:${headingFont};font-size:12px;font-weight:700;line-height:1.4;text-decoration:none;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
+    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="left" style="padding:0;"><a href="${valueFor(copy.button.url, preview, variables)}" style="display:inline-block;min-height:40px;box-sizing:border-box;padding:11px 15px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};color:${colors.buttonText};font-family:${headingFont};font-size:11px;font-weight:730;line-height:1.4;text-align:center;text-decoration:none;mso-padding-alt:0;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
     : "";
   const note = copy.note
     ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">${valueFor(copy.note, preview, variables)}</p></td></tr>`
@@ -253,7 +278,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   <meta name="x-apple-disable-message-reformatting">
   <title>${escapeHtml(previewSubject)}</title>
 </head>
-<body style="margin:0;padding:0;background-color:${colors.canvas};">
+<body style="margin:0;padding:0;background-color:${colors.canvas};font-family:${bodyFont};">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(valueFor(preheader, preview, variables))}</div>
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${colors.canvas}" style="width:100%;border-collapse:collapse;background-color:${colors.canvas};">
     <tr><td align="center" style="padding:28px 12px;">

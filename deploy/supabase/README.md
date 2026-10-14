@@ -57,6 +57,10 @@ SUPABASE_ANON_KEY=<the generated ANON_KEY from the Supabase .env>
 
 The application never needs `SERVICE_ROLE_KEY`, `SUPABASE_SECRET_KEY`, or the Postgres password. The public Test app talks to its same-origin auth routes; server routes call Supabase over the private Docker network and store access/refresh tokens in `HttpOnly`, `SameSite=Lax` cookies.
 
+## Auth SMTP and password recovery
+
+Password recovery uses the public Supabase Auth recovery endpoint and the same-origin application callback. Its custom HTML is served from `https://test.jobforged.com/api/auth/email-templates/password-recovery` via `GOTRUE_MAILER_TEMPLATES_RECOVERY` in the Test override. Configure SMTP in `/opt/jbfd/supabase/.env` using `SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=587`, `SMTP_USER`, and `SMTP_PASS`; `SMTP_PASS` must be a Brevo SMTP key, not `BREVO_API_KEY`. Keep SMTP credentials root-only and out of GitHub build logs and the application repository. Restart only the Test Auth service after a reviewed configuration change. See `docs/AUTH-RECUPERACAO.md` for the flow and validation steps.
+
 ## Live stack
 
 Create `/opt/jbfd/supabase-live` as an independent copy of the official `docker` directory at the same upstream release. Generate fresh Live secrets with the upstream `utils/generate-keys.sh --update-env`; never copy the Test JWT secret, Postgres password, anon key, service-role key, or database files.

@@ -31,3 +31,20 @@ test("email theme defaults to light and respects a saved dark preference", () =>
   assert.equal(resolveEmailTheme("light"), "light");
   assert.equal(resolveEmailTheme("dark"), "dark");
 });
+
+test("password recovery template uses branded typography and a button-style CTA", () => {
+  const html = renderEmailHtml("password-recovery", "light");
+
+  assert.match(html, /font-family:"Montserrat Variable", "Montserrat", "Arial", sans-serif/);
+  assert.match(html, /font-family:"Open Sans Variable", "Open Sans", "Arial", sans-serif/);
+  assert.match(html, /display:inline-block;min-height:40px;box-sizing:border-box;padding:11px 15px/);
+  assert.match(html, /border-radius:10px;background-color:#dff5f2;color:#087a76/);
+  assert.match(html, /href="\{\{ \.SiteURL \}\}\/redefinir-senha\?token_hash=\{\{ \.TokenHash \}\}&amp;type=recovery"/);
+});
+
+test("password recovery preview replaces Supabase tokens with safe sample values", () => {
+  const html = renderEmailHtml("password-recovery", "light", true);
+
+  assert.match(html, /href="https:\/\/test\.jobforged\.com\/redefinir-senha\?token_hash=token-de-exemplo&amp;type=recovery"/);
+  assert.doesNotMatch(html, /\{\{ \.TokenHash \}\}/);
+});
