@@ -6,6 +6,11 @@ export type EmailTypography = {
   body?: string;
 };
 
+export type EmailTemplateVariables = Partial<Record<
+  "FIRST_NAME" | "COMPANY_NAME" | "CANDIDATE_NAME" | "JOB_TITLE" | "RECRUITER_NAME" | "APPLICATION_URL" | "APP_URL" | "JOB_URL",
+  string
+>>;
+
 const fontStacks: Record<string, string> = {
   Montserrat: '"Montserrat Variable", "Montserrat", Arial, sans-serif',
   "Open Sans": '"Open Sans Variable", "Open Sans", Arial, sans-serif',
@@ -156,14 +161,6 @@ function copyFor(id: EmailTemplateId): EmailCopy {
   }
 }
 
-function valueFor(value: string, preview: boolean) {
-  if (!preview) return value;
-  return Object.entries(previewValues).reduce(
-    (result, [token, replacement]) => result.replaceAll(token, replacement),
-    value,
-  );
-}
-
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -171,6 +168,28 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function sanitizeVariable(name: string, value: string) {
+  if (!name.endsWith("_URL")) return value;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : "#";
+  } catch {
+    return "#";
+  }
+}
+
+function valueFor(value: string, preview: boolean, variables: EmailTemplateVariables) {
+  const replacements: Record<string, string> = preview
+    ? previewValues
+    : Object.fromEntries(Object.entries(variables)
+      .filter((entry): entry is [string, string] => typeof entry[1] === "string")
+      .map(([key, replacement]) => [`{{ params.${key} }}`, sanitizeVariable(key, replacement)]));
+  return Object.entries(replacements).reduce(
+    (result, [token, replacement]) => result.replaceAll(token, preview ? replacement : escapeHtml(replacement)),
+    value,
+  );
 }
 
 function palette(theme: EmailTheme) {
@@ -204,7 +223,7 @@ function palette(theme: EmailTheme) {
       };
 }
 
-export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview = false, typography: EmailTypography = {}) {
+export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview = false, typography: EmailTypography = {}, variables: EmailTemplateVariables = {}) {
   const template = emailTemplates.find((item) => item.id === id);
   if (!template) throw new Error(`Template de e-mail desconhecido: ${id}`);
 
@@ -213,16 +232,16 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   const preferredFont = fontStacks[typography.font ?? "Montserrat"] ?? fontStacks.Montserrat;
   const headingFont = fontStack(typography.heading ?? preferredFont, fontStacks.Montserrat);
   const bodyFont = fontStack(typography.body ?? preferredFont, fontStacks["Open Sans"]);
-  const subject = valueFor(template.subject, preview);
-  const preheader = valueFor(copy.preheader, preview);
+  const subject = valueFor(template.subject, preview, variables);
+  const preheader = valueFor(copy.preheader, preview, variables);
   const paragraphs = copy.paragraphs
-    .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:${bodyFont};font-size:16px;line-height:1.65;">${valueFor(paragraph, preview)}</p>`)
+    .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:${bodyFont};font-size:16px;line-height:1.65;">${valueFor(paragraph, preview, variables)}</p>`)
     .join("");
   const button = copy.button
-    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="center" bgcolor="${colors.buttonBackground}" style="min-height:40px;padding:11px 14px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};"><a href="${valueFor(copy.button.url, preview)}" style="display:inline-block;color:${colors.buttonText};font-family:${headingFont};font-size:12px;font-weight:700;line-height:1.4;text-decoration:none;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
+    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="center" bgcolor="${colors.buttonBackground}" style="min-height:40px;padding:11px 14px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};"><a href="${valueFor(copy.button.url, preview, variables)}" style="display:inline-block;color:${colors.buttonText};font-family:${headingFont};font-size:12px;font-weight:700;line-height:1.4;text-decoration:none;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
     : "";
   const note = copy.note
-    ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">${valueFor(copy.note, preview)}</p></td></tr>`
+    ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">${valueFor(copy.note, preview, variables)}</p></td></tr>`
     : "";
   const previewSubject = preview ? subject : template.subject;
 
@@ -235,7 +254,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   <title>${escapeHtml(previewSubject)}</title>
 </head>
 <body style="margin:0;padding:0;background-color:${colors.canvas};">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${preheader}</div>
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(valueFor(preheader, preview, variables))}</div>
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${colors.canvas}" style="width:100%;border-collapse:collapse;background-color:${colors.canvas};">
     <tr><td align="center" style="padding:28px 12px;">
       <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${colors.card}" style="width:100%;max-width:600px;border:1px solid ${colors.border};border-radius:14px;border-collapse:separate;background-color:${colors.card};">

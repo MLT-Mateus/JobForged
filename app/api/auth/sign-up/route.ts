@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server";
 import { onlyDigits, validateSignup, type SignupValues } from "@/app/components/auth/auth-validation";
+import { sendCompanyWelcomeEmail } from "@/app/lib/brevo-email";
+import { resolveEmailTheme } from "@/app/design-system/email-template-catalog";
 import { requireSameOrigin, requestAuth, setSessionCookies, type SupabaseSessionPayload } from "../_server";
 
 export const runtime = "nodejs";
@@ -46,6 +48,14 @@ export async function POST(request: NextRequest) {
 
     const session = result.payload as SupabaseSessionPayload;
     const requiresConfirmation = !session.access_token;
+    if (!requiresConfirmation) {
+      await sendCompanyWelcomeEmail({
+        email: values.email,
+        responsible: values.responsible,
+        company: values.company,
+        preferredTheme: resolveEmailTheme(request.cookies.get("jobforged-theme")?.value),
+      });
+    }
     const headers = new Headers({ "Cache-Control": "no-store" });
     if (!requiresConfirmation) setSessionCookies(headers, session);
     return Response.json({ ok: true, requiresConfirmation }, { headers });

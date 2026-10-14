@@ -159,15 +159,30 @@ jobs:
           VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
           VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_USERNAME: ${{ github.actor }}
           REVISION: ${{ github.sha }}
         run: |
+          if [[ -z "$BREVO_API_KEY" ]]; then
+            echo "O secret BREVO_API_KEY não está configurado no Environment jbfd-test." >&2
+            exit 78
+          fi
           install -d -m 700 "$HOME/.ssh"
           printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/jbfd_deploy"
           printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/jbfd_deploy" "$HOME/.ssh/known_hosts"
-          printf '%s\n%s\n' "$GH_USERNAME" "$GH_TOKEN" | ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+          ssh_args=(-i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
             -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            "$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST" "deploy test $REVISION"
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          target="$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST"
+          protocol="$(ssh "${ssh_args[@]}" "$target" "probe brevo test" 2>/dev/null)" || {
+            echo "O gateway restrito da VPS ainda não aceita a configuração segura do secret Brevo. Atualize os scripts de deploy Test conforme docs/BREVO-EMAIL.md." >&2
+            exit 78
+          }
+          if [[ "$protocol" != "brevo-test-protocol-v1" ]]; then
+            echo "O gateway da VPS respondeu com uma versão incompatível para a integração Brevo." >&2
+            exit 78
+          fi
+          printf '%s\n%s\n%s\n' "$GH_USERNAME" "$GH_TOKEN" "$BREVO_API_KEY" | \
+            ssh "${ssh_args[@]}" "$target" "deploy test $REVISION"
