@@ -24,7 +24,7 @@ function fontStack(value: string | undefined, fallback: string) {
     .map((family) => family.trim().replace(/^['"]|['"]$/g, "").replace(/[^\w -]/g, ""))
     .filter(Boolean);
   return (families?.length ? families : fallback.split(",").map((family) => family.trim().replace(/^['"]|['"]$/g, "")))
-    .map((family) => genericFamilies.has(family.toLowerCase()) ? family : `"${family}"`)
+    .map((family) => genericFamilies.has(family.toLowerCase()) ? family : `'${family}'`)
     .join(", ");
 }
 
@@ -262,8 +262,11 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   const paragraphs = copy.paragraphs
     .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:${bodyFont};font-size:16px;line-height:1.65;">${valueFor(paragraph, preview, variables)}</p>`)
     .join("");
+  const buttonStyles = `display:inline-block;min-height:40px;box-sizing:border-box;padding:11px 15px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};color:${colors.buttonText};font-family:${headingFont};font-size:11px;font-weight:730;line-height:1.4;text-align:center;text-decoration:none;mso-padding-alt:0;`;
   const button = copy.button
-    ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="left" style="padding:0;"><a href="${valueFor(copy.button.url, preview, variables)}" style="display:inline-block;min-height:40px;box-sizing:border-box;padding:11px 15px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};color:${colors.buttonText};font-family:${headingFont};font-size:11px;font-weight:730;line-height:1.4;text-align:center;text-decoration:none;mso-padding-alt:0;">${escapeHtml(copy.button.label)}</a></td></tr></table>`
+    ? preview
+      ? `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="left" style="padding:0;"><button type="button" style="${buttonStyles}appearance:none;-webkit-appearance:none;cursor:pointer;">${escapeHtml(copy.button.label)}</button></td></tr></table>`
+      : `<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 22px;"><tr><td align="left" style="padding:0;"><a href="${valueFor(copy.button.url, preview, variables)}" style="${buttonStyles}">${escapeHtml(copy.button.label)}</a></td></tr></table>`
     : "";
   const note = copy.note
     ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">${valueFor(copy.note, preview, variables)}</p></td></tr>`

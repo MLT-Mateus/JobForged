@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { renderEmailHtml, resolveEmailTheme } from "../app/design-system/email-template-catalog.ts";
+import { emailTemplates, renderEmailHtml, resolveEmailTheme } from "../app/design-system/email-template-catalog.ts";
 
 test("company welcome email escapes personalized text and keeps a safe HTTPS CTA", () => {
   const html = renderEmailHtml("company-welcome", "light", false, {}, {
@@ -35,16 +35,24 @@ test("email theme defaults to light and respects a saved dark preference", () =>
 test("password recovery template uses branded typography and a button-style CTA", () => {
   const html = renderEmailHtml("password-recovery", "light");
 
-  assert.match(html, /font-family:"Montserrat Variable", "Montserrat", "Arial", sans-serif/);
-  assert.match(html, /font-family:"Open Sans Variable", "Open Sans", "Arial", sans-serif/);
+  assert.match(html, /font-family:'Montserrat Variable', 'Montserrat', 'Arial', sans-serif;/);
+  assert.match(html, /font-family:'Open Sans Variable', 'Open Sans', 'Arial', sans-serif;/);
   assert.match(html, /display:inline-block;min-height:40px;box-sizing:border-box;padding:11px 15px/);
   assert.match(html, /border-radius:10px;background-color:#dff5f2;color:#087a76/);
   assert.match(html, /href="\{\{ \.SiteURL \}\}\/redefinir-senha\?token_hash=\{\{ \.TokenHash \}\}&amp;type=recovery"/);
 });
 
-test("password recovery preview replaces Supabase tokens with safe sample values", () => {
-  const html = renderEmailHtml("password-recovery", "light", true);
+test("email template previews show inert button controls without navigating", () => {
+  for (const template of emailTemplates) {
+    const html = renderEmailHtml(template.id, "light", true);
+    assert.match(html, /<button type="button" style="[^"]*">/);
+    assert.doesNotMatch(html, /<a\b|href="https:\/\//);
+    assert.doesNotMatch(html, /\{\{ \.TokenHash \}\}/);
+  }
+});
 
-  assert.match(html, /href="https:\/\/test\.jobforged\.com\/redefinir-senha\?token_hash=token-de-exemplo&amp;type=recovery"/);
-  assert.doesNotMatch(html, /\{\{ \.TokenHash \}\}/);
+test("recovery email export keeps its working Supabase link", () => {
+  const html = renderEmailHtml("password-recovery", "light", false);
+
+  assert.match(html, /<a href="\{\{ \.SiteURL \}\}\/redefinir-senha\?token_hash=\{\{ \.TokenHash \}\}&amp;type=recovery"/);
 });
