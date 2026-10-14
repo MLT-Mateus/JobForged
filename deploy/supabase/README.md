@@ -1,6 +1,6 @@
 # Supabase self-hosted — Test e Live
 
-Test and Live use independent self-hosted Supabase stacks from the official Docker release `self-hosted/v0.8.2`. Each stack has its own Compose project, `.env`, database and storage files, private application network and API keys. The Test Studio remains at `supabase.jobforged.com`; Live Studio uses `supabase-live.jobforged.com`. Both Studio routes require the same separately configured Traefik Basic Auth middleware. Neither Supabase stack shares data with the automation Postgres or the MCP identity database.
+Test and Live use independent self-hosted Supabase stacks from the official Docker release `self-hosted/v0.8.2`. Each stack has its own Compose project, `.env`, database and storage files, private application network and API keys. Test Studio uses `test.supabase.jobforged.com`; Live Studio uses `supabase.jobforged.com`. Both Studio routes require the same separately configured Traefik Basic Auth middleware. Neither Supabase stack shares data with the automation Postgres or the MCP identity database.
 
 ## VPS setup
 
@@ -42,7 +42,7 @@ docker compose -f docker-compose.yml -f docker-compose.override.yml config --qui
 docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --wait
 ```
 
-Supabase Studio is exposed only through the HTTPS host `supabase.jobforged.com`, protected by Traefik Basic Auth. Set `STUDIO_BASIC_AUTH_USERS` in the root-owned Supabase `.env` to a quoted `htpasswd -B` user/hash entry before starting the stack. The Studio service is not published on a host port. The API gateway remains published only on loopback port `8210` and is externally exposed through the Test hostname; its API paths are routed before the Test app router. The app container uses `http://supabase-envoy:8000` on `jbfd-test-internal`.
+Test Studio is exposed only through the HTTPS host `test.supabase.jobforged.com`, protected by Traefik Basic Auth. The `test.supabase` A record must point to the VPS before using the hostname. Set `STUDIO_BASIC_AUTH_USERS` in the root-owned Test Supabase `.env` to a quoted `htpasswd -B` user/hash entry before starting the stack. The Studio service is not published on a host port. The API gateway remains published only on loopback port `8210` and is externally exposed through the Test app hostname; its API paths are routed before the Test app router. The app container uses `http://supabase-envoy:8000` on `jbfd-test-internal`.
 
 After the first start, apply the versioned SQL migrations from the repository in order using `psql` inside the matching Supabase database container. Never use the automation Postgres or MCP identity database.
 
@@ -85,7 +85,7 @@ docker compose --project-name supabase-live -f docker-compose.yml -f docker-comp
 docker compose --project-name supabase-live -f docker-compose.yml -f docker-compose.live.override.yml up -d --wait
 ```
 
-The override attaches only the API gateway to `jbfd-live-internal` and the shared Traefik network. It routes Supabase API paths from `jobforged.com` to Live and protects Studio at `supabase-live.jobforged.com`. Create the `supabase-live` A record pointing to the VPS before using that Studio hostname. Studio is not exposed on a host port.
+The override attaches only the API gateway to `jbfd-live-internal` and the shared Traefik network. It routes Supabase API paths from `jobforged.com` to Live and protects Studio at `supabase.jobforged.com`. The `supabase` A record must point to the VPS before using that Studio hostname. Studio is not exposed on a host port.
 
 The Live app uses only the private URL and public anon key in `/opt/jbfd/live/.env`:
 
