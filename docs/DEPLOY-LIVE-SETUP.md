@@ -18,7 +18,7 @@ visudo -cf /etc/sudoers.d/jbfd-live-deploy
 Cadastre a chave pública de deploy exclusivamente em `/home/jbfd-live-deploy/.ssh/authorized_keys`, com opções `restrict` e comando forçado:
 
 ```text
-command="sudo -n /usr/local/bin/jbfd-deploy-live-gateway.sh",restrict <CHAVE PÚBLICA ED25519>
+command="/usr/local/bin/jbfd-deploy-live-gateway.sh",restrict <CHAVE PÚBLICA ED25519>
 ```
 
 O diretório `.ssh` deve pertencer a `jbfd-live-deploy` com modo `700`; `authorized_keys` deve pertencer ao mesmo usuário com modo `600`. A chave privada fica somente no cofre de secrets do GitHub Environment `jbfd-live` e, se necessário, em armazenamento seguro local. Nunca a versione.
