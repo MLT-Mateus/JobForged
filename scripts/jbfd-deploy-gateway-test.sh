@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${SSH_ORIGINAL_COMMAND:-}" == "probe brevo test" ]]; then
+  echo "brevo-test-protocol-v1"
+  exit 0
+fi
+
 if [[ "${SSH_ORIGINAL_COMMAND:-}" =~ ^deploy\ test\ ([0-9a-f]{40})$ ]]; then
   revision="${BASH_REMATCH[1]}"
 else
@@ -24,11 +29,19 @@ IFS= read -r registry_token || {
   echo "Token temporário do registry inválido." >&2
   exit 64
 }
+IFS= read -r brevo_api_key || {
+  echo "A chave da API Brevo não foi recebida." >&2
+  exit 64
+}
+[[ "$brevo_api_key" =~ ^[[:graph:]]{20,512}$ ]] || {
+  echo "A configuração da API Brevo é inválida." >&2
+  exit 64
+}
 
 set +e
-printf '%s\n%s\n%s\n' "$revision" "$registry_username" "$registry_token" |
+printf '%s\n%s\n%s\n%s\n' "$revision" "$registry_username" "$registry_token" "$brevo_api_key" |
   sudo -n /opt/jbfd/bin/jbfd-deploy-test-root.sh
 result=$?
 set -e
-unset registry_token
+unset registry_token brevo_api_key
 exit "$result"

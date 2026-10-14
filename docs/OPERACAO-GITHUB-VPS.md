@@ -49,7 +49,7 @@ restrict,command="/opt/jbfd/bin/jbfd-deploy-gateway-test.sh" ssh-ed25519 CHAVE_P
 
 Copie a chave privada Test para o Secret `VPS_DEPLOY_KEY` do Environment `jbfd-test`; ela não será exibida no chat. A chave Test não tem caminho para publicar Live. A configuração de Live permanece separada e inalterada.
 
-O gateway Test aceita somente `deploy test <SHA>` e o token temporário do registry pela entrada padrão. Não dá shell, encaminhamento de portas nem comando Docker arbitrário. O helper valida o SHA, atualiza apenas `JBFD_IMAGE`, baixa a imagem, confere se o rótulo corresponde ao mesmo SHA, valida o Compose, aguarda healthcheck e restaura a imagem anterior se o deploy falhar.
+O gateway Test aceita somente `deploy test <SHA>` e os dados temporários do registry e da Brevo pela entrada padrão. Não dá shell, encaminhamento de portas nem comando Docker arbitrário. O helper valida o SHA, atualiza apenas `JBFD_IMAGE`, grava a chave Brevo em `/opt/jbfd/test/.env` com modo `600`, baixa a imagem, confere se o rótulo corresponde ao mesmo SHA, valida o Compose, aguarda healthcheck e restaura a imagem anterior se o deploy falhar. Antes do deploy, o workflow exige a resposta do comando `probe brevo test`; assim, um gateway antigo não publica uma imagem que ficaria sem o secret.
 
 ## 4. Fazer a primeira publicação
 
