@@ -20,6 +20,9 @@ if [[ "${SSH_ORIGINAL_COMMAND:-}" == "configure smtp test" ]]; then
     echo "A chave SMTP da Brevo não foi recebida." >&2
     exit 64
   }
+  remaining_smtp_key="$(cat)"
+  brevo_smtp_key+="$remaining_smtp_key"
+  brevo_smtp_key="${brevo_smtp_key//[[:space:]]/}"
   trim_outer_whitespace() {
     local value="$1"
     value="${value#"${value%%[![:space:]]*}"}"
@@ -27,7 +30,6 @@ if [[ "${SSH_ORIGINAL_COMMAND:-}" == "configure smtp test" ]]; then
     printf '%s' "$value"
   }
   brevo_smtp_user="$(trim_outer_whitespace "$brevo_smtp_user")"
-  brevo_smtp_key="$(trim_outer_whitespace "$brevo_smtp_key")"
   [[ "$brevo_smtp_user" =~ ^[[:graph:]]{3,255}$ ]] || {
     echo "O login SMTP da Brevo é inválido." >&2
     exit 64
