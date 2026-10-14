@@ -36,4 +36,4 @@ O remetente deve continuar `suporte@jobforged.com`, já verificado na Brevo. Tes
 
 ## Live
 
-O override versionado do Live aponta para `https://jobforged.com/api/auth/email-templates/password-recovery`. Não configure nem reinicie Live durante a validação desta branch. Após aprovação, configure credencial SMTP separada no `/opt/jbfd/supabase-live/.env`, valide o template no mesmo SHA aprovado em Test e siga o fluxo protegido de promoção.
+O override versionado do Live aponta para `https://jobforged.com/api/auth/email-templates/password-recovery`. Após a validação em Test e a aprovação de Live, o workflow protegido transmite `BREVO_SMTP_USER` e `BREVO_SMTP_KEY` ao gateway seguro. Ele grava SMTP somente em `/opt/jbfd/supabase-live/.env`, valida o Compose sem imprimir valores e recria somente o serviço `auth` Live se a configuração mudar. As credenciais devem estar cadastradas separadamente no Environment `jbfd-live`; nunca copie o `.env` de Test.

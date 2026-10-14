@@ -54,6 +54,51 @@ jobs:
             exit 1
           }
 
+      - name: Confirmar secrets e protocolo seguro de Brevo Live
+        env:
+          VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SMTP_USER: ${{ secrets.BREVO_SMTP_USER }}
+          BREVO_SMTP_KEY: ${{ secrets.BREVO_SMTP_KEY }}
+        run: |
+          [[ -n "$BREVO_API_KEY" && -n "$BREVO_SMTP_USER" && -n "$BREVO_SMTP_KEY" ]] || {
+            echo "Configure BREVO_API_KEY, BREVO_SMTP_USER e BREVO_SMTP_KEY no Environment jbfd-live." >&2
+            exit 1
+          }
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/jbfd_deploy"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/jbfd_deploy" "$HOME/.ssh/known_hosts"
+          protocol="$(ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST" "probe brevo live")"
+          [[ "$protocol" == "jbfd-brevo-live-protocol-v1" ]] || {
+            echo "O gateway seguro de Brevo Live ainda não está instalado. Nenhuma credencial foi alterada." >&2
+            exit 1
+          }
+
+      - name: Configurar Brevo em Live por SSH seguro
+        env:
+          VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SMTP_USER: ${{ secrets.BREVO_SMTP_USER }}
+          BREVO_SMTP_KEY: ${{ secrets.BREVO_SMTP_KEY }}
+        run: |
+          set +x
+          printf '%s\n%s\n%s\n' "$BREVO_API_KEY" "$BREVO_SMTP_USER" "$BREVO_SMTP_KEY" |
+            ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+              -o BatchMode=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+              "$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST" "configure brevo live"
+          unset BREVO_API_KEY BREVO_SMTP_USER BREVO_SMTP_KEY
+
       - name: Implantar a mesma imagem aprovada em Live
         env:
           VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
