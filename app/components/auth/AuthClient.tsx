@@ -7,7 +7,7 @@ import { ArrowLeft, Building2, Check, LockKeyhole, Mail, Phone, ShieldCheck, Use
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, useThemePreference, type ToastNotice } from "@/app/components/ui";
 import { maskCnpj, maskPhone, normalizeText, passwordRules, validateLogin, validateSignup, type LoginValues, type SignupValues } from "./auth-validation";
-import { signInCompany, signUpCompany } from "./auth-service";
+import { requestPasswordRecovery, signInCompany, signUpCompany, updateRecoveredPassword, verifyPasswordRecovery } from "./auth-service";
 import "./auth.css";
 
 type FieldErrors<T> = Partial<Record<keyof T, string>>;
@@ -338,16 +338,178 @@ export function SignupClient() {
   );
 }
 
-export function PasswordRecoveryClient({ reset = false }: { reset?: boolean }) {
+export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", recoveryType = "" }: { reset?: boolean; initialTokenHash?: string; recoveryType?: string }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  const [notice, setNotice] = useState<ToastNotice | null>(null);
+  const [recoveryStatus, setRecoveryStatus] = useState<"checking" | "link" | "ready" | "done" | "invalid">(
+    !reset ? "checking" : recoveryType === "recovery" && initialTokenHash ? "link" : "invalid",
+  );
+  const [tokenHash, setTokenHash] = useState(initialTokenHash);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const rules = passwordRules(password);
+
+  async function sendRecovery(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setNotice({ kind: "danger", title: "Confira o e-mail", text: "Informe um endereço de e-mail válido." });
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await requestPasswordRecovery(email);
+      if (!result.ok) {
+        setNotice({ kind: "danger", title: "Não foi possível solicitar", text: result.message });
+        return;
+      }
+      setRequestSent(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function verifyRecoveryLink() {
+    setLoading(true);
+    try {
+      const result = await verifyPasswordRecovery(tokenHash);
+      if (result.ok) {
+        window.history.replaceState(null, "", "/redefinir-senha");
+        setTokenHash("");
+        setRecoveryStatus("ready");
+      } else {
+        if ((result.status ?? 500) < 500) {
+          window.history.replaceState(null, "", "/redefinir-senha");
+          setTokenHash("");
+          setRecoveryStatus("invalid");
+        }
+        setNotice({ kind: "danger", title: "Link indisponível", text: result.message });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveNewPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (Object.values(rules).some((valid) => !valid)) {
+      setPasswordError("Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
+      setConfirmPasswordError("");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setPasswordError("");
+      setConfirmPasswordError("As senhas não coincidem.");
+      return;
+    }
+    setPasswordError("");
+    setConfirmPasswordError("");
+    setLoading(true);
+    try {
+      const result = await updateRecoveredPassword(password, confirmPassword);
+      if (!result.ok) {
+        setNotice({ kind: "danger", title: "Não foi possível atualizar", text: result.message });
+        if (result.message.toLowerCase().includes("expirou")) setRecoveryStatus("invalid");
+        return;
+      }
+      setPassword("");
+      setConfirmPassword("");
+      setRecoveryStatus("done");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <AuthShell compact>
       <div className="auth-heading">
         <p className="auth-eyebrow">Recuperação de acesso</p>
-        <h1>{reset ? "Defina uma nova senha" : "Esqueceu sua senha?"}</h1>
-        <p>A recuperação por e-mail será habilitada na próxima etapa, junto à configuração segura do serviço de e-mail.</p>
+        <h1>{reset ? "Defina uma nova senha" : requestSent ? "Confira seu e-mail" : "Esqueceu sua senha?"}</h1>
+        <p>{reset
+          ? "Use o link de recuperação enviado para seu e-mail e crie uma nova senha segura."
+          : requestSent
+            ? "Se houver uma conta associada a esse endereço, enviaremos as instruções para redefinir a senha."
+            : "Informe o e-mail da sua conta empresarial para receber um link seguro de recuperação."}</p>
       </div>
-      <div className="auth-security-note"><LockKeyhole />Sua conta e sua senha continuam protegidas. Nenhuma alteração será simulada nesta tela.</div>
+      {!reset && !requestSent && <form className="auth-form" noValidate onSubmit={sendRecovery}>
+        <TextField
+          name="email"
+          type="email"
+          label="E-mail da conta"
+          placeholder="nome@empresa.com"
+          icon={Mail}
+          autoComplete="email"
+          maxLength={254}
+          value={email}
+          onChange={event => setEmail(event.target.value.slice(0, 254))}
+        />
+        <div className="auth-security-note"><LockKeyhole />Por segurança, a página sempre confirma a solicitação sem revelar se o e-mail está cadastrado.</div>
+        <ActionButton type="submit" disabled={loading} className="auth-submit">
+          <LoadingLabel loading={loading} idle="Enviar link de recuperação" />
+        </ActionButton>
+      </form>}
+      {!reset && requestSent && <button type="button" className="auth-link-button" onClick={() => setRequestSent(false)}>Usar outro e-mail ou solicitar outro link</button>}
+
+      {reset && recoveryStatus === "checking" && <p role="status" className="auth-security-note">Preparando a validação do link…</p>}
+      {reset && recoveryStatus === "link" && <div className="auth-form">
+        <div className="auth-security-note"><LockKeyhole />O link será validado somente quando você continuar. Isso evita consumir a recuperação apenas pela pré-visualização automática do e-mail.</div>
+        <ActionButton type="button" disabled={loading} className="auth-submit" onClick={verifyRecoveryLink}>
+          <LoadingLabel loading={loading} idle="Validar link e continuar" />
+        </ActionButton>
+      </div>}
+
+      {reset && recoveryStatus === "ready" && <form className="auth-form" noValidate onSubmit={saveNewPassword}>
+        <TextField
+          name="new-password"
+          type="password"
+          label="Nova senha"
+          placeholder="Crie uma senha segura"
+          icon={LockKeyhole}
+          autoComplete="new-password"
+          maxLength={72}
+          value={password}
+          onChange={event => { setPassword(event.target.value); setPasswordError(""); }}
+          error={passwordError}
+        />
+        <ul className="auth-password-requirements" aria-label="Requisitos da senha">
+          {[
+            [rules.length, "8 caracteres"],
+            [rules.upper && rules.lower, "Maiúscula e minúscula"],
+            [rules.number, "Um número"],
+            [rules.special, "Um símbolo"],
+          ].map(([valid, label]) => <li className={valid ? "is-valid" : ""} key={String(label)}><Check aria-hidden="true" />{label}</li>)}
+        </ul>
+        <TextField
+          name="confirm-password"
+          type="password"
+          label="Confirme a nova senha"
+          placeholder="Digite a senha novamente"
+          icon={LockKeyhole}
+          autoComplete="new-password"
+          maxLength={72}
+          value={confirmPassword}
+          onChange={event => { setConfirmPassword(event.target.value); setConfirmPasswordError(""); }}
+          error={confirmPasswordError}
+        />
+        <div className="auth-security-note"><LockKeyhole />Ao concluir, as sessões anteriores da conta serão encerradas.</div>
+        <ActionButton type="submit" disabled={loading} className="auth-submit">
+          <LoadingLabel loading={loading} idle="Salvar nova senha" />
+        </ActionButton>
+      </form>}
+
+      {reset && recoveryStatus === "done" && <div className="auth-confirmation">
+        <span><Check /></span>
+        <h2>Senha atualizada</h2>
+        <p>Sua nova senha já pode ser usada para entrar na JobForged. Por segurança, entre novamente com a nova senha.</p>
+      </div>}
+
+      {reset && recoveryStatus === "invalid" && <div className="auth-security-note"><LockKeyhole />Este link é inválido ou expirou. Solicite uma nova recuperação para continuar.</div>}
       <Link className="auth-back" href="/login"><ArrowLeft />Voltar ao login</Link>
+      {reset && recoveryStatus === "invalid" && <Link className="auth-back" href="/recuperar-senha"><Mail />Solicitar outro link</Link>}
+      {notice && <AppToast notice={notice} onClose={() => setNotice(null)} />}
     </AuthShell>
   );
 }

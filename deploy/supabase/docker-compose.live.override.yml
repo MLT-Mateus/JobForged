@@ -1,4 +1,8 @@
 services:
+  auth:
+    environment:
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: https://jobforged.com/api/auth/email-templates/password-recovery
+
   studio:
     container_name: supabase-live-studio
     networks:

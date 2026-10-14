@@ -81,14 +81,14 @@ export function EmailTemplatesSection() {
       <header className="ds-section-heading ds-email-templates__heading">
         <span>COMUNICAÇÃO · BREVO</span>
         <h2 id="ds-emails-title">E-mails com a identidade JobForged.</h2>
-        <p>Quatro modelos transacionais, cada um com versões clara e escura. Escolha um cartão para entender quando o e-mail é enviado e comparar as duas versões antes de copiar ou baixar o HTML.</p>
+          <p>Cinco modelos transacionais, cada um com versões clara e escura. Escolha um cartão para entender quando o e-mail é enviado e comparar as duas versões antes de copiar ou baixar o HTML.</p>
       </header>
 
       <aside className="ds-email-templates__notice" aria-label="Regra de tema e situação de envio">
         <span className="ds-email-templates__notice-icon"><Mail size={19} aria-hidden="true" /></span>
         <div>
           <strong>Prévia de design · nenhum e-mail é enviado por esta página</strong>
-          <p>Quando o envio for integrado, use a preferência de tema salva da pessoa; se não houver, escolha o tema claro. O domínio <b>jobforged.com</b> aparece autenticado na Brevo e o remetente informado é <b>JobForged &lt;suporte@jobforged.com&gt;</b>.</p>
+          <p>Os e-mails seguem a tipografia aprovada no Design System: Montserrat nos títulos e Open Sans no texto, com alternativas seguras para clientes de e-mail. Os CTAs usam aparência e área de clique de botão, próximas ao componente principal do aplicativo. O tema claro é o padrão; preferências disponíveis nos envios transacionais do app podem usar a escolha salva da pessoa.</p>
           <small>O painel da Brevo também sinaliza ausência da etiqueta <code>rua</code> no DMARC. O registro DNS não foi alterado.</small>
         </div>
       </aside>
@@ -139,7 +139,7 @@ export function EmailTemplatesSection() {
 
       <aside className="ds-email-templates__integration-note">
         <strong>Como os modelos se conectam ao envio</strong>
-        <p>Confirmação de conta usa o modelo HTML do Supabase Auth enviado por SMTP Brevo. Boas-vindas e notificações usam o envio transacional da Brevo. Nos envios do aplicativo, a regra é <code>tema salvo === escuro ? escuro : claro</code>. O SMTP padrão do Supabase usa um modelo global de Auth; escolher uma variante por pessoa para esses e-mails exigirá um fluxo de envio personalizado.</p>
+        <p>Recuperação de senha e confirmação de conta usam Supabase Auth com SMTP Brevo e o modelo global de segurança. A recuperação valida o link no servidor, grava a sessão em cookies HttpOnly e nunca expõe uma chave administrativa da Supabase. Boas-vindas e notificações do aplicativo usam a API transacional da Brevo; nesses envios, a preferência salva de tema é aplicada quando disponível e o tema claro é o padrão.</p>
       </aside>
     </section>
   );
