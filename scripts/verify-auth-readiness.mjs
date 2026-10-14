@@ -20,7 +20,7 @@ try {
   const settings = await settingsResponse.json();
   assert.equal(settings.external?.email, true);
   assert.notEqual(settings.disable_signup, true);
-  if (environment === "live") assert.equal(settings.mailer_autoconfirm, false);
+  assert.equal(settings.mailer_autoconfirm, false);
   const configResponse = await fetch(`http://127.0.0.1:${process.env.PORT || "3000"}/api/auth/config`, {
     signal: AbortSignal.timeout(10_000),
   });

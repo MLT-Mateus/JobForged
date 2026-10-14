@@ -5,11 +5,11 @@ import test from "node:test";
 
 const jwt = role => ["header", Buffer.from(JSON.stringify({ role })).toString("base64url"), "fixture"].join(".");
 
-async function check(overrides = {}, settingsStatus = 200, enabled = true) {
+async function check(overrides = {}, settingsStatus = 200, enabled = true, settings = {}) {
   const server = createServer((request, response) => {
     const config = request.url === "/api/auth/config";
     response.writeHead(config ? 200 : settingsStatus, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(config ? { enabled } : { external: { email: true }, disable_signup: false, mailer_autoconfirm: false }));
+    response.end(JSON.stringify(config ? { enabled } : { external: { email: true }, disable_signup: false, mailer_autoconfirm: false, ...settings }));
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address();
@@ -44,4 +44,10 @@ test("Configuração desabilitada na aplicação bloqueia deploy", async () => {
 });
 test("Live exige a conexão interna exclusiva de Live", async () => {
   assert.equal(await check({ APP_ENV: "live" }), 1);
+});
+test("Cadastro desabilitado impede publicar uma versão pronta para cadastro", async () => {
+  assert.equal(await check({}, 200, true, { disable_signup: true }), 1);
+});
+test("Confirmação de e-mail é obrigatória também em Test", async () => {
+  assert.equal(await check({}, 200, true, { mailer_autoconfirm: true }), 1);
 });

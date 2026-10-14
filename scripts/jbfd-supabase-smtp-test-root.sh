@@ -54,6 +54,8 @@ services:
     environment:
       GOTRUE_MAILER_TEMPLATES_RECOVERY: https://test.jobforged.com/api/auth/email-templates/password-recovery
       GOTRUE_MAILER_SUBJECTS_RECOVERY: Redefina sua senha na JobForged
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: https://test.jobforged.com/api/auth/email-templates/auth-confirmation
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: Confirme seu e-mail na JobForged
 YAML
 chmod 600 "$template_candidate"
 chown root:root "$template_candidate"
@@ -86,12 +88,15 @@ declare -A smtp_values=(
   [SMTP_PASS]="$brevo_smtp_key"
   [SMTP_ADMIN_EMAIL]=suporte@jobforged.com
   [SMTP_SENDER_NAME]=JobForged
+  [DISABLE_SIGNUP]=false
+  [ENABLE_EMAIL_SIGNUP]=true
+  [ENABLE_EMAIL_AUTOCONFIRM]=false
 )
 declare -A smtp_seen=()
 while IFS= read -r line || [[ -n "$line" ]]; do
   key="${line%%=*}"
   case "$key" in
-    SMTP_HOST|SMTP_PORT|SMTP_USER|SMTP_PASS|SMTP_ADMIN_EMAIL|SMTP_SENDER_NAME)
+    SMTP_HOST|SMTP_PORT|SMTP_USER|SMTP_PASS|SMTP_ADMIN_EMAIL|SMTP_SENDER_NAME|DISABLE_SIGNUP|ENABLE_EMAIL_SIGNUP|ENABLE_EMAIL_AUTOCONFIRM)
       [[ "$line" == *=* ]] || { printf '%s\n' "$line" >> "$candidate"; continue; }
     smtp_seen["$key"]=$(( ${smtp_seen[$key]:-0} + 1 ))
     [[ "${smtp_seen[$key]}" -eq 1 ]] || {
@@ -104,7 +109,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   esac
 done < "$env_file"
 
-for key in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS SMTP_ADMIN_EMAIL SMTP_SENDER_NAME; do
+for key in "${!smtp_values[@]}"; do
   if [[ -z "${smtp_seen[$key]:-}" ]]; then
     printf '%s=%s\n' "$key" "$(dotenv_quote "${smtp_values[$key]}")" >> "$candidate"
   fi
@@ -140,6 +145,21 @@ compose() {
   (cd "$stack_dir" && docker compose "${compose_args[@]}" "$@")
 }
 compose "$candidate" "$template_candidate" config --quiet
+compose "$candidate" "$template_candidate" config --format json | python3 -c '
+import json, smtplib, ssl, sys
+env = json.load(sys.stdin)["services"]["auth"]["environment"]
+if env.get("GOTRUE_SMTP_HOST") != "smtp-relay.brevo.com" or str(env.get("GOTRUE_SMTP_PORT")) != "587":
+    sys.exit("Servidor SMTP Test inesperado.")
+try:
+    with smtplib.SMTP("smtp-relay.brevo.com", 587, timeout=20) as smtp:
+        smtp.ehlo()
+        smtp.starttls(context=ssl.create_default_context())
+        smtp.ehlo()
+        smtp.login(env["GOTRUE_SMTP_USER"], env["GOTRUE_SMTP_PASS"])
+except Exception as error:
+    sys.exit("Falha na verificação SMTP Test: " + type(error).__name__)
+print("SMTP Test: TLS e autenticação validados, sem envio de mensagem.")
+'
 if [[ "$template_changed" == true ]]; then
   mv -f -- "$template_candidate" "$template_override_file"
   template_candidate=""
