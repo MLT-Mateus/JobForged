@@ -4,6 +4,8 @@ services:
     environment:
       GOTRUE_MAILER_TEMPLATES_RECOVERY: https://jobforged.com/api/auth/email-templates/password-recovery
       GOTRUE_MAILER_SUBJECTS_RECOVERY: Redefina sua senha na JobForged
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: https://jobforged.com/api/auth/email-templates/auth-confirmation
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: Confirme seu e-mail na JobForged
 
   studio:
     container_name: supabase-live-studio

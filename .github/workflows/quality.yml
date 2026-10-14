@@ -67,7 +67,7 @@ jobs:
 
       - name: Validar proteção de publicação sem Auth
         run: |
-          bash -n scripts/deploy-vps.sh scripts/supabase-migrate.sh scripts/jbfd-deploy-live-root.sh
+          bash -n scripts/deploy-vps.sh scripts/supabase-migrate.sh scripts/jbfd-deploy-live-root.sh scripts/jbfd-deploy-test-root.sh scripts/jbfd-supabase-smtp-test-root.sh
           node --test tests/auth-readiness.test.mjs
 
       - name: Testar e validar a publicação
@@ -171,8 +171,8 @@ jobs:
           GH_USERNAME: ${{ github.actor }}
           REVISION: ${{ github.sha }}
         run: |
-          if [[ -z "$BREVO_API_KEY" ]]; then
-            echo "O secret BREVO_API_KEY não está configurado no Environment jbfd-test." >&2
+          if [[ -z "$BREVO_API_KEY" || -z "$BREVO_SMTP_USER" || -z "$BREVO_SMTP_KEY" ]]; then
+            echo "Configure os três secrets Brevo no Environment jbfd-test antes de publicar Auth." >&2
             exit 78
           fi
           install -d -m 700 "$HOME/.ssh"
@@ -191,12 +191,6 @@ jobs:
             echo "O gateway da VPS respondeu com uma versão incompatível para a integração Brevo." >&2
             exit 78
           fi
-          printf '%s\n%s\n%s\n' "$GH_USERNAME" "$GH_TOKEN" "$BREVO_API_KEY" | \
-            ssh "${ssh_args[@]}" "$target" "deploy test $REVISION"
-          if [[ -z "$BREVO_SMTP_USER" || -z "$BREVO_SMTP_KEY" ]]; then
-            echo "SMTP do Supabase Test adiado: configure BREVO_SMTP_USER e BREVO_SMTP_KEY no Environment jbfd-test."
-            exit 0
-          fi
           if protocol="$(ssh "${ssh_args[@]}" "$target" "probe smtp test" 2>/dev/null)"; then
             if [[ "$protocol" != "supabase-smtp-test-protocol-v1" ]]; then
               echo "O gateway da VPS respondeu com uma versão incompatível para SMTP Test." >&2
@@ -205,5 +199,8 @@ jobs:
             printf '%s\n%s\n' "$BREVO_SMTP_USER" "$BREVO_SMTP_KEY" | \
               ssh "${ssh_args[@]}" "$target" "configure smtp test"
           else
-            echo "SMTP do Supabase Test adiado: o gateway root-owned da VPS ainda precisa ser atualizado conforme docs/BREVO-EMAIL.md."
+            echo "Gateway SMTP Test indisponível; publicação interrompida." >&2
+            exit 78
           fi
+          printf '%s\n%s\n%s\n' "$GH_USERNAME" "$GH_TOKEN" "$BREVO_API_KEY" | \
+            ssh "${ssh_args[@]}" "$target" "deploy test $REVISION"
