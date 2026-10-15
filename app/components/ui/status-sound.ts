@@ -7,11 +7,17 @@ const preferenceKey = "jf-status-sound-enabled";
 const preferenceEvent = "jf-status-sound-preference";
 let audioContext: AudioContext | null = null;
 
-const notes: Record<ToastKind, ReadonlyArray<[number, number, number]>> = {
-  success: [[523, 0, 0.12], [659, 0.11, 0.12], [784, 0.22, 0.18]],
-  info: [[587, 0, 0.13], [784, 0.14, 0.13]],
-  warning: [[587, 0, 0.15], [494, 0.19, 0.2]],
-  danger: [[440, 0, 0.13], [349, 0.15, 0.18], [262, 0.33, 0.22]],
+type SoundPulse = { frequency: number; endFrequency?: number; offset: number; duration: number; level: number; wave?: OscillatorType };
+
+// Short, restrained interface cues. No melodic arpeggios or sharp alarms.
+const sounds: Record<ToastKind, ReadonlyArray<SoundPulse>> = {
+  success: [{ frequency: 440, endFrequency: 493, offset: 0, duration: 0.18, level: 0.021 }],
+  info: [{ frequency: 392, offset: 0, duration: 0.12, level: 0.017 }],
+  warning: [
+    { frequency: 330, offset: 0, duration: 0.09, level: 0.019 },
+    { frequency: 330, offset: 0.15, duration: 0.09, level: 0.016 },
+  ],
+  danger: [{ frequency: 275, endFrequency: 235, offset: 0, duration: 0.2, level: 0.023, wave: "sine" }],
 };
 
 function enabled() {
@@ -45,18 +51,25 @@ export function playStatusSound(kind: ToastKind) {
     const context = audioContext;
     void context.resume().then(() => {
       const start = context.currentTime;
-      for (const [frequency, offset, duration] of notes[kind]) {
+      for (const { frequency, endFrequency, offset, duration, level, wave } of sounds[kind]) {
         const oscillator = context.createOscillator();
         const gain = context.createGain();
-        oscillator.type = "sine";
-        oscillator.frequency.value = frequency;
-        gain.gain.setValueAtTime(0, start + offset);
-        gain.gain.linearRampToValueAtTime(0.035, start + offset + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + offset + duration);
-        oscillator.connect(gain);
+        const filter = context.createBiquadFilter();
+        const at = start + offset;
+        oscillator.type = wave ?? "triangle";
+        oscillator.frequency.setValueAtTime(frequency, at);
+        if (endFrequency) oscillator.frequency.linearRampToValueAtTime(endFrequency, at + duration);
+        filter.type = "lowpass";
+        filter.frequency.value = 950;
+        filter.Q.value = 0.6;
+        gain.gain.setValueAtTime(0.0001, at);
+        gain.gain.exponentialRampToValueAtTime(level, at + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+        oscillator.connect(filter);
+        filter.connect(gain);
         gain.connect(context.destination);
-        oscillator.start(start + offset);
-        oscillator.stop(start + offset + duration);
+        oscillator.start(at);
+        oscillator.stop(at + duration + 0.01);
       }
     }).catch(() => { /* Browsers may block audio before user interaction. */ });
   } catch { /* Sound must never interrupt the visual alert. */ }

@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ActionButton, InlineNotice, Panel, PanelHeading, SelectField, StatusBadge, TextField, WorkspacePageHeader, type ToastKind } from "@/app/components/ui";
-import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
+import { ActionButton, AppToast, InlineNotice, Panel, PanelHeading, SelectField, StatusBadge, TextField, WorkspacePageHeader, type ToastKind } from "@/app/components/ui";
 
 type Company = { id: string; name: string; cnpj: string | null; phone: string | null; plan_id: string; plan_status: string; created_at: string };
 type Member = { id: string; email: string; full_name: string; role: "owner" | "admin" | "member"; status: "active" | "inactive"; created_at: string };
@@ -19,7 +18,6 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [messageKind, setMessageKind] = useState<ToastKind>("info");
-  useStatusSoundForMessage(message, messageKind);
   const load = useCallback(async () => {
     const response = await fetch("/api/company", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
     if (!response?.ok) { setMessageKind("danger"); setMessage("Não foi possível carregar os dados da empresa."); return; }
@@ -53,12 +51,13 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
     setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Acesso atualizado." : "Você não pode alterar esse acesso.");
     if (response?.ok) void load();
   }
-  if (!data) return <InlineNotice tone={message ? "danger" : "info"}>{message || "Carregando empresa…"}</InlineNotice>;
+  if (!data) return <><InlineNotice tone={message ? "danger" : "info"}>{message || "Carregando empresa…"}</InlineNotice>{message && <AppToast notice={{kind:messageKind,title:"Dados da empresa",text:message}} onClose={() => setMessage("")}/>}</>;
   const canManage = data.role === "owner" || data.role === "admin";
   return <><WorkspacePageHeader section={`Painel / ${mode === "settings" ? "Configurações" : "Administradores"}`}
     title={mode === "settings" ? "Dados da empresa" : "Equipe e acessos"}
     description={mode === "settings" ? "Informações persistidas da sua organização." : "Usuários vinculados à sua organização."}/>
     {message && <InlineNotice tone={messageKind === "danger" ? "danger" : messageKind === "success" ? "success" : "info"}>{message}</InlineNotice>}
+    {message && <AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Ação não concluída" : "Atualização da empresa",text:message}} onClose={() => setMessage("")}/>}
     {mode === "settings" ? <div className="admin-settings-grid"><Panel as="section" className="admin-card"><PanelHeading title="Identificação da empresa" description="Dados usados para identificar sua organização"/>
       <form onSubmit={save} className="admin-form-stack jf-panel-body"><TextField label="Nome da empresa" value={name} maxLength={160} onChange={event => setName(event.target.value)} required />
         <TextField label="CNPJ" value={cnpj} onChange={event => setCnpj(event.target.value.replace(/\D/g, "").slice(0, 14))} />
