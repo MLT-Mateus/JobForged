@@ -258,6 +258,11 @@ export default function Home() {
   const [annualBilling, setAnnualBilling] = useState(true);
   const { theme, changeTheme } = useThemePreference();
   useEffect(() => {
+    if (window.location.hash.startsWith("#error=") && window.location.hash.includes("error_code=otp_expired")) {
+      window.location.replace("/confirmar-email");
+    }
+  }, []);
+  useEffect(() => {
     const carousel = document.querySelector<HTMLElement>(".landing-page .capability-carousel");
     if (!carousel || !("IntersectionObserver" in window)) return;
     let inView = false;

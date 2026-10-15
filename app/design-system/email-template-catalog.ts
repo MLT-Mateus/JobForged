@@ -35,6 +35,7 @@ export function resolveEmailTheme(preferredTheme: string | null | undefined): Em
 export type EmailTemplateId =
   | "auth-confirmation"
   | "password-recovery"
+  | "account-invitation"
   | "company-welcome"
   | "application-received"
   | "new-application";
@@ -68,6 +69,7 @@ export const emailTemplates: EmailTemplateDefinition[] = [
     subject: "Redefina sua senha na JobForged",
     description: "Entrega um link de uso único para definir uma nova senha sem revelar se o e-mail está cadastrado.",
   },
+  { id: "account-invitation", name: "Convite de acesso", audience: "Conta convidada", trigger: "Convite administrativo", channel: "Supabase Auth · SMTP Brevo", subject: "Seu convite de acesso à JobForged", description: "Permite definir a senha com link de uso único." },
   {
     id: "company-welcome",
     name: "Boas-vindas à empresa",
@@ -129,10 +131,10 @@ function copyFor(id: EmailTemplateId): EmailCopy {
         eyebrow: "SEGURANÇA DA CONTA",
         title: "Confirme seu e-mail",
         paragraphs: [
-          "Olá, {{ .Email }}.",
+          "Olá,",
           "Recebemos uma solicitação para criar uma conta na JobForged com este endereço. Confirme que ele pertence a você para continuar.",
         ],
-        button: { label: "Confirmar meu e-mail", url: "{{ .ConfirmationURL }}" },
+        button: { label: "Confirmar meu e-mail", url: "{{ .SiteURL }}/confirmar-email?token_hash={{ .TokenHash }}&amp;type=signup" },
         note: "Se você não iniciou este cadastro, pode ignorar esta mensagem.",
       };
     case "password-recovery":
@@ -146,6 +148,14 @@ function copyFor(id: EmailTemplateId): EmailCopy {
         ],
         button: { label: "Redefinir minha senha", url: "{{ .SiteURL }}/redefinir-senha?token_hash={{ .TokenHash }}&amp;type=recovery" },
         note: "Se você não solicitou a recuperação, ignore esta mensagem. Sua senha não será alterada.",
+      };
+    case "account-invitation":
+      return {
+        preheader: "Confirme o convite e defina sua senha de acesso.", eyebrow: "SEGURANÇA DA CONTA",
+        title: "Convite para acessar a JobForged",
+        paragraphs: ["Você recebeu um convite de acesso à JobForged.", "O link é de uso único e expira. Confirme o convite para definir sua senha."],
+        button: { label: "Aceitar convite e definir senha", url: "{{ .SiteURL }}/redefinir-senha?token_hash={{ .TokenHash }}&amp;type=invite" },
+        note: "Se você não esperava este convite, ignore esta mensagem.",
       };
     case "company-welcome":
       return {
@@ -272,6 +282,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
     ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">${valueFor(copy.note, preview, variables)}</p></td></tr>`
     : "";
   const previewSubject = preview ? subject : template.subject;
+  const origin = process.env.APP_ENV === "live" ? "https://jobforged.com" : "https://test.jobforged.com";
 
   return `<!doctype html>
 <html lang="pt-BR">
@@ -287,7 +298,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
     <tr><td align="center" style="padding:28px 12px;">
       <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="${colors.card}" style="width:100%;max-width:600px;border:1px solid ${colors.border};border-radius:14px;border-collapse:separate;background-color:${colors.card};">
         <tr><td style="padding:24px 32px;border-bottom:1px solid ${colors.border};">
-          <img src="https://jobforged.com/brand/jobforged-logo.png" width="164" height="47" alt="JobForged" style="display:block;width:164px;height:auto;max-width:100%;border:0;">
+          <img src="${origin}/brand/jobforged-logo.png" width="164" height="47" alt="JobForged" style="display:block;width:164px;height:auto;max-width:100%;border:0;">
         </td></tr>
         <tr><td style="padding:32px 32px 10px;">
           <p style="margin:0 0 12px;color:${colors.accent};font-family:${headingFont};font-size:11px;font-weight:bold;letter-spacing:1.1px;line-height:1.4;">${copy.eyebrow}</p>
