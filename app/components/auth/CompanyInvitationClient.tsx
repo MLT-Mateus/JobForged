@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
-import { ActionButton, TextField } from "@/app/components/ui";
+import { ActionButton, TextField, type ToastKind } from "@/app/components/ui";
+import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
 import { isEmail } from "./auth-validation";
 import { focusFirstInvalid } from "./focus-first-invalid";
 import "./auth.css";
@@ -11,13 +12,15 @@ export function CompanyInvitationClient({ token }: { token: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [messageKind, setMessageKind] = useState<ToastKind>("info");
+  useStatusSoundForMessage(message, messageKind);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const credentialsForm = useRef<HTMLFormElement>(null);
   function credentialsReady(form: HTMLFormElement | null) {
     const invalid = [!isEmail(email) && "email", !password && "password"].filter(Boolean) as string[];
     if (!invalid.length) return true;
-    setMessage("Informe um e-mail válido e a senha antes de continuar.");
+    setMessageKind("danger"); setMessage("Informe um e-mail válido e a senha antes de continuar.");
     if (form) focusFirstInvalid(form, invalid);
     return false;
   }
@@ -25,7 +28,7 @@ export function CompanyInvitationClient({ token }: { token: string }) {
     setBusy(true); setMessage("");
     const response = await fetch(path, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
     const payload = await response?.json().catch(() => ({})) as { message?: string } | undefined;
-    setBusy(false); setMessage(payload?.message ?? (response?.ok ? "Concluído." : "Não foi possível concluir."));
+    setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(payload?.message ?? (response?.ok ? "Concluído." : "Não foi possível concluir."));
     return Boolean(response?.ok);
   }
   async function register(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!credentialsReady(credentialsForm.current)) return; await act("/api/auth/invitee-sign-up", { token, email, password }); }
