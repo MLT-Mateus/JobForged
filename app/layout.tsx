@@ -9,7 +9,10 @@ import "./components/ui/ui.css";
 import GlobalInteractions from "./components/GlobalInteractions";
 import NavigationLoader from "./components/NavigationLoader";
 
+const canonicalOrigin = process.env.APP_PUBLIC_URL || "https://jobforged.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(canonicalOrigin),
   title: "JobForged",
   description:
     "Centralize vagas, currículos, triagem automática, Kanban e histórico de candidatos em uma plataforma feita para PMEs.",
@@ -21,10 +24,12 @@ export const metadata: Metadata = {
     "página de carreiras",
     "gestão de candidatos",
   ],
+  alternates: { canonical: "/" },
   openGraph: {
     title: "JobForged",
     description: "Recrutamento organizado para PMEs, com vagas, currículos, Kanban, histórico de candidatos e triagem assistida por IA.",
     type: "website",
+    url: canonicalOrigin,
     locale: "pt_BR",
     images: [{ url: "/brand/jobforged-logo.png", width: 636, height: 184, alt: "JobForged" }],
   },

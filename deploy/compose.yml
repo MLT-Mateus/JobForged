@@ -7,14 +7,19 @@ services:
       NODE_ENV: production
       PORT: "3000"
       HOST: 0.0.0.0
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:?Defina APP_PUBLIC_URL}
     labels:
       - traefik.enable=true
       - traefik.docker.network=${JBFD_DOCKER_NETWORK:?Defina a rede do Traefik}
-      - traefik.http.routers.jbfd-${APP_ENV}.rule=Host(`${APP_ORIGIN:?Defina o domínio deste ambiente}`)
+      - traefik.http.routers.jbfd-${APP_ENV}.rule=${APP_HOST_RULE:?Defina APP_HOST_RULE}
       - traefik.http.routers.jbfd-${APP_ENV}.entrypoints=websecure
       - traefik.http.routers.jbfd-${APP_ENV}.tls=true
       - traefik.http.routers.jbfd-${APP_ENV}.tls.certresolver=letsencrypt
+      - traefik.http.routers.jbfd-${APP_ENV}.middlewares=jbfd-${APP_ENV}-canonical
       - traefik.http.routers.jbfd-${APP_ENV}.service=jbfd-${APP_ENV}
+      - traefik.http.middlewares.jbfd-${APP_ENV}-canonical.redirectregex.regex=^https?://www\\.jobforged\\.com/(.*)
+      - traefik.http.middlewares.jbfd-${APP_ENV}-canonical.redirectregex.replacement=https://jobforged.com/\$\$1
+      - traefik.http.middlewares.jbfd-${APP_ENV}-canonical.redirectregex.permanent=true
       - traefik.http.services.jbfd-${APP_ENV}.loadbalancer.server.port=3000
     networks:
       - default
