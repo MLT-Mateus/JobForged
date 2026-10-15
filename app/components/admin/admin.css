@@ -18,19 +18,16 @@ body:has(.admin-shell){overflow:hidden}
 .admin-sidebar nav a .admin-nav-status{display:grid;width:18px;height:18px;flex:0 0 18px;place-items:center;margin-left:auto;border-radius:50%;background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted)}
 .admin-sidebar nav a .admin-nav-status--beta{background:var(--jf-ui-warning-soft);color:var(--jf-ui-warning)}
 .admin-sidebar nav a .admin-nav-status svg{width:13px;height:13px}
-.admin-user{flex-shrink:0;display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:center;gap:var(--jf-ui-space-1);margin-top:auto;padding-top:var(--jf-ui-space-3);border-top:1px solid var(--jf-ui-border)}
+.admin-user{flex-shrink:0;display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:var(--jf-ui-space-1);margin-top:auto;padding-top:var(--jf-ui-space-3);border-top:1px solid var(--jf-ui-border)}
 .admin-user>a{display:flex;min-width:0;align-items:center;gap:var(--jf-ui-space-2)}
 .admin-user>a>span:first-child{display:grid;width:36px;height:36px;flex:0 0 36px;place-items:center;border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong);font-size:var(--jf-ui-font-size-xs);font-weight:800}
 .admin-user>a>span:last-child{display:grid;min-width:0}
 .admin-user strong,.admin-user small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .admin-user strong{font-size:var(--jf-ui-font-size-sm)}
 .admin-user small{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
-.admin-user>button{display:grid;width:34px;height:34px;place-items:center;padding:0;cursor:pointer}
-.admin-user svg{width:16px}
 .is-collapsed .admin-brand{justify-content:center;padding-inline:0}
 .is-collapsed .admin-brand>span,.is-collapsed .admin-sidebar nav a span,.is-collapsed .admin-user>a>span:last-child{display:none}
 .is-collapsed .admin-sidebar nav a .admin-nav-status{display:none}
-.is-collapsed .admin-user>button{display:none}
 .is-collapsed .admin-sidebar nav a{justify-content:center;padding:0}
 .is-collapsed .admin-user{display:flex;justify-content:center}
 .admin-workspace{height:100%;min-width:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
@@ -171,7 +168,6 @@ body:has(.admin-shell){overflow:hidden}
 .admin-sidebar.is-open .admin-brand>span,.admin-sidebar.is-open nav a span,.admin-sidebar.is-open .admin-user>a>span:last-child{display:flex}
 .admin-sidebar.is-open nav a .admin-nav-label{display:block}
 .admin-sidebar.is-open nav a .admin-nav-status{display:grid}
-.admin-sidebar.is-open .admin-user>button{display:flex}
 .admin-sidebar.is-open .admin-user>a>span:last-child{display:grid}
 .admin-sidebar.is-open nav a{justify-content:flex-start;padding:0 var(--jf-ui-space-3)}
 .admin-sidebar .admin-brand>button:not(.admin-close){display:none}
