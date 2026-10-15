@@ -11,6 +11,7 @@ import { useThemePreference, ActionButton, DataTable, FieldControl, StatusBadge,
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { signOutCompany, useCompanyAuthSession } from "@/app/components/auth/auth-service";
 import { moduleCopy, type AdminModuleId } from "./admin-data";
+import { availabilityLabel, featureAvailability, type WorkspaceModule } from "./feature-availability";
 import type { AwaitedAdminContext } from "./admin-types";
 
 const nav = [
@@ -18,7 +19,7 @@ const nav = [
 ] as const;
 type OrganizationThemeRecord={palette?:Record<string,string>;theme?:{dark?:Record<string,string>};typography?:{font?:"Montserrat"|"Open Sans"|"Poppins"}};
 
-export function AdminShell({ module, context, children }: { module: AdminModuleId | "home"; context: {organization: AwaitedAdminContext["organization"]; user: Pick<AwaitedAdminContext["user"], "name" | "role" | "initials">}; children: ReactNode }) {
+export function AdminShell({ module, context, children }: { module: WorkspaceModule; context: {organization: AwaitedAdminContext["organization"]; user: Pick<AwaitedAdminContext["user"], "name" | "role" | "initials">}; children: ReactNode }) {
   const router=useRouter();
   const auth=useCompanyAuthSession();
   const {theme}=useThemePreference();
@@ -32,7 +33,8 @@ export function AdminShell({ module, context, children }: { module: AdminModuleI
   const organizationFont={Montserrat:'"Montserrat Variable", "Montserrat", Arial, sans-serif',"Open Sans":'"Open Sans Variable", "Open Sans", Arial, sans-serif',Poppins:'"Poppins", "Montserrat Variable", "Open Sans Variable", Arial, sans-serif'}[selectedFont];
   const paletteStyle=brandPalette?{"--teal":brandPalette.primary,"--teal-deep":brandPalette.link,"--teal-soft":brandPalette.activeItem,"--blue":brandPalette.secondary,"--app-bg":brandPalette.background,"--app-panel":brandPalette.surface,"--jf-ui-brand":brandPalette.primary,"--jf-ui-brand-strong":brandPalette.link,"--jf-ui-brand-soft":brandPalette.activeItem,"--jf-ui-focus":brandPalette.primary,"--jf-ui-focus-ring":"color-mix(in srgb, var(--jf-ui-focus) 28%, transparent)","--jf-ui-surface":brandPalette.surface,"--jf-ui-surface-soft":brandPalette.background,"--jf-ui-accent":brandPalette.secondary,"--jf-ui-text":brandPalette.text,"--jf-ui-text-muted":"color-mix(in srgb, var(--jf-ui-text) 72%, var(--jf-ui-surface))"}:{};
   const brandStyle={...paletteStyle,"--jf-ui-font-heading":organizationFont,"--jf-ui-font-body":organizationFont} as unknown as CSSProperties;
-  return <WorkspaceShell items={nav.map(([label,href,icon])=>({label,href,icon,active:`/app/${module}`===href}))} logo={context.organization.logo} brand={context.organization.shortName} title={context.organization.name} subtitle={auth.demo?"Sessão Free de Test":"Organização ativa"} style={brandStyle} actions={<button className="jf-action jf-action--quiet admin-notice" aria-label="Notificações"><Bell/><i/></button>} footer={<div className="admin-user"><a href="/app/minha-conta"><span>{context.user.initials}</span><span><strong>{context.user.name}</strong><small>{auth.email??context.user.role}</small></span></a><button className="jf-action jf-action--quiet" aria-label="Sair da conta" onClick={async()=>{await signOutCompany();router.replace("/login")}}><LogOut/></button></div>}>{children}</WorkspaceShell>;
+  const availability=featureAvailability[module];
+  return <WorkspaceShell items={nav.map(([label,href,icon])=>({label,href,icon,active:`/app/${module}`===href,status:featureAvailability[href.slice(5) as WorkspaceModule].status}))} logo={context.organization.logo} brand={context.organization.shortName} title={context.organization.name} subtitle={auth.demo?"Sessão Free de Test":"Organização ativa"} style={brandStyle} actions={<button className="jf-action jf-action--quiet admin-notice" aria-label="Notificações (em breve)" title="Notificações em breve" disabled><Bell/></button>} footer={<div className="admin-user"><a href="/app/minha-conta" title="Minha conta — Em breve"><span>{context.user.initials}</span><span><strong>{context.user.name}</strong><small>{auth.email??context.user.role}</small></span></a><button className="jf-action jf-action--quiet" aria-label="Sair da conta" onClick={async()=>{await signOutCompany();router.replace("/login")}}><LogOut/></button></div>}><section className={`admin-availability admin-availability--${availability.status}`} aria-label={`Disponibilidade: ${availabilityLabel(availability.status)}`}><StatusBadge tone={availability.status==="beta"?"warning":"neutral"}>{availabilityLabel(availability.status)}</StatusBadge><p>{availability.description}</p></section>{availability.status==="soon"?<div className="admin-availability-preview" inert>{children}</div>:children}</WorkspaceShell>;
 }
 
 export function AdminPageHeader({ module, action }: { module: AdminModuleId; action?: ReactNode }) { const copy=moduleCopy[module]; return <header className="admin-page-head"><div><span>Painel / {copy.title}</span><h1>{copy.title}</h1><p>{copy.description}</p></div>{action}</header> }
