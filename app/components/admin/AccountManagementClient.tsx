@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { ActionButton, Panel, TextField } from "@/app/components/ui";
 import { useCompanyAuthSession, type AuthSessionState } from "@/app/components/auth/auth-service";
+import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
+import type { ToastKind } from "@/app/components/ui";
 
 export function AccountManagementClient() {
   const session = useCompanyAuthSession();
@@ -15,12 +17,14 @@ function AccountEditor({ session }: { session: AuthSessionState }) {
   const [fullName, setFullName] = useState(session.fullName ?? "");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageKind, setMessageKind] = useState<ToastKind>("info");
+  useStatusSoundForMessage(message, messageKind);
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     const response = await fetch("/api/account", { method: "PATCH", credentials: "same-origin",
       headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fullName }) }).catch(() => null);
     const payload = await response?.json().catch(() => ({})) as { fullName?: string; message?: string } | undefined;
-    setBusy(false); setMessage(response?.ok ? "Perfil salvo." : payload?.message ?? "Não foi possível salvar.");
+    setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Perfil salvo." : payload?.message ?? "Não foi possível salvar.");
     if (payload?.fullName) setFullName(payload.fullName);
   }
   return <><header className="admin-page-head"><div><span>Painel / Minha Conta</span><h1>Minha Conta</h1><p>Dados reais do seu acesso empresarial.</p></div></header>

@@ -4,11 +4,13 @@ import { WorkspaceShell } from "@/app/components/ui/WorkspaceShell";
 import { Panel, StatusBadge } from "@/app/components/ui";
 import { LogOut, ShieldCheck } from "lucide-react";
 import { signOutCompany } from "@/app/components/auth/auth-service";
+import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
 
 type Overview = { companies: number; members: number; recentCompanies: Array<{ id: string; name: string; plan_id: string; plan_status: string; created_at: string }> };
 export function BackofficeClient({ email }: { email: string }) {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [error, setError] = useState("");
+  useStatusSoundForMessage(error, "danger");
   useEffect(() => { void fetch("/api/backoffice", { credentials: "same-origin", cache: "no-store" })
     .then(async response => { if (!response.ok) throw new Error(); return response.json() as Promise<{ overview: Overview }>; })
     .then(data => setOverview(data.overview)).catch(() => setError("Não foi possível carregar dados autorizados.")); }, []);

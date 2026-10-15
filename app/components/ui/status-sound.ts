@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type { ToastKind } from "./AppToast";
 
 const preferenceKey = "jf-status-sound-enabled";
@@ -60,4 +60,11 @@ export function playStatusSound(kind: ToastKind) {
       }
     }).catch(() => { /* Browsers may block audio before user interaction. */ });
   } catch { /* Sound must never interrupt the visual alert. */ }
+}
+
+/** Use for inline action results; loading labels must not call this hook with text. */
+export function useStatusSoundForMessage(message: string, kind: ToastKind) {
+  useEffect(() => {
+    if (message) playStatusSound(kind);
+  }, [message, kind]);
 }

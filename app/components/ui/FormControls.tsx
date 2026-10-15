@@ -36,6 +36,7 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
+import { useStatusSoundForMessage } from "./status-sound";
 
 export type SelectOption = {
   value: string;
@@ -1058,6 +1059,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
   const selectionRef = useRef<Range | null>(null);
   const [initial] = useState(initialHtml);
   const [imageError, setImageError] = useState("");
+  useStatusSoundForMessage(imageError, "danger");
   const [size, setSize] = useState("3");
   const errorId = useId();
 

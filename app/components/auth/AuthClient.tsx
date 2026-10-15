@@ -9,6 +9,7 @@ import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, create
 import { maskCnpj, maskPhone, normalizeText, passwordRules, validateLogin, validateSignup, type LoginValues, type SignupValues } from "./auth-validation";
 import { requestPasswordRecovery, signInCompany, signUpCompany, updateRecoveredPassword, verifyPasswordRecovery } from "./auth-service";
 import { focusFirstInvalid } from "./focus-first-invalid";
+import { playStatusSound } from "@/app/components/ui/status-sound";
 import "./auth.css";
 
 type FieldErrors<T> = Partial<Record<keyof T, string>>;
@@ -75,6 +76,7 @@ export function LoginClient() {
       }
       setValues(current => ({ ...current, password: "" }));
       const session = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).catch(() => null) as { platformAdmin?: boolean } | null;
+      playStatusSound("success");
       router.replace(session?.platformAdmin ? "/backoffice" : "/app/home");
     } finally {
       setLoading(false);
@@ -186,6 +188,7 @@ export function SignupClient() {
       }
       setRequiresConfirmation(Boolean(result.requiresConfirmation));
       setCreated(true);
+      playStatusSound(result.requiresConfirmation ? "info" : "success");
       if (!result.requiresConfirmation) router.replace("/app/home");
     } finally {
       setLoading(false);
@@ -376,6 +379,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
         return;
       }
       setRequestSent(true);
+      playStatusSound("info");
     } finally {
       setLoading(false);
     }
@@ -429,6 +433,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
       setPassword("");
       setConfirmPassword("");
       setRecoveryStatus("done");
+      playStatusSound("success");
     } finally {
       setLoading(false);
     }

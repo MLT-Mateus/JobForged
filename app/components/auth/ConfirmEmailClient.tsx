@@ -6,29 +6,34 @@ import { ActionButton, TextField } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { isEmail } from "./auth-validation";
 import { focusFirstInvalid } from "./focus-first-invalid";
+import { playStatusSound, useStatusSoundForMessage } from "@/app/components/ui/status-sound";
+import type { ToastKind } from "@/app/components/ui";
 import "./auth.css";
 
 export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; type: string }) {
   const [status, setStatus] = useState<"pending" | "loading" | "success" | "invalid">(type === "signup" && tokenHash ? "pending" : "invalid");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [messageKind, setMessageKind] = useState<ToastKind>("info");
+  useStatusSoundForMessage(message, messageKind);
   async function confirm() {
     setStatus("loading");
     const response = await fetch("/api/auth/confirmation/session", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tokenHash, type }) }).catch(() => null);
     if (response?.ok) {
       window.history.replaceState(null, "", "/confirmar-email");
       setStatus("success");
+      playStatusSound("success");
     } else { window.history.replaceState(null, "", "/confirmar-email"); setStatus("invalid"); }
   }
   async function resend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!isEmail(email)) {
-      setMessage("Informe um e-mail válido para solicitar outro link.");
+      setMessageKind("danger"); setMessage("Informe um e-mail válido para solicitar outro link.");
       focusFirstInvalid(event.currentTarget, ["email"]);
       return;
     }
     const response = await fetch("/api/auth/confirmation/resend", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) }).catch(() => null);
-    setMessage(response?.ok ? "Se houver um cadastro pendente, enviaremos um novo link." : "Confira o e-mail e tente novamente.");
+    setMessageKind(response?.ok ? "info" : "danger"); setMessage(response?.ok ? "Se houver um cadastro pendente, enviaremos um novo link." : "Confira o e-mail e tente novamente.");
   }
   return <main className="auth-page auth-page--compact"><div className="auth-layout"><section className="auth-card">
     <Link href="/" className="brand"><BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={190} height={55} /></Link>

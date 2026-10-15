@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ActionButton, Panel, StatusBadge, TextField } from "@/app/components/ui";
+import { ActionButton, Panel, StatusBadge, TextField, type ToastKind } from "@/app/components/ui";
+import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
 
 type Company = { id: string; name: string; cnpj: string | null; phone: string | null; plan_id: string; plan_status: string; created_at: string };
 type Member = { id: string; email: string; full_name: string; role: "owner" | "admin" | "member"; status: "active" | "inactive"; created_at: string };
@@ -17,9 +18,11 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
   const [inviteRole, setInviteRole] = useState<"admin" | "member">("member");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageKind, setMessageKind] = useState<ToastKind>("info");
+  useStatusSoundForMessage(message, messageKind);
   const load = useCallback(async () => {
     const response = await fetch("/api/company", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
-    if (!response?.ok) { setMessage("Não foi possível carregar os dados da empresa."); return; }
+    if (!response?.ok) { setMessageKind("danger"); setMessage("Não foi possível carregar os dados da empresa."); return; }
     const snapshot = await response.json() as Snapshot;
     setData(snapshot); setName(snapshot.company.name); setCnpj(snapshot.company.cnpj ?? ""); setPhone(snapshot.company.phone ?? "");
   }, []);
@@ -28,26 +31,26 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
     void fetch("/api/company", { credentials: "same-origin", cache: "no-store" })
       .then(async response => { if (!response.ok) throw new Error(); return response.json() as Promise<Snapshot>; })
       .then(snapshot => { if (active) { setData(snapshot); setName(snapshot.company.name); setCnpj(snapshot.company.cnpj ?? ""); setPhone(snapshot.company.phone ?? ""); } })
-      .catch(() => { if (active) setMessage("Não foi possível carregar os dados da empresa."); });
+      .catch(() => { if (active) { setMessageKind("danger"); setMessage("Não foi possível carregar os dados da empresa."); } });
     return () => { active = false; };
   }, []);
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     const response = await fetch("/api/company", { method: "PATCH", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, cnpj, phone }) }).catch(() => null);
-    setBusy(false); setMessage(response?.ok ? "Dados da empresa atualizados." : "Não foi possível salvar. Revise os campos.");
+    setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Dados da empresa atualizados." : "Não foi possível salvar. Revise os campos.");
     if (response?.ok) void load();
   }
   async function invite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     const response = await fetch("/api/company/members", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: inviteEmail, role: inviteRole }) }).catch(() => null);
     const result = await response?.json().catch(() => ({})) as { message?: string } | undefined;
-    setBusy(false); setMessage(result?.message ?? "Não foi possível enviar o convite.");
+    setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(result?.message ?? (response?.ok ? "Convite enviado." : "Não foi possível enviar o convite."));
     if (response?.ok) { setInviteEmail(""); void load(); }
   }
   async function changeMember(member: Member, role: Member["role"], status: Member["status"]) {
     setBusy(true); setMessage("");
     const response = await fetch("/api/company/members", { method: "PATCH", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: member.id, role, status }) }).catch(() => null);
-    setBusy(false); setMessage(response?.ok ? "Acesso atualizado." : "Você não pode alterar esse acesso.");
+    setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Acesso atualizado." : "Você não pode alterar esse acesso.");
     if (response?.ok) void load();
   }
   if (!data) return <p role="status">{message || "Carregando empresa…"}</p>;
