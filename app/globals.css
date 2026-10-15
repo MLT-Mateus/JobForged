@@ -4560,10 +4560,11 @@ html[data-theme="dark"] .footer-column a { color: var(--ink-soft); }
   gap: 6px;
   padding: 8px 12px;
   border-radius: 999px;
-  background: var(--teal-deep);
-  color: #ffffff;
+  border: 1px solid var(--jf-ui-border);
+  background: var(--jf-ui-surface-soft);
+  color: var(--jf-ui-text-muted);
   font-family: var(--font-heading);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   transform: translateX(-50%);
   white-space: nowrap;
@@ -4631,6 +4632,15 @@ html[data-theme="dark"] .footer-column a { color: var(--ink-soft); }
 
 .price-card > .button {
   width: 100%;
+}
+
+.price-card > .button:disabled,
+.price-card > .button:disabled:hover {
+  border-color: var(--jf-ui-border);
+  background: var(--jf-ui-surface-soft);
+  color: var(--jf-ui-text-muted);
+  box-shadow: none;
+  opacity: 1;
 }
 
 .price-card ul {
@@ -4816,11 +4826,6 @@ html[data-theme="dark"] .plan-equivalent {
 
 html[data-theme="dark"] .price-card ul {
   border-color: var(--app-border);
-}
-
-html[data-theme="dark"] .plan-badge {
-  background: #43d0c6;
-  color: #05201d;
 }
 
 @media (max-width: 1080px) {
