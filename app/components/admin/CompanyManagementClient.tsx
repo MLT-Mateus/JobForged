@@ -63,14 +63,14 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
         <ActionButton type="submit" disabled={!canManage || busy}>Salvar dados</ActionButton></form></Panel>
       <Panel as="section" className="admin-card"><h2>Plano atual</h2><p>{data.company.plan_id} · {data.company.plan_status}</p><p>Cadastro criado em {new Date(data.company.created_at).toLocaleDateString("pt-BR")}.</p>
         <h3>Histórico recente</h3><ul>{data.audit.map(event => <li key={event.id}>{event.action} · {new Date(event.created_at).toLocaleString("pt-BR")}</li>)}</ul></Panel></div>
-      : <><Panel as="section" className="admin-card"><h2>Convidar pessoa</h2><p>O convite expira em 24 horas e exige acesso com o mesmo e-mail confirmado.</p>
+      : <><Panel as="section" className="admin-card"><h2>Convidar pessoa</h2><p>O convite expira em 24 horas e exige o mesmo e-mail confirmado. Cada conta mantém um vínculo empresarial ativo nesta versão.</p>
           <form className="auth-form" onSubmit={invite}><TextField label="E-mail" type="email" value={inviteEmail} onChange={event => setInviteEmail(event.target.value)} required />
             <label>Função <select value={inviteRole} onChange={event => setInviteRole(event.target.value as "admin" | "member") }><option value="member">Membro</option><option value="admin">Administrador</option></select></label>
             <ActionButton type="submit" disabled={!canManage || busy}>Enviar convite</ActionButton></form></Panel>
           <Panel as="section" className="admin-card"><h2>Equipe vinculada</h2><div className="admin-team-list">{data.members.map(member => <article key={member.id}>
             <strong>{member.full_name}</strong><small>{member.email}</small><StatusBadge tone={member.status === "active" ? "positive" : "neutral"}>{member.status === "active" ? "Ativo" : "Suspenso"}</StatusBadge>
             <select aria-label={`Função de ${member.email}`} value={member.role} disabled={!canManage || busy || (member.role === "owner" && data.role !== "owner")}
-              onChange={event => void changeMember(member, event.target.value as Member["role"], member.status)}><option value="owner">Titular</option><option value="admin">Administrador</option><option value="member">Membro</option></select>
+              onChange={event => void changeMember(member, event.target.value as Member["role"], member.status)}><option value="owner" disabled={data.role !== "owner"}>Titular</option><option value="admin">Administrador</option><option value="member">Membro</option></select>
             <ActionButton type="button" variant="secondary" disabled={!canManage || busy || member.role === "owner"} onClick={() => void changeMember(member, member.role, member.status === "active" ? "inactive" : "active")}>{member.status === "active" ? "Suspender" : "Reativar"}</ActionButton>
           </article>)}</div></Panel></>}
   </>;

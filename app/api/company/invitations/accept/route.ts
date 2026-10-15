@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
   if (!user.response?.ok || !(user.payload as { email_confirmed_at?: string }).email_confirmed_at)
     return Response.json({ message: "Confirme seu e-mail antes de aceitar o convite." }, { status: 401 });
   const response = await requestDatabase("rpc/accept_company_invitation", access, { invitation_token: token });
+  if (response?.status === 409) return Response.json({ message: "Esta conta já tem vínculo ativo com outra empresa. Entre com um e-mail diferente para aceitar o convite." }, { status: 409 });
   if (!response?.ok) return Response.json({ message: "Convite expirado, já utilizado ou destinado a outro e-mail." }, { status: 400 });
   return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
 }
