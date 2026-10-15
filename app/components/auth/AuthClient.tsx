@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, Building2, Check, LockKeyhole, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { BrandAsset } from "@/app/components/BrandAsset";
-import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, useThemePreference, type ToastNotice } from "@/app/components/ui";
+import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, createToastNotice, useThemePreference, type ToastNotice } from "@/app/components/ui";
 import { maskCnpj, maskPhone, normalizeText, passwordRules, validateLogin, validateSignup, type LoginValues, type SignupValues } from "./auth-validation";
 import { requestPasswordRecovery, signInCompany, signUpCompany, updateRecoveredPassword, verifyPasswordRecovery } from "./auth-service";
+import { focusFirstInvalid } from "./focus-first-invalid";
 import "./auth.css";
 
 type FieldErrors<T> = Partial<Record<keyof T, string>>;
@@ -60,7 +61,8 @@ export function LoginClient() {
     const next = validateLogin(values);
     setErrors(next);
     if (Object.keys(next).length) {
-      setNotice({ kind: "danger", title: "Revise os campos", text: "Informe um e-mail válido e sua senha." });
+      focusFirstInvalid(event.currentTarget, [next.identifier && "email", next.password && "password"].filter(Boolean) as string[]);
+      setNotice(createToastNotice({ kind: "danger", title: "Revise os campos", text: next.identifier ?? next.password ?? "Confira os dados." }));
       return;
     }
 
@@ -68,7 +70,7 @@ export function LoginClient() {
     try {
       const result = await signInCompany(values);
       if (!result.ok) {
-        setNotice({ kind: "danger", title: "Não foi possível entrar", text: result.message });
+        setNotice(createToastNotice({ kind: "danger", title: "Não foi possível entrar", text: result.message }));
         return;
       }
       setValues(current => ({ ...current, password: "" }));
@@ -163,11 +165,15 @@ export function SignupClient() {
     const next = validateSignup(values);
     setErrors(next);
     if (Object.keys(next).length || !acceptedTerms) {
-      setNotice({
+      const order: Array<[keyof SignupValues, string]> = [["responsible", "responsible"], ["company", "company"], ["cnpj", "cnpj"], ["phone", "phone"], ["email", "email"], ["password", "new-password"], ["confirmPassword", "confirm-password"]];
+      const invalidFields = order.filter(([key]) => next[key]).map(([, name]) => name);
+      if (!acceptedTerms) invalidFields.push("terms");
+      focusFirstInvalid(event.currentTarget, invalidFields);
+      setNotice(createToastNotice({
         kind: "danger",
         title: "Revise os dados cadastrais",
-        text: !acceptedTerms ? "Aceite os termos para criar a conta." : "Corrija os campos destacados antes de continuar.",
-      });
+        text: invalidFields[0] === "terms" ? "Aceite os termos para criar a conta." : "Corrija os campos destacados antes de continuar.",
+      }));
       return;
     }
 
@@ -175,7 +181,7 @@ export function SignupClient() {
     try {
       const result = await signUpCompany(values);
       if (!result.ok) {
-        setNotice({ kind: "danger", title: "Cadastro não concluído", text: result.message });
+        setNotice(createToastNotice({ kind: "danger", title: "Cadastro não concluído", text: result.message }));
         return;
       }
       setRequiresConfirmation(Boolean(result.requiresConfirmation));
@@ -323,6 +329,7 @@ export function SignupClient() {
         </div>
         <div className="auth-consent">
           <CheckboxField
+            name="terms"
             label={<>Li e aceito os <Link href="/termos-servico" target="_blank">Termos de Serviço</Link> e a <Link href="/politicas-privacidade" target="_blank">Política de Privacidade</Link>.</>}
             checked={acceptedTerms}
             onChange={event => setAcceptedTerms(event.target.checked)}
@@ -357,14 +364,15 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
   async function sendRecovery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setNotice({ kind: "danger", title: "Confira o e-mail", text: "Informe um endereço de e-mail válido." });
+      focusFirstInvalid(event.currentTarget, ["email"]);
+      setNotice(createToastNotice({ kind: "danger", title: "Confira o e-mail", text: "Informe um endereço de e-mail válido." }));
       return;
     }
     setLoading(true);
     try {
       const result = await requestPasswordRecovery(email);
       if (!result.ok) {
-        setNotice({ kind: "danger", title: "Não foi possível solicitar", text: result.message });
+        setNotice(createToastNotice({ kind: "danger", title: "Não foi possível solicitar", text: result.message }));
         return;
       }
       setRequestSent(true);
@@ -387,7 +395,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
           setTokenHash("");
           setRecoveryStatus("invalid");
         }
-        setNotice({ kind: "danger", title: "Link indisponível", text: result.message });
+        setNotice(createToastNotice({ kind: "danger", title: "Link indisponível", text: result.message }));
       }
     } finally {
       setLoading(false);
@@ -399,11 +407,13 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
     if (Object.values(rules).some((valid) => !valid)) {
       setPasswordError("Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
       setConfirmPasswordError("");
+      focusFirstInvalid(event.currentTarget, ["new-password"]);
       return;
     }
     if (password !== confirmPassword) {
       setPasswordError("");
       setConfirmPasswordError("As senhas não coincidem.");
+      focusFirstInvalid(event.currentTarget, ["confirm-password"]);
       return;
     }
     setPasswordError("");
@@ -412,7 +422,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
     try {
       const result = await updateRecoveredPassword(password, confirmPassword);
       if (!result.ok) {
-        setNotice({ kind: "danger", title: "Não foi possível atualizar", text: result.message });
+        setNotice(createToastNotice({ kind: "danger", title: "Não foi possível atualizar", text: result.message }));
         if (result.message.toLowerCase().includes("expirou")) setRecoveryStatus("invalid");
         return;
       }
