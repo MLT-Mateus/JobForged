@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Bell, BriefcaseBusiness, CalendarDays, Download, FileText, House, LayoutDashboard, ListFilter, LogOut, MoreHorizontal, Palette, Plus, Search, Settings2, ShieldCheck, UsersRound, WalletCards } from "lucide-react";
-import { useThemePreference, ActionButton, DataTable, FieldControl, StatusBadge, TextField, MetricCard } from "@/app/components/ui";
+import { useThemePreference, ActionButton, DataTable, FieldControl, StatusBadge, TextField, MetricCard, WorkspacePageHeader } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { signOutCompany, useCompanyAuthSession } from "@/app/components/auth/auth-service";
 import { moduleCopy, type AdminModuleId } from "./admin-data";
@@ -39,7 +39,7 @@ export function AdminShell({ module, context, children }: { module: WorkspaceMod
   return <WorkspaceShell items={nav.map(([label,href,icon])=>({label,href,icon,active:`/app/${module}`===href,status:featureAvailability[href.slice(5) as WorkspaceModule].status}))} logo={context.organization.logo} brand={auth.company.name} title={auth.company.name} subtitle="Organização ativa" style={brandStyle} actions={<><button className="jf-action jf-action--quiet admin-notice" aria-label="Notificações (em breve)" title="Notificações em breve" disabled><Bell/></button><button className="jf-action jf-action--quiet admin-notice" aria-label="Sair da conta" title="Sair da conta" onClick={async()=>{await signOutCompany();router.replace("/login")}}><LogOut/></button></>} footer={<div className="admin-user"><a href="/app/minha-conta" title="Minha conta"><span>{(auth.fullName || auth.email || "U").split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase()}</span><span><strong>{auth.fullName || auth.email || "Conta"}</strong><small>{auth.email??context.user.role}</small></span></a></div>}><section className={`admin-availability admin-availability--${availability.status}`} aria-label={`Disponibilidade: ${availabilityLabel(availability.status)}`}><StatusBadge tone={availability.status==="beta"?"warning":"neutral"}>{availabilityLabel(availability.status)}</StatusBadge><p>{availability.description}</p></section>{availability.status==="soon"?<div className="admin-availability-preview" inert>{children}</div>:children}</WorkspaceShell>;
 }
 
-export function AdminPageHeader({ module, action }: { module: AdminModuleId; action?: ReactNode }) { const copy=moduleCopy[module]; return <header className="admin-page-head"><div><span>Painel / {copy.title}</span><h1>{copy.title}</h1><p>{copy.description}</p></div>{action}</header> }
+export function AdminPageHeader({ module, action }: { module: AdminModuleId; action?: ReactNode }) { const copy=moduleCopy[module]; return <WorkspacePageHeader section={`Painel / ${copy.title}`} title={copy.title} description={copy.description} action={action}/> }
 const PageHeader = AdminPageHeader;
 function Toolbar({ search="Pesquisar", children }: { search?:string; children?:ReactNode }) { return <div className="admin-toolbar"><TextField className="admin-search-field" label={search} icon={Search} type="search" placeholder={search}/><div>{children}<ActionButton variant="secondary" icon={<ListFilter/>}>Filtros</ActionButton></div></div> }
 const Metric = MetricCard;

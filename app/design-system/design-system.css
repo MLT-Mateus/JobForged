@@ -1969,6 +1969,9 @@ body:has(.ds-page) {
 /* Chrome is provided by WorkspaceShell, shared with the company panel. */
 .ds-page.ds-page--workspace { position:static; inset:auto; height:auto; min-height:0; overflow:visible; background:transparent; }
 .ds-sidebar-return { flex-shrink:0; padding-top:var(--jf-ui-space-3); }
+.ds-workspace-example{padding:var(--jf-ui-space-4);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface-soft);color:var(--jf-ui-text)}
+.ds-workspace-example .jf-page-head{margin-bottom:var(--jf-ui-space-4)}
+.ds-workspace-example .jf-inline-notice{margin:0}
 .ds-sidebar-return .jf-action { width:100%; min-height:44px; }
 .is-collapsed .ds-sidebar-return .jf-action { padding-inline:0; }
 .is-collapsed .ds-sidebar-return span { display:none; }
