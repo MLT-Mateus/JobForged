@@ -8,14 +8,36 @@ export JBFD_ENV_FILE="/opt/jbfd/${environment}/.env"
 [[ -f "$JBFD_ENV_FILE" ]] || { echo "Arquivo ausente: $JBFD_ENV_FILE" >&2; exit 66; }
 
 # Keep canonical host and public URL available for legacy VPS .env files.
-# These values are derived per environment and never write secrets or mutate the .env.
+# These values are public runtime settings; no secrets are written or displayed.
 if [[ "$environment" == "live" ]]; then
-  export APP_HOST_RULE="${APP_HOST_RULE:-Host(`jobforged.com`) || Host(`www.jobforged.com`)}"
+  APP_HOST_RULE="${APP_HOST_RULE:-}"
+  [[ -n "$APP_HOST_RULE" ]] || APP_HOST_RULE='Host(`jobforged.com`) || Host(`www.jobforged.com`)'
+  export APP_HOST_RULE
   export APP_PUBLIC_URL="${APP_PUBLIC_URL:-https://jobforged.com}"
 else
-  export APP_HOST_RULE="${APP_HOST_RULE:-Host(`test.jobforged.com`)}"
+  APP_HOST_RULE="${APP_HOST_RULE:-}"
+  [[ -n "$APP_HOST_RULE" ]] || APP_HOST_RULE='Host(`test.jobforged.com`)'
+  export APP_HOST_RULE
   export APP_PUBLIC_URL="${APP_PUBLIC_URL:-https://test.jobforged.com}"
 fi
+
+ensure_env_value() {
+  local key="$1" value="$2" temporary
+  temporary="$(mktemp "${JBFD_ENV_FILE}.XXXXXX")"
+  awk -v key="$key" -v value="$value" '
+    BEGIN { prefix=key "="; replaced=0 }
+    index($0, prefix) == 1 { print prefix value; replaced=1; next }
+    { print }
+    END { if (!replaced) print prefix value }
+  ' "$JBFD_ENV_FILE" > "$temporary"
+  chmod 600 "$temporary"
+  mv -f "$temporary" "$JBFD_ENV_FILE"
+}
+
+# Persist only deterministic public routing values so Compose parses them
+# exactly the same way on every subsequent restart.
+ensure_env_value APP_HOST_RULE "$APP_HOST_RULE"
+ensure_env_value APP_PUBLIC_URL "$APP_PUBLIC_URL"
 
 compose=(docker compose --project-name "jbfd-${environment}" --env-file "$JBFD_ENV_FILE" -f "$root/deploy/compose.yml")
 case "$command" in
