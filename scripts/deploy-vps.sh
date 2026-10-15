@@ -7,14 +7,14 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export JBFD_ENV_FILE="/opt/jbfd/${environment}/.env"
 [[ -f "$JBFD_ENV_FILE" ]] || { echo "Arquivo ausente: $JBFD_ENV_FILE" >&2; exit 66; }
 
-# Keep the canonical host rule available even for legacy VPS .env files.
-# This is derived per environment and never writes secrets or mutates the .env.
-if [[ -z "${APP_HOST_RULE:-}" ]]; then
-  if [[ "$environment" == "live" ]]; then
-    export APP_HOST_RULE='Host(`jobforged.com`) || Host(`www.jobforged.com`)'
-  else
-    export APP_HOST_RULE='Host(`test.jobforged.com`)'
-  fi
+# Keep canonical host and public URL available for legacy VPS .env files.
+# These values are derived per environment and never write secrets or mutate the .env.
+if [[ "$environment" == "live" ]]; then
+  export APP_HOST_RULE="${APP_HOST_RULE:-Host(`jobforged.com`) || Host(`www.jobforged.com`)}"
+  export APP_PUBLIC_URL="${APP_PUBLIC_URL:-https://jobforged.com}"
+else
+  export APP_HOST_RULE="${APP_HOST_RULE:-Host(`test.jobforged.com`)}"
+  export APP_PUBLIC_URL="${APP_PUBLIC_URL:-https://test.jobforged.com}"
 fi
 
 compose=(docker compose --project-name "jbfd-${environment}" --env-file "$JBFD_ENV_FILE" -f "$root/deploy/compose.yml")
