@@ -7,6 +7,7 @@ services:
       NODE_ENV: production
       PORT: "3000"
       HOST: 0.0.0.0
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:?Defina APP_PUBLIC_URL}
     labels:
       - traefik.enable=true
       - traefik.docker.network=${JBFD_DOCKER_NETWORK:?Defina a rede do Traefik}
