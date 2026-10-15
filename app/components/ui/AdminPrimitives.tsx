@@ -26,3 +26,15 @@ export function MetricCard({ label, value, detail }: { label: string; value: Rea
 export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HTMLElement>&{as?:"section"|"article"|"aside"}) {
  return <Tag {...props} className={`jf-panel ${className}`.trim()}/>;
 }
+
+export function WorkspacePageHeader({ section, title, description, action }: { section: string; title: string; description: string; action?: ReactNode }) {
+  return <header className="jf-page-head"><div><span>{section}</span><h1>{title}</h1><p>{description}</p></div>{action}</header>;
+}
+
+export function PanelHeading({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
+  return <header className="jf-panel-head"><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{action}</header>;
+}
+
+export function InlineNotice({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "danger" | "success" }) {
+  return <p className={`jf-inline-notice jf-inline-notice--${tone}`} role={tone === "danger" ? "alert" : "status"}>{children}</p>;
+}

@@ -46,11 +46,6 @@ body:has(.admin-shell){overflow:hidden}
 .admin-availability--beta{border-color:color-mix(in srgb,var(--jf-ui-warning) 32%,var(--jf-ui-border))}
 .admin-availability p{margin:0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.5}
 .admin-availability-preview{opacity:.68}
-.admin-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--jf-ui-space-6);margin-bottom:var(--jf-ui-space-6)}
-.admin-page-head>div:first-child{display:grid;gap:var(--jf-ui-space-1)}
-.admin-page-head span{color:var(--jf-ui-brand-strong);font-size:var(--jf-ui-font-size-xs);font-weight:750;text-transform:uppercase}
-
-.admin-page-head p{max-width:700px;margin:0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.6}
 .admin-actions{display:flex;gap:var(--jf-ui-space-2)}
 .admin-toolbar{display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-3);margin-bottom:var(--jf-ui-space-3)}
 .admin-toolbar>label{display:flex;width:min(420px,100%);min-height:42px;align-items:center;gap:var(--jf-ui-space-2);padding:0 var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface)}
@@ -181,8 +176,7 @@ body:has(.admin-shell){overflow:hidden}
 
 @media(max-width:680px){.admin-content{padding:var(--jf-ui-space-5) var(--jf-ui-space-4) var(--jf-ui-space-7)}
 .admin-org{display:none}
-.admin-page-head{align-items:flex-start;flex-direction:column}
-.admin-page-head>.jf-action,.admin-page-head>.admin-actions{width:100%}
+.jf-page-head>.jf-action,.jf-page-head>.admin-actions{width:100%}
 .admin-actions{display:grid;grid-template-columns:1fr 1fr}
 .admin-toolbar{align-items:stretch;flex-direction:column}
 .admin-toolbar>label{width:100%}
@@ -224,9 +218,9 @@ body:has(.admin-shell){overflow:hidden}
 .admin-shell { font-size:var(--jf-ui-font-size-md); line-height:1.5; }
 .admin-shell :is(button,a,input,textarea,select):focus-visible { outline:2px solid var(--jf-ui-focus); outline-offset:3px; }
 .admin-shell :is(h1,h2,h3,h4) { font-family:var(--jf-ui-font-heading); overflow-wrap:anywhere; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { margin:0; font:700 clamp(1.5rem,2.5vw,2rem)/1.25 var(--jf-ui-font-heading); letter-spacing:-.025em; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-7); gap:var(--jf-ui-space-6); flex-wrap:wrap; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-detail-head) p { margin-top:var(--jf-ui-space-2); font-size:var(--jf-ui-font-size-md); line-height:1.6; }
+.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { margin:0; font:700 clamp(1.5rem,2.5vw,2rem)/1.25 var(--jf-ui-font-heading); letter-spacing:-.025em; }
+.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-7); gap:var(--jf-ui-space-6); flex-wrap:wrap; }
+.admin-shell :is(.home-welcome,.custom-head,.job-detail-head) p { margin-top:var(--jf-ui-space-2); font-size:var(--jf-ui-font-size-md); line-height:1.6; }
 .admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) h2 { font-size:var(--jf-ui-font-size-lg); line-height:1.4; }
 .admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) { min-width:0; }
 .admin-shell .jf-field { min-width:0; }
@@ -242,7 +236,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-toggle-list .jf-toggle-row>div span { font-size:var(--jf-ui-font-size-sm); }
 @media(max-width:680px) {
  .admin-content { padding:var(--jf-ui-space-6) var(--jf-ui-layout-gutter-mobile); }
- .admin-page-head,.custom-head,.job-wizard-head,.job-detail-head { align-items:flex-start; }
+ .custom-head,.job-wizard-head,.job-detail-head { align-items:flex-start; }
  .admin-shell .admin-card>header { flex-wrap:wrap; padding:var(--jf-ui-space-4); }
  .admin-form .jf-field { padding:var(--jf-ui-space-3) var(--jf-ui-space-4); }
  .admin-org strong { overflow-wrap:anywhere; }
@@ -293,17 +287,15 @@ body:has(.admin-shell){overflow:hidden}
   letter-spacing:.035em;
 }
 .admin-shell .jf-table td { color:var(--jf-ui-text); line-height:1.5; }
-.admin-shell .admin-page-head > div:first-child { max-width:760px; }
-.admin-shell .admin-page-head > div:first-child > span { letter-spacing:.06em; }
 .admin-shell .admin-toolbar { gap:var(--jf-ui-space-4); }
 .admin-shell .admin-kanban { gap:var(--jf-ui-space-3); }
 .admin-shell .admin-kanban > section { border-radius:var(--jf-ui-radius-card); }
 .admin-shell .admin-kanban article { border-radius:var(--jf-ui-control-radius); }
 .admin-shell .admin-workspace { min-width:0; }
 .admin-shell .admin-content { width:min(var(--jf-ui-layout-content-max),100%); margin-inline:auto; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { align-items:flex-end; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { letter-spacing:-.035em; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) p { max-width:68ch; color:var(--jf-ui-text-muted); }
+.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { align-items:flex-end; }
+.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { letter-spacing:-.035em; }
+.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) p { max-width:68ch; color:var(--jf-ui-text-muted); }
 .admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) {
   box-shadow:0 1px 2px color-mix(in srgb,var(--jf-ui-text) 4%,transparent);
 }
@@ -322,7 +314,36 @@ body:has(.admin-shell){overflow:hidden}
 @media(max-width:680px) {
   .admin-shell .admin-card > header { padding:var(--jf-ui-space-4); }
   .admin-shell :is(.admin-metrics,.admin-chart-grid,.admin-settings-grid,.admin-agenda,.admin-account) { gap:var(--jf-ui-space-3); }
-  .admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-5); }
+  .admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-5); }
   .admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) { border-radius:var(--jf-ui-control-radius); }
   .admin-shell .jf-table td { padding-block:var(--jf-ui-space-3); }
 }
+
+/* Workspace content uses the same spacing and surfaces as the component catalog. */
+.admin-shell .admin-main{min-width:0}
+.admin-shell .admin-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--jf-ui-space-4);margin-bottom:var(--jf-ui-space-4)}
+.admin-shell .admin-management-stack{display:grid;gap:var(--jf-ui-space-4)}
+.admin-shell .admin-form-stack{display:grid;gap:var(--jf-ui-space-4)}
+.admin-shell .admin-form-stack>.jf-action{justify-self:start}
+.admin-shell .admin-record-list,.admin-shell .admin-audit-list{margin:0;padding:0;list-style:none}
+.admin-shell .admin-record-list li{display:flex;min-width:0;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-4) var(--jf-ui-space-6);border-bottom:1px solid var(--jf-ui-border)}
+.admin-shell .admin-record-list li:last-child{border-bottom:0}
+.admin-shell .admin-record-list li>div{display:grid;min-width:0;gap:var(--jf-ui-space-1)}
+.admin-shell .admin-record-list strong{overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-record-list small,.admin-shell .admin-muted,.admin-shell .admin-facts span,.admin-shell .admin-audit-list time{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.6}
+.admin-shell .admin-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:var(--jf-ui-space-3)}
+.admin-shell .admin-facts>div{display:grid;align-content:start;gap:var(--jf-ui-space-1);padding:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface-soft)}
+.admin-shell .admin-facts strong{overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-subheading{margin:var(--jf-ui-space-6) 0 var(--jf-ui-space-3);font-size:var(--jf-ui-font-size-md)}
+.admin-shell .admin-audit-list li{display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--jf-ui-space-2);padding:var(--jf-ui-space-3) 0;border-bottom:1px solid var(--jf-ui-border);font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-audit-list li:last-child{border-bottom:0}
+.admin-shell .admin-team-list{display:grid}
+.admin-shell .admin-team-list article{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) auto minmax(150px,.8fr) auto;align-items:center;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-4) var(--jf-ui-space-6);border-bottom:1px solid var(--jf-ui-border)}
+.admin-shell .admin-team-list article:last-child{border-bottom:0}
+.admin-shell .admin-team-list :is(strong,small){min-width:0;overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-team-list small{color:var(--jf-ui-text-muted)}
+.admin-shell .admin-team-list select{min-width:0;width:100%;min-height:var(--jf-ui-control-height);padding-inline:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface);color:var(--jf-ui-text)}
+.admin-shell .admin-panel-feedback{padding:0 var(--jf-ui-space-6) var(--jf-ui-space-6)}
+.admin-shell .admin-panel-feedback .jf-inline-notice{margin:0}
+@media(max-width:1050px){.admin-shell .admin-team-list article{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.admin-shell .admin-team-list article>select{grid-column:1/3}.admin-shell .admin-team-list article>.jf-action{grid-column:3;grid-row:2}}
+@media(max-width:680px){.admin-shell .admin-team-list article{grid-template-columns:minmax(0,1fr) auto;padding:var(--jf-ui-space-4)}.admin-shell .admin-team-list article>small{grid-column:1/-1;grid-row:2}.admin-shell .admin-team-list article>select{grid-column:1;grid-row:3}.admin-shell .admin-team-list article>.jf-action{grid-column:2;grid-row:3}.admin-shell .admin-record-list li{padding-inline:var(--jf-ui-space-4)}.admin-shell .admin-panel-feedback{padding:0 var(--jf-ui-space-4) var(--jf-ui-space-4)}}

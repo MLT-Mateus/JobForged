@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { WorkspaceShell } from "@/app/components/ui/WorkspaceShell";
-import { Panel, StatusBadge } from "@/app/components/ui";
+import { EmptyState, InlineNotice, MetricCard, Panel, PanelHeading, StatusBadge, WorkspacePageHeader } from "@/app/components/ui";
 import { LogOut, ShieldCheck } from "lucide-react";
 import { signOutCompany } from "@/app/components/auth/auth-service";
 import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
@@ -15,10 +15,10 @@ export function BackofficeClient({ email }: { email: string }) {
     .then(async response => { if (!response.ok) throw new Error(); return response.json() as Promise<{ overview: Overview }>; })
     .then(data => setOverview(data.overview)).catch(() => setError("Não foi possível carregar dados autorizados.")); }, []);
   return <WorkspaceShell items={[{ label: "Backoffice", href: "/backoffice", icon: ShieldCheck, active: true }]} logo="/brand/jobforged-symbol.svg" brand="JobForged" title="JobForged" subtitle="Administração interna" actions={<button type="button" className="jf-action jf-action--quiet admin-notice" aria-label="Sair da conta" title="Sair da conta" onClick={async () => { await signOutCompany(); location.replace("/login"); }}><LogOut/></button>}><div className="admin-main">
-    <header className="admin-page-head"><div><span>JobForged / Backoffice</span><h1>Visão administrativa</h1><p>Dados operacionais permitidos para {email}.</p></div></header>
-    {error && <p role="alert">{error}</p>}
-    {!overview && !error && <p role="status">Carregando dados…</p>}
-    {overview && <><div className="admin-metrics"><Panel><h2>Empresas</h2><strong>{overview.companies}</strong></Panel><Panel><h2>Usuários vinculados</h2><strong>{overview.members}</strong></Panel></div>
-      <Panel as="section" className="admin-card"><h2>Empresas recentes</h2><ul>{overview.recentCompanies.map(company => <li key={company.id}><strong>{company.name}</strong> · <StatusBadge>{company.plan_status}</StatusBadge> · {new Date(company.created_at).toLocaleDateString("pt-BR")}</li>)}</ul></Panel></>}
+    <WorkspacePageHeader section="JobForged / Backoffice" title="Visão administrativa" description={`Dados operacionais permitidos para ${email}.`}/>
+    {error && <InlineNotice tone="danger">{error}</InlineNotice>}
+    {!overview && !error && <InlineNotice>Carregando dados…</InlineNotice>}
+    {overview && <><div className="admin-metrics"><MetricCard label="Empresas" value={overview.companies}/><MetricCard label="Usuários vinculados" value={overview.members}/></div>
+      <Panel as="section" className="admin-card"><PanelHeading title="Empresas recentes" description="Organizações cadastradas mais recentemente"/>{overview.recentCompanies.length ? <ul className="admin-record-list">{overview.recentCompanies.map(company => <li key={company.id}><div><strong>{company.name}</strong><small>Criada em {new Date(company.created_at).toLocaleDateString("pt-BR")}</small></div><StatusBadge tone="neutral">{company.plan_status}</StatusBadge></li>)}</ul> : <EmptyState title="Nenhuma empresa recente" description="Os novos cadastros aparecerão aqui."/>}</Panel></>}
   </div></WorkspaceShell>;
 }

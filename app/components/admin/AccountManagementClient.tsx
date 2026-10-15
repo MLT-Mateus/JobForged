@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ActionButton, Panel, TextField } from "@/app/components/ui";
+import { ActionButton, InlineNotice, Panel, PanelHeading, TextField, WorkspacePageHeader } from "@/app/components/ui";
 import { useCompanyAuthSession, type AuthSessionState } from "@/app/components/auth/auth-service";
 import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
 import type { ToastKind } from "@/app/components/ui";
 
 export function AccountManagementClient() {
   const session = useCompanyAuthSession();
-  if (session.checking) return <p role="status">Carregando perfil…</p>;
+  if (session.checking) return <InlineNotice>Carregando perfil…</InlineNotice>;
   return <AccountEditor session={session} />;
 }
 
@@ -27,11 +27,10 @@ function AccountEditor({ session }: { session: AuthSessionState }) {
     setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Perfil salvo." : payload?.message ?? "Não foi possível salvar.");
     if (payload?.fullName) setFullName(payload.fullName);
   }
-  return <><header className="admin-page-head"><div><span>Painel / Minha Conta</span><h1>Minha Conta</h1><p>Dados reais do seu acesso empresarial.</p></div></header>
-    <div className="admin-settings-grid"><Panel as="section" className="admin-card admin-form"><h2>Meu perfil</h2>
-      <form className="auth-form" onSubmit={save}><TextField label="Nome completo" value={fullName} maxLength={120} onChange={event => setFullName(event.target.value)} required />
+  return <><WorkspacePageHeader section="Painel / Minha Conta" title="Minha Conta" description="Dados reais do seu acesso empresarial."/>
+    <div className="admin-settings-grid"><Panel as="section" className="admin-card"><PanelHeading title="Meu perfil" description="Informações da conta confirmada"/>
+      <form className="admin-form-stack jf-panel-body" onSubmit={save}><TextField label="Nome completo" value={fullName} maxLength={120} onChange={event => setFullName(event.target.value)} required />
         <TextField label="E-mail confirmado" type="email" value={session.email ?? ""} readOnly />
-        <ActionButton type="submit" disabled={busy}>Salvar perfil</ActionButton></form>{message && <p role="status">{message}</p>}</Panel>
-      <Panel as="section" className="admin-card"><h2>Acesso e segurança</h2><p><strong>Empresa:</strong> {session.company?.name}</p><p><strong>Função:</strong> {session.role}</p>
-        <p>Para alterar sua senha, solicite um link de uso único ao seu e-mail.</p><Link href="/recuperar-senha">Solicitar alteração de senha</Link></Panel></div></>;
+        <ActionButton type="submit" disabled={busy}>Salvar perfil</ActionButton></form>{message && <div className="admin-panel-feedback"><InlineNotice tone={messageKind === "danger" ? "danger" : messageKind === "success" ? "success" : "info"}>{message}</InlineNotice></div>}</Panel>
+      <Panel as="section" className="admin-card"><PanelHeading title="Acesso e segurança" description="Vínculo empresarial e recuperação da conta"/><div className="jf-panel-body"><div className="admin-facts"><div><span>Empresa</span><strong>{session.company?.name}</strong></div><div><span>Função</span><strong>{session.role}</strong></div></div><p className="admin-muted">Para alterar sua senha, solicite um link de uso único ao seu e-mail.</p><Link className="jf-action jf-action--secondary" href="/recuperar-senha">Solicitar alteração de senha</Link></div></Panel></div></>;
 }

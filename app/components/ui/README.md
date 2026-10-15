@@ -35,3 +35,4 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 - Buscas e filtros usam `TextField` e `SelectField`; controles nativos específicos usam `FieldControl` sem estilos descendentes próprios.
 - Notificações usam `AppToast`, na posição global. Telas não implementam notificações locais.
 - Títulos de páginas seguem a mesma hierarquia em `admin.css`. Os módulos consomem as famílias, cores, raios e espaçamentos de `ui.css`.
+- `WorkspacePageHeader`, `PanelHeading` e `InlineNotice` definem a hierarquia das páginas internas, títulos dos cartões e mensagens de estado. O catálogo em `/design-system/componentes` renderiza esses mesmos componentes.

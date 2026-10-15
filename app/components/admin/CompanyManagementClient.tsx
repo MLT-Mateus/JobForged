@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ActionButton, Panel, StatusBadge, TextField, type ToastKind } from "@/app/components/ui";
+import { ActionButton, InlineNotice, Panel, PanelHeading, SelectField, StatusBadge, TextField, WorkspacePageHeader, type ToastKind } from "@/app/components/ui";
 import { useStatusSoundForMessage } from "@/app/components/ui/status-sound";
 
 type Company = { id: string; name: string; cnpj: string | null; phone: string | null; plan_id: string; plan_status: string; created_at: string };
@@ -53,28 +53,27 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
     setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Acesso atualizado." : "Você não pode alterar esse acesso.");
     if (response?.ok) void load();
   }
-  if (!data) return <p role="status">{message || "Carregando empresa…"}</p>;
+  if (!data) return <InlineNotice tone={message ? "danger" : "info"}>{message || "Carregando empresa…"}</InlineNotice>;
   const canManage = data.role === "owner" || data.role === "admin";
-  return <><header className="admin-page-head"><div><span>Painel / {mode === "settings" ? "Configurações" : "Administradores"}</span>
-    <h1>{mode === "settings" ? "Dados da empresa" : "Equipe e acessos"}</h1>
-    <p>{mode === "settings" ? "Informações persistidas da sua organização." : "Usuários vinculados à sua organização."}</p></div></header>
-    {message && <p role="status">{message}</p>}
-    {mode === "settings" ? <div className="admin-settings-grid"><Panel as="section" className="admin-card admin-form"><h2>Identificação da empresa</h2>
-      <form onSubmit={save} className="auth-form"><TextField label="Nome da empresa" value={name} maxLength={160} onChange={event => setName(event.target.value)} required />
+  return <><WorkspacePageHeader section={`Painel / ${mode === "settings" ? "Configurações" : "Administradores"}`}
+    title={mode === "settings" ? "Dados da empresa" : "Equipe e acessos"}
+    description={mode === "settings" ? "Informações persistidas da sua organização." : "Usuários vinculados à sua organização."}/>
+    {message && <InlineNotice tone={messageKind === "danger" ? "danger" : messageKind === "success" ? "success" : "info"}>{message}</InlineNotice>}
+    {mode === "settings" ? <div className="admin-settings-grid"><Panel as="section" className="admin-card"><PanelHeading title="Identificação da empresa" description="Dados usados para identificar sua organização"/>
+      <form onSubmit={save} className="admin-form-stack jf-panel-body"><TextField label="Nome da empresa" value={name} maxLength={160} onChange={event => setName(event.target.value)} required />
         <TextField label="CNPJ" value={cnpj} onChange={event => setCnpj(event.target.value.replace(/\D/g, "").slice(0, 14))} />
         <TextField label="Telefone" value={phone} onChange={event => setPhone(event.target.value.replace(/\D/g, "").slice(0, 13))} />
         <ActionButton type="submit" disabled={!canManage || busy}>Salvar dados</ActionButton></form></Panel>
-      <Panel as="section" className="admin-card"><h2>Plano atual</h2><p>{data.company.plan_id} · {data.company.plan_status}</p><p>Cadastro criado em {new Date(data.company.created_at).toLocaleDateString("pt-BR")}.</p>
-        <h3>Histórico recente</h3><ul>{data.audit.map(event => <li key={event.id}>{event.action} · {new Date(event.created_at).toLocaleString("pt-BR")}</li>)}</ul></Panel></div>
-      : <><Panel as="section" className="admin-card"><h2>Convidar pessoa</h2><p>O convite expira em 24 horas e exige o mesmo e-mail confirmado. Cada conta mantém um vínculo empresarial ativo nesta versão.</p>
-          <form className="auth-form" onSubmit={invite}><TextField label="E-mail" type="email" value={inviteEmail} onChange={event => setInviteEmail(event.target.value)} required />
-            <label>Função <select value={inviteRole} onChange={event => setInviteRole(event.target.value as "admin" | "member") }><option value="member">Membro</option><option value="admin">Administrador</option></select></label>
+      <Panel as="section" className="admin-card"><PanelHeading title="Plano atual" description="Situação da assinatura e histórico da empresa"/><div className="jf-panel-body"><div className="admin-facts"><div><span>Plano</span><strong>{data.company.plan_id}</strong></div><div><span>Situação</span><strong>{data.company.plan_status}</strong></div><div><span>Cadastro</span><strong>{new Date(data.company.created_at).toLocaleDateString("pt-BR")}</strong></div></div><h3 className="admin-subheading">Histórico recente</h3>{data.audit.length ? <ul className="admin-audit-list">{data.audit.map(event => <li key={event.id}><span>{event.action}</span><time>{new Date(event.created_at).toLocaleString("pt-BR")}</time></li>)}</ul> : <p className="admin-muted">Nenhuma alteração registrada.</p>}</div></Panel></div>
+      : <div className="admin-management-stack"><Panel as="section" className="admin-card"><PanelHeading title="Convidar pessoa" description="O convite expira em 24 horas e exige o mesmo e-mail confirmado. Cada conta mantém um vínculo empresarial ativo nesta versão."/>
+          <form className="admin-form-stack jf-panel-body" onSubmit={invite}><TextField label="E-mail" type="email" value={inviteEmail} onChange={event => setInviteEmail(event.target.value)} required />
+            <SelectField label="Função" value={inviteRole} onValueChange={value => setInviteRole(value as "admin" | "member")} options={[{value:"member",label:"Membro"},{value:"admin",label:"Administrador"}]}/>
             <ActionButton type="submit" disabled={!canManage || busy}>Enviar convite</ActionButton></form></Panel>
-          <Panel as="section" className="admin-card"><h2>Equipe vinculada</h2><div className="admin-team-list">{data.members.map(member => <article key={member.id}>
+          <Panel as="section" className="admin-card"><PanelHeading title="Equipe vinculada" description="Funções e estado de cada acesso"/><div className="admin-team-list">{data.members.map(member => <article key={member.id}>
             <strong>{member.full_name}</strong><small>{member.email}</small><StatusBadge tone={member.status === "active" ? "positive" : "neutral"}>{member.status === "active" ? "Ativo" : "Suspenso"}</StatusBadge>
             <select aria-label={`Função de ${member.email}`} value={member.role} disabled={!canManage || busy || (member.role === "owner" && data.role !== "owner")}
               onChange={event => void changeMember(member, event.target.value as Member["role"], member.status)}><option value="owner" disabled={data.role !== "owner"}>Titular</option><option value="admin">Administrador</option><option value="member">Membro</option></select>
             <ActionButton type="button" variant="secondary" disabled={!canManage || busy || member.role === "owner"} onClick={() => void changeMember(member, member.role, member.status === "active" ? "inactive" : "active")}>{member.status === "active" ? "Suspender" : "Reativar"}</ActionButton>
-          </article>)}</div></Panel></>}
+          </article>)}</div></Panel></div>}
   </>;
 }
