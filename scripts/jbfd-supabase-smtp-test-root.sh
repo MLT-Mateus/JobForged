@@ -56,6 +56,8 @@ services:
       GOTRUE_MAILER_SUBJECTS_RECOVERY: Redefina sua senha na JobForged
       GOTRUE_MAILER_TEMPLATES_CONFIRMATION: https://test.jobforged.com/api/auth/email-templates/auth-confirmation
       GOTRUE_MAILER_SUBJECTS_CONFIRMATION: Confirme seu e-mail na JobForged
+      GOTRUE_MAILER_TEMPLATES_INVITE: https://test.jobforged.com/api/auth/email-templates/account-invitation
+      GOTRUE_MAILER_SUBJECTS_INVITE: Seu convite de acesso à JobForged
 YAML
 chmod 600 "$template_candidate"
 chown root:root "$template_candidate"

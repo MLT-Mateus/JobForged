@@ -34,16 +34,16 @@ export const featureAvailability: Record<WorkspaceModule, FeatureAvailability> =
     description: "As alterações são uma prévia salva neste navegador. Elas ainda não aparecem para sua equipe nem em um portal público.",
   },
   administradores: {
-    status: "soon",
-    description: "A equipe exibida é um exemplo. Convites e gestão de acessos ainda não estão disponíveis.",
+    status: "beta",
+    description: "Equipe real da empresa: titulares e administradores podem convidar, alterar e suspender acessos. Convites expiram em 24 horas.",
   },
   financeiro: {
     status: "soon",
     description: "Plano, consumo e faturas são exemplos. Eles não representam cobranças reais da sua empresa.",
   },
   configuracoes: {
-    status: "soon",
-    description: "Os dados e controles são uma prévia. Alterações nesta página ainda não são salvas para sua empresa.",
+    status: "beta",
+    description: "Os dados cadastrais da empresa são reais e auditáveis. Preferências de recrutamento ainda estão em desenvolvimento.",
   },
   "minha-conta": {
     status: "soon",

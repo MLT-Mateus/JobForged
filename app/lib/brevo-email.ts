@@ -8,6 +8,23 @@ const SENDER = { name: "JobForged", email: "suporte@jobforged.com" };
 
 export type BrevoSendResult = "sent" | "not-configured" | "failed";
 
+export async function sendCompanyInvitationEmail(email: string, company: string, token: string): Promise<BrevoSendResult> {
+  const apiKey = process.env.BREVO_API_KEY?.trim();
+  if (!apiKey) return "not-configured";
+  const origin = process.env.APP_ENV === "live" ? "https://jobforged.com" : "https://test.jobforged.com";
+  const url = `${origin}/convite?token=${encodeURIComponent(token)}`;
+  const safeCompany = company.replace(/[&<>"']/g, "").slice(0, 160);
+  try {
+    const response = await fetch(BREVO_SEND_URL, {
+      method: "POST", cache: "no-store", signal: AbortSignal.timeout(8000),
+      headers: { accept: "application/json", "api-key": apiKey, "content-type": "application/json" },
+      body: JSON.stringify({ sender: SENDER, to: [{ email }], subject: "Convite para acessar uma empresa na JobForged",
+        htmlContent: `<html lang="pt-BR"><body style="font-family:Arial,sans-serif;color:#142321;padding:24px"><img src="${origin}/brand/jobforged-logo.png" alt="JobForged" width="164"/><h1>Convite para ${safeCompany}</h1><p>Você recebeu um convite para acessar esta empresa na JobForged. O link expira em 24 horas e só funciona com este e-mail confirmado.</p><p><a href="${url}">Aceitar convite</a></p><p>Se você não esperava este convite, ignore esta mensagem.</p></body></html>` }),
+    });
+    return response.ok ? "sent" : "failed";
+  } catch { return "failed"; }
+}
+
 function appHomeUrl() {
   const origin = process.env.APP_ENV === "test"
     ? "https://test.jobforged.com"

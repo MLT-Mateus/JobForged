@@ -72,7 +72,8 @@ export function LoginClient() {
         return;
       }
       setValues(current => ({ ...current, password: "" }));
-      router.replace("/app/home");
+      const session = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).catch(() => null) as { platformAdmin?: boolean } | null;
+      router.replace(session?.platformAdmin ? "/backoffice" : "/app/home");
     } finally {
       setLoading(false);
     }
@@ -344,7 +345,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
   const [requestSent, setRequestSent] = useState(false);
   const [notice, setNotice] = useState<ToastNotice | null>(null);
   const [recoveryStatus, setRecoveryStatus] = useState<"checking" | "link" | "ready" | "done" | "invalid">(
-    !reset ? "checking" : recoveryType === "recovery" && initialTokenHash ? "link" : "invalid",
+    !reset ? "checking" : (recoveryType === "recovery" || recoveryType === "invite") && initialTokenHash ? "link" : "invalid",
   );
   const [tokenHash, setTokenHash] = useState(initialTokenHash);
   const [password, setPassword] = useState("");
@@ -375,7 +376,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
   async function verifyRecoveryLink() {
     setLoading(true);
     try {
-      const result = await verifyPasswordRecovery(tokenHash);
+      const result = await verifyPasswordRecovery(tokenHash, recoveryType === "invite" ? "invite" : "recovery");
       if (result.ok) {
         window.history.replaceState(null, "", "/redefinir-senha");
         setTokenHash("");

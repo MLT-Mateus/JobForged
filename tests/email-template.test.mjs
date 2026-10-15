@@ -58,6 +58,16 @@ test("recovery email export keeps its working Supabase link", () => {
   assert.match(html, /<a href="\{\{ \.SiteURL \}\}\/redefinir-senha\?token_hash=\{\{ \.TokenHash \}\}&amp;type=recovery"/);
 });
 
+test("confirmation and invitation use explicit, complete Test landing links", () => {
+  const confirmation = renderEmailHtml("auth-confirmation", "light");
+  const invitation = renderEmailHtml("account-invitation", "light");
+  assert.match(confirmation, /confirmar-email\?token_hash=\{\{ \.TokenHash \}\}&amp;type=signup/);
+  assert.match(invitation, /redefinir-senha\?token_hash=\{\{ \.TokenHash \}\}&amp;type=invite/);
+  assert.doesNotMatch(confirmation, /\.ConfirmationURL/);
+  assert.doesNotMatch(confirmation, /Olá, \{\{ \.Email \}\}/);
+  assert.match(confirmation, /https:\/\/test\.jobforged\.com\/brand\/jobforged-logo\.png/);
+});
+
 test("Test and Live Auth point recovery emails to the approved Design System template", async () => {
   const [composeOverride, liveComposeOverride, smtpRootHelper] = await Promise.all([
     readFile(new URL("../deploy/supabase/docker-compose.override.yml", import.meta.url), "utf8"),
@@ -68,6 +78,7 @@ test("Test and Live Auth point recovery emails to the approved Design System tem
   for (const source of [composeOverride, smtpRootHelper]) {
     assert.match(source, /GOTRUE_MAILER_TEMPLATES_RECOVERY:\s*https:\/\/test\.jobforged\.com\/api\/auth\/email-templates\/password-recovery/);
     assert.match(source, /GOTRUE_MAILER_SUBJECTS_RECOVERY:\s*Redefina sua senha na JobForged/);
+    assert.match(source, /GOTRUE_MAILER_TEMPLATES_INVITE:\s*https:\/\/test\.jobforged\.com\/api\/auth\/email-templates\/account-invitation/);
   }
 
   assert.match(liveComposeOverride, /GOTRUE_MAILER_TEMPLATES_RECOVERY:\s*https:\/\/jobforged\.com\/api\/auth\/email-templates\/password-recovery/);
