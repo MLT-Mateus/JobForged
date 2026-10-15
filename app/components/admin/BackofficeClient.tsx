@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { WorkspaceShell } from "@/app/components/ui/WorkspaceShell";
 import { Panel, StatusBadge } from "@/app/components/ui";
-import { ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import { signOutCompany } from "@/app/components/auth/auth-service";
 
 type Overview = { companies: number; members: number; recentCompanies: Array<{ id: string; name: string; plan_id: string; plan_status: string; created_at: string }> };
@@ -12,7 +12,7 @@ export function BackofficeClient({ email }: { email: string }) {
   useEffect(() => { void fetch("/api/backoffice", { credentials: "same-origin", cache: "no-store" })
     .then(async response => { if (!response.ok) throw new Error(); return response.json() as Promise<{ overview: Overview }>; })
     .then(data => setOverview(data.overview)).catch(() => setError("Não foi possível carregar dados autorizados.")); }, []);
-  return <WorkspaceShell items={[{ label: "Backoffice", href: "/backoffice", icon: ShieldCheck, active: true }]} logo="/brand/jobforged-symbol.svg" brand="JobForged" title="JobForged" subtitle="Administração interna" footer={<button type="button" className="jf-action jf-action--quiet" onClick={async () => { await signOutCompany(); location.replace("/login"); }}>Sair</button>}><div className="admin-main">
+  return <WorkspaceShell items={[{ label: "Backoffice", href: "/backoffice", icon: ShieldCheck, active: true }]} logo="/brand/jobforged-symbol.svg" brand="JobForged" title="JobForged" subtitle="Administração interna" actions={<button type="button" className="jf-action jf-action--quiet admin-notice" aria-label="Sair da conta" title="Sair da conta" onClick={async () => { await signOutCompany(); location.replace("/login"); }}><LogOut/></button>}><div className="admin-main">
     <header className="admin-page-head"><div><span>JobForged / Backoffice</span><h1>Visão administrativa</h1><p>Dados operacionais permitidos para {email}.</p></div></header>
     {error && <p role="alert">{error}</p>}
     {!overview && !error && <p role="status">Carregando dados…</p>}
