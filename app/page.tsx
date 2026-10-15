@@ -5,7 +5,7 @@ import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode }
 import Link from "next/link";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, BarChart3, Bot, BrainCircuit, BriefcaseBusiness, Check, ChevronDown, CircleCheck, FileText, LayoutTemplate, LogIn, Mail, Menu, MessageCircle, Paintbrush, PanelTop, ShieldCheck, SquareKanban, Sparkles, Star, UsersRound, X } from "lucide-react";
+import { ArrowRight, BarChart3, Bot, BrainCircuit, BriefcaseBusiness, Check, ChevronDown, CircleCheck, Clock3, FileText, LayoutTemplate, LogIn, Mail, Menu, MessageCircle, Paintbrush, PanelTop, ShieldCheck, SquareKanban, Sparkles, UsersRound, X } from "lucide-react";
 import { ViewportMotion } from "./components/ViewportMotion";
 import { ThemeSelector, useThemePreference } from "@/app/components/ui";
 import { plansById } from "@/app/data/plans";
@@ -587,12 +587,12 @@ export default function Home() {
               </ul>
             </Reveal>
             <Reveal className="price-card price-card--featured" delay={0.08}>
-              <span className="plan-badge"><Star /> Mais popular</span>
+              <span className="plan-badge"><Clock3 /> Em breve</span>
               <div className="plan-head"><span>Básico</span><small>Para PMEs que querem mais controle</small></div>
               <div className="plan-price"><strong>R$ {plansById[annualBilling ? "basico-anual" : "basico-mensal"].price}</strong><span>{plansById[annualBilling ? "basico-anual" : "basico-mensal"].suffix}</span></div>
               {annualBilling && <small className="plan-equivalent">Economize R$ 40,00 por mês — R$ 480,00 por ano</small>}
               <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
-              <Link className="button button--primary jf-action jf-action--primary" href={`/cadastro?plano=${annualBilling ? "basico-anual" : "basico-mensal"}`}>Falar com especialista <ArrowRight /></Link>
+              <button className="button button--primary jf-action jf-action--primary" type="button" disabled aria-label="Plano Básico indisponível: contratação em breve">Contratação em breve</button>
               <ul>
                 <li><Check /> Até 5 vagas simultâneas</li>
                 <li><Check /> 3 usuários</li>
@@ -602,11 +602,12 @@ export default function Home() {
               </ul>
             </Reveal>
             <Reveal className="price-card price-card--professional" delay={0.16}>
+              <span className="plan-badge"><Clock3 /> Em breve</span>
               <div className="plan-head"><span>Profissional</span><small>Para operações estruturadas</small></div>
               <div className="plan-price"><strong>R$ {plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price}</strong><span>{plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].suffix}</span></div>
               {annualBilling && <small className="plan-equivalent">Economize R$ 47,00 por mês — R$ 564,00 por ano</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
-              <Link className="button button--blue jf-action jf-action--accent" href={`/cadastro?plano=${annualBilling ? "profissional-anual" : "profissional-mensal"}`}>Falar com especialista <ArrowRight /></Link>
+              <button className="button button--blue jf-action jf-action--accent" type="button" disabled aria-label="Plano Profissional indisponível: contratação em breve">Contratação em breve</button>
               <ul>
                 <li><Check /> Até 15 vagas simultâneas</li>
                 <li><Check /> 10 usuários</li>
@@ -616,7 +617,7 @@ export default function Home() {
               </ul>
             </Reveal>
           </div>
-          <p className="pricing-note"><ShieldCheck /> Fale com um especialista para escolher o plano mais adequado à sua operação.</p>
+          <p className="pricing-note"><ShieldCheck /> Básico e Profissional terão contratação e pagamento direto em breve. Se quiser conversar antes, use o botão lateral de WhatsApp.</p>
         </div>
       </section>
 
