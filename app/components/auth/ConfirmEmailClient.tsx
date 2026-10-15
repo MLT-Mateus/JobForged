@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { ActionButton, TextField } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
+import { isEmail } from "./auth-validation";
+import { focusFirstInvalid } from "./focus-first-invalid";
 import "./auth.css";
 
 export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; type: string }) {
@@ -18,7 +20,13 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
       setStatus("success");
     } else { window.history.replaceState(null, "", "/confirmar-email"); setStatus("invalid"); }
   }
-  async function resend() {
+  async function resend(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!isEmail(email)) {
+      setMessage("Informe um e-mail válido para solicitar outro link.");
+      focusFirstInvalid(event.currentTarget, ["email"]);
+      return;
+    }
     const response = await fetch("/api/auth/confirmation/resend", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) }).catch(() => null);
     setMessage(response?.ok ? "Se houver um cadastro pendente, enviaremos um novo link." : "Confira o e-mail e tente novamente.");
   }
@@ -29,8 +37,8 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
     {status === "loading" && <p role="status">Validando link…</p>}
     {status === "success" && <><p>E-mail confirmado. Entre na sua conta ou volte ao convite recebido para concluir a associação à empresa.</p><Link href="/login">Ir para o login</Link></>}
     {status === "invalid" && <><p>Este link expirou, já foi usado ou é inválido. Peça outro e-mail de confirmação.</p>
-      <TextField label="E-mail do cadastro" type="email" value={email} onChange={event => setEmail(event.target.value)} />
-      <ActionButton type="button" onClick={resend}>Solicitar novo e-mail</ActionButton>{message && <p role="status">{message}</p>}</>}
+      <form className="auth-form" noValidate onSubmit={resend}><TextField name="email" label="E-mail do cadastro" type="email" value={email} onChange={event => setEmail(event.target.value)} />
+      <ActionButton type="submit">Solicitar novo e-mail</ActionButton></form>{message && <p role="status">{message}</p>}</>}
     <p><Link href="/login">Voltar ao login</Link></p>
   </section></div></main>;
 }
