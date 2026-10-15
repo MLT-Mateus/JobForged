@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     const result = await requestAuth("resend", { type: "signup", email });
     if (!result.configured) return Response.json({ message: "Serviço indisponível." }, { status: 503 });
+    if (result.response?.status && result.response.status >= 500) return Response.json({ message: "Não foi possível solicitar o e-mail agora. Tente novamente." }, { status: 503 });
     return Response.json({ ok: true, message: "Se houver um cadastro pendente, enviaremos um novo link." }, { headers: { "Cache-Control": "no-store" } });
   } catch { return Response.json({ message: "Não foi possível solicitar o e-mail agora." }, { status: 503 }); }
 }

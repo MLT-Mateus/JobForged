@@ -27,7 +27,7 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
     <div className="auth-heading"><h1>Confirme seu e-mail</h1><p>O link será usado somente quando você clicar em confirmar.</p></div>
     {status === "pending" && <ActionButton type="button" onClick={confirm}>Confirmar meu e-mail</ActionButton>}
     {status === "loading" && <p role="status">Validando link…</p>}
-    {status === "success" && <><p>E-mail confirmado. Sua conta está pronta para acesso.</p><Link href="/app/home">Ir para o aplicativo</Link></>}
+    {status === "success" && <><p>E-mail confirmado. Entre na sua conta ou volte ao convite recebido para concluir a associação à empresa.</p><Link href="/login">Ir para o login</Link></>}
     {status === "invalid" && <><p>Este link expirou, já foi usado ou é inválido. Peça outro e-mail de confirmação.</p>
       <TextField label="E-mail do cadastro" type="email" value={email} onChange={event => setEmail(event.target.value)} />
       <ActionButton type="button" onClick={resend}>Solicitar novo e-mail</ActionButton>{message && <p role="status">{message}</p>}</>}
