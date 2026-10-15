@@ -46,8 +46,8 @@ export const featureAvailability: Record<WorkspaceModule, FeatureAvailability> =
     description: "Os dados cadastrais da empresa são reais e auditáveis. Preferências de recrutamento ainda estão em desenvolvimento.",
   },
   "minha-conta": {
-    status: "soon",
-    description: "Os dados do perfil e da sessão são exemplos. Edição de perfil e segurança ainda não estão disponíveis aqui.",
+    status: "beta",
+    description: "Nome, empresa, função e e-mail são reais. Você pode editar seu nome e solicitar alteração de senha; mudança de e-mail ainda não está disponível.",
   },
 };
 
