@@ -50,3 +50,6 @@ Resultados de lint/types/build, CI, SHA e healthcheck são confirmados na entreg
 5. Confirmar membro sem acesso administrativo e dados preservados após desativar banner.
 
 Live não alterado; Frente4 não iniciada.
+
+### Registro operacional de checksum
+A primeira cópia enviada para aplicar0011 tinha CRLF; o Git usa LF. O gate de deploy recusou a divergência antes de trocar o app. Após novo backup e comparação byte a byte, confirmou-se que a única diferença era CRLF/LF. O script restrito `scripts/reconcile-test-communication-migration.py` reconciliou apenas o checksum do registro de migrations de Test com a versão canônica do Git. O SQL não foi reexecutado, reescrito ou alterado semanticamente; a cópia inicial e registro operacional foram preservados. Checksum canônico: `ba31593665a224c2d5cd39aff3860e26ab923a2a751da4e3c8c26d9bdab50f7c`. O script só aceita esse par exato de hashes e recusa qualquer diferença adicional.
