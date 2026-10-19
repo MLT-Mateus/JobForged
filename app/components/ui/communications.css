@@ -5,10 +5,9 @@
 /* Controls overlay the image; neither captions nor counters add height. */
 .jf-communication-banner{position:relative}
 .jf-communication-banner__image a{display:block;width:100%;height:100%}
-.jf-communication-banner__previous,.jf-communication-banner__next{position:absolute;top:50%;transform:translateY(-50%);width:44px;min-height:44px;padding:0;z-index:1;background:var(--jf-ui-surface)}
-.jf-communication-banner__previous{left:var(--jf-ui-space-3)}
-.jf-communication-banner__next{right:var(--jf-ui-space-3)}
-.jf-communication-banner .jf-action svg{width:18px;height:18px}
+.jf-communication-banner__navigation{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-3);pointer-events:none}
+.jf-communication-banner__navigation>span{display:flex;background:var(--jf-ui-surface);border-radius:var(--jf-ui-control-radius);pointer-events:auto}
+.jf-communication-banner__navigation .jf-action{width:44px;min-height:44px;padding:0}
 .jf-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--jf-ui-space-4);min-width:0}
 .jf-communications-list{display:grid;gap:var(--jf-ui-space-4)}
 .jf-communications-list article{border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);padding:var(--jf-ui-space-4);overflow-wrap:anywhere}
