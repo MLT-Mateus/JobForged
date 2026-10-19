@@ -23,9 +23,9 @@ export function WidgetsSection() {
    ['card','Cartão','Resumos e informações principais.'],['outline','Contorno','Conteúdos relacionados, sem uma nova camada.'],['plain','Grupo aberto','Agrupamento com espaço em branco.']
   ] as const).map(([variant,title,description])=><article className="ds-surface-example" key={variant}><div className="ds-widget-canvas"><WidgetGroup variant={variant}><StatusBadge tone="info">Em andamento</StatusBadge><h3>Processo de seleção</h3><p>Time de relacionamento</p><WidgetDivider/><div className="ds-widget-inline"><span>Candidaturas</span><strong>28</strong></div></WidgetGroup></div><h3>{title}</h3><p>{description}</p></article>)}</div>
  </Demo>
- <Demo number="02" title="Composição e respiro" description="Aproxime o que está relacionado. Use intervalos maiores para mudar de assunto.">
+ <Demo number="02" title="Coleções de cartões" description="Uma hierarquia consistente, do desktop ao celular.">
   <div className="ds-composition-grid"><article className="ds-composition-collection"><header><h3>Coleções de cartões</h3><p>Uma hierarquia consistente, do desktop ao celular.</p></header><div className="ds-widget-grid">{[['Vagas abertas','12'],['Em entrevista','28'],['Contratações','4']].map(([label,value])=><WidgetGroup key={label}><span>{label}</span><strong className="ds-widget-number">{value}</strong><span className="ds-widget-caption">Neste mês</span></WidgetGroup>)}</div><WidgetDivider label="Outro grupo de informações"/><div className="ds-widget-inline"><span>Última atualização</span><StatusBadge tone="positive">Agora</StatusBadge></div></article>
-  <article className="ds-spacing-guide"><h3>Escala de espaçamento</h3><div className="ds-widget-spacing">{[8,16,24,32].map(n=><div key={n}><strong>{n} px</strong><div className="ds-widget-space-sample"><i style={{width:n}}/></div><span>{n===8?'Itens próximos':n===16?'Entre controles':n===24?'Dentro do grupo':'Entre seções'}</span></div>)}</div><p className="ds-widget-caption">Divisórias separam assuntos. Espaço em branco conecta os elementos do mesmo grupo.</p></article></div>
+  </div>
  </Demo>
  <Demo number="03" title="Detalhes no momento certo" description="Três formas de revelar opções sem sair da página. Experimente cada comportamento.">
   <div className="ds-overlay-examples">

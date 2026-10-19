@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, Copy, Download, Mail, Moon, Sun } from "lucide-react";
+import { useThemePreference } from "@/app/components/ui";
 import {
   downloadFileName,
   emailTemplates,
@@ -67,6 +68,7 @@ function EmailVariantPreview({ templateId, theme }: { templateId: EmailTemplateI
 }
 
 export function EmailTemplatesSection() {
+  const { theme } = useThemePreference();
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplateId>(emailTemplates[0].id);
   const current = emailTemplates.find((item) => item.id === selectedTemplate)!;
   const selectedIndex = emailTemplates.findIndex((item) => item.id === selectedTemplate);
@@ -81,21 +83,20 @@ export function EmailTemplatesSection() {
       <header className="ds-section-heading ds-email-templates__heading">
         <span>COMUNICAÇÃO · BREVO</span>
         <h2 id="ds-emails-title">E-mails com a identidade JobForged.</h2>
-          <p>Cinco modelos transacionais, cada um com versões clara e escura. Escolha um cartão para entender quando o e-mail é enviado e comparar as duas versões antes de copiar ou baixar o HTML.</p>
+          <p>Escolha um modelo para ver a prévia no tema atual e copiar ou baixar seu HTML.</p>
       </header>
 
-      <aside className="ds-email-templates__notice" aria-label="Regra de tema e situação de envio">
+      <aside className="ds-email-templates__notice" aria-label="Informações da prévia">
         <span className="ds-email-templates__notice-icon"><Mail size={19} aria-hidden="true" /></span>
         <div>
           <strong>Prévia de design · nenhum e-mail é enviado por esta página</strong>
-          <p>Os e-mails seguem a tipografia aprovada no Design System: Montserrat nos títulos e Open Sans no texto, com alternativas seguras para clientes de e-mail. Os CTAs usam aparência e área de clique de botão, próximas ao componente principal do aplicativo. O tema claro é o padrão; preferências disponíveis nos envios transacionais do app podem usar a escolha salva da pessoa.</p>
-          <small>O painel da Brevo também sinaliza ausência da etiqueta <code>rua</code> no DMARC. O registro DNS não foi alterado.</small>
+          <p>A prévia acompanha o tema escolhido no aplicativo. Os botões e a hierarquia visual seguem o Design System; fontes alternativas podem ser aplicadas nos envios personalizados das empresas.</p>
         </div>
       </aside>
 
       <div className="ds-email-templates__layout">
         <nav className="ds-email-library" aria-label="Modelos de e-mail">
-          <div className="ds-email-library__heading"><div><strong>Biblioteca de modelos</strong><small>Selecione um e-mail para ver o conteúdo e as duas versões.</small></div><span>{emailTemplates.length} modelos</span></div>
+          <div className="ds-email-library__heading"><div><strong>Biblioteca de modelos</strong><small>Selecione um e-mail para ver o conteúdo.</small></div><span>{emailTemplates.length} modelos</span></div>
           <div className="ds-email-library__items">
             {emailTemplates.map((template, index) => (
               <button
@@ -111,7 +112,6 @@ export function EmailTemplatesSection() {
               </button>
             ))}
           </div>
-          <div className="ds-email-library__rule"><strong>Regra de tema</strong><p>Usamos a preferência salva no perfil; quando ela não existe, o padrão é claro.</p></div>
         </nav>
 
         <div className="ds-email-template-detail">
@@ -131,16 +131,12 @@ export function EmailTemplatesSection() {
               <button type="button" className="jf-action jf-action--secondary" onClick={() => selectRelativeTemplate(1)} aria-label="Ver próximo modelo"><span>Próximo</span><ChevronRight size={16} aria-hidden="true"/></button>
             </nav>
           </div>
-          <div className="ds-email-variants" aria-label={`Duas versões do modelo ${current.name}`}>
-            {themes.map(({ id }) => <EmailVariantPreview key={`${current.id}-${id}`} templateId={current.id} theme={id} />)}
+          <div className="ds-email-variants" aria-label={`Prévia do modelo ${current.name} no tema ${theme === "dark" ? "escuro" : "claro"}`}>
+            <EmailVariantPreview key={`${current.id}-${theme}`} templateId={current.id} theme={theme === "dark" ? "dark" : "light"} />
           </div>
         </div>
       </div>
 
-      <aside className="ds-email-templates__integration-note">
-        <strong>Como os modelos se conectam ao envio</strong>
-        <p>Recuperação de senha e confirmação de conta usam Supabase Auth com SMTP Brevo e o modelo global de segurança. A recuperação valida o link no servidor, grava a sessão em cookies HttpOnly e nunca expõe uma chave administrativa da Supabase. Boas-vindas e notificações do aplicativo usam a API transacional da Brevo; nesses envios, a preferência salva de tema é aplicada quando disponível e o tema claro é o padrão.</p>
-      </aside>
     </section>
   );
 }

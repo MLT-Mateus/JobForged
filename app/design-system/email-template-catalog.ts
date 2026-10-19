@@ -283,6 +283,16 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
     : "";
   const previewSubject = preview ? subject : template.subject;
   const origin = process.env.APP_ENV === "live" ? "https://jobforged.com" : "https://test.jobforged.com";
+  // Browser-based previews and downloaded HTML share the application's scrollbar. Mail clients may ignore this optional CSS.
+  const scrollbarStyles = `<style>
+    :root { --track:${theme === "dark" ? "#0b211e" : "#e9f5f4"}; --edge:${theme === "dark" ? "#0b211e" : "#eef7f6"}; --thumb-start:${theme === "dark" ? "#7e9cff" : "#4169e1"}; --thumb-end:${theme === "dark" ? "#43d0c6" : "#20b2aa"}; --hover-start:${theme === "dark" ? "#a8baff" : "#3157ca"}; --hover-end:${theme === "dark" ? "#73e2da" : "#087a76"}; }
+    * { scrollbar-color:var(--thumb-end) var(--track); scrollbar-width:thin; }
+    *::-webkit-scrollbar { width:10px; height:10px; }
+    *::-webkit-scrollbar-track { background:var(--track); }
+    *::-webkit-scrollbar-thumb { min-height:34px; border:2px solid var(--edge); border-radius:999px; background:linear-gradient(180deg,var(--thumb-start),var(--thumb-end)); background-clip:padding-box; }
+    *::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,var(--hover-start),var(--hover-end)); background-clip:padding-box; }
+    *::-webkit-scrollbar-button { display:none; width:0; height:0; }
+  </style>`;
 
   return `<!doctype html>
 <html lang="pt-BR">
@@ -291,6 +301,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="x-apple-disable-message-reformatting">
   <title>${escapeHtml(previewSubject)}</title>
+  ${scrollbarStyles}
 </head>
 <body style="margin:0;padding:0;background-color:${colors.canvas};font-family:${bodyFont};">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(valueFor(preheader, preview, variables))}</div>
