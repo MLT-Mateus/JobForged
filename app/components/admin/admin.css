@@ -41,7 +41,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-org strong{font-size:var(--jf-ui-font-size-sm)}
 .admin-notice{position:relative;background:var(--jf-ui-surface)}
 .admin-notice i{position:absolute;top:8px;right:8px;width:7px;height:7px;border:2px solid var(--jf-ui-surface);border-radius:50%;background:var(--jf-ui-danger)}
-.admin-content{width:min(var(--jf-ui-layout-content-max),100%);margin:auto;padding:clamp(var(--jf-ui-space-6),3vw,var(--jf-ui-space-8))}
+.admin-content{width:min(var(--jf-ui-layout-content-max),100%);min-width:0;margin:auto;padding:var(--jf-ui-space-7) var(--jf-ui-space-6)}
 .admin-availability{display:flex;align-items:center;gap:var(--jf-ui-space-3);margin-bottom:var(--jf-ui-space-5);padding:var(--jf-ui-space-3) var(--jf-ui-space-4);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface)}
 .admin-availability--beta{border-color:color-mix(in srgb,var(--jf-ui-warning) 32%,var(--jf-ui-border))}
 .admin-availability p{margin:0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.5}
@@ -54,7 +54,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-toolbar>div{display:flex;align-items:center;gap:var(--jf-ui-space-2)}
 .admin-card{overflow:hidden;}
 .admin-card>header{display:flex;min-height:72px;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-4) var(--jf-ui-space-5);border-bottom:1px solid var(--jf-ui-border)}
-.admin-card h2{margin:0;font-size:var(--jf-ui-font-size-md)}
+.admin-card h2{margin:0;font-size:var(--jf-ui-font-size-lg);line-height:1.4}
 .admin-card header p{margin:var(--jf-ui-space-1) 0 0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
 .admin-card td b{font-family:var(--jf-ui-font-heading);font-size:var(--jf-ui-font-size-sm)}
 .admin-card td small{display:block;margin-top:var(--jf-ui-space-1);color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
@@ -215,32 +215,16 @@ body:has(.admin-shell){overflow:hidden}
 .jf-control input[type=color]:focus-visible{outline:2px solid var(--jf-ui-focus);outline-offset:2px}
 
 
+/* Shell owns navigation and framing; reusable content styles live in ui.css. */
 .admin-shell { font-size:var(--jf-ui-font-size-md); line-height:1.5; }
 .admin-shell :is(button,a,input,textarea,select):focus-visible { outline:2px solid var(--jf-ui-focus); outline-offset:3px; }
 .admin-shell :is(h1,h2,h3,h4) { font-family:var(--jf-ui-font-heading); overflow-wrap:anywhere; }
-.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { margin:0; font:700 clamp(1.5rem,2.5vw,2rem)/1.25 var(--jf-ui-font-heading); letter-spacing:-.025em; }
-.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-7); gap:var(--jf-ui-space-6); flex-wrap:wrap; }
-.admin-shell :is(.home-welcome,.custom-head,.job-detail-head) p { margin-top:var(--jf-ui-space-2); font-size:var(--jf-ui-font-size-md); line-height:1.6; }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) h2 { font-size:var(--jf-ui-font-size-lg); line-height:1.4; }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) { min-width:0; }
-.admin-shell .jf-field { min-width:0; }
-.admin-shell .jf-action { flex-shrink:0; text-decoration:none; }
-.admin-shell .admin-actions { flex-wrap:wrap; }
+.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card,.jf-field) { min-width:0; }
+.admin-shell .jf-action { text-decoration:none; }
 .admin-shell .admin-topbar { z-index:40; }
 .admin-shell .admin-sidebar { z-index:50; }
 .admin-shell .admin-scrim { z-index:49; }
-.admin-sidebar nav a { flex-shrink:0; }
-.admin-card>header { padding:var(--jf-ui-space-6); }
-.admin-form .jf-field { padding:var(--jf-ui-space-3) var(--jf-ui-space-6); }
-.admin-toggle-list .jf-toggle-row strong { font-size:var(--jf-ui-font-size-sm); }
-.admin-toggle-list .jf-toggle-row>div span { font-size:var(--jf-ui-font-size-sm); }
-@media(max-width:680px) {
- .admin-content { padding:var(--jf-ui-space-6) var(--jf-ui-layout-gutter-mobile); }
- .custom-head,.job-wizard-head,.job-detail-head { align-items:flex-start; }
- .admin-shell .admin-card>header { flex-wrap:wrap; padding:var(--jf-ui-space-4); }
- .admin-form .jf-field { padding:var(--jf-ui-space-3) var(--jf-ui-space-4); }
- .admin-org strong { overflow-wrap:anywhere; }
-}
+.admin-card:has(.jf-select.is-open),.custom-card:has(.jf-select.is-open),.job-stage:has(.jf-select.is-open) { position:relative; overflow:visible; z-index:30; }
 @media(prefers-reduced-motion:reduce) { .admin-shell * { transition:none!important; animation:none!important; scroll-behavior:auto!important; } }
 
 /* Approved complete signature; compact navigation moves the symbol to the header. */
@@ -252,76 +236,9 @@ body:has(.admin-shell){overflow:hidden}
   .has-full-brand.is-menu-open .admin-org .admin-org__brand-icon { display:none; }
 }
 
-/* Shared company-panel finish: all modules inherit the approved UI tokens. */
-.admin-shell {
-  background:var(--jf-ui-surface-soft);
-  color:var(--jf-ui-text);
-  font-family:var(--jf-ui-font-body);
-}
-.admin-shell .admin-workspace { background:var(--jf-ui-surface-soft); }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) {
-  border-color:var(--jf-ui-border);
-  border-radius:var(--jf-ui-radius-card);
-  background:var(--jf-ui-surface);
-  color:var(--jf-ui-text);
-}
-.admin-shell :is(.admin-metrics,.admin-chart-grid,.admin-settings-grid,.admin-agenda,.admin-account) {
-  gap:var(--jf-ui-space-4);
-}
-.admin-shell .admin-card > header {
-  min-height:76px;
-  padding:var(--jf-ui-space-5) var(--jf-ui-space-6);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) :is(h2,h3,h4) {
-  color:var(--jf-ui-text);
-  font-family:var(--jf-ui-font-heading);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) :is(p,small,dd,dt,label) {
-  font-family:var(--jf-ui-font-body);
-}
-.admin-shell .jf-table-wrap { border-radius:0 0 var(--jf-ui-radius-card) var(--jf-ui-radius-card); }
-.admin-shell .jf-table th {
-  background:var(--jf-ui-surface-soft);
-  color:var(--jf-ui-text-muted);
-  font-family:var(--jf-ui-font-heading);
-  letter-spacing:.035em;
-}
-.admin-shell .jf-table td { color:var(--jf-ui-text); line-height:1.5; }
-.admin-shell .admin-toolbar { gap:var(--jf-ui-space-4); }
-.admin-shell .admin-kanban { gap:var(--jf-ui-space-3); }
-.admin-shell .admin-kanban > section { border-radius:var(--jf-ui-radius-card); }
-.admin-shell .admin-kanban article { border-radius:var(--jf-ui-control-radius); }
-.admin-shell .admin-workspace { min-width:0; }
-.admin-shell .admin-content { width:min(var(--jf-ui-layout-content-max),100%); margin-inline:auto; }
-.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { align-items:flex-end; }
-.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { letter-spacing:-.035em; }
-.admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) p { max-width:68ch; color:var(--jf-ui-text-muted); }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) {
-  box-shadow:0 1px 2px color-mix(in srgb,var(--jf-ui-text) 4%,transparent);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) > header {
-  gap:var(--jf-ui-space-4);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) :is(h2,h3) { letter-spacing:-.02em; }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) p { line-height:1.65; }
-.admin-shell .jf-action { min-height:40px; gap:var(--jf-ui-space-2); }
-.admin-shell .jf-action--small { min-height:36px; }
-.admin-shell :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea) { font-size:var(--jf-ui-font-size-md); }
-.admin-shell .jf-table th { padding-block:var(--jf-ui-space-3); }
-.admin-shell .jf-table td { padding-block:var(--jf-ui-space-4); }
-.admin-shell :is(.admin-toolbar,.jobs-toolbar,.custom-head-actions) { row-gap:var(--jf-ui-space-3); }
-.admin-shell :is(.admin-empty,.home-empty,.jf-empty) { line-height:1.6; }
-@media(max-width:680px) {
-  .admin-shell .admin-card > header { padding:var(--jf-ui-space-4); }
-  .admin-shell :is(.admin-metrics,.admin-chart-grid,.admin-settings-grid,.admin-agenda,.admin-account) { gap:var(--jf-ui-space-3); }
-  .admin-shell :is(.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-5); }
-  .admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) { border-radius:var(--jf-ui-control-radius); }
-  .admin-shell .jf-table td { padding-block:var(--jf-ui-space-3); }
-}
-
 /* Workspace content uses the same spacing and surfaces as the component catalog. */
 .admin-shell .admin-main{min-width:0}
-.admin-shell .admin-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--jf-ui-space-4);margin-bottom:var(--jf-ui-space-4)}
+.admin-shell .admin-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--jf-ui-space-6)}
 .admin-shell .admin-management-stack{display:grid;gap:var(--jf-ui-space-4)}
 .admin-shell .admin-form-stack{display:grid;gap:var(--jf-ui-space-4)}
 .admin-shell .admin-form-stack>.jf-action{justify-self:start}
@@ -347,3 +264,16 @@ body:has(.admin-shell){overflow:hidden}
 .admin-shell .admin-panel-feedback .jf-inline-notice{margin:0}
 @media(max-width:1050px){.admin-shell .admin-team-list article{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.admin-shell .admin-team-list article>select{grid-column:1/3}.admin-shell .admin-team-list article>.jf-action{grid-column:3;grid-row:2}}
 @media(max-width:680px){.admin-shell .admin-team-list article{grid-template-columns:minmax(0,1fr) auto;padding:var(--jf-ui-space-4)}.admin-shell .admin-team-list article>small{grid-column:1/-1;grid-row:2}.admin-shell .admin-team-list article>select{grid-column:1;grid-row:3}.admin-shell .admin-team-list article>.jf-action{grid-column:2;grid-row:3}.admin-shell .admin-record-list li{padding-inline:var(--jf-ui-space-4)}.admin-shell .admin-panel-feedback{padding:0 var(--jf-ui-space-4) var(--jf-ui-space-4)}}
+
+.admin-org > span { min-width:0; }
+.admin-org strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.admin-topbar > div:last-child { flex-shrink:0; }
+.admin-availability { margin-bottom:var(--jf-ui-space-6); }
+.admin-card > .jf-panel-head { padding:var(--jf-ui-space-5) var(--jf-ui-space-6); }
+.admin-card .jf-table th { background:var(--jf-ui-surface-soft); font-family:var(--jf-ui-font-heading); }
+.admin-team-list .jf-select { min-width:0; }
+.admin-team-list .jf-select .jf-field__label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.admin-team-list .jf-select { gap:0; }
+.admin-shell .admin-team-list article > .jf-select { grid-column:auto; }
+@media(max-width:1050px) { .admin-shell .admin-team-list article > .jf-select { grid-column:1/3; } }
+@media(max-width:680px) { .admin-content{padding:var(--jf-ui-space-6) var(--jf-ui-layout-gutter-mobile)} .admin-availability{align-items:flex-start;margin-bottom:var(--jf-ui-space-4)} .admin-card > .jf-panel-head{padding:var(--jf-ui-space-4)} .admin-shell .admin-team-list article > .jf-select{grid-column:1;grid-row:3} .admin-topbar{gap:var(--jf-ui-space-2);padding-inline:var(--jf-ui-layout-gutter-mobile)} }

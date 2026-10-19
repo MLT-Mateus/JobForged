@@ -47,3 +47,6 @@
 @keyframes jf-drawer-enter { from{transform:translateX(100%)} to{transform:translateX(0)} }
 @keyframes jf-drawer-exit { to{transform:translateX(100%)} }
 @media(prefers-reduced-motion:reduce){.jf-widget-dialog[open],.jf-widget-dialog[data-state="closing"]{animation:none;transition:none}}
+
+.jf-widget-dialog--wide { width:min(1120px,calc(100vw - 32px)); }
+@media(max-width:680px) { .jf-widget-dialog__header,.jf-widget-dialog__body,.jf-widget-dialog__footer { padding:var(--jf-ui-space-4); } }

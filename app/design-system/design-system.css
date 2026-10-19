@@ -2002,3 +2002,8 @@ body:has(.ds-page) {
 .ds-page--workspace .ds-content { margin:0; padding:0; height:auto; overflow:visible; }
 .ds-page--workspace .ds-content__inner { width:100%; max-width:none; }
 .ds-page--workspace .ds-hero__loader .app-loader__inline { width:112px; height:112px; }
+
+.ds-components-grid .ds-workspace-patterns { grid-column:1 / -1; }
+
+.ds-example-card:has(.jf-action-menu__panel) { position:relative; z-index:35; overflow:visible; }
+.ds-workspace-demo-actions { justify-content:space-between; }

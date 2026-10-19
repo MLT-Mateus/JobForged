@@ -23,3 +23,4 @@ export { ActionButton, Panel, MetricCard, DataTable, EmptyState, StatusBadge, Wo
 export { useThemePreference, setThemePreference } from "./useThemePreference";
 
 export { WidgetGroup, WidgetDivider, WidgetDialog, FocusPopover } from "./Widgets";
+export { WorkspaceState, WorkspaceTabs, WorkspaceActionMenu } from "./WorkspacePatterns";

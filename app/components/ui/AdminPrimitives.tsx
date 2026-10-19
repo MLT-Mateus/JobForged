@@ -2,6 +2,8 @@
 
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { Inbox } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export function ActionButton({ variant = "primary", icon, children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "quiet" | "danger" | "accent" | "inverse"; icon?: ReactNode }) {
   return <button {...props} className={`jf-action jf-action--${variant} ${props.className ?? ""}`.trim()}>{icon}{children}</button>;
@@ -27,8 +29,8 @@ export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HT
  return <Tag {...props} className={`jf-panel ${className}`.trim()}/>;
 }
 
-export function WorkspacePageHeader({ section, title, description, action }: { section: string; title: string; description: string; action?: ReactNode }) {
-  return <header className="jf-page-head"><div><span>{section}</span><h1>{title}</h1><p>{description}</p></div>{action}</header>;
+export function WorkspacePageHeader({ section, title, description, action, back, meta }: { section: string; title: string; description?: string; action?: ReactNode; back?: { href: string; label: string }; meta?: ReactNode }) {
+  return <header className="jf-page-head"><div>{back && <Link className="jf-page-head__back" href={back.href}><ArrowLeft size={16}/>{back.label}</Link>}<span className="jf-page-head__section">{section}</span>{meta && <div className="jf-page-head__meta">{meta}</div>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action && <div className="jf-page-head__actions">{action}</div>}</header>;
 }
 
 export function PanelHeading({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
