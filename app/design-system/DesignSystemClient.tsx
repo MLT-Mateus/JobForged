@@ -18,6 +18,7 @@ import { CheckboxField, AppToast, DateField, DateRangeField, FileUploadField, In
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
+import { AppearanceTemplatesDemo } from '../components/personalization/AppearanceTemplatesDemo';
 import { BrandingDesignSystemDemo } from '../components/personalization/BrandingDesignSystemDemo';
 
 type AlertKind = "success" | "info" | "warning" | "danger";
@@ -491,7 +492,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <AdvancedCharts />
           </section>
 
-          <section className="ds-section ds-section--first" hidden={currentPage.id !== "aplicacao"} aria-label="Aplicação">
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "aplicacao"} aria-label="Aplicação"><AppearanceTemplatesDemo theme={theme}/>
             <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
             <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
               <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">
