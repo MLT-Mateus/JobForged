@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { readSession } from "@/app/api/auth/_server";
-import { BackofficeClient } from "@/app/components/admin/BackofficeClient";
+import { BackofficeManagementClient } from "@/app/components/admin/BackofficeManagementClient";
 import "@/app/components/admin/admin.css";
 
 export const metadata: Metadata = { title: "JobForged | Backoffice" };
@@ -15,5 +15,5 @@ export default async function Page() {
   if (!session?.platformAdmin) {
     redirect(new URL("/login", process.env.APP_PUBLIC_URL || "https://jobforged.com").toString());
   }
-  return <BackofficeClient email={session.email} />;
+  return <BackofficeManagementClient email={session.email} />;
 }
