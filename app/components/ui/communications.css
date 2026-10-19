@@ -4,6 +4,7 @@
 .jf-communication-banner__image img{width:100%;height:100%;object-fit:contain;filter:none}
 /* Controls overlay the image; neither captions nor counters add height. */
 .jf-communication-banner{position:relative}
+.jf-communication-banner__slide{width:100%;height:100%}
 .jf-communication-banner__image a{display:block;width:100%;height:100%}
 .jf-communication-banner__navigation{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-3);pointer-events:none}
 .jf-communication-banner__navigation>span{display:flex;background:var(--jf-ui-surface);border-radius:var(--jf-ui-control-radius);pointer-events:auto}

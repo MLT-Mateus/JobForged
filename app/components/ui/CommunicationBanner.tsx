@@ -23,9 +23,9 @@ export function CommunicationBanner({items,view="responsive"}:{items:BannerSlide
   return()=>window.clearTimeout(timer);
  },[count,item?.id,selected,duration,available,hovered,focused]);
  if(!item)return null;
- const image=<picture>{view==="responsive"&&item.mobileImage&&<source media="(max-width: 680px)" srcSet={item.mobileImage}/>}<BrandAsset src={view==="mobile"?(item.mobileImage||item.image):item.image} alt={item.title}/></picture>;
+ const renderImage=(slide:BannerSlide)=><picture>{view==="responsive"&&slide.mobileImage&&<source media="(max-width: 680px)" srcSet={slide.mobileImage}/>}<BrandAsset src={view==="mobile"?(slide.mobileImage||slide.image):slide.image} alt={slide.title} loading="lazy"/></picture>;
  return <Panel className="jf-communication-banner" data-preview-view={view} aria-label="Comunicados JobForged" aria-roledescription="carrossel" onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)} onFocusCapture={()=>setFocused(true)} onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setFocused(false)}}>
- <div ref={element=>{root.current=element}} className="jf-communication-banner__image">{item.link?<a href={item.link} target="_blank" rel="noopener noreferrer" aria-label={item.title}>{image}</a>:image}</div>
+ <div ref={element=>{root.current=element}} className="jf-communication-banner__image">{items.map((slide,i)=><div key={slide.id} hidden={i!==index} className="jf-communication-banner__slide">{slide.link?<a href={slide.link} target="_blank" rel="noopener noreferrer" aria-label={slide.title}>{renderImage(slide)}</a>:renderImage(slide)}</div>)}</div>
  {count>1&&<nav className="jf-communication-banner__navigation" aria-label="Navegar pelos banners"><span><ActionButton type="button" variant="secondary" aria-label="Banner anterior" onClick={()=>setSelected((index-1+count)%count)}><ChevronLeft aria-hidden="true"/></ActionButton></span><span><ActionButton type="button" variant="secondary" aria-label="Próximo banner" onClick={()=>setSelected((index+1)%count)}><ChevronRight aria-hidden="true"/></ActionButton></span></nav>}
  </Panel>;
 }

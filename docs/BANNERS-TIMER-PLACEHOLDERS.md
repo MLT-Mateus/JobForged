@@ -10,7 +10,8 @@
   validação HTTP e SQL, persistência e auditoria. Edições por versões anteriores
   preservam a duração quando o campo não é enviado. Controle de versão preservado.
 - Um único setTimeout por carrossel com mais de uma imagem. Sem polling ou contador
-  atualizado por segundo. Pausa em hover/foco, fora da área visível, aba oculta e
+  atualizado por segundo. Imagens permanecem montadas, com carregamento lazy;
+  alternar slides não recria imagens nem repete a consulta de metadados. Pausa em hover/foco, fora da área visível, aba oculta e
   preferência por movimento reduzido; limpeza do timer e listeners ao desmontar.
 - Placeholders contextuais nos campos de busca, edição cadastral, configurações,
   convite, motivo administrativo, perfil, banners e notificações. Componentes
