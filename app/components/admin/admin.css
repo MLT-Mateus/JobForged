@@ -277,3 +277,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-shell .admin-team-list article > .jf-select { grid-column:auto; }
 @media(max-width:1050px) { .admin-shell .admin-team-list article > .jf-select { grid-column:1/3; } }
 @media(max-width:680px) { .admin-content{padding:var(--jf-ui-space-6) var(--jf-ui-layout-gutter-mobile)} .admin-availability{align-items:flex-start;margin-bottom:var(--jf-ui-space-4)} .admin-card > .jf-panel-head{padding:var(--jf-ui-space-4)} .admin-shell .admin-team-list article > .jf-select{grid-column:1;grid-row:3} .admin-topbar{gap:var(--jf-ui-space-2);padding-inline:var(--jf-ui-layout-gutter-mobile)} }
+
+.backoffice-audit-data { white-space:pre-wrap; overflow-wrap:anywhere; font-size:var(--jf-ui-font-size-sm); }
+.admin-main dd { margin:var(--jf-ui-space-1) 0 0; overflow-wrap:anywhere; }
+.admin-main dt { color:var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); }
