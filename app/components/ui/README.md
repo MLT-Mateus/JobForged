@@ -34,6 +34,6 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 - `MetricCard` é o indicador comum da Home, Dashboard e Vagas. O Design System renderiza a mesma implementação.
 - Buscas e filtros usam `TextField` e `SelectField`; controles nativos específicos usam `FieldControl` sem estilos descendentes próprios.
 - Notificações usam `AppToast`, na posição global. Telas não implementam notificações locais.
-- O popup de `AppToast` e os sons de `status-sound.ts` são demonstrados em `/design-system/componentes`. Páginas de autenticação e gestão usam o mesmo componente para resultados e erros; mensagens persistentes podem permanecer inline para contexto.
+- O popup de `AppToast` e os sons de `status-sound.ts` são demonstrados em `/design-system/componentes`. Os arquivos padrão ficam em `public/sounds/` e seguem o mapeamento sucesso, informação, atenção e erro. Páginas de autenticação e gestão usam a mesma camada de áudio para resultados e erros; mensagens persistentes podem permanecer inline para contexto.
 - Títulos de páginas seguem a mesma hierarquia em `admin.css`. Os módulos consomem as famílias, cores, raios e espaçamentos de `ui.css`.
 - `WorkspacePageHeader`, `PanelHeading` e `InlineNotice` definem a hierarquia das páginas internas, títulos dos cartões e mensagens de estado. O catálogo em `/design-system/componentes` renderiza esses mesmos componentes.
