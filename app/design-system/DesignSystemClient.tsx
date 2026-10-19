@@ -492,7 +492,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <AdvancedCharts />
           </section>
 
-          <section className="ds-section ds-section--first" hidden={currentPage.id !== "aplicacao"} aria-label="Aplicação"><AppearanceTemplatesDemo theme={theme}/>
+          <section className="ds-section ds-section--first" hidden={currentPage.id !== "aplicacao"} aria-label="Aplicação">
             <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
             <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
               <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">
@@ -518,6 +518,8 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               </div>
             </div>
           </section>
+
+          {currentPage.id === "aplicacao" && <section className="ds-section" aria-label="Templates de aparência"><AppearanceTemplatesDemo theme={theme}/></section>}
 
           {currentPage.id === "emails" && <EmailTemplatesSection />}
 
