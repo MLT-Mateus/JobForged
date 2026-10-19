@@ -1,14 +1,16 @@
 "use client";
 
 import { useMemo, useState, type CSSProperties, type ComponentType } from "react";
-import { Activity, Archive, AtSign, BadgeCheck, BarChart3, Bell, Bot, BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, Check, ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck, Clock3, CloudUpload, Columns3, Contact, CreditCard, Download, Eye, FileCheck2, FileSearch, FileText, Filter, Flag, FolderKanban, Funnel, Gauge, Globe2, GraduationCap, Handshake, House, Image, KeyRound, Laptop, Link2, LockKeyhole, Mail, MapPin, MessageCircle, Monitor, Moon, Palette, PanelLeft, Phone, PieChart, Search, Settings2, ShieldCheck, Smartphone, Sparkles, Sun, Target, Upload, UserCog, UserRound, UserRoundCheck, UsersRound, Video, WandSparkles } from "lucide-react";
+import { Activity, Archive, AtSign, BadgeCheck, BarChart3, Bell, Bot, BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, Check, ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck, Clock3, CloudUpload, Columns3, Contact, CreditCard, Download, Eye, FileCheck2, FileSearch, FileText, Filter, Flag, FolderKanban, Funnel, Gauge, Globe2, GraduationCap, Handshake, House, Image, Inbox, KeyRound, Laptop, Link2, LockKeyhole, Mail, MapPin, MessageCircle, Monitor, Moon, Palette, PanelLeft, Phone, PieChart, Search, Settings2, ShieldCheck, Smartphone, Sparkles, Sun, Target, Upload, UserCog, UserRound, UserRoundCheck, UsersRound, Video, WandSparkles } from "lucide-react";
 import { SelectField, TextField, type SelectOption } from "@/app/components/ui";
 
+import { NotificationStatesDemo } from "./NotificationStatesDemo";
 import { WidgetsIcon } from "../components/ui/Icons";
 
 type IconType = ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>;
 
 export const iconCatalog: Array<{ id: string; name: string; category: string; meaning: string; example: string; icon: IconType }> = [
+  ["caixa-entrada","Caixa de entrada","Interface","Coleção sem registros","Estado vazio padrão da aplicação",Inbox],
   ["widgets","Widgets","Navegação","Grupos, containers e sobreposições","Menu do Design System",WidgetsIcon],
   ["home","Home","Navegação","Página inicial","Menu principal",House],
   ["dashboard","Dashboard","Dados","Visão analítica","Indicadores",BarChart3],
@@ -97,7 +99,7 @@ const emptyStates=[
   {id:"activity",icon:Bell,title:"Nenhuma atividade recente",text:"Novas publicações, candidaturas e atualizações aparecerão aqui.",action:"",use:"Histórico válido, ainda sem eventos.",avoid:"Quando o histórico ainda está carregando."},
 ];
 
-export function EmptyStatesSection(){const [compact,setCompact]=useState(false);return <><div className="ds-section-heading"><h2>Empty States com contexto e próximo passo.</h2><p>Use apenas quando os dados foram carregados com sucesso e não há conteúdo a apresentar.</p></div><div className="ds-empty-toolbar"><span>Variação da demonstração</span><button className={!compact?"is-active":""} onClick={()=>setCompact(false)}>Completa</button><button className={compact?"is-active":""} onClick={()=>setCompact(true)}>Compacta</button></div><div className={`ds-empty-grid ${compact?"is-compact":""}`}>{emptyStates.map(({id,icon:Icon,title,text,action,use,avoid})=><article className="ds-empty-card" key={id}><div className="ds-empty-visual" aria-hidden="true"><i/><Icon size={compact?24:34}/></div><strong>{title}</strong><p>{text}</p>{action&&<button type="button" className="jf-action jf-action--primary">{action}</button>}<footer><span><Check size={13}/> Use: {use}</span><span>Evite: {avoid}</span></footer></article>)}</div></>}
+export function EmptyStatesSection(){const [compact,setCompact]=useState(false);return <><NotificationStatesDemo/><div className="ds-section-heading"><h2>Empty States com contexto e próximo passo.</h2><p>Use apenas quando os dados foram carregados com sucesso e não há conteúdo a apresentar.</p></div><div className="ds-empty-toolbar"><span>Variação da demonstração</span><button className={!compact?"is-active":""} onClick={()=>setCompact(false)}>Completa</button><button className={compact?"is-active":""} onClick={()=>setCompact(true)}>Compacta</button></div><div className={`ds-empty-grid ${compact?"is-compact":""}`}>{emptyStates.map(({id,icon:Icon,title,text,action,use,avoid})=><article className="ds-empty-card" key={id}><div className="ds-empty-visual" aria-hidden="true"><i/><Icon size={compact?24:34}/></div><strong>{title}</strong><p>{text}</p>{action&&<button type="button" className="jf-action jf-action--primary">{action}</button>}<footer><span><Check size={13}/> Use: {use}</span><span>Evite: {avoid}</span></footer></article>)}</div></>}
 
 const backgrounds=[
   {name:"Base da aplicação",category:"Cor sólida",className:"is-solid",tokens:"var(--ds-bg)",themes:"Claro + escuro",goal:"Sustentar páginas extensas sem competir com o conteúdo.",apply:"Painel, formulários e páginas de gestão.",avoid:"Como destaque de ação.",page:"Todas as páginas administrativas",css:"background: var(--ds-bg);"},

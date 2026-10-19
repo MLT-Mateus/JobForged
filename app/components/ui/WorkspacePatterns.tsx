@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { CircleAlert, Inbox, MoreHorizontal, ShieldCheck } from "lucide-react";
+import { CircleAlert, Inbox, MoreHorizontal, ShieldCheck, type LucideIcon } from "lucide-react";
 import { JobForgedLoadingAnimation } from "../JobForgedLoadingAnimation";
-import { ActionButton } from "./AdminPrimitives";
+import { ActionButton, EmptyState, type EmptyStateVariant } from "./AdminPrimitives";
 import { useStatusSoundForMessage } from "./status-sound";
 import { useCompanyBranding } from '../personalization/CompanyBranding';
 
 /** Shared page feedback; never substitutes for server-side authorization. */
-export function WorkspaceState({ kind = "loading", title, description, action }: { kind?: "loading" | "error" | "empty" | "forbidden"; title: string; description?: string; action?: ReactNode }) {
+export function WorkspaceState({ kind = "loading", title, description, action, icon, variant }: { icon?:LucideIcon; variant?:EmptyStateVariant; kind?: "loading" | "error" | "empty" | "forbidden"; title: string; description?: string; action?: ReactNode }) {
   useStatusSoundForMessage(kind === "error" ? title : "", "danger");
   const Icon = kind === "error" ? CircleAlert : kind === "forbidden" ? ShieldCheck : Inbox;
   const branding=useCompanyBranding();
+  if(kind==="empty")return <EmptyState title={title} description={description||""} action={action} icon={icon} variant={variant}/>;
   return <section className={`jf-workspace-state jf-workspace-state--${kind}`} aria-busy={kind === "loading"} role={kind === "error" ? "alert" : "status"}>
     {kind === "loading" ? branding?.loaderEnabled===false?null:<JobForgedLoadingAnimation size={48}/> : <Icon size={28} aria-hidden="true"/>}
     <strong>{title}</strong>{description && <p>{description}</p>}{action}
