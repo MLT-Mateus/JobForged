@@ -24,3 +24,17 @@
 .jf-communication-banner__image picture{display:block;width:100%;height:100%}
 .jf-communication-banner[data-preview-view="mobile"] .jf-communication-banner__image{aspect-ratio:640/360}
 @media(max-width:680px){.jf-communication-banner:not([data-preview-view="desktop"]) .jf-communication-banner__image{aspect-ratio:640/360}}
+
+/* Shared inbox: same spacing in the application drawer and Design System. */
+.jf-notification-panel{display:flex;flex-direction:column;gap:var(--jf-ui-space-5);min-width:0}
+.jf-notification-panel__content{min-width:0}
+.jf-notification-panel .jf-empty{min-height:240px;padding-inline:var(--jf-ui-space-3)}
+.jf-notification-list{display:grid;gap:var(--jf-ui-space-4);list-style:none;padding:0;margin:0}
+.jf-notification-item{border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);padding:var(--jf-ui-space-4);display:grid;gap:var(--jf-ui-space-3);min-width:0;overflow-wrap:anywhere;background:var(--jf-ui-surface)}
+.jf-notification-item.is-unread{border-color:var(--jf-ui-brand)}
+.jf-notification-item__meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--jf-ui-space-2)}
+.jf-notification-item time{font-size:var(--jf-ui-font-size-xs);color:var(--jf-ui-text-muted)}
+.jf-notification-item h3{font:700 var(--jf-ui-font-size-md)/1.4 var(--jf-ui-font-heading);margin:0}
+.jf-notification-item p{margin:0;white-space:pre-wrap;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.6}
+.jf-notification-item__actions{display:flex;align-items:center;gap:var(--jf-ui-space-2);flex-wrap:wrap}
+.jf-notification-panel__pagination{display:flex;justify-content:space-between;align-items:center;gap:var(--jf-ui-space-2);border-top:1px solid var(--jf-ui-border);padding-top:var(--jf-ui-space-4);font-size:var(--jf-ui-font-size-sm)}

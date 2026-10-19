@@ -24,3 +24,5 @@ export { useThemePreference, setThemePreference } from "./useThemePreference";
 
 export { WidgetGroup, WidgetDivider, WidgetDialog, FocusPopover } from "./Widgets";
 export { WorkspaceState, WorkspaceTabs, WorkspaceActionMenu } from "./WorkspacePatterns";
+
+export { NotificationPanel } from "./NotificationPanel";

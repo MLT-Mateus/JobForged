@@ -1,7 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
-import { Inbox } from "lucide-react";
+import { Inbox, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -13,8 +13,9 @@ export function StatusBadge({ tone = "neutral", children }: { tone?: "positive" 
   return <span className={`jf-status jf-status--${tone}`}>{children}</span>;
 }
 
-export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
-  return <div className="jf-empty"><span><Inbox /></span><strong>{title}</strong><p>{description}</p>{action}</div>;
+export type EmptyStateVariant = "standard" | "compact" | "inline";
+export function EmptyState({ title, description, action, icon:Icon=Inbox, variant="standard" }: { title: string; description: string; action?: ReactNode; icon?: LucideIcon; variant?: EmptyStateVariant }) {
+  return <div className={`jf-empty jf-empty--${variant}`} role="status"><span className="jf-empty__icon" aria-hidden="true"><Icon strokeWidth={1.8}/></span><div className="jf-empty__content"><strong>{title}</strong><p>{description}</p>{action&&<div className="jf-empty__action">{action}</div>}</div></div>;
 }
 
 export function DataTable({ headers, children, label }: { headers: string[]; children: ReactNode; label: string }) {
