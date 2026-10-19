@@ -7,7 +7,7 @@ export type EmailTypography = {
 };
 
 export type EmailTemplateVariables = Partial<Record<
-  "FIRST_NAME" | "COMPANY_NAME" | "CANDIDATE_NAME" | "JOB_TITLE" | "RECRUITER_NAME" | "APPLICATION_URL" | "APP_URL" | "JOB_URL",
+  "COMMUNICATION_TITLE" | "COMMUNICATION_MESSAGE" | "FIRST_NAME" | "COMPANY_NAME" | "CANDIDATE_NAME" | "JOB_TITLE" | "RECRUITER_NAME" | "APPLICATION_URL" | "APP_URL" | "JOB_URL",
   string
 >>;
 
@@ -36,6 +36,7 @@ export type EmailTemplateId =
   | "auth-confirmation"
   | "password-recovery"
   | "account-invitation"
+  | "platform-communication"
   | "company-welcome"
   | "application-received"
   | "new-application";
@@ -51,6 +52,7 @@ export type EmailTemplateDefinition = {
 };
 
 export const emailTemplates: EmailTemplateDefinition[] = [
+  {id:"platform-communication",name:"Comunicado JobForged",audience:"Contas selecionadas no backoffice",trigger:"Publicação e envio pelo backoffice",channel:"Brevo · e-mail transacional",subject:"{{ params.COMMUNICATION_TITLE }}",description:"Comunicado institucional para destinatários verificados."},
   {
     id: "auth-confirmation",
     name: "Confirmação de e-mail",
@@ -109,6 +111,8 @@ type EmailCopy = {
 };
 
 const previewValues: Record<string, string> = {
+  "{{ params.COMMUNICATION_TITLE }}": "Novidades para sua equipe",
+  "{{ params.COMMUNICATION_MESSAGE }}": "Confira as novidades da JobForged no seu painel.",
   "{{ .Email }}": "pessoa@empresa.com",
   "{{ .ConfirmationURL }}": "https://jobforged.com/",
   "{{ .SiteURL }}": "https://test.jobforged.com",
@@ -157,6 +161,8 @@ function copyFor(id: EmailTemplateId): EmailCopy {
         button: { label: "Aceitar convite e definir senha", url: "{{ .SiteURL }}/redefinir-senha?token_hash={{ .TokenHash }}&amp;type=invite" },
         note: "Se você não esperava este convite, ignore esta mensagem.",
       };
+    case "platform-communication":
+      return {preheader:"Uma nova comunicação da JobForged para sua conta.",eyebrow:"COMUNICADO JOBFORGED",title:"{{ params.COMMUNICATION_TITLE }}",paragraphs:["{{ params.COMMUNICATION_MESSAGE }}"],button:{label:"Saiba mais",url:"{{ params.APP_URL }}"},note:"Você recebeu este comunicado por possuir uma conta vinculada à JobForged."};
     case "company-welcome":
       return {
         preheader: "Seu espaço de recrutamento está pronto para o primeiro acesso.",
@@ -270,7 +276,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   const subject = valueFor(template.subject, preview, variables);
   const preheader = valueFor(copy.preheader, preview, variables);
   const paragraphs = copy.paragraphs
-    .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:${bodyFont};font-size:16px;line-height:1.65;">${valueFor(paragraph, preview, variables)}</p>`)
+    .map((paragraph) => `<p style="margin:0 0 18px;color:${colors.text};font-family:${bodyFont};font-size:16px;line-height:1.65;white-space:pre-wrap;">${valueFor(paragraph, preview, variables)}</p>`)
     .join("");
   const buttonStyles = `display:inline-block;min-height:40px;box-sizing:border-box;padding:11px 15px;border:1px solid ${colors.buttonBorder};border-radius:10px;background-color:${colors.buttonBackground};color:${colors.buttonText};font-family:${headingFont};font-size:11px;font-weight:730;line-height:1.4;text-align:center;text-decoration:none;mso-padding-alt:0;`;
   const button = copy.button
@@ -313,7 +319,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
         </td></tr>
         <tr><td style="padding:32px 32px 10px;">
           <p style="margin:0 0 12px;color:${colors.accent};font-family:${headingFont};font-size:11px;font-weight:bold;letter-spacing:1.1px;line-height:1.4;">${copy.eyebrow}</p>
-          <h1 style="margin:0 0 22px;color:${colors.text};font-family:${headingFont};font-size:27px;font-weight:700;line-height:1.25;">${copy.title}</h1>
+          <h1 style="margin:0 0 22px;color:${colors.text};font-family:${headingFont};font-size:27px;font-weight:700;line-height:1.25;">${valueFor(copy.title, preview, variables)}</h1>
           ${paragraphs}
           ${button}
         </td></tr>

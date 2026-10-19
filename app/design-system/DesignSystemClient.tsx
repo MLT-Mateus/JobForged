@@ -17,6 +17,7 @@ import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, Ic
 import { CheckboxField, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
+import { CommunicationsDemo } from './CommunicationsDemo';
 import { BrandingDesignSystemDemo } from '../components/personalization/BrandingDesignSystemDemo';
 
 type AlertKind = "success" | "info" | "warning" | "danger";
@@ -466,7 +467,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "dashboards"} aria-label="Dashboards">
             <SectionHeading title="Elementos para dashboards." description="Referências visuais reutilizáveis para indicadores e gráficos da aplicação." />
-            <div className="ds-dashboard-catalog">
+            <CommunicationsDemo/><div className="ds-dashboard-catalog">
               <article className="ds-dashboard-template ds-dashboard-template--funnel">
                 <header><div><strong>Funil compacto</strong><small>Use em resumos quando o objetivo for identificar rapidamente a queda entre etapas.</small></div></header>
                 <div className="ds-funnel-chart">{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div>
