@@ -29,7 +29,7 @@ Existiam sete seções visuais, uploads como data URLs, rascunho/publicação/hi
 
 - Salvar rascunho é explícito. Alterações locais não salvas e diferenças em relação à versão publicada são indicadas separadamente.
 - Publicar exige confirmação e troca a versão consumida pelo painel; não publica um portal ou uma vaga.
-- Cada mutation exige a versão esperada, bloqueia a linha e incrementa a versão. Conflito retorna HTTP 409 e preserva os campos locais. Recarregar dados exige confirmação quando há campos não salvos.
+- Cada mutation exige a versão esperada, bloqueia a linha e incrementa a versão. Conflito retorna HTTP 409 e preserva os campos locais. Escrita e upload também exigem que o contexto exibido corresponda à empresa da sessão, evitando uma operação acidental após trocar de conta em outra aba. A sessão é reconferida ao voltar o foco ou restaurar a página; o identificador informado pelo cliente nunca substitui a autorização do servidor. Recarregar dados exige confirmação quando há campos não salvos.
 - Descartar substitui o rascunho pela versão publicada, incluindo alterações já salvas no rascunho. Restaurar padrões usa nome da empresa autenticada e valores padrão JobForged.
 - Restaurar uma publicação cria um novo estado de rascunho. A versão publicada só muda após nova publicação.
 - Publicações geram snapshots imutáveis. A interface mostra as últimas 50; todo o histórico continua no banco. Autor e datas vêm do servidor, não de nomes demonstrativos do cliente.

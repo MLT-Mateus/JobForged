@@ -10,7 +10,7 @@ function unpack(row:Stored):BrandingSnapshot {
 }
 async function load():Promise<BrandingSnapshot>{const response=await fetch('/api/company/branding',{cache:'no-store',credentials:'same-origin'});if(!response.ok)throw new Error('Não foi possível carregar a identidade da sua empresa.');return unpack(await response.json() as Stored)}
 async function mutate(operation:string,input:Customization,historyId?:string){
- const response=await fetch('/api/company/branding',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({operation,version:input.revision,configuration:brandContent(input),historyId})});
+ const response=await fetch('/api/company/branding',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({operation,companyId:input.organizationId,version:input.revision,configuration:brandContent(input),historyId})});
  const result=await response.json() as {version?:number;message?:string};if(!response.ok)throw new Error(result.message||'Não foi possível salvar.');
  const next=await load();if(next.draft.revision!==result.version)throw new Error('A operação foi registrada, mas outra sessão alterou o rascunho em seguida. Recarregue antes de continuar; seus campos foram preservados.');
  if(operation==='publish')window.dispatchEvent(new CustomEvent('jobforged-customization-published',{detail:{companyId:input.organizationId}}));
@@ -24,5 +24,5 @@ export const customizationService={
  async resetCustomization(input:Customization){return (await mutate('reset',input)).draft},
  async restoreVersion(entry:HistoryEntry,input:Customization){return (await mutate('restore',input,entry.id)).draft},
  async getHistory(){return (await load()).history},
- async uploadAsset(file:File,kind:string):Promise<BrandAsset>{const form=new FormData();form.set('file',file);form.set('kind',kind);const response=await fetch('/api/company/branding/assets',{method:'POST',credentials:'same-origin',body:form});const result=await response.json() as {asset:BrandAsset;message?:string};if(!response.ok)throw new Error(result.message||'Não foi possível enviar a imagem.');return result.asset}
+ async uploadAsset(file:File,kind:string,companyId:string):Promise<BrandAsset>{const form=new FormData();form.set('file',file);form.set('kind',kind);form.set('companyId',companyId);const response=await fetch('/api/company/branding/assets',{method:'POST',credentials:'same-origin',body:form});const result=await response.json() as {asset:BrandAsset;message?:string};if(!response.ok)throw new Error(result.message||'Não foi possível enviar a imagem.');return result.asset}
 };

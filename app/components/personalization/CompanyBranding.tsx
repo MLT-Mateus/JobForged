@@ -3,17 +3,25 @@ import {createContext,useContext,useEffect,useState,type ReactNode} from 'react'
 import {BrandAsset} from '../BrandAsset';
 import {ChevronLeft,ChevronRight} from 'lucide-react';
 import {brandingLogo} from './branding-model';
+import {WorkspaceState} from '../ui/WorkspacePatterns';
+import {ActionButton} from '../ui/AdminPrimitives';
 import type {Customization} from './personalization-types';
 const Context=createContext<Customization|null>(null);
 const ThemeContext=createContext<'light'|'dark'>('light');
+const ScopeContext=createContext<{id:string;role:string}>({id:'',role:''});
 export const useCompanyBranding=()=>useContext(Context);
-export function CompanyBrandingProvider({value,theme='light',children}:{value:Customization|null;theme?:'light'|'dark';children:ReactNode}){
+export function CompanyBrandingProvider({value,theme='light',companyId='',companyRole='',children}:{value:Customization|null;theme?:'light'|'dark';companyId?:string;companyRole?:string;children:ReactNode}){
  useEffect(()=>{
   const icon=document.querySelector<HTMLLinkElement>('link[rel="icon"]');if(!icon||!value?.assets.favicon)return;
   const previous=icon.href,previousType=icon.type;icon.href=value.assets.favicon.url;icon.type='image/png';
   return()=>{icon.href=previous;icon.type=previousType};
  },[value]);
- return <ThemeContext.Provider value={theme}><Context.Provider value={value}>{children}</Context.Provider></ThemeContext.Provider>;
+ return <ScopeContext.Provider value={{id:companyId,role:companyRole}}><ThemeContext.Provider value={theme}><Context.Provider value={value}>{children}</Context.Provider></ThemeContext.Provider></ScopeContext.Provider>;
+}
+export function CompanyBrandingGuard({companyId,editing,children}:{companyId:string;editing:boolean;children:ReactNode}){
+ const scope=useContext(ScopeContext);
+ if(scope.id!==companyId||(editing&&!['owner','admin'].includes(scope.role)))return <WorkspaceState kind="forbidden" title="A conta ou suas permissões mudaram" description="Recarregue a identidade para continuar no contexto autorizado." action={<ActionButton onClick={()=>location.reload()}>Recarregar identidade</ActionButton>}/>;
+ return children;
 }
 export function CompanyJobHeading({fallbackName,fallbackLogo}:{fallbackName:string;fallbackLogo:string}){
  const value=useCompanyBranding(),theme=useContext(ThemeContext);return <><BrandAsset src={value?brandingLogo(value,theme):fallbackLogo} alt=""/><span>{value?.displayName||fallbackName}</span></>;

@@ -16,8 +16,9 @@ export async function POST(request:NextRequest){
  // Bound the actual stream, not only the untrusted Content-Length header.
  const reader=request.body?.getReader();let bytes=0,text='';const decoder=new TextDecoder();
  if(reader){while(true){const chunk=await reader.read();if(chunk.done)break;bytes+=chunk.value.byteLength;if(bytes>131072){await reader.cancel();return Response.json({message:'A configuração excede o limite.'},{status:413,headers})}text+=decoder.decode(chunk.value,{stream:true})}text+=decoder.decode()}
- let body:{operation?:string;version?:number;configuration?:unknown;historyId?:string};
+ let body:{operation?:string;version?:number;companyId?:string;configuration?:unknown;historyId?:string};
  try{body=JSON.parse(text)}catch{return Response.json({message:'Configuração inválida.'},{status:400,headers})}
+ if(body?.companyId!==session.company.id)return Response.json({message:'O contexto da conta mudou. Recarregue os dados antes de continuar; seus campos foram preservados.',conflict:true},{status:409,headers});
  if(!body||!['save','publish','reset','discard','restore'].includes(body.operation||'')||!Number.isSafeInteger(body.version)||Number(body.version)<0||
   (body.operation==='restore'&&!/^[0-9a-f-]{36}$/i.test(body.historyId||'')))return Response.json({message:'Operação inválida.'},{status:400,headers});
  const configuration=body.operation==='reset'?brandContent(brandingDefaults(session.company.id,session.company.name)):body.configuration;

@@ -92,7 +92,9 @@ export function useCompanyAuthSession(): AuthSessionState {
     };
 
     void refresh();
-    return () => { active = false; };
+    window.addEventListener('focus',refresh);
+    window.addEventListener('pageshow',refresh);
+    return () => { active = false; window.removeEventListener('focus',refresh); window.removeEventListener('pageshow',refresh); };
   }, []);
 
   return state;

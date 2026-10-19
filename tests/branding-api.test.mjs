@@ -25,17 +25,18 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   assert.equal((await request('/api/company/branding',null,{cookie:''})).status,403);
   platform=true;assert.equal((await request('/api/company/branding')).status,403);platform=false;
   assert.equal((await request('/api/company/branding')).status,200);
-  const mutation={operation:'save',version:0,configuration:brandContent(brandingDefaults(cid,'Fixture Branding'))};
+  const mutation={operation:'save',companyId:cid,version:0,configuration:brandContent(brandingDefaults(cid,'Fixture Branding'))};
   role='member';assert.equal((await request('/api/company/branding',mutation)).status,403);role='owner';
   assert.equal((await request('/api/company/branding',mutation,{origin:'https://outside.invalid'})).status,403);
+  assert.equal((await request('/api/company/branding',{...mutation,companyId:'38000000-0000-0000-0000-000000000012'})).status,409);
   assert.equal((await request('/api/company/branding',mutation)).status,200);assert.equal(writes.at(-1).expected_version,0);
   conflict=true;const stale=await request('/api/company/branding',mutation);assert.equal(stale.status,409);assert.equal((await stale.json()).conflict,true);conflict=false;
   const image=await sharp({create:{width:8,height:8,channels:3,background:'#20B2AA'}}).png().toBuffer();
-  const form=new FormData();form.set('file',new File([image],'logo.png',{type:'image/png'}));form.set('kind','logoMain');
+  const form=new FormData();form.set('file',new File([image],'logo.png',{type:'image/png'}));form.set('kind','logoMain');form.set('companyId',cid);
   const upload=await request('/api/company/branding/assets',form);assert.equal(upload.status,200);const result=await upload.json();assert.match(result.asset.url,/^\/api\/company\/branding\/assets\//);assert.equal(JSON.stringify(result).includes('bucket-only-fixture-token'),false);
   const read=await request(result.asset.url);assert.equal(read.status,200);assert.equal(read.headers.get('content-type'),'image/png');assert.equal(read.headers.get('x-content-type-options'),'nosniff');
   assert.equal((await request('/api/company/branding/assets/38000000-0000-0000-0000-000000000099')).status,404);
   tampered=true;assert.equal((await request(result.asset.url)).status,503);
-  const svg=new FormData();svg.set('file',new File(['<svg/>'],'fake.png',{type:'image/png'}));assert.equal((await request('/api/company/branding/assets',svg)).status,400);
+  const svg=new FormData();svg.set('companyId',cid);svg.set('file',new File(['<svg/>'],'fake.png',{type:'image/png'}));assert.equal((await request('/api/company/branding/assets',svg)).status,400);
  }finally{globalThis.fetch=original;for(const name of names){if(prior[name]===undefined)delete process.env[name];else process.env[name]=prior[name]}}
 });

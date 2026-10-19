@@ -12,6 +12,7 @@ export async function POST(request:NextRequest){
   const reader=request.body?.getReader(),chunks:Uint8Array[]=[];let size=0;
   if(!reader)throw new Error();while(true){const chunk=await reader.read();if(chunk.done)break;size+=chunk.value.byteLength;if(size>5308416){await reader.cancel();return Response.json({message:'Envie uma imagem de até 5 MB.'},{status:413,headers})}chunks.push(chunk.value)}
   const form=await new Request(request.url,{method:'POST',headers:request.headers,body:Buffer.concat(chunks)}).formData(),file=form.get('file');
+  if(form.get('companyId')!==session.company.id)return Response.json({message:'O contexto da conta mudou. Recarregue a identidade antes de enviar imagens.'},{status:409,headers});
   if(!(file instanceof File)||file.size>5242880||!['image/png','image/jpeg','image/webp'].includes(file.type)||!(/\.(png|jpe?g|webp)$/i.test(file.name)))throw new Error();
   const input=Buffer.from(await file.arrayBuffer());
   const output=await normalizeBrandingImage(input,file.type);

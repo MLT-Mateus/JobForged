@@ -18,3 +18,5 @@
 .company-branding .preview-stage :is(.mock-panel,.mock-home,.mock-portal) { color:var(--cp-text); }
 
 .company-branding .preview-stage :is(.mock-home,.mock-job,.mock-portal) main>small { color:var(--cp-link); }
+.company-branding .home-section>header { background:var(--jf-ui-surface-soft); }
+.company-branding .preview-stage .mock-hero>:is(h1,p,small) { background:var(--cp-portal); color:var(--cp-text); }
