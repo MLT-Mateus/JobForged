@@ -6,15 +6,11 @@
 .company-branding .jf-table-wrap { background-color:var(--jf-ui-surface); }
 .company-branding .jf-action { font-family:var(--jf-ui-font-heading); }
 .company-branding .admin-user img { width:100%; height:100%; object-fit:contain; }
-.company-branding .jf-action--primary { background:var(--company-button,var(--jf-ui-brand)); color:var(--company-on-button,var(--jf-ui-text)); }
-.company-branding .jf-action--primary:hover:not(:disabled) { background:var(--company-button-hover,var(--jf-ui-brand-strong)); color:var(--company-on-button-hover,var(--jf-ui-text)); }
 .company-branding .candidate-page { background:var(--cp-portal,var(--jf-ui-surface)); color:var(--jf-ui-text); font-family:var(--jf-ui-font-body); }
 .company-branding .candidate-page h1,.company-branding .candidate-page h2 { color:var(--jf-ui-text); font-family:var(--jf-ui-font-heading); }
 .company-branding .candidate-page>header { background:var(--jf-ui-surface); color:var(--jf-ui-text); }
 .company-branding .preview-stage { font-family:var(--jf-ui-font-body); }
 .company-branding .preview-stage :is(h1,h2,h3,b,strong) { font-family:var(--jf-ui-font-heading); }
-.company-branding .preview-stage button { background:var(--company-button); color:var(--company-on-button); }
-.company-branding .preview-stage button:hover { background:var(--company-button-hover); color:var(--company-on-button-hover); }
 .company-branding .preview-stage :is(.mock-panel,.mock-home,.mock-portal) { color:var(--cp-text); }
 
 .company-branding .preview-stage :is(.mock-home,.mock-job,.mock-portal) main>small { color:var(--cp-link); }

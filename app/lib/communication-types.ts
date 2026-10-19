@@ -1,4 +1,4 @@
-export type PlatformBanner={id:string;title:string;description:string;image_id:string;link:string;active:boolean;position:number;version:number};
+export type PlatformBanner={id:string;title:string;description:string;image_id:string;mobile_image_id?:string|null;link:string;active:boolean;position:number;version:number};
 export type Communication={id:string;title:string;message:string;link:string;audience:string;channel:string;state:string;version:number;recipients:number;pending:number;sent:number;attention:number;eligible:number;company_id?:string};
 export type InboxItem={id:string;title:string;message:string;link:string;dispatched_at:string;read_at:string|null};
 export const communicationAudiences=[{value:'companies',label:'Empresas · todos os membros ativos'},{value:'admins',label:'Empresas · titulares e administradores'},{value:'platform_admins',label:'Administradores JobForged'}];

@@ -10,11 +10,12 @@ export async function POST(request:NextRequest){
  if(!session?.platformAdmin)return Response.json({message:'Acesso negado.'},{status:403,headers});
  try{
   const reader=request.body?.getReader(),chunks:Uint8Array[]=[];let size=0;
-  if(!reader)throw new Error();while(true){const chunk=await reader.read();if(chunk.done)break;size+=chunk.value.byteLength;if(size>5308416){await reader.cancel();return Response.json({message:'Envie uma imagem de até 5 MB.'},{status:413,headers})}chunks.push(chunk.value)}
+  if(!reader)throw new Error();while(true){const chunk=await reader.read();if(chunk.done)break;size+=chunk.value.byteLength;if(size>10551296){await reader.cancel();return Response.json({message:'Envie uma imagem de até 10 MB.'},{status:413,headers})}chunks.push(chunk.value)}
   const form=await new Request(request.url,{method:'POST',headers:request.headers,body:Buffer.concat(chunks)}).formData(),file=form.get('file');
-  if(!(file instanceof File)||file.size>5242880||!['image/png','image/jpeg','image/webp'].includes(file.type)||!(/\.(png|jpe?g|webp)$/i.test(file.name)))throw new Error();
+  if(!(file instanceof File)||file.size>10485760||!['image/png','image/jpeg','image/webp'].includes(file.type)||!(/\.(png|jpe?g|webp)$/i.test(file.name)))throw new Error();
   const input=Buffer.from(await file.arrayBuffer());
-  const output=await normalizeBrandingImage(input,file.type);
+  // Input up to 10 MiB / 32 MP; processed PNG stays under the private bucket's 5 MiB limit.
+  const output=await normalizeBrandingImage(input,file.type,{bytes:10485760,pixels:33554432});
   const id=randomUUID(),path=`platform/${id}.png`;
   const uploaded=await brandingStorage(path,output);
   if(!uploaded?.ok)return Response.json({message:'O armazenamento de imagens está indisponível. Tente novamente.'},{status:503,headers});
@@ -22,5 +23,5 @@ export async function POST(request:NextRequest){
   const registered=await requestDatabase('rpc/register_platform_banner_asset',session.accessToken,{asset_id:id,file_size:output.byteLength,file_sha256:createHash('sha256').update(output).digest('hex')});
   if(!registered?.ok)return Response.json({message:'Não foi possível registrar a imagem. Tente novamente.'},{status:503,headers});
   return Response.json({asset:{id,kind:String(form.get('kind')||'image').slice(0,40),name,url:`/api/communications/assets/${id}`,format:'PNG',size:output.byteLength,updatedAt:new Date().toISOString()}},{headers});
- }catch{return Response.json({message:'Use PNG, JPEG ou WebP estático válido, até 5 MB e 16 milhões de pixels. SVG, animações e arquivos inválidos não são aceitos.'},{status:400,headers})}
+ }catch(error){if(error instanceof Error&&error.message==='Output size limit')return Response.json({message:'A imagem otimizada ainda excede 5 MB. Reduza suas dimensões ou complexidade antes de enviar.'},{status:413,headers});return Response.json({message:'Use PNG, JPEG ou WebP estático válido, até 10 MB e 32 milhões de pixels. SVG, animações e arquivos inválidos não são aceitos.'},{status:400,headers})}
 }
