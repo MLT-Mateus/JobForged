@@ -1553,17 +1553,10 @@ body:has(.ds-page) {
 .ds-empty-toolbar span { margin-right: auto; color: var(--ds-text-muted); font-size: 11px; }
 .ds-empty-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .ds-empty-card { min-height: 340px; padding: 30px; border: 1px solid var(--ds-border); border-radius: 14px; background: var(--ds-surface); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.ds-empty-visual { position: relative; width: 94px; height: 94px; margin-bottom: 18px; display: grid; place-items: center; border-radius: 50%; background: var(--ds-brand-soft); color: var(--ds-brand); }
-.ds-empty-visual i { position: absolute; inset: -7px; border: 1px dashed color-mix(in srgb,var(--ds-brand) 45%,transparent); border-radius: 50%; }
-.ds-empty-card > strong { color: var(--ds-text); font: 720 16px/1.3 var(--font-heading); }
-.ds-empty-card > p { max-width: 390px; margin: 8px 0 16px; color: var(--ds-text-muted); font-size: 13px; line-height: 1.55; }
-.ds-empty-card > .jf-action { margin-top: 2px; }
 .ds-empty-card footer { width: 100%; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--ds-border); display: grid; gap: 5px; text-align: left; color: var(--ds-text-muted); font-size: 10px; }
 .ds-empty-card footer span:first-child { color: var(--ds-success); display: flex; gap: 5px; align-items: center; }
 .ds-empty-grid.is-compact { grid-template-columns: repeat(3,minmax(0,1fr)); }
 .ds-empty-grid.is-compact .ds-empty-card { min-height: 250px; padding: 20px; }
-.ds-empty-grid.is-compact .ds-empty-visual { width: 58px; height: 58px; margin-bottom: 12px; }
-.ds-empty-grid.is-compact .ds-empty-card > p { font-size: 11px; }
 .ds-empty-grid.is-compact .ds-empty-card footer { display: none; }
 
 .ds-background-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
@@ -2007,3 +2000,5 @@ body:has(.ds-page) {
 
 .ds-example-card:has(.jf-action-menu__panel) { position:relative; z-index:35; overflow:visible; }
 .ds-workspace-demo-actions { justify-content:space-between; }
+
+.ds-empty-card > .jf-empty { width:100%; padding:0; flex:1; }
