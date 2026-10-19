@@ -18,6 +18,7 @@ import { CheckboxField, AppToast, DateField, DateRangeField, FileUploadField, In
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
+import { AppearanceTemplatesDemo } from '../components/personalization/AppearanceTemplatesDemo';
 import { BrandingDesignSystemDemo } from '../components/personalization/BrandingDesignSystemDemo';
 
 type AlertKind = "success" | "info" | "warning" | "danger";
@@ -517,6 +518,8 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               </div>
             </div>
           </section>
+
+          {currentPage.id === "aplicacao" && <section className="ds-section" aria-label="Templates de aparência"><AppearanceTemplatesDemo theme={theme}/></section>}
 
           {currentPage.id === "emails" && <EmailTemplatesSection />}
 

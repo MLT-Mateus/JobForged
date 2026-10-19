@@ -6,7 +6,7 @@ export const assetKinds=['logoMain','logoAlternative','logoLight','logoDark','fa
 export function brandingDefaults(companyId:string,name:string):Customization {
  const source=structuredClone(defaultCustomization);
  return {...source,organizationId:companyId,displayName:name,shortName:name.slice(0,24),slogan:'',assets:Object.fromEntries(assetKinds.map(key=>[key,null])),banners:[],
-  portal:{...source.portal,headline:'Faça parte da nossa equipe',introduction:'Conheça nossas oportunidades.',about:'',contactEmail:'',contactPhone:'',socialLinkedin:'',socialInstagram:'',footerText:name,customDomain:'',jobforgedDomain:''},draftUpdatedAt:'',publishedAt:'',publishedBy:'',revision:0};
+  portal:{...source.portal,layout:'classico',headline:'Faça parte da nossa equipe',introduction:'Conheça nossas oportunidades.',about:'',contactEmail:'',contactPhone:'',socialLinkedin:'',socialInstagram:'',footerText:name,customDomain:'',jobforgedDomain:''},draftUpdatedAt:'',publishedAt:'',publishedBy:'',revision:0};
 }
 export const brandContent=(value:Customization)=>{
  const {organizationId,draftUpdatedAt,publishedAt,publishedBy,revision,...content}=value;
@@ -37,6 +37,7 @@ export function validateBranding(content:unknown):string|null {
  const c=content as ReturnType<typeof brandContent>;
  try {
   if(!c.displayName.trim()||c.displayName.length>160||!c.shortName.trim()||c.shortName.length>24||c.slogan.length>110) return 'Revise o nome, nome curto e slogan.';
+  if(c.portal.layout!==undefined&&!['classico','equipe','panorama','vagas','essencial'].includes(c.portal.layout))return 'Escolha um template válido.';
   if(!fontPairs.some(p=>p.id===c.typography.fontPair))return 'Escolha um dos quatro pares tipográficos aprovados.';
   for(const palette of [c.palette,c.theme.light,c.theme.dark])for(const color of Object.values(palette))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return 'Use cores no formato #RRGGBB.';
   for(const mode of ['light','dark'] as const){const p=paletteFor({...c} as Customization,mode);if(['surface','background','sidebar','activeItem','portalBackground'].some(field=>contrast(p.text,p[field as keyof Palette])<4.5||contrast(p.link,p[field as keyof Palette])<4.5))return `Ajuste o contraste do tema ${mode==='light'?'claro':'escuro'}. Texto e links precisam de pelo menos 4,5:1 em todas as superfícies. Use texto e links mais escuros no tema claro e mais claros no escuro, ou restaure as paletas padrão.`;}

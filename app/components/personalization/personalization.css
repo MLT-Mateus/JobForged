@@ -1,9 +1,3 @@
-.custom-progress{display:grid;grid-template-columns:170px minmax(160px,1fr) auto;align-items:center;gap:var(--jf-ui-space-3);margin-bottom:var(--jf-ui-space-3);padding:var(--jf-ui-space-3) var(--jf-ui-space-4);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface)}
-.custom-progress>span{display:flex;flex-direction:column}
-.custom-progress b{font-size:var(--jf-ui-font-size-sm)}
-.custom-progress small,.custom-progress em{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs);font-style:normal}
-.custom-progress>i{height:7px;border-radius:99px;background:var(--jf-ui-surface-soft);overflow:hidden}
-.custom-progress>i b{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--jf-ui-brand),var(--jf-ui-accent))}
 .custom-workbench{display:grid;grid-template-columns:minmax(520px,1.05fr) minmax(430px,.95fr);gap:var(--jf-ui-space-3);align-items:start}
 .custom-workbench>main{display:grid;gap:var(--jf-ui-space-3);min-width:0}
 .custom-card{overflow:hidden}
@@ -176,10 +170,6 @@
 .mock-job main>section{margin-top:var(--jf-ui-space-5);padding-top:var(--jf-ui-space-4);border-top:1px solid color-mix(in srgb,var(--cp-text) 13%,transparent)}
 .mock-job h3{font-size:var(--jf-ui-font-size-sm)}
 .mock-job li{font-size:var(--jf-ui-font-size-xs);margin:var(--jf-ui-space-1) 0}
-.custom-bottom-bar{position:sticky;z-index:9;bottom:-1px;display:flex;align-items:center;justify-content:flex-end;gap:var(--jf-ui-space-2);margin:var(--jf-ui-space-4) -12px -42px;padding:var(--jf-ui-space-3) var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card) 12px 0 0;background:color-mix(in srgb,var(--jf-ui-surface) 95%,transparent);box-shadow:0 -10px 30px rgba(0,0,0,.06);backdrop-filter:blur(14px)}
-.custom-bottom-bar>div{display:flex;flex:1;flex-direction:column}
-.custom-bottom-bar b{font-size:var(--jf-ui-font-size-xs)}
-.custom-bottom-bar span{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
 .custom-history-list article{display:grid;grid-template-columns:36px 1fr auto auto auto;align-items:center;gap:var(--jf-ui-space-2);padding:var(--jf-ui-space-3);border-bottom:1px solid var(--jf-ui-border)}
 .custom-history-list article>i{display:grid;width:34px;height:34px;place-items:center;border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong)}
 .custom-history-list article svg{width:16px}
@@ -204,8 +194,6 @@
 }
 
 @media(max-width:700px){
-.custom-progress{grid-template-columns:1fr}
-.custom-progress>em{display:none}
 .custom-card>header{align-items:flex-start;flex-direction:column}
 .custom-card>header>.jf-action{width:100%}
 .custom-grid,.custom-grid.three,.theme-settings,.theme-panels,.asset-grid{grid-template-columns:1fr}
@@ -220,9 +208,6 @@
 .mock-portal>header nav{display:none}
 .mock-jobs{grid-template-columns:1fr}
 .mock-jobs article:nth-child(n+2){display:none}
-.custom-bottom-bar{margin-bottom:-30px}
-.custom-bottom-bar>div{display:none}
-.custom-bottom-bar>.jf-action{flex:1}
 .custom-history-list article{grid-template-columns:34px 1fr auto}
 .custom-history-list article>.jf-status{display:none}
 .custom-history-list article>button:not(.jf-action){display:none}
@@ -248,7 +233,6 @@
 .custom-workbench { min-width:0; }
 .custom-card{  }
 
-@media(max-width:680px) { .custom-bottom-bar { flex-wrap:wrap; gap:var(--jf-ui-space-2); } }
 
 .custom-workbench { gap:var(--jf-ui-space-6); }
 .custom-workbench > main { gap:var(--jf-ui-space-6); }
@@ -256,7 +240,6 @@
 .preview-controls { flex-wrap:wrap; }
 .preview-controls > .jf-field { flex:1 1 170px; min-width:0; }
 .custom-preview:has(.jf-select.is-open) { overflow:visible; z-index:35; }
-.custom-bottom-bar { margin:0; bottom:0; padding:var(--jf-ui-space-4); border-radius:var(--jf-ui-control-radius); }
 .custom-history-list { display:grid; gap:var(--jf-ui-space-3); }
 .custom-history-list article { min-width:0; grid-template-columns:34px minmax(0,1fr) auto auto auto; gap:var(--jf-ui-space-3); }
 .custom-history-list article > div { min-width:0; overflow-wrap:anywhere; }
@@ -267,3 +250,14 @@
 .custom-editor { border:0; padding:0; margin:0; min-width:0; display:grid; gap:var(--jf-ui-space-5); }
 .custom-preview.company-branding .preview-stage :is(h1,h2,h3,p,span,b,strong) { color:var(--cp-text); }
 .custom-preview.company-branding .mock-portal nav { min-width:0; flex-wrap:wrap; overflow-wrap:anywhere; }
+
+/* Visual compositions are shared with the Design System preview. */
+.mock-portal .mock-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--jf-ui-space-4);align-items:center}
+.mock-hero__copy{min-width:0}.mock-hero__visual{display:grid;place-items:center;min-width:0;min-height:140px;align-self:stretch;background:color-mix(in srgb,var(--cp-primary) 15%,var(--cp-surface));border-radius:var(--jf-ui-control-radius);overflow:hidden}
+.mock-hero__visual img{width:100%;height:100%;max-height:230px;object-fit:cover}.mock-hero__visual svg{width:44px;height:44px;color:var(--cp-primary)}
+.mock-portal[data-layout="equipe"] .mock-hero__visual{grid-column:1;grid-row:1}.mock-portal[data-layout="equipe"] .mock-hero__copy{grid-column:2}
+.mock-portal[data-layout="panorama"] .mock-hero{position:relative;min-height:260px;grid-template-columns:1fr;overflow:hidden}.mock-portal[data-layout="panorama"] .mock-hero__visual{position:absolute;inset:0}.mock-portal[data-layout="panorama"] .mock-hero__visual img{max-height:none}.mock-portal[data-layout="panorama"] .mock-hero__copy{position:relative;z-index:1;max-width:85%;padding:var(--jf-ui-space-4);border-radius:var(--jf-ui-control-radius);background:color-mix(in srgb,var(--cp-surface) 94%,transparent)}
+.mock-portal[data-layout="vagas"] .mock-hero{grid-template-columns:1fr;min-height:0;padding:var(--jf-ui-space-4)}.mock-portal[data-layout="vagas"] .mock-hero__visual{display:none}.mock-portal[data-layout="vagas"] .mock-hero p{margin-block:var(--jf-ui-space-2)}
+.mock-portal[data-layout="essencial"] .mock-hero{grid-template-columns:1fr;text-align:center}.mock-portal[data-layout="essencial"] .mock-hero__copy>*{margin-inline:auto}.mock-portal[data-layout="essencial"] .mock-hero__visual{display:none}
+.preview-stage.is-mobile .mock-portal .mock-hero{grid-template-columns:1fr}.preview-stage.is-mobile .mock-hero__copy,.preview-stage.is-mobile .mock-hero__visual{grid-column:1;grid-row:auto}.preview-stage.is-mobile .mock-portal[data-layout="equipe"] .mock-hero__visual{grid-row:1}
+@media(max-width:680px){.custom-workbench{grid-template-columns:minmax(0,1fr)}.custom-preview .mock-portal .mock-hero{grid-template-columns:1fr}.custom-preview .mock-hero__copy,.custom-preview .mock-hero__visual{grid-column:1;grid-row:auto}}
