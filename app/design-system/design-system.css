@@ -1967,7 +1967,7 @@ body:has(.ds-page) {
 .ds-brand-icons__downloads { display:flex; flex-wrap:wrap; gap:7px; }
 .ds-components-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .ds-components-grid .ds-example-card:last-child { grid-column:1 / -1; }
-.ds-status-people { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--jf-ui-space-5); align-items:start; }
+.ds-status-people { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:var(--jf-ui-space-5); align-items:start; }
 .ds-status-people > div { min-width:0; }
 .ds-status-people h3 { margin:0 0 var(--jf-ui-space-3); color:var(--ds-text-muted); font-size:11px; }
 .ds-type-pairs { display:grid; gap:var(--jf-ui-space-4); margin-top:var(--jf-ui-space-7); }

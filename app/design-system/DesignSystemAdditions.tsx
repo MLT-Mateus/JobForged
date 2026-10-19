@@ -80,7 +80,7 @@ export function IconLibrary() {
   const pageSize=20; const pages=Math.max(1,Math.ceil(filtered.length/pageSize)); const visible=filtered.slice((Math.min(page,pages)-1)*pageSize,Math.min(page,pages)*pageSize);
   const updateQuery=(value:string)=>{setQuery(value);setPage(1)}; const updateCategory=(value:string)=>{setCategory(value);setPage(1)};
   return <div className="ds-icon-library">
-    <div className="ds-icon-library__heading"><div><strong>Biblioteca de ícones</strong><span>60 símbolos SVG distintos, auditados por significado</span></div></div>
+    <div className="ds-icon-library__heading"><div><strong>Biblioteca de ícones</strong><span>{iconCatalog.length} símbolos SVG distintos, auditados por significado</span></div></div>
     <div className="ds-icon-tools"><TextField className="ds-icon-filter-field" label="Pesquisar ícones" icon={Search} type="search" value={query} onChange={e=>updateQuery(e.target.value)} placeholder="Pesquisar por nome ou uso"/><SelectField className="ds-icon-filter-field" label="Categoria" value={category} options={categoryOptions} onValueChange={updateCategory}/></div>
     <p className="ds-icon-results" role="status">{filtered.length} resultado{filtered.length===1?"":"s"}</p>
     {visible.length?<div className="ds-icon-grid ds-icon-grid--documented">{visible.map(({id,name,icon:Icon})=><article key={id}><span className="ds-icon-preview"><Icon size={24} strokeWidth={1.8} aria-hidden={true}/></span><div><strong>{name}</strong><code>{id}</code></div></article>)}</div>:<div className="ds-icon-empty"><Search size={28}/><strong>Nenhum ícone encontrado</strong><span>Revise a busca ou escolha outra categoria.</span><button onClick={()=>{updateQuery("");updateCategory("Todos")}}>Limpar filtros</button></div>}
