@@ -76,6 +76,11 @@ try {
     "/app/vagas/job-customer-success/preview",
   ])];
   for (const { base, environment } of targets) {
+    // Loading the upload route also verifies sharp's native runtime in the standalone image.
+    for (const path of ['/api/company/branding','/api/company/branding/assets']) {
+      const denied=await fetch(`${base}${path}`,{method:'POST',headers:{Origin:base},signal:AbortSignal.timeout(15000)});
+      assert.equal(denied.status,403,`${environment}${path} must reject a visitor`);
+    }
     for (const route of routes) {
       const response = await fetch(`${base}${route}`, { signal: AbortSignal.timeout(15_000) });
       assert.equal(response.status, 200, `${environment}: ${route}`);

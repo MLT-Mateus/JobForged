@@ -1,28 +1,28 @@
 "use client";
-import {defaultCustomization,initialHistory} from "./personalization-mocks";
-import type {Customization,HistoryEntry,OrganizationBanner,Palette,ThemeSettings} from "./personalization-types";
-const DRAFT="jobforged.customization.draft.v2",PUBLISHED="jobforged.customization.published.v2",HISTORY="jobforged.customization.history.v2";
-const clone=<T,>(x:T):T=>JSON.parse(JSON.stringify(x));
-const read=<T,>(key:string,fallback:T):T=>{if(typeof window==="undefined")return clone(fallback);try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):clone(fallback)}catch{return clone(fallback)}};
-const write=(key:string,value:unknown)=>{if(typeof window!=="undefined")localStorage.setItem(key,JSON.stringify(value))};
-const stamp=(c:Customization)=>({...c,draftUpdatedAt:new Date().toISOString()});
+import { brandingDefaults, brandContent } from './branding-model';
+import type { Customization, HistoryEntry, BrandAsset } from './personalization-types';
+type Stored = {companyId:string;companyName:string;editable:boolean;version:number;draft:object|null;published:object;publishedVersion:number;updatedAt:string;publishedAt:string;publishedBy:string;history:Array<{id:string;version:number;snapshot:object;created_at:string;actor:string}>};
+export type BrandingSnapshot={draft:Customization;published:Customization;history:HistoryEntry[];editable:boolean};
+function unpack(row:Stored):BrandingSnapshot {
+ const base=brandingDefaults(row.companyId,row.companyName);
+ const hydrate=(value:object|null,version=row.version):Customization=>({...base,...(value&&Object.keys(value).length?value:{}),organizationId:row.companyId,revision:version,draftUpdatedAt:row.updatedAt||'',publishedAt:row.publishedAt||'',publishedBy:row.publishedBy||''});
+ return {draft:hydrate(row.editable?row.draft:row.published),published:hydrate(row.published),editable:row.editable,history:row.history.map(entry=>({id:entry.id,organizationId:row.companyId,createdAt:entry.created_at,actor:entry.actor,type:`Identidade publicada · versão ${entry.version}`,status:'Publicado',snapshot:hydrate(entry.snapshot,entry.version)}))};
+}
+async function load():Promise<BrandingSnapshot>{const response=await fetch('/api/company/branding',{cache:'no-store',credentials:'same-origin'});if(!response.ok)throw new Error('Não foi possível carregar a identidade da sua empresa.');return unpack(await response.json() as Stored)}
+async function mutate(operation:string,input:Customization,historyId?:string){
+ const response=await fetch('/api/company/branding',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({operation,version:input.revision,configuration:brandContent(input),historyId})});
+ const result=await response.json() as {version?:number;message?:string};if(!response.ok)throw new Error(result.message||'Não foi possível salvar.');
+ const next=await load();if(next.draft.revision!==result.version)throw new Error('A operação foi registrada, mas outra sessão alterou o rascunho em seguida. Recarregue antes de continuar; seus campos foram preservados.');
+ if(operation==='publish')window.dispatchEvent(new CustomEvent('jobforged-customization-published',{detail:{companyId:input.organizationId}}));
+ return next;
+}
 export const customizationService={
- async getOrganizationTheme(organizationId:string){const draft=read(DRAFT,defaultCustomization);return draft.organizationId===organizationId?draft:clone(defaultCustomization)},
- async getPublishedCustomization(organizationId:string){const published=read(PUBLISHED,defaultCustomization);return published.organizationId===organizationId?published:clone(defaultCustomization)},
- async saveOrganizationTheme(input:Customization){const saved=stamp(input);write(DRAFT,saved);return saved},
- async updateBrandAssets(input:Customization){return this.saveOrganizationTheme(input)},
- async updateColorPalette(input:Customization,palette:Palette){return this.saveOrganizationTheme({...input,palette})},
- async updateThemeSettings(input:Customization,theme:ThemeSettings){return this.saveOrganizationTheme({...input,theme})},
- async listBanners(organizationId:string){return (await this.getOrganizationTheme(organizationId)).banners},
- async createBanner(input:Customization,banner:OrganizationBanner){return this.saveOrganizationTheme({...input,banners:[...input.banners,banner]})},
- async updateBanner(input:Customization,banner:OrganizationBanner){return this.saveOrganizationTheme({...input,banners:input.banners.map(x=>x.id===banner.id?banner:x)})},
- async reorderBanners(input:Customization,banners:OrganizationBanner[]){return this.saveOrganizationTheme({...input,banners:banners.map((x,i)=>({...x,order:i}))})},
- async deleteBanner(input:Customization,id:string){return this.saveOrganizationTheme({...input,banners:input.banners.filter(x=>x.id!==id)})},
- async updateCareerPortal(input:Customization){return this.saveOrganizationTheme(input)},
- async resetCustomization(organizationId:string){const reset={...clone(defaultCustomization),organizationId,draftUpdatedAt:new Date().toISOString()};write(DRAFT,reset);return reset},
- async discardDraft(organizationId:string){const published=await this.getPublishedCustomization(organizationId);write(DRAFT,published);return published},
- async publishCustomization(input:Customization,actor="Mateus Batista"){const published={...stamp(input),publishedAt:new Date().toISOString(),publishedBy:actor,revision:input.revision+1};write(PUBLISHED,published);write(DRAFT,published);const history=read<HistoryEntry[]>(HISTORY,initialHistory);write(HISTORY,[{id:`history-${Date.now()}`,organizationId:input.organizationId,createdAt:published.publishedAt,actor,type:"Personalização publicada",status:"Publicado",snapshot:published},...history]);if(typeof window!=="undefined")window.dispatchEvent(new CustomEvent("jobforged-customization-published",{detail:published}));return published},
- async getHistory(organizationId:string){return read<HistoryEntry[]>(HISTORY,initialHistory).filter(x=>x.organizationId===organizationId)},
- async restoreVersion(entry:HistoryEntry){const restored={...clone(entry.snapshot),draftUpdatedAt:new Date().toISOString()};write(DRAFT,restored);return restored}
+ load,
+ async saveOrganizationTheme(input:Customization){return (await mutate('save',input)).draft},
+ async publishCustomization(input:Customization){return (await mutate('publish',input)).published},
+ async discardDraft(input:Customization){return (await mutate('discard',input)).draft},
+ async resetCustomization(input:Customization){return (await mutate('reset',input)).draft},
+ async restoreVersion(entry:HistoryEntry,input:Customization){return (await mutate('restore',input,entry.id)).draft},
+ async getHistory(){return (await load()).history},
+ async uploadAsset(file:File,kind:string):Promise<BrandAsset>{const form=new FormData();form.set('file',file);form.set('kind',kind);const response=await fetch('/api/company/branding/assets',{method:'POST',credentials:'same-origin',body:form});const result=await response.json() as {asset:BrandAsset;message?:string};if(!response.ok)throw new Error(result.message||'Não foi possível enviar a imagem.');return result.asset}
 };
-export const getPublishedPalette=()=>read(PUBLISHED,defaultCustomization).palette;

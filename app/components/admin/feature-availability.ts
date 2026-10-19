@@ -31,7 +31,7 @@ export const featureAvailability: Record<WorkspaceModule, FeatureAvailability> =
   },
   personalizacao: {
     status: "beta",
-    description: "As alterações são uma prévia salva neste navegador. Elas ainda não aparecem para sua equipe nem em um portal público.",
+    description: "Rascunhos, publicações e histórico são salvos por empresa. O painel recebe a identidade publicada; o portal público permanece em breve.",
   },
   administradores: {
     status: "beta",

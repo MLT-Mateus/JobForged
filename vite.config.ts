@@ -35,7 +35,7 @@ const localBindingConfig = {
 
 export default defineConfig(async () => {
   if (process.env.JBFD_RUNTIME === "node") {
-    return { plugins: [vinext()] };
+    return { plugins: [vinext()], ssr: { external: ['sharp'] }, environments: { rsc: { resolve: { external: ['sharp'] } }, ssr: { resolve: { external: ['sharp'] } } } };
   }
 
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
