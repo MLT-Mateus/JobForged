@@ -16,3 +16,5 @@
 .company-branding .preview-stage button { background:var(--company-button); color:var(--company-on-button); }
 .company-branding .preview-stage button:hover { background:var(--company-button-hover); color:var(--company-on-button-hover); }
 .company-branding .preview-stage :is(.mock-panel,.mock-home,.mock-portal) { color:var(--cp-text); }
+
+.company-branding .preview-stage :is(.mock-home,.mock-job,.mock-portal) main>small { color:var(--cp-link); }

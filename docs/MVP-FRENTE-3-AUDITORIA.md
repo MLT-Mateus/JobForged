@@ -37,7 +37,7 @@ Existiam sete seções visuais, uploads como data URLs, rascunho/publicação/hi
 
 ## Segurança e armazenamento
 
-Migration nova `0008_company_branding.sql`, sem editar as anteriores: tabelas de estado/histórico/ativos com RLS e sem acesso direto de clientes; RPCs derivam empresa da identidade verificada e ativa, respeitando suspensão. Titular/administrador editam; membro consulta somente a publicada, sem rascunho ou histórico. Administrador de plataforma não ganha acesso empresarial nesta frente.
+Migrations novas `0008_company_branding.sql` e `0009_branding_surface_contrast.sql`, sem editar as anteriores: tabelas de estado/histórico/ativos com RLS e sem acesso direto de clientes; RPCs derivam empresa da identidade verificada e ativa, respeitando suspensão. Titular/administrador editam; membro consulta somente a publicada, sem rascunho ou histórico. Administrador de plataforma não ganha acesso empresarial nesta frente.
 
 Bucket `company-branding` privado. Sessões comuns não podem acessar objetos brutos nem contornar o processamento pela API Storage. Credencial dedicada de servidor usa papel `authenticated`, assunto técnico sem conta e claim restrita, autorizados somente para leitura/inserção imutável nesse bucket. Não é uma service-role key e não acessa empresas/RPCs empresariais. Seu valor nunca foi exibido, enviado ao navegador ou versionado. Configuração Test em arquivo protegido; renovação em até 365 dias pelo script root-only. Live não foi configurado.
 
@@ -45,7 +45,7 @@ Uploads: autenticação/permissão e mesma origem, limite do stream e do arquivo
 
 Substituir/remover uma referência não apaga o arquivo nem versões anteriores. Se houver falha entre upload e registro, pode restar objeto não referenciado; não há coleta destrutiva automática. A verificação operacional usou uma pequena imagem técnica não pessoal sem registro empresarial, mantida privada como probe.
 
-Backup verificado antes da migration: `/opt/jbfd/backups/supabase/test-20261019T174003Z` (dump, Storage, checksums, gzip/tar). Migration aplicada em Test pelo runner com checksum. Configuração da credencial: `scripts/configure-test-branding-storage.py`; verificação privada: `scripts/verify-test-branding-storage.py`. Nenhuma nova conta ou papel administrativo foi criado.
+Backup verificado antes da migration: `/opt/jbfd/backups/supabase/test-20261019T174003Z` (dump, Storage, checksums, gzip/tar). Migrations aplicadas em Test pelo runner com checksum. A 0009 completa a proteção de contraste de texto/links em todas as superfícies sem modificar a 0008 já aplicada. Configuração da credencial: `scripts/configure-test-branding-storage.py`; verificação privada: `scripts/verify-test-branding-storage.py`. Nenhuma nova conta ou papel administrativo foi criado.
 
 ## Arquivos principais
 

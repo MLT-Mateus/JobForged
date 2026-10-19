@@ -39,7 +39,7 @@ export function validateBranding(content:unknown):string|null {
   if(!c.displayName.trim()||c.displayName.length>160||!c.shortName.trim()||c.shortName.length>24||c.slogan.length>110) return 'Revise o nome, nome curto e slogan.';
   if(!fontPairs.some(p=>p.id===c.typography.fontPair))return 'Escolha um dos quatro pares tipográficos aprovados.';
   for(const palette of [c.palette,c.theme.light,c.theme.dark])for(const color of Object.values(palette))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return 'Use cores no formato #RRGGBB.';
-  for(const mode of ['light','dark'] as const){const p=paletteFor({...c} as Customization,mode);if(contrast(p.text,p.surface)<4.5||contrast(p.text,p.background)<4.5||contrast(p.text,p.sidebar)<4.5||contrast(p.text,p.activeItem)<4.5||contrast(p.link,p.surface)<4.5)return `Ajuste o contraste do tema ${mode==='light'?'claro':'escuro'}. Texto e links precisam de pelo menos 4,5:1.`;}
+  for(const mode of ['light','dark'] as const){const p=paletteFor({...c} as Customization,mode);if(['surface','background','sidebar','activeItem','portalBackground'].some(field=>contrast(p.text,p[field as keyof Palette])<4.5||contrast(p.link,p[field as keyof Palette])<4.5))return `Ajuste o contraste do tema ${mode==='light'?'claro':'escuro'}. Texto e links precisam de pelo menos 4,5:1 em todas as superfícies. Use texto e links mais escuros no tema claro e mais claros no escuro, ou restaure as paletas padrão.`;}
   return null;
  }catch{return 'Revise os campos da identidade visual.';}
 }

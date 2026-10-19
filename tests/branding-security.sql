@@ -28,6 +28,7 @@ begin
  begin perform public.write_company_branding('save',v,config||'{"publishedBy":"forged"}'::jsonb);raise exception 'forged metadata accepted';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_branding('save',v,jsonb_set(config,'{typography,fontPair}','"injected-font"'));raise exception 'unapproved font accepted';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_branding('publish',v,jsonb_set(config,'{theme,light,text}',config#>'{theme,light,surface}'));raise exception 'low contrast accepted';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('publish',v,jsonb_set(config,'{theme,dark,portalBackground}',config#>'{theme,dark,text}'));raise exception 'low portal contrast accepted';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_branding('save',v,jsonb_set(config,'{backgrounds,coverImage}','"data:image/svg+xml,evil"'));raise exception 'unsafe image accepted';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_branding('save',v,jsonb_set(config,'{portal,socialLinkedin}','"javascript:alert(1)"'));raise exception 'unsafe URL accepted';exception when invalid_parameter_value then null;end;
  v:=public.write_company_branding('reset',v,config);
