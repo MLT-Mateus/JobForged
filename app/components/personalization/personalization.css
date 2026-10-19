@@ -264,3 +264,6 @@
 @media(max-width:760px) { .custom-history-list article { grid-template-columns:34px minmax(0,1fr); } .custom-history-list article > :is(button,.jf-status) { grid-column:2; } .custom-workbench,.custom-workbench>main,.custom-card-body { gap:var(--jf-ui-space-4); } }
 
 .jf-widget-dialog .custom-preview { position:static; }
+.custom-editor { border:0; padding:0; margin:0; min-width:0; display:grid; gap:var(--jf-ui-space-5); }
+.custom-preview.company-branding .preview-stage :is(h1,h2,h3,p,span,b,strong) { color:var(--cp-text); }
+.custom-preview.company-branding .mock-portal nav { min-width:0; flex-wrap:wrap; overflow-wrap:anywhere; }

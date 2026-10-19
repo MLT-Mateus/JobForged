@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Bell, BriefcaseBusiness, CalendarDays, Download, FileText, House, LayoutDashboard, ListFilter, LogOut, MoreHorizontal, Palette, Plus, Search, Settings2, ShieldCheck, UsersRound, WalletCards } from "lucide-react";
 import { useThemePreference, ActionButton, DataTable, FieldControl, StatusBadge, TextField, MetricCard, WorkspacePageHeader, WorkspaceState } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
@@ -15,28 +15,37 @@ import { availabilityLabel, featureAvailability, type WorkspaceModule } from "./
 import type { AwaitedAdminContext } from "./admin-types";
 import { CompanyManagementClient } from "./CompanyManagementClient";
 import { AccountManagementClient } from "./AccountManagementClient";
+import { customizationService } from '../personalization/personalization-service';
+import { brandingStyle } from '../personalization/branding-model';
+import type { Customization } from '../personalization/personalization-types';
+import { CompanyBrandingProvider } from '../personalization/CompanyBranding';
+import '../personalization/company-branding.css';
 
 const nav = [
   ["Home","/app/home",House],["Dashboards","/app/dashboards",LayoutDashboard],["Vagas","/app/vagas",BriefcaseBusiness],["Candidaturas","/app/candidaturas",UsersRound],["Agenda","/app/agenda",CalendarDays],["Personalização","/app/personalizacao",Palette],["Administradores","/app/administradores",ShieldCheck],["Financeiro","/app/financeiro",WalletCards],["Configurações","/app/configuracoes",Settings2],
 ] as const;
-type OrganizationThemeRecord={palette?:Record<string,string>;theme?:{dark?:Record<string,string>};typography?:{font?:"Montserrat"|"Open Sans"|"Poppins"}};
 
 export function AdminShell({ module, context, children }: { module: WorkspaceModule; context: {organization: AwaitedAdminContext["organization"]; user: Pick<AwaitedAdminContext["user"], "name" | "role" | "initials">}; children: ReactNode }) {
   const router=useRouter();
   const auth=useCompanyAuthSession();
   const {theme}=useThemePreference();
-  const [organizationTheme,setOrganizationTheme]=useState<OrganizationThemeRecord|null>(null);
+  const [branding,setBranding]=useState<{companyId:string;value:Customization}|null>(null);
   useEffect(()=>{if(!auth.checking&&(!auth.authenticated||auth.platformAdmin||!auth.company))router.replace(auth.platformAdmin?"/backoffice":"/login")},[auth.checking,auth.authenticated,auth.platformAdmin,auth.company,router]);
-  useEffect(()=>{const load=()=>{try{const raw=localStorage.getItem("jobforged.customization.published.v2");setOrganizationTheme(raw?JSON.parse(raw):null)}catch{setOrganizationTheme(null)}};load();window.addEventListener("jobforged-customization-published",load);return()=>window.removeEventListener("jobforged-customization-published",load)},[]);
+  useEffect(()=>{if(!auth.company?.id||auth.platformAdmin)return;let active=true;const companyId=auth.company.id;
+    const load=()=>{void customizationService.load().then(value=>{if(active&&value.published.organizationId===companyId)setBranding({companyId,value:value.published})}).catch(()=>{if(active)setBranding(null)})};
+    load();window.addEventListener('jobforged-customization-published',load);window.addEventListener('focus',load);
+    return()=>{active=false;window.removeEventListener('jobforged-customization-published',load);window.removeEventListener('focus',load)};
+  },[auth.company?.id,auth.platformAdmin]);
   if(auth.checking)return <main className="jf-session-state"><WorkspaceState title="Validando seu acesso" description="Aguarde enquanto confirmamos sua sessão."/></main>;
   if(!auth.authenticated||auth.platformAdmin||!auth.company)return <main className="jf-session-state"><WorkspaceState title="Redirecionando…"/></main>;
-  const brandPalette=theme==="dark"?organizationTheme?.theme?.dark:organizationTheme?.palette;
-  const selectedFont=organizationTheme?.typography?.font??"Montserrat";
-  const organizationFont={Montserrat:'"Montserrat Variable", "Montserrat", Arial, sans-serif',"Open Sans":'"Open Sans Variable", "Open Sans", Arial, sans-serif',Poppins:'"Poppins", "Montserrat Variable", "Open Sans Variable", Arial, sans-serif'}[selectedFont];
-  const paletteStyle=brandPalette?{"--teal":brandPalette.primary,"--teal-deep":brandPalette.link,"--teal-soft":brandPalette.activeItem,"--blue":brandPalette.secondary,"--app-bg":brandPalette.background,"--app-panel":brandPalette.surface,"--jf-ui-brand":brandPalette.primary,"--jf-ui-brand-strong":brandPalette.link,"--jf-ui-brand-soft":brandPalette.activeItem,"--jf-ui-focus":brandPalette.primary,"--jf-ui-focus-ring":"color-mix(in srgb, var(--jf-ui-focus) 28%, transparent)","--jf-ui-surface":brandPalette.surface,"--jf-ui-surface-soft":brandPalette.background,"--jf-ui-accent":brandPalette.secondary,"--jf-ui-text":brandPalette.text,"--jf-ui-text-muted":"color-mix(in srgb, var(--jf-ui-text) 72%, var(--jf-ui-surface))"}:{};
-  const brandStyle={...paletteStyle,...(organizationTheme?.typography?.font?{"--jf-ui-font-heading":organizationFont,"--jf-ui-font-body":organizationFont}:{})} as unknown as CSSProperties;
+  const organizationTheme=branding?.companyId===auth.company.id?branding.value:null;
+  let selectedTheme=theme;
+  if(organizationTheme){let hasPreference=true;try{hasPreference=!!localStorage.getItem('jobforged-theme')}catch{/* Keep the active user preference. */}
+    if(!organizationTheme.theme.allowSwitch||!hasPreference)selectedTheme=organizationTheme.theme.defaultMode==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):organizationTheme.theme.defaultMode;
+  }
+  const brandStyle=organizationTheme?brandingStyle(organizationTheme,selectedTheme):{};
   const availability=featureAvailability[module];
-  return <WorkspaceShell supportEnabled items={nav.map(([label,href,icon])=>({label,href,icon,active:`/app/${module}`===href,status:featureAvailability[href.slice(5) as WorkspaceModule].status}))} logo={context.organization.logo} brand={auth.company.name} title={auth.company.name} subtitle="Organização ativa" style={brandStyle} actions={<><button className="jf-action jf-action--quiet admin-notice" aria-label="Notificações (em breve)" title="Notificações em breve" disabled><Bell/></button><button className="jf-action jf-action--quiet admin-notice" aria-label="Sair da conta" title="Sair da conta" onClick={async()=>{await signOutCompany();router.replace("/login")}}><LogOut/></button></>} footer={<div className="admin-user"><a href="/app/minha-conta" title="Minha conta"><span>{(auth.fullName || auth.email || "U").split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase()}</span><span><strong>{auth.fullName || auth.email || "Conta"}</strong><small>{auth.email??context.user.role}</small></span></a></div>}><section className={`admin-availability admin-availability--${availability.status}`} aria-label={`Disponibilidade: ${availabilityLabel(availability.status)}`}><StatusBadge tone={availability.status==="beta"?"warning":"neutral"}>{availabilityLabel(availability.status)}</StatusBadge><p>{availability.description}</p></section>{availability.status==="soon"?<div className="admin-availability-preview jf-workspace-stack" inert>{children}</div>:<div className="jf-workspace-stack">{children}</div>}</WorkspaceShell>;
+  return <CompanyBrandingProvider value={organizationTheme} theme={selectedTheme} companyId={auth.company.id} companyRole={auth.role||""}><WorkspaceShell className="company-branding" themeOverride={selectedTheme} showThemeSwitch={organizationTheme?.theme.allowSwitch??true} supportEnabled items={nav.map(([label,href,icon])=>({label,href,icon,active:`/app/${module}`===href,status:featureAvailability[href.slice(5) as WorkspaceModule].status}))} logo={organizationTheme?.assets.favicon?.url||organizationTheme?.assets.logoMain?.url||context.organization.logo} fullLogo={(selectedTheme==="dark"?organizationTheme?.assets.logoDark?.url:organizationTheme?.assets.logoLight?.url)||organizationTheme?.assets.logoMain?.url||organizationTheme?.assets.logoAlternative?.url} brand={organizationTheme?.shortName||auth.company.name} title={organizationTheme?.displayName||auth.company.name} subtitle="Organização ativa" style={brandStyle} actions={<><button className="jf-action jf-action--quiet admin-notice" aria-label="Notificações (em breve)" title="Notificações em breve" disabled><Bell/></button><button className="jf-action jf-action--quiet admin-notice" aria-label="Sair da conta" title="Sair da conta" onClick={async()=>{await signOutCompany();router.replace("/login")}}><LogOut/></button></>} footer={<div className="admin-user"><a href="/app/minha-conta" title="Minha conta"><span>{organizationTheme?.assets.avatar?<BrandAsset src={organizationTheme.assets.avatar.url} alt="Avatar da empresa"/>:(auth.fullName || auth.email || "U").split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase()}</span><span><strong>{auth.fullName || auth.email || "Conta"}</strong><small>{auth.email??context.user.role}</small></span></a></div>}><section className={`admin-availability admin-availability--${availability.status}`} aria-label={`Disponibilidade: ${availabilityLabel(availability.status)}`}><StatusBadge tone={availability.status==="beta"?"warning":"neutral"}>{availabilityLabel(availability.status)}</StatusBadge><p>{availability.description}</p></section>{availability.status==="soon"?<div className="admin-availability-preview jf-workspace-stack" inert>{children}</div>:<div className="jf-workspace-stack">{children}</div>}</WorkspaceShell></CompanyBrandingProvider>;
 }
 
 export function AdminPageHeader({ module, action }: { module: AdminModuleId; action?: ReactNode }) { const copy=moduleCopy[module]; return <WorkspacePageHeader section={`Painel / ${copy.title}`} title={copy.title} description={copy.description} action={action}/> }
