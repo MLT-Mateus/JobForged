@@ -61,7 +61,7 @@ export function updateRecoveredPassword(password: string, confirmPassword: strin
 }
 
 export async function signOutCompany() {
-  await postAuth("sign-out");
+  return postAuth("sign-out");
 }
 
 const initialState: AuthSessionState = { authenticated: false, checking: true, demo: false };
