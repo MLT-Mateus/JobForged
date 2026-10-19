@@ -1087,8 +1087,11 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
   }
   useEffect(() => {
     const editor = editorRef.current;
-    if (editor) editor.dataset.empty = String(!editor.textContent?.trim() && !editor.querySelector("img"));
-  }, []);
+    if (editor) {
+      editor.innerHTML = initial;
+      editor.dataset.empty = String(!editor.textContent?.trim() && !editor.querySelector("img"));
+    }
+  }, [initial]);
   function format(command: string, value?: string) {
     restoreSelection();
     document.execCommand(command, false, value);
@@ -1118,13 +1121,13 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
         <button type="button" aria-label="Lista" title="Lista" onMouseDown={e => e.preventDefault()} onClick={() => format("insertUnorderedList")}><List size={16}/></button>
         <button type="button" aria-label="Adicionar link" title="Adicionar link" onMouseDown={e => e.preventDefault()} onClick={() => format("createLink", "https://jobforged.com")}><Link2 size={16}/></button>
         <button type="button" aria-label="Adicionar imagem" title="Adicionar imagem" onMouseDown={e => e.preventDefault()} onClick={() => { saveSelection(); inputRef.current?.click(); }}><ImagePlus size={16}/></button>
-        <select className="jf-rich-text__size" aria-label="Tamanho do texto" title="Tamanho do texto" value={size} onChange={e => { setSize(e.target.value); format("fontSize", e.target.value); }}>
-          <option value="3">Normal · 16 px</option><option value="4">Grande · 18 px</option><option value="5">Maior · 24 px</option><option value="6">Título · 32 px</option>
-        </select>
+        <div className="jf-rich-text__sizes" role="group" aria-label="Tamanho do texto">
+          {([{"value":"3","label":"16"},{"value":"4","label":"18"},{"value":"5","label":"24"},{"value":"6","label":"32"}] as const).map(option => <button key={option.value} type="button" className="jf-rich-text__size" aria-label={`Texto de ${option.label} pixels`} title={`${option.label} px`} aria-pressed={size === option.value} onMouseDown={e => e.preventDefault()} onClick={() => { setSize(option.value); format("fontSize", option.value); }}>{option.label}</button>)}
+        </div>
       </div>
       <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={addImage}/>
       <div className="jf-rich-text__body">
-        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial} contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: initial }} onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
+        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial} contentEditable suppressContentEditableWarning onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
         <span className="jf-rich-text__placeholder" aria-hidden="true">{placeholder}</span>
       </div>
     </div>
