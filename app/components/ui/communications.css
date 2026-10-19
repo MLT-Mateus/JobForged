@@ -2,12 +2,13 @@
 .jf-communication-banner{overflow:hidden;min-width:0;padding:0;background:var(--jf-ui-surface);color:var(--jf-ui-text)}
 .jf-communication-banner__image{aspect-ratio:820/312;width:100%;overflow:hidden;background:var(--jf-ui-surface-soft)}
 .jf-communication-banner__image img{width:100%;height:100%;object-fit:contain;filter:none}
-.jf-communication-banner__content{padding:var(--jf-ui-space-5);display:grid;gap:var(--jf-ui-space-4)}
-.jf-communication-banner h2{margin:0;min-height:2.8em;font-size:var(--jf-ui-font-size-lg);line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
-.jf-communication-banner p{margin:var(--jf-ui-space-2) 0 0;min-height:3.2em;color:var(--jf-ui-text-muted);line-height:1.6;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
-.jf-communication-banner footer,.jf-communication-banner nav{display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-3);min-height:44px}
-.jf-communication-banner nav{flex-shrink:0;font-variant-numeric:tabular-nums}
-.jf-communication-banner nav svg{width:18px;height:18px}
+/* Controls overlay the image; neither captions nor counters add height. */
+.jf-communication-banner{position:relative}
+.jf-communication-banner__slide{width:100%;height:100%}
+.jf-communication-banner__image a{display:block;width:100%;height:100%}
+.jf-communication-banner__navigation{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-3);pointer-events:none}
+.jf-communication-banner__navigation>span{display:flex;background:var(--jf-ui-surface);border-radius:var(--jf-ui-control-radius);pointer-events:auto}
+.jf-communication-banner__navigation .jf-action{width:44px;min-height:44px;padding:0}
 .jf-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--jf-ui-space-4);min-width:0}
 .jf-communications-list{display:grid;gap:var(--jf-ui-space-4)}
 .jf-communications-list article{border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);padding:var(--jf-ui-space-4);overflow-wrap:anywhere}
@@ -18,7 +19,6 @@
 .jf-communication-meta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--jf-ui-space-2)}
 .jf-communication-status{white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:1100px){.jf-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.jf-communication-banner__content{padding:var(--jf-ui-space-4)}.jf-communication-banner footer{align-items:flex-start;flex-wrap:wrap}}
 @media(max-width:420px){.jf-metric-grid{grid-template-columns:minmax(0,1fr)}}
 
 .jf-communication-banner__image picture{display:block;width:100%;height:100%}
