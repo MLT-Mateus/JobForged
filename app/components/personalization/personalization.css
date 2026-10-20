@@ -1,6 +1,7 @@
 .custom-workbench{display:grid;grid-template-columns:minmax(520px,1.05fr) minmax(430px,.95fr);gap:var(--jf-ui-space-3);align-items:start}
 .custom-workbench>main{display:grid;gap:var(--jf-ui-space-3);min-width:0}
 .custom-card{overflow:hidden}
+.custom-card:has(.jf-field.is-open){overflow:visible}
 
 .custom-card-body{display:grid;gap:var(--jf-ui-space-6)}
 .custom-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--jf-ui-space-3)}
