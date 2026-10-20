@@ -93,7 +93,7 @@ export function TextField({
         <b>{label}</b>
         {requiredLabel && <i>{requiredLabel}</i>}
       </label>
-      <span className="jf-control">
+      <div className="jf-control">
         {Icon && <Icon size={17} aria-hidden="true" />}
         <input
           {...inputProps}
@@ -121,7 +121,7 @@ export function TextField({
             {passwordVisible ? <EyeOff size={17} aria-hidden="true" /> : <Eye size={17} aria-hidden="true" />}
           </button>
         )}
-      </span>
+      </div>
       {(error || helpText) && <small id={messageId}>{error ?? helpText}</small>}
     </div>
   );
