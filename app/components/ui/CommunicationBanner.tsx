@@ -21,6 +21,11 @@ export function CommunicationBanner({items,view="responsive"}:{items:BannerSlide
   return()=>{observer.disconnect();document.removeEventListener('visibilitychange',update);};
  },[count]);
  useEffect(()=>{
+  let active=true;const images=Array.from(root.current?.querySelectorAll<HTMLImageElement>('.jf-communication-banner__slide:not([hidden]) img')||[]),key=`${item?.id}:${item?.image}`;
+  void Promise.all(images.map(image=>image.decode().catch(()=>{}))).then(()=>{if(active&&images.some(image=>image.complete&&image.naturalWidth>0))setLoaded(value=>value.includes(key)?value:[...value,key])});
+  return()=>{active=false};
+ },[item?.id,item?.image,item?.mobileImage,view]);
+ useEffect(()=>{
   if(count<2||!available||!pageReady||!loaded.includes(`${item?.id}:${item?.image}`))return;
   const timer=window.setTimeout(()=>setSelected(value=>(value+1)%count),duration*1000);
   return()=>window.clearTimeout(timer);
