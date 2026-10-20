@@ -19,10 +19,22 @@ export function luminance(value:string){const rgb=[1,3,5].map(i=>parseInt(value.
 export function contrast(a:string,b:string){const [x,y]=[luminance(a),luminance(b)].sort((m,n)=>n-m);return(x+.05)/(y+.05)}
 export const foreground=(background:string)=>contrast(background,'#142321')>=4.5?'#142321':contrast(background,'#000000')>=4.5?'#000000':'#FFFFFF';
 export function paletteFor(value:Customization,theme:'light'|'dark'):Palette {return theme==='dark'?value.theme.dark:{...value.palette,background:value.theme.light.background,surface:value.theme.light.surface,text:value.theme.light.text}}
+function blendColor(source:string,target:string,amount:number){return '#'+[1,3,5].map(i=>Math.round(parseInt(source.slice(i,i+2),16)*(1-amount)+parseInt(target.slice(i,i+2),16)*amount).toString(16).padStart(2,'0')).join('')}
+export function brandingScrollbarStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
+ const primary=/^#[0-9A-F]{6}$/i.test(value.palette.primary)?value.palette.primary:lightPalette.primary;
+ const p=paletteFor(value,theme),surfaces=[p.background,p.surface],score=(color:string)=>Math.min(...surfaces.map(surface=>contrast(color,surface)));
+ const target=score('#000000')>=score('#FFFFFF')?'#000000':'#FFFFFF';
+ let thumb=primary;
+ for(let step=1;score(thumb)<3&&step<=10;step++)thumb=blendColor(primary,target,step/10);
+ const hover=blendColor(thumb,target,.15);
+ return {'--app-scrollbar-track':p.background,'--app-scrollbar-edge':p.background,'--app-scrollbar-thumb-start':thumb,'--app-scrollbar-thumb-end':thumb,'--app-scrollbar-thumb-hover-start':hover,'--app-scrollbar-thumb-hover-end':hover,
+ '--jf-ui-app-scrollbar-track':p.background,'--jf-ui-app-scrollbar-edge':p.background,'--jf-ui-app-scrollbar-thumb-start':thumb,'--jf-ui-app-scrollbar-thumb-end':thumb,'--jf-ui-app-scrollbar-thumb-hover-start':hover,'--jf-ui-app-scrollbar-thumb-hover-end':hover,
+ '--jf-ui-scrollbar-track':p.background,'--jf-ui-scrollbar-thumb':thumb,'--jf-ui-scrollbar-thumb-hover':hover} as CSSProperties;
+}
 export function brandingStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
  const p=paletteFor(value,theme),pair=fontPairs.find(x=>x.id===value.typography.fontPair)||fontPairs[0];
  const image=value.backgrounds.panelImage||value.backgrounds.textureImage;
- return {'--teal':p.primary,'--teal-deep':p.link,'--teal-soft':p.activeItem,'--blue':p.secondary,'--app-bg':p.background,'--app-panel':p.surface,
+ return {...brandingScrollbarStyle(value,theme),'--teal':p.primary,'--teal-deep':p.link,'--teal-soft':p.activeItem,'--blue':p.secondary,'--app-bg':p.background,'--app-panel':p.surface,
   '--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
   '--jf-ui-focus':p.link,'--jf-ui-focus-ring':'color-mix(in srgb,var(--jf-ui-focus) 28%,transparent)','--jf-ui-surface':p.surface,'--jf-ui-surface-soft':p.background,
   '--jf-ui-accent':p.secondary,'--jf-ui-text':p.text,'--jf-ui-text-muted':'color-mix(in srgb,var(--jf-ui-text) 72%,var(--jf-ui-surface))','--jf-ui-text-soft':'var(--jf-ui-text-muted)',
