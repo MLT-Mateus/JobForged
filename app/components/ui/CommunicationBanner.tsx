@@ -11,6 +11,7 @@ export function CommunicationBanner({items,view="responsive"}:{items:BannerSlide
  const [selected,setSelected]=useState(0),[loaded,setLoaded]=useState<string[]>([]),[available,setAvailable]=useState(false);
  const pageReady=useSyncExternalStore(subscribePageReady,pageIsReady,()=>false);
  const root=useRef<HTMLElement>(null),count=items.length,index=count?selected%count:0,item=items[index];
+ const imageReady=loaded.includes(`${item?.id}:${item?.image}`);
  const seconds=item?.duration_seconds,duration=typeof seconds==='number'&&Number.isInteger(seconds)&&seconds>=5&&seconds<=120?seconds:8;
  useEffect(()=>{
   const element=root.current;if(!element||count<2)return;
@@ -26,10 +27,10 @@ export function CommunicationBanner({items,view="responsive"}:{items:BannerSlide
   return()=>{active=false};
  },[item?.id,item?.image,item?.mobileImage,view]);
  useEffect(()=>{
-  if(count<2||!available||!pageReady||!loaded.includes(`${item?.id}:${item?.image}`))return;
+  if(count<2||!available||!pageReady||!imageReady)return;
   const timer=window.setTimeout(()=>setSelected(value=>(value+1)%count),duration*1000);
   return()=>window.clearTimeout(timer);
- },[count,item?.id,selected,duration,available,pageReady,loaded,item?.image]);
+ },[count,item?.id,selected,duration,available,pageReady,imageReady,item?.image]);
  if(!item)return null;
  const renderImage=(slide:BannerSlide)=><picture>{view==="responsive"&&slide.mobileImage&&<source media="(max-width: 680px)" srcSet={slide.mobileImage}/>}<BrandAsset src={view==="mobile"?(slide.mobileImage||slide.image):slide.image} alt={slide.title} loading={slide.id===items[0]?.id?"eager":"lazy"} onLoad={()=>setLoaded(value=>value.includes(`${slide.id}:${slide.image}`)?value:[...value,`${slide.id}:${slide.image}`])}/></picture>;
  return <Panel className="jf-communication-banner" data-preview-view={view} aria-label="Comunicados JobForged" aria-roledescription="carrossel">
