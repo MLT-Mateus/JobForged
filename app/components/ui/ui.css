@@ -800,3 +800,7 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-rich-text .jf-rich-text__editor:focus-visible {
  border:0 !important; outline:0 !important; box-shadow:none !important; border-radius:0; background:transparent;
 }
+
+.jf-color-field { display:grid; min-width:0; gap:var(--jf-ui-space-2); }
+.jf-color-field__actions { display:flex; align-items:center; flex-wrap:wrap; gap:var(--jf-ui-space-2); }
+.jf-color-field__swatch { display:block; width:20px; height:20px; flex-shrink:0; border:1px solid var(--jf-ui-border-strong); border-radius:var(--jf-ui-space-1); }
