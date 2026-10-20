@@ -28,3 +28,5 @@ export { WorkspaceState, WorkspaceTabs, WorkspaceActionMenu } from "./WorkspaceP
 export { NotificationPanel } from "./NotificationPanel";
 
 export {ColorField} from "./ColorField";
+
+export {FontPairPicker} from "./FontPairPicker";

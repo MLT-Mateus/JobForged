@@ -67,9 +67,10 @@ export default function NavigationLoader() {
     const pageIsReady = () => finishAfterCompleteCycle();
     failsafeRef.current = window.setTimeout(hideLoader, LOADER_FAILSAFE_MS);
 
-    pageIsReady();
+    if(document.readyState==="complete")pageIsReady();else window.addEventListener("load",pageIsReady,{once:true});
 
     return () => {
+      window.removeEventListener("load",pageIsReady);
       window.clearTimeout(failsafeRef.current);
       window.clearTimeout(finishTimerRef.current);
     };
@@ -103,6 +104,11 @@ export default function NavigationLoader() {
 
     finishAfterCompleteCycle();
   }, [active, finishAfterCompleteCycle, pathname, phase]);
+
+  useEffect(()=>{
+    document.documentElement.dataset.pageReady=String(!active);
+    window.dispatchEvent(new CustomEvent('jobforged-page-ready',{detail:!active}));
+  },[active]);
 
   if (!active) return null;
 

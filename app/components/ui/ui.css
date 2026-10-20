@@ -804,3 +804,17 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-color-field { display:grid; min-width:0; gap:var(--jf-ui-space-2); }
 .jf-color-field__actions { display:flex; align-items:center; flex-wrap:wrap; gap:var(--jf-ui-space-2); }
 .jf-color-field__swatch { display:block; width:20px; height:20px; flex-shrink:0; border:1px solid var(--jf-ui-border-strong); border-radius:var(--jf-ui-space-1); }
+
+.jf-color-field:has(.jf-focus-group__panel){position:relative;z-index:50}
+.jf-color-field__sample{height:48px;border:1px solid var(--jf-ui-border-strong);border-radius:var(--jf-ui-control-radius)}
+
+.jf-font-pairs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:var(--jf-ui-space-4)}
+.jf-font-pairs>.jf-action{display:grid;white-space:normal;text-align:left;justify-items:start;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-4)}
+.jf-font-pairs__heading{font-size:var(--jf-ui-font-size-xl)}
+.jf-font-pairs small{color:var(--jf-ui-text-muted)}
+
+.jf-color-field{position:relative}
+.jf-color-field .jf-focus-group{position:static}
+.jf-color-field .jf-focus-group__panel{width:min(100%,340px);max-height:70vh;overflow-y:auto;top:calc(100% + var(--jf-ui-space-2));left:0}
+
+.jf-control input[type="range"]{accent-color:var(--jf-ui-brand);cursor:pointer}
