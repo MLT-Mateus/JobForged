@@ -226,3 +226,5 @@
 
 .jf-external-preview>.preview-stage>*{height:auto;max-height:none;overflow:visible}
 @media(max-width:680px){.jf-external-preview .mock-hero{grid-template-columns:1fr}.jf-external-preview .mock-hero__copy,.jf-external-preview .mock-hero__visual{grid-column:1;grid-row:auto}}
+
+.jf-appearance-demo>.custom-preview{position:relative;top:0}
