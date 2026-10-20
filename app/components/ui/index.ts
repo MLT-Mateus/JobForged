@@ -26,3 +26,5 @@ export { WidgetGroup, WidgetDivider, WidgetDialog, FocusPopover } from "./Widget
 export { WorkspaceState, WorkspaceTabs, WorkspaceActionMenu } from "./WorkspacePatterns";
 
 export { NotificationPanel } from "./NotificationPanel";
+
+export {ColorField} from "./ColorField";

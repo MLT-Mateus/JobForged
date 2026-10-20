@@ -818,6 +818,7 @@ export function MultiSelectField({
 }
 
 type FileUploadFieldProps = FieldBaseProps & {
+  disabled?: boolean;
   value: string | null;
   accept: string;
   emptyHint: string;
@@ -831,6 +832,7 @@ export function FileUploadField({
   accept,
   emptyHint,
   variant = "file",
+  disabled = false,
   onFileChange,
   className = "",
 }: FileUploadFieldProps) {
@@ -845,7 +847,8 @@ export function FileUploadField({
         id={inputId}
         type="file"
         accept={accept}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => onFileChange(event.target.files?.[0] ?? null)}
+        disabled={disabled}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { onFileChange(event.target.files?.[0] ?? null); event.target.value = ""; }}
       />
       <span className="jf-upload__icon"><StateIcon size={21} aria-hidden="true" /></span>
       <span className="jf-upload__content">

@@ -14,7 +14,7 @@ import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnim
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Bell, BriefcaseBusiness, CalendarDays, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, House, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, ShieldCheck, SlidersHorizontal, Sparkles, TrendingUp, Type, UserRound, UserRoundCheck, UsersRound, WalletCards } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
-import { CheckboxField, TextAreaField, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
+import { CheckboxField, ColorField, TextAreaField, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
@@ -205,6 +205,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const { theme } = useThemePreference();
   const statusSoundEnabled = useStatusSoundPreference();
   const [workspaceState,setWorkspaceState] = useState<"loading"|"error"|"empty"|"forbidden">("loading");
+  const [demoColor,setDemoColor] = useState("#20B2AA");
   const [wideDialogOpen,setWideDialogOpen] = useState(false);
   const [nestedDialogOpen,setNestedDialogOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
@@ -429,6 +430,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <MultiFileUploadField label="Galeria da empresa" files={uploadedPictures} accept="image/png,image/jpeg,image/webp" emptyHint="Arraste ou selecione até 8 imagens" variant="picture" maxFiles={8} onFilesChange={setUploadedPictures} helpText="As imagens aparecem em miniaturas e podem ser removidas individualmente." />
                 </div>
               </ExampleCard>
+              <ExampleCard title="Cor (hexadecimal e seletor)"><ColorField label="Cor principal" value={demoColor} previous="#20B2AA" onChange={setDemoColor}/></ExampleCard>
               <ExampleCard title="Texto multilinha (Textarea)">
                 <TextAreaField label="Apresentação" placeholder="Escreva uma apresentação em várias linhas." rows={4}/>
               </ExampleCard>
