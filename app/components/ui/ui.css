@@ -816,3 +816,5 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-color-field{position:relative}
 .jf-color-field .jf-focus-group{position:static}
 .jf-color-field .jf-focus-group__panel{width:min(100%,340px);max-height:70vh;overflow-y:auto;top:calc(100% + var(--jf-ui-space-2));left:0}
+
+.jf-control input[type="range"]{accent-color:var(--jf-ui-brand);cursor:pointer}
