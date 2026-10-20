@@ -21,8 +21,7 @@ export const foreground=(background:string)=>contrast(background,'#142321')>=4.5
 export function paletteFor(value:Customization,theme:'light'|'dark'):Palette {return theme==='dark'?value.theme.dark:{...value.palette,background:value.theme.light.background,surface:value.theme.light.surface,text:value.theme.light.text}}
 function blendColor(source:string,target:string,amount:number){return '#'+[1,3,5].map(i=>Math.round(parseInt(source.slice(i,i+2),16)*(1-amount)+parseInt(target.slice(i,i+2),16)*amount).toString(16).padStart(2,'0')).join('')}
 export function brandingScrollbarStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
- const primary=value.palette.primary;
- if(!/^#[0-9A-F]{6}$/i.test(primary)||primary.toUpperCase()===lightPalette.primary.toUpperCase())return {};
+ const primary=/^#[0-9A-F]{6}$/i.test(value.palette.primary)?value.palette.primary:lightPalette.primary;
  const p=paletteFor(value,theme),surfaces=[p.background,p.surface],score=(color:string)=>Math.min(...surfaces.map(surface=>contrast(color,surface)));
  const target=score('#000000')>=score('#FFFFFF')?'#000000':'#FFFFFF';
  let thumb=primary;
