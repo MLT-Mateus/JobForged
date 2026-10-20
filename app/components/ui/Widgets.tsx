@@ -34,8 +34,8 @@ export function WidgetDialog({open,onClose,title,description,kind="modal",size="
  </dialog>;
 }
 
-export function FocusPopover({label,children}:{label:string;children:ReactNode}) {
+export function FocusPopover({label,children,triggerContent}:{label:string;children:ReactNode;triggerContent?:ReactNode}) {
  const [open,setOpen]=useState(false),root=useRef<HTMLDivElement>(null),trigger=useRef<HTMLButtonElement>(null),panel=useRef<HTMLDivElement>(null),id=useId();
  useEffect(()=>{if(!open)return;panel.current?.focus();const outside=(e:PointerEvent)=>{if(!root.current?.contains(e.target as Node))setOpen(false)};const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){setOpen(false);trigger.current?.focus()}};document.addEventListener('pointerdown',outside);document.addEventListener('keydown',key);return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',key)}},[open]);
- return <div className="jf-focus-group" ref={root} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false)}}><button ref={trigger} type="button" className="jf-action jf-action--secondary" aria-expanded={open} aria-controls={id} aria-haspopup="dialog" onClick={()=>setOpen(v=>!v)}>{label}</button>{open&&<div id={id} ref={panel} tabIndex={-1} role="dialog" aria-label={label} className="jf-focus-group__panel">{children}<ActionButton variant="quiet" onClick={()=>{setOpen(false);trigger.current?.focus()}}>Concluir</ActionButton></div>}</div>;
+ return <div className="jf-focus-group" ref={root} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false)}}><button ref={trigger} type="button" className="jf-action jf-action--secondary" aria-expanded={open} aria-controls={id} aria-haspopup="dialog" onClick={()=>setOpen(v=>!v)}>{triggerContent??label}</button>{open&&<div id={id} ref={panel} tabIndex={-1} role="dialog" aria-label={label} className="jf-focus-group__panel">{children}<ActionButton variant="quiet" onClick={()=>{setOpen(false);trigger.current?.focus()}}>Concluir</ActionButton></div>}</div>;
 }
