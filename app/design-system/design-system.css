@@ -576,7 +576,8 @@ body:has(.ds-page) {
 .ds-example-card:has(.ds-multiselect.is-open),
 .ds-example-card:has(.jf-select.is-open),
 .ds-example-card:has(.jf-multiselect.is-open),
-.ds-example-card:has(.jf-date.is-open) {
+.ds-example-card:has(.jf-date.is-open),
+.ds-example-card:has(.jf-focus-group__panel) {
   position: relative;
   z-index: 30;
   overflow: visible;
