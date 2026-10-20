@@ -14,7 +14,7 @@ import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnim
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Bell, BriefcaseBusiness, CalendarDays, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, House, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, ShieldCheck, SlidersHorizontal, Sparkles, TrendingUp, Type, UserRound, UserRoundCheck, UsersRound, WalletCards } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
-import { CheckboxField, ColorField, TextAreaField, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
+import { CheckboxField, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
@@ -430,9 +430,9 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <MultiFileUploadField label="Galeria da empresa" files={uploadedPictures} accept="image/png,image/jpeg,image/webp" emptyHint="Arraste ou selecione até 8 imagens" variant="picture" maxFiles={8} onFilesChange={setUploadedPictures} helpText="As imagens aparecem em miniaturas e podem ser removidas individualmente." />
                 </div>
               </ExampleCard>
-              <ExampleCard title="Cor (hexadecimal e seletor)"><ColorField label="Cor principal" value={demoColor} previous="#20B2AA" onChange={setDemoColor}/></ExampleCard>
-              <ExampleCard title="Texto multilinha (Textarea)">
-                <TextAreaField label="Apresentação" placeholder="Escreva uma apresentação em várias linhas." rows={4}/>
+              <ExampleCard title="Color Input · HEX e picker"><ColorField label="Cor principal" value={demoColor} previous="#20B2AA" onChange={setDemoColor}/></ExampleCard>
+              <ExampleCard title="Multiline Input · texto multilinha">
+                <MultilineInput label="Apresentação" placeholder="Escreva uma apresentação em várias linhas." rows={4}/>
               </ExampleCard>
               <ExampleCard title="Rich text">
                 <RichTextField label="Descrição da vaga" placeholder="Descreva responsabilidades, resultados esperados e como o time trabalha." />

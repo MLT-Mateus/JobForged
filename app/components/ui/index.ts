@@ -18,7 +18,7 @@ export {
 
 export { AppToast, createToastNotice, type ToastKind, type ToastNotice } from "./AppToast";
 export { ThemeSelector, type ThemeMode } from "./ThemeSelector";
-export { ActionButton, Panel, MetricCard, DataTable, EmptyState, StatusBadge, WorkspacePageHeader, PanelHeading, InlineNotice } from "./AdminPrimitives";
+export { ActionButton, Panel, MetricCard, DataTable, EmptyState, EmptyStateVisual, StatusBadge, WorkspacePageHeader, PanelHeading, InlineNotice } from "./AdminPrimitives";
 
 export { useThemePreference, setThemePreference } from "./useThemePreference";
 
@@ -30,3 +30,5 @@ export { NotificationPanel } from "./NotificationPanel";
 export {ColorField} from "./ColorField";
 
 export {FontPairPicker} from "./FontPairPicker";
+
+export {TextAreaField as MultilineInput} from "./FormControls";
