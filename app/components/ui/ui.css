@@ -833,3 +833,15 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 /* One shared color control: swatch, editable HEX and optional reset. */
 .jf-color-field .jf-control>input{font-family:var(--font-mono,monospace);letter-spacing:.04em;font-variant-numeric:tabular-nums}
 .jf-color-field .jf-control>.jf-focus-group{padding-right:var(--jf-ui-space-2);border-right:1px solid var(--jf-ui-border)}
+
+/* Visual color palette, shared by the manual and company editor. */
+.jf-color-palette{position:relative;height:180px;flex-shrink:0;border:1px solid var(--jf-ui-border-strong);border-radius:var(--jf-ui-control-radius);background-image:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,transparent);touch-action:none;cursor:crosshair}
+.jf-color-palette:focus-visible{outline:3px solid var(--jf-ui-focus);outline-offset:3px}
+.jf-color-palette__cursor{position:absolute;width:14px;height:14px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #0008;transform:translate(-50%,-50%);pointer-events:none}
+.jf-color-hue{display:grid;gap:var(--jf-ui-space-2);color:var(--jf-ui-text-muted);font-size:12px}
+.jf-color-hue input{appearance:none;width:100%;height:14px;margin:0;border:1px solid var(--jf-ui-border-strong);border-radius:999px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer}
+.jf-color-hue input::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border:2px solid #fff;border-radius:50%;background:var(--jf-color-hue);box-shadow:0 0 0 1px #0008}
+.jf-color-hue input::-moz-range-thumb{width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:var(--jf-color-hue)}
+.jf-color-hue input:focus-visible{outline:3px solid var(--jf-ui-focus);outline-offset:3px}
+.jf-color-selection{display:flex;align-items:center;gap:var(--jf-ui-space-3);font-family:monospace;color:var(--jf-ui-text)}
+.jf-color-selection>span{width:32px;height:32px;border:1px solid var(--jf-ui-border-strong);border-radius:var(--jf-ui-control-radius)}
