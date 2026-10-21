@@ -5456,7 +5456,7 @@ html[data-theme="dark"] .not-found-window__body small { color: var(--ink-soft); 
     flex-direction: column;
   }
 
-  .not-found-actions .button {
+  .not-found-actions .jf-action {
     width: 100%;
   }
 

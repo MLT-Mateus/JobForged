@@ -19,8 +19,8 @@ export default function NotFound() {
           <h1>Essa página não faz parte deste processo.</h1>
           <p>O endereço pode ter mudado ou não existir. Volte para a Landing Page e continue conhecendo a JobForged.</p>
           <div className="not-found-actions">
-            <Link className="button button--primary" href="/"><Home /> Voltar ao início</Link>
-            <Link className="button button--ghost" href="/#faq"><ArrowLeft /> Acessar o FAQ</Link>
+            <Link className="jf-action jf-action--primary" href="/"><Home size={18} aria-hidden="true" /> <span>Voltar ao início</span></Link>
+            <Link className="jf-action jf-action--secondary" href="/#faq"><ArrowLeft size={18} aria-hidden="true" /> <span>Acessar o FAQ</span></Link>
           </div>
         </div>
         <div className="not-found-visual" aria-hidden="true">
