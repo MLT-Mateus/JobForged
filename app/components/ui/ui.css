@@ -829,3 +829,7 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-empty-art-example{display:grid;min-height:220px;align-content:center;justify-items:center;gap:var(--jf-ui-space-4);text-align:center;color:var(--jf-ui-text-muted)}
 
 .jf-color-field>.jf-field{grid-template-rows:minmax(20px,auto) minmax(var(--jf-ui-control-height),auto)}
+
+/* One shared color control: swatch, editable HEX and optional reset. */
+.jf-color-field .jf-control>input{font-family:var(--font-mono,monospace);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.jf-color-field .jf-control>.jf-focus-group{padding-right:var(--jf-ui-space-2);border-right:1px solid var(--jf-ui-border)}
