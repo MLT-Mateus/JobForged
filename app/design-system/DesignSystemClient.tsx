@@ -192,6 +192,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const { theme } = useThemePreference();
   const statusSoundEnabled = useStatusSoundPreference();
   const [workspaceState,setWorkspaceState] = useState<"loading"|"error"|"empty"|"forbidden">("loading");
+  const [demoRange,setDemoRange] = useState(50);
   const [demoColor,setDemoColor] = useState("#20B2AA");
   const [wideDialogOpen,setWideDialogOpen] = useState(false);
   const [nestedDialogOpen,setNestedDialogOpen] = useState(false);
@@ -416,6 +417,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <MultiFileUploadField label="Galeria da empresa" files={uploadedPictures} accept="image/png,image/jpeg,image/webp" emptyHint="Arraste ou selecione até 8 imagens" variant="picture" maxFiles={8} onFilesChange={setUploadedPictures} helpText="As imagens aparecem em miniaturas e podem ser removidas individualmente." />
                 </div>
               </ExampleCard>
+              <ExampleCard title="Range Input · controle de faixa"><TextField label={`Intensidade: ${demoRange}%`} type="range" min={0} max={100} step={1} value={demoRange} onChange={e=>setDemoRange(Number(e.target.value))} helpText="Arraste ou use as setas para ajustar o valor."/></ExampleCard>
               <ExampleCard title="Color Input · HEX e picker"><ColorField label="Cor principal" value={demoColor} previous="#20B2AA" onChange={setDemoColor}/></ExampleCard>
               <ExampleCard title="Multiline Input · texto multilinha">
                 <MultilineInput label="Apresentação" placeholder="Escreva uma apresentação em várias linhas." rows={4}/>
