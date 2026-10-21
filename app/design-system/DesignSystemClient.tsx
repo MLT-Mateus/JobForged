@@ -12,13 +12,12 @@ import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, Bell, BriefcaseBusiness, CalendarDays, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, House, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, ShieldCheck, SlidersHorizontal, Sparkles, TrendingUp, Type, UserRound, UserRoundCheck, UsersRound, WalletCards } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, SlidersHorizontal, Sparkles, Type } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
 import { CheckboxField, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
-import { AppearanceTemplatesDemo } from '../components/personalization/AppearanceTemplatesDemo';
 import { BrandingDesignSystemDemo } from '../components/personalization/BrandingDesignSystemDemo';
 
 type AlertKind = "success" | "info" | "warning" | "danger";
@@ -37,7 +36,6 @@ const navigation = [
   { id: "empty-states", label: "Empty States", icon: FileText },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "emails", label: "E-mails", icon: Mail },
-  { id: "aplicacao", label: "Aplicação", icon: PanelsTopLeft },
 ];
 
 const dashboardFunnel = [
@@ -59,17 +57,6 @@ const spacingScale = [
   { token: "--jf-ui-space-9", value: 64, label: "Seções" },
 ];
 
-const applicationMenu = [
-  { label: "Home", icon: House },
-  { label: "Dashboards", icon: LayoutDashboard },
-  { label: "Vagas", icon: BriefcaseBusiness },
-  { label: "Candidaturas", icon: UsersRound },
-  { label: "Agenda", icon: CalendarDays },
-  { label: "Personalização", icon: Palette },
-  { label: "Administradores", icon: ShieldCheck },
-  { label: "Financeiro", icon: WalletCards },
-  { label: "Configurações", icon: Settings2 },
-];
 
 const colorTokens = [
   { name: "Turquesa JobForged", variable: "--jf-ui-brand", group: "brand", use: "Ações principais e progresso" },
@@ -209,7 +196,6 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const [wideDialogOpen,setWideDialogOpen] = useState(false);
   const [nestedDialogOpen,setNestedDialogOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
-  const [appSidebarExpanded, setAppSidebarExpanded] = useState(true);
   const [activePage, setActivePage] = useState(() => Math.max(0,navigation.findIndex(item=>item.id===initialSection)));
   const [copied, setCopied] = useState<string | null>(null);
   const [activeAlert, setActiveAlert] = useState<ToastNotice | null>(null);
@@ -496,35 +482,6 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             </div>
             <AdvancedCharts />
           </section>
-
-          <section className="ds-section ds-section--first" hidden={currentPage.id !== "aplicacao"} aria-label="Aplicação">
-            <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
-            <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
-              <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">
-              <div className="ds-app-preview__brand"><span><BrandAsset src="/brand/jobforged-symbol.svg" alt="" /><strong>JobForged</strong></span><button type="button" className="ds-app-preview__collapse" aria-label={appSidebarExpanded ? "Reduzir menu lateral" : "Expandir menu lateral"} aria-pressed={!appSidebarExpanded} onClick={() => setAppSidebarExpanded((expanded) => !expanded)}>{appSidebarExpanded ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}</button></div>
-                <nav>{applicationMenu.map(({ label, icon: Icon }, index) => <button type="button" key={label} className={index === 1 ? "is-active" : ""}><Icon size={15} strokeWidth={1.8} /><span>{label}</span></button>)}</nav>
-                <button type="button" className="ds-app-preview__profile" aria-label="Abrir meu perfil"><span><UserRound size={15} /></span><strong>Mateus</strong></button>
-              </aside>
-
-              <div className="ds-app-preview__main">
-                <header className="ds-app-preview__topbar"><div><span>Dashboards / Visão geral</span><strong>Bom dia, Mateus 👋</strong><small>Acompanhe os resultados da sua operação de talentos.</small></div><div><button type="button" className="ds-app-preview__period"><CalendarDays size={14} />Últimos 30 dias</button><button type="button" className="ds-app-preview__notice" aria-label="Notificações"><Bell size={15} /><i /></button></div></header>
-
-                <div className="ds-app-preview__kpis"><article><span><BriefcaseBusiness size={14} />Vagas ativas</span><strong>18</strong><small><TrendingUp size={12} />3 novas neste mês</small></article><article><span><UsersRound size={14} />Candidaturas</span><strong>1.284</strong><small><TrendingUp size={12} />18,4% no período</small></article><article><span><CalendarDays size={14} />Entrevistas</span><strong>96</strong><small>24 nesta semana</small></article><article><span><UserRoundCheck size={14} />Taxa de contratação</span><strong>12,8%</strong><small><TrendingUp size={12} />2,1 p.p.</small></article></div>
-
-                <div className="ds-app-preview__analytics">
-                  <article className="ds-app-panel ds-app-panel--funnel"><header><div><strong>Funil de recrutamento</strong><small>Conversão por etapa</small></div><button type="button"><MoreHorizontal size={14} /></button></header><div>{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div></article>
-                  <article className="ds-app-panel ds-app-panel--weekly"><header><div><strong>Candidaturas</strong><small>Volume nas últimas 6 semanas</small></div><span>+18,4%</span></header><div className="ds-app-bars"><i style={{ "--bar": "36%" } as CSSProperties} /><i style={{ "--bar": "53%" } as CSSProperties} /><i style={{ "--bar": "47%" } as CSSProperties} /><i style={{ "--bar": "69%" } as CSSProperties} /><i style={{ "--bar": "62%" } as CSSProperties} /><i style={{ "--bar": "88%" } as CSSProperties} /></div><footer><span>S1</span><span>S2</span><span>S3</span><span>S4</span><span>S5</span><span>S6</span></footer></article>
-                </div>
-
-                <div className="ds-app-preview__bottom">
-                  <article className="ds-app-panel ds-app-panel--vacancies"><header><div><strong>Vagas em destaque</strong><small>Maior volume de candidatos</small></div><button type="button">Ver todas</button></header><div><span>Product Designer</span><strong>142 candidatos</strong><i><b style={{ width: "92%" }} /></i><small>92% aderência média</small></div><div><span>Customer Success</span><strong>98 candidatos</strong><i><b style={{ width: "78%" }} /></i><small>87% aderência média</small></div><div><span>People Analyst</span><strong>76 candidatos</strong><i><b style={{ width: "66%" }} /></i><small>89% aderência média</small></div></article>
-                  <article className="ds-app-panel ds-app-panel--activity"><header><div><strong>Atividade recente</strong><small>Atualizações do time</small></div></header><ul><li><span className="ds-avatar ds-avatar--teal">BS</span><p><strong>Beatriz Souza</strong> avançou para entrevista<small>Há 12 minutos</small></p></li><li><span className="ds-avatar ds-avatar--blue">AM</span><p><strong>André Martins</strong> enviou o teste técnico<small>Há 38 minutos</small></p></li><li><span className="ds-avatar ds-avatar--green">LR</span><p><strong>Larissa Rocha</strong> recebeu uma proposta<small>Há 1 hora</small></p></li></ul></article>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {currentPage.id === "aplicacao" && <section className="ds-section" aria-label="Templates de aparência"><AppearanceTemplatesDemo theme={theme}/></section>}
 
           {currentPage.id === "emails" && <EmailTemplatesSection />}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, Copy, Download, Mail, Moon, Sun } from "lucide-react";
+import { Check, Copy, Download, Moon, Sun } from "lucide-react";
 import { useThemePreference } from "@/app/components/ui";
 import {
   downloadFileName,
@@ -12,9 +12,9 @@ import {
   type EmailTheme,
 } from "./email-template-catalog";
 
-const themes: Array<{ id: EmailTheme; label: string; description: string; icon: typeof Sun }> = [
-  { id: "light", label: "Claro", description: "Padrão se a preferência do usuário não estiver salva.", icon: Sun },
-  { id: "dark", label: "Escuro", description: "Usado quando a preferência salva do usuário for escura.", icon: Moon },
+const themes: Array<{ id: EmailTheme; label: string; icon: typeof Sun }> = [
+  { id: "light", label: "Claro", icon: Sun },
+  { id: "dark", label: "Escuro", icon: Moon },
 ];
 
 function EmailVariantPreview({ templateId, theme }: { templateId: EmailTemplateId; theme: EmailTheme }) {
@@ -40,7 +40,7 @@ function EmailVariantPreview({ templateId, theme }: { templateId: EmailTemplateI
       <header className="ds-email-variant__header">
         <div>
           <span className="ds-email-variant__mode"><Icon size={15} aria-hidden="true" />Tema {mode.label}</span>
-          <small>{mode.description}</small>
+
         </div>
         <div className="ds-email-variant__actions">
           <button type="button" className="jf-action jf-action--secondary" onClick={copyHtml} aria-label={`Copiar HTML do modelo ${template.name}, tema ${mode.label}`}>
@@ -71,28 +71,15 @@ export function EmailTemplatesSection() {
   const { theme } = useThemePreference();
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplateId>(emailTemplates[0].id);
   const current = emailTemplates.find((item) => item.id === selectedTemplate)!;
-  const selectedIndex = emailTemplates.findIndex((item) => item.id === selectedTemplate);
-
-  function selectRelativeTemplate(offset: number) {
-    const nextIndex = (selectedIndex + offset + emailTemplates.length) % emailTemplates.length;
-    setSelectedTemplate(emailTemplates[nextIndex].id);
-  }
 
   return (
     <section className="ds-section ds-section--first ds-email-templates" aria-labelledby="ds-emails-title">
       <header className="ds-section-heading ds-email-templates__heading">
-        <span>COMUNICAÇÃO · BREVO</span>
+        <span>MODELOS DE E-MAIL</span>
         <h2 id="ds-emails-title">E-mails com a identidade JobForged.</h2>
           <p>Escolha um modelo para ver a prévia no tema atual e copiar ou baixar seu HTML.</p>
       </header>
 
-      <aside className="ds-email-templates__notice" aria-label="Informações da prévia">
-        <span className="ds-email-templates__notice-icon"><Mail size={19} aria-hidden="true" /></span>
-        <div>
-          <strong>Prévia de design · nenhum e-mail é enviado por esta página</strong>
-          <p>A prévia acompanha o tema escolhido no aplicativo. Os botões e a hierarquia visual seguem o Design System; fontes alternativas podem ser aplicadas nos envios personalizados das empresas.</p>
-        </div>
-      </aside>
 
       <div className="ds-email-templates__layout">
         <nav className="ds-email-library" aria-label="Modelos de e-mail">
@@ -115,22 +102,6 @@ export function EmailTemplatesSection() {
         </nav>
 
         <div className="ds-email-template-detail">
-          <div className="ds-email-template-detail__summary">
-            <div>
-              <span>{current.channel}</span>
-              <h3>{current.name}</h3>
-              <p>{current.description}</p>
-            </div>
-            <dl>
-              <div><dt>Quando</dt><dd>{current.trigger}</dd></div>
-              <div><dt>Assunto</dt><dd>{current.subject}</dd></div>
-            </dl>
-            <nav className="ds-email-template-detail__navigation" aria-label="Navegação entre modelos">
-              <button type="button" className="jf-action jf-action--secondary" onClick={() => selectRelativeTemplate(-1)} aria-label="Ver modelo anterior"><ChevronLeft size={16} aria-hidden="true"/><span>Anterior</span></button>
-              <span aria-live="polite">{String(selectedIndex + 1).padStart(2, "0")} / {String(emailTemplates.length).padStart(2, "0")}</span>
-              <button type="button" className="jf-action jf-action--secondary" onClick={() => selectRelativeTemplate(1)} aria-label="Ver próximo modelo"><span>Próximo</span><ChevronRight size={16} aria-hidden="true"/></button>
-            </nav>
-          </div>
           <div className="ds-email-variants" aria-label={`Prévia do modelo ${current.name} no tema ${theme === "dark" ? "escuro" : "claro"}`}>
             <EmailVariantPreview key={`${current.id}-${theme}`} templateId={current.id} theme={theme === "dark" ? "dark" : "light"} />
           </div>
