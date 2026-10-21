@@ -2003,3 +2003,12 @@ body:has(.ds-page) {
 .ds-workspace-demo-actions { justify-content:space-between; }
 
 .ds-empty-card > .jf-empty { width:100%; padding:0; flex:1; }
+
+/* Email preview and model library share one responsive workspace. */
+.ds-email-templates__layout{grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);align-items:start}
+.ds-email-template-detail{grid-column:1;grid-row:1}
+.ds-email-library{grid-column:2;grid-row:1;min-width:0}
+.ds-email-library__items{grid-template-columns:1fr}
+.ds-email-library__item{min-height:0}
+@media(max-width:900px){.ds-email-templates__layout{grid-template-columns:1fr}.ds-email-template-detail,.ds-email-library{grid-column:1;grid-row:auto}.ds-email-library__items{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.ds-email-library__items{grid-template-columns:1fr}}
