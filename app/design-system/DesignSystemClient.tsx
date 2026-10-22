@@ -14,7 +14,7 @@ import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnim
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, SlidersHorizontal, Sparkles, Type } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
-import { CheckboxField, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
+import { CheckboxField, StatusBadge, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
@@ -372,7 +372,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <TextField label="E-mail do responsável" icon={Mail} type="email" placeholder="nome@empresa.com" helpText="Usado apenas nas comunicações sobre a vaga." />
                   <TextField label="Buscar candidato" icon={Search} type="search" placeholder="Nome, e-mail ou competência" helpText="Pesquise por dados ou competências do perfil." />
                   <TextField label="Senha de acesso" icon={LockKeyhole} type="password" placeholder="Digite ao menos 8 caracteres" defaultValue="12345" error="A senha precisa ter pelo menos 8 caracteres." />
-                  <TextField label="Desabilitado" icon={LockKeyhole} defaultValue="Indisponível" disabled helpText="Estado inativo do mesmo componente compartilhado." />
+                  <TextField label="Desabilitado" labelAdornment={<StatusBadge>Em breve</StatusBadge>} icon={LockKeyhole} defaultValue="Indisponível" disabled helpText="Estado inativo do mesmo componente compartilhado." />
                 </div>
               </ExampleCard>
               <ExampleCard title="Dropdowns">

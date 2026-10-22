@@ -1,3 +1,4 @@
+import {careerDefaults} from './career-defaults.ts';
 import type { CSSProperties } from 'react';
 import { fontPairs } from '../ui/font-pairs.ts';
 import { defaultCustomization, lightPalette, darkPalette } from './personalization-mocks.ts';
@@ -6,7 +7,7 @@ export const assetKinds=['logoMain','logoAlternative','logoLight','logoDark','fa
 export function brandingDefaults(companyId:string,name:string):Customization {
  const source=structuredClone(defaultCustomization);
  return {...source,organizationId:companyId,displayName:name,shortName:name.slice(0,24),slogan:'',assets:Object.fromEntries(assetKinds.map(key=>[key,null])),banners:[],
-  portal:{...source.portal,layout:'classico',headline:'Faça parte da nossa equipe',introduction:'Conheça nossas oportunidades.',about:'',contactEmail:'',contactPhone:'',socialLinkedin:'',socialInstagram:'',footerText:name,customDomain:'',jobforgedDomain:''},draftUpdatedAt:'',publishedAt:'',publishedBy:'',revision:0};
+  portal:{...source.portal,layout:'classico',headline:careerDefaults.headline,introduction:careerDefaults.introduction,about:careerDefaults.about,contactEmail:'',contactPhone:'',socialLinkedin:'',socialInstagram:'',footerText:name,customDomain:'',jobforgedDomain:''},draftUpdatedAt:'',publishedAt:'',publishedBy:'',revision:0};
 }
 export const brandContent=(value:Customization)=>{
  const {organizationId,draftUpdatedAt,publishedAt,publishedBy,revision,...content}=value;

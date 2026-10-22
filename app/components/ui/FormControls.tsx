@@ -55,6 +55,7 @@ type FieldBaseProps = {
 
 type TextFieldProps = FieldBaseProps &
   Omit<InputHTMLAttributes<HTMLInputElement>, "className"> & {
+    labelAdornment?: ReactNode;
     startAdornment?: ReactNode;
     endAdornment?: ReactNode;
   };
@@ -65,6 +66,7 @@ export function TextField({
   error,
   requiredLabel,
   icon: Icon,
+  labelAdornment,
   startAdornment,
   endAdornment,
   className = "",
@@ -93,6 +95,7 @@ export function TextField({
     <div className={`jf-field ${error ? "is-error" : ""} ${className}`}>
       <label className="jf-field__label" htmlFor={inputId}>
         <b>{label}</b>
+        {labelAdornment}
         {requiredLabel && <i>{requiredLabel}</i>}
       </label>
       <div className="jf-control">
