@@ -51,9 +51,9 @@
 .jf-widget-dialog--wide { width:min(1120px,calc(100vw - 32px)); }
 @media(max-width:680px) { .jf-widget-dialog__header,.jf-widget-dialog__body,.jf-widget-dialog__footer { padding:var(--jf-ui-space-4); } }
 
-.jf-editor-workbench{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:start;gap:var(--jf-ui-space-6);min-width:0}
+.jf-editor-workbench{display:grid;grid-template-columns:minmax(0,35fr) minmax(0,65fr);align-items:start;gap:var(--jf-ui-space-3);min-width:0}
 .jf-editor-workbench__form{display:grid;gap:var(--jf-ui-space-3);min-width:0}
-.jf-editor-workbench__preview{position:sticky;top:var(--jf-ui-space-6);min-width:0}
+.jf-editor-workbench__preview{align-self:start;min-width:0}
 .jf-editor-accordion{min-width:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface)}
 .jf-editor-accordion>summary{display:flex;align-items:center;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-5);list-style:none;cursor:pointer;font-family:var(--jf-ui-font-heading);font-weight:700;color:var(--jf-ui-text)}
 .jf-editor-accordion>summary::-webkit-details-marker{display:none}
