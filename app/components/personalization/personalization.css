@@ -232,7 +232,7 @@
 @media(max-width:680px){.appearance-publishing__actions{width:100%}.appearance-publishing__actions>.jf-action{flex:1 1 140px}.jf-editor-workbench .custom-grid{grid-template-columns:1fr}}
 
 /* Isolated from the institutional landing page's legacy .custom-preview. */
-.appearance-preview-panel{margin:0;align-self:start}
+.appearance-preview-panel{margin:0;align-self:start;color:var(--jf-ui-text)}
 .appearance-preview-controls{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--jf-ui-space-3)}
 .appearance-preview-controls>.jf-field{display:block;min-width:0}
 .appearance-preview-controls>div[role="group"]{display:flex;align-items:center;gap:var(--jf-ui-space-1)}
