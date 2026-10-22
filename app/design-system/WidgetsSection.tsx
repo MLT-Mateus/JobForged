@@ -5,6 +5,8 @@ import { PhoneFrame } from "../components/ui/PhoneFrame";
 import { FocusPopover, WidgetDialog, WidgetDivider, WidgetGroup } from "../components/ui/Widgets";
 import { WidgetsIcon } from "../components/ui/Icons";
 import "./widgets-section.css";
+import {AppearancePreviewPanel} from "../components/personalization/AppearancePreviewPanel";
+import {jobforgedCareerExample} from "../components/personalization/jobforged-career-example";
 
 function Demo({number,title,description,children}:{number:string;title:string;description:string;children:ReactNode}) {
  return <section className="ds-widget-demo"><header><span className="ds-widget-index">{number}</span><div><h2>{title}</h2><p>{description}</p></div></header><div className="ds-widget-demo__stage">{children}</div></section>;
@@ -13,6 +15,8 @@ function OverlayPreview({kind}:{kind:"modal"|"focus"|"drawer"}) {
  return <div className={`ds-overlay-preview ds-overlay-preview--${kind}`} aria-hidden="true"><div className="ds-overlay-preview__nav"><i/><i/><i/></div><div className="ds-overlay-preview__lines"><i/><i/><i/></div><div className="ds-overlay-preview__panel"><i/><i/><b/></div></div>;
 }
 export function WidgetsSection() {
+ const [previewTheme,setPreviewTheme]=useState<"light"|"dark">("light");
+ const example=jobforgedCareerExample();
  const [editorTitle,setEditorTitle]=useState("Faça parte da nossa equipe");
  const [overlay,setOverlay]=useState<"modal"|"drawer"|"sheet"|null>(null),[onlyActive,setOnlyActive]=useState(true),[sheetChoice,setSheetChoice]=useState(true),[preview,setPreview]=useState(true);
  const close=()=>setOverlay(null);
@@ -41,7 +45,7 @@ export function WidgetsSection() {
   </div>
  </Demo>
  <Demo number="05" title="Editor com prévia" description="Menus recolhíveis à esquerda e prévia ao lado, com os mesmos componentes da personalização.">
- <EditorWorkbench editor={<><EditorAccordion title="Conteúdo do hero" defaultOpen><TextField label="Título principal" placeholder="Faça parte da nossa equipe" value={editorTitle} onChange={e=>setEditorTitle(e.target.value)}/></EditorAccordion><EditorAccordion title="Imagem e composição"><p>As opções relacionadas ficam dentro do mesmo menu.</p></EditorAccordion></>} preview={<WidgetGroup><StatusBadge>Prévia</StatusBadge><h3>{editorTitle||"Título da página"}</h3><p>O conteúdo acompanha a edição.</p></WidgetGroup>}/>
+ <EditorWorkbench editor={<><EditorAccordion title="Conteúdo do hero" defaultOpen><TextField label="Título principal" placeholder="Faça parte da nossa equipe" value={editorTitle} onChange={e=>setEditorTitle(e.target.value)}/></EditorAccordion><EditorAccordion title="Imagem e composição"><p>As opções relacionadas ficam dentro do mesmo menu.</p></EditorAccordion></>} preview={<AppearancePreviewPanel data={{...example,portal:{...example.portal,headline:editorTitle}}} theme={previewTheme} onThemeChange={setPreviewTheme}/>}/>
  </Demo>
  <WidgetDialog open={overlay==='modal'} onClose={close} title="Salvar preferências" description="Uma ação breve sem perder o contexto." footer={<><ActionButton variant="quiet" onClick={close}>Cancelar</ActionButton><ActionButton onClick={close}>Concluir exemplo</ActionButton></>}><TextField label="Nome da visualização" placeholder="Ex.: Vagas do time comercial"/><p className="ds-widget-caption">Demonstração visual. Nenhuma configuração será alterada.</p></WidgetDialog>
  <WidgetDialog open={overlay==='drawer'} onClose={close} kind="drawer" title="Detalhes da vaga" description="Informações adicionais no contexto da lista." footer={<ActionButton variant="secondary" onClick={close}>Fechar detalhes</ActionButton>}><StatusBadge tone="positive">Publicada</StatusBadge><h3>Analista de Customer Success</h3><p>Time de relacionamento · Híbrido</p><WidgetDivider label="Sobre a oportunidade"/><p>Acompanhe a experiência dos clientes, organize demandas e apoie o crescimento das contas.</p><WidgetGroup variant="outline"><strong>Próxima etapa</strong><p>Entrevista com a liderança.</p></WidgetGroup></WidgetDialog>
