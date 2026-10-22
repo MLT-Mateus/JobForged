@@ -1,4 +1,3 @@
-export type PersonalizationSection="templates"|"marca"|"cores"|"tipografia"|"estrutura"|"banners"|"conteudo"|"dominio"|"construtor";
 export type PreviewSurface="painel"|"home"|"portal"|"vaga"|"login";
 export type BrandAsset={id:string;kind:string;name:string;url:string;format:string;size:number;updatedAt:string};
 export type Palette={primary:string;secondary:string;accent:string;button:string;buttonHover:string;sidebar:string;activeItem:string;link:string;background:string;surface:string;portalBackground:string;text:string};
