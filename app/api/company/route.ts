@@ -8,15 +8,9 @@ export async function GET(request: NextRequest) {
   const headers = new Headers({ "Cache-Control": "no-store" });
   const session = await readSession(request, headers);
   if (!session || session.platformAdmin || !session.company) return Response.json({ message: "Acesso negado." }, { status: 403, headers });
-  const id = session.company.id;
-  const [company, members, audit] = await Promise.all([
-    requestDatabase(`companies?id=eq.${id}&select=id,name,cnpj,phone,plan_id,plan_status,created_at`, session.accessToken),
-    requestDatabase(`company_members?company_id=eq.${id}&select=id,email,full_name,role,status,created_at&order=created_at.asc`, session.accessToken),
-    requestDatabase(`company_audit_events?company_id=eq.${id}&select=id,action,target_id,details,created_at&order=created_at.desc&limit=30`, session.accessToken),
-  ]);
-  if (!company?.ok || !members?.ok || !audit?.ok) return Response.json({ message: "Não foi possível carregar a empresa." }, { status: 503, headers });
-  const companies = await company.json() as unknown[];
-  return Response.json({ company: companies[0], members: await members.json(), audit: await audit.json(), role: session.role }, { headers });
+  const result = await requestDatabase("rpc/company_read_v1", session.accessToken, {});
+  if (!result?.ok) return Response.json({ message: "Não foi possível carregar a empresa." }, { status: 503, headers });
+  return Response.json(await result.json(), { headers });
 }
 
 export async function PATCH(request: NextRequest) {

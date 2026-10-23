@@ -11,7 +11,7 @@ test('backoffice APIs enforce session, origin, validation and invitation secrecy
   const url=String(input);const body=init?.body?JSON.parse(init.body):null;
   if(url.endsWith('/auth/v1/user'))return Response.json({id:'26000000-0000-0000-0000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
   if(url.endsWith('/rest/v1/rpc/is_platform_admin'))return Response.json(admin);
-  if(url.includes('/rest/v1/company_members?'))return Response.json([]);
+  if(url.endsWith('/rest/v1/rpc/session_context_v1'))return Response.json(null);
   if(url.endsWith('/rest/v1/rpc/platform_read'))return Response.json({total:0,items:[]});
   if(url.endsWith('/rest/v1/rpc/platform_manage')){calls.push(body);return Response.json(body.operation==='invitation.create'?{id:'26000000-0000-0000-0000-000000000031',email:'invite@example.invalid',token:'a'.repeat(64),company_name:'Fixture'}:{ok:true});}
   if(url.endsWith('/rest/v1/rpc/platform_public_settings'))return Response.json({platform_name:'Fixture',support_email:'support@example.invalid',support_url:'https://example.invalid'});
