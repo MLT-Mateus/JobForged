@@ -8,3 +8,10 @@
 - O portal público JobForged usa o rodapé institucional real da landing e destaques azul/verde. O ícone isolado do convite foi removido. Permanece uma demonstração mock, sem candidatura real.
 
 Resultado de CI, migration e conferência visual: registrado nos documentos de continuidade ao concluir a publicação Test.
+
+
+## Ajuste de parâmetros — 23/10/2026
+- A edição empresarial usa fonte com parâmetros BBCode: [color=#RRGGBB]trecho[/color], [b], [i], [u], [size=16|18|24|32] e [br]. A toolbar não possui seletor de cor. Um balão documenta a sintaxe; Formulários demonstra a edição e a saída ao vivo. Os botões de formato envolvem a seleção preservando o restante do texto.
+- A API canonicaliza os parâmetros para o mesmo HTML restrito já aceito pela migration0016. Assim, título continua limitado por caracteres visíveis e não há nova migration para BBCode. O editor converte HTML legado de volta para fonte legível, sem regravar históricos. Parâmetros inválidos são literais; CSS e atributos livres continuam bloqueados.
+- SiteFooter e site-footer.css passam a ser a única composição e apresentação; removidas sobrescritas do portal. Mesmo conteúdo, contatos, links, logo temática e medidas em LP e /jobforged.
+- Nova foto Pexels7495493 otimizada para139KB, com crédito em public/careers/PHOTO-CREDIT.md.

@@ -1,4 +1,4 @@
-import {sanitizeRichText,richTextPlain} from '../ui/rich-content.ts';
+import {renderRichText,richTextPlain} from '../ui/rich-content.ts';
 import {careerCopy} from './career-copy.ts';
 import {careerDefaults} from './career-defaults.ts';
 import type { CSSProperties } from 'react';
@@ -69,10 +69,10 @@ export function normalizeBrandingRichContent(input:unknown):unknown{
  if(!input||typeof input!=='object'||Array.isArray(input))return input;
  const c=structuredClone(input) as ReturnType<typeof brandContent>;
  if(c.portal&&typeof c.portal==='object'){
-  for(const key of ['headline','introduction','buttonText','about','footerText','emptyStateTitle','emptyStateDescription'] as const)if(typeof c.portal[key]==='string')c.portal[key]=sanitizeRichText(c.portal[key]);
-  if(c.portal.content&&typeof c.portal.content==='object')for(const [key,value] of Object.entries(c.portal.content))if(typeof value==='string')c.portal.content[key]=sanitizeRichText(value);
-  const f=c.portal.footer;if(f&&typeof f==='object'){for(const key of ['description','legal','eyebrow','title'] as const)if(typeof f[key]==='string')f[key]=sanitizeRichText(f[key]);if(Array.isArray(f.links))for(const link of f.links)if(link&&typeof link.label==='string')link.label=sanitizeRichText(link.label);}
+  for(const key of ['headline','introduction','buttonText','about','footerText','emptyStateTitle','emptyStateDescription'] as const)if(typeof c.portal[key]==='string')c.portal[key]=renderRichText(c.portal[key]);
+  if(c.portal.content&&typeof c.portal.content==='object')for(const [key,value] of Object.entries(c.portal.content))if(typeof value==='string')c.portal.content[key]=renderRichText(value);
+  const f=c.portal.footer;if(f&&typeof f==='object'){for(const key of ['description','legal','eyebrow','title'] as const)if(typeof f[key]==='string')f[key]=renderRichText(f[key]);if(Array.isArray(f.links))for(const link of f.links)if(link&&typeof link.label==='string')link.label=renderRichText(link.label);}
  }
- if(Array.isArray(c.banners))for(const b of c.banners)for(const key of ['title','description','buttonText'] as const)if(b&&typeof b[key]==='string')b[key]=sanitizeRichText(b[key]);
+ if(Array.isArray(c.banners))for(const b of c.banners)for(const key of ['title','description','buttonText'] as const)if(b&&typeof b[key]==='string')b[key]=renderRichText(b[key]);
  return c;
 }
