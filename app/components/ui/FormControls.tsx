@@ -1069,7 +1069,7 @@ type RichTextFieldProps = {
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", value, textOnly=true, resetKey, onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder = "Escreva seu texto aqui.", initialHtml = "", value, textOnly=true, resetKey, onChange }: RichTextFieldProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<Range | null>(null);
