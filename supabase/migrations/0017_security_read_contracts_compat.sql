@@ -1,3 +1,4 @@
+-- migration-role: supabase_admin
 -- Additive compatibility phase. Deploy these consumers before revoking table
 -- grants in the security phase. Existing functions and grants stay available.
 create function public.session_context_v1() returns jsonb language sql stable security definer
@@ -28,4 +29,6 @@ begin
 end;$$;
 revoke all on function public.session_context_v1(),public.company_read_v1() from public,anon;
 grant execute on function public.session_context_v1(),public.company_read_v1() to authenticated;
+alter function public.session_context_v1() owner to postgres;
+alter function public.company_read_v1() owner to postgres;
 notify pgrst,'reload schema';
