@@ -38,6 +38,7 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
+import {fieldPlaceholder} from "./field-copy";
 import {FocusPopover} from "./Widgets";
 import {sanitizeRichText,renderRichText,richTextSource} from "./rich-content";
 import { useStatusSoundForMessage } from "./status-sound";
@@ -107,6 +108,7 @@ export function TextField({
         {Icon && <Icon size={17} aria-hidden="true" />}
         <input
           {...inputProps}
+          placeholder={fieldPlaceholder({label,type,placeholder:inputProps.placeholder,disabled:inputProps.disabled,readOnly:inputProps.readOnly})}
           ref={inputRef}
           id={inputId}
           type={isPassword && passwordVisible ? "text" : type}
@@ -163,6 +165,7 @@ export function TextAreaField({
       <span className="jf-control">
         <textarea
           {...textareaProps}
+          placeholder={fieldPlaceholder({label,placeholder:textareaProps.placeholder,multiline:true,disabled:textareaProps.disabled,readOnly:textareaProps.readOnly})}
           id={inputId}
           aria-invalid={Boolean(error)}
           aria-describedby={helpText || error ? messageId : undefined}
@@ -261,12 +264,12 @@ function dateToIso(date: Date) {
 
 function formatDate(value?: string) {
   const date = dateFromIso(value);
-  return date ? new Intl.DateTimeFormat("pt-BR").format(date) : "Selecione uma data";
+  return date ? new Intl.DateTimeFormat("pt-BR").format(date) : "Selecione a data...";
 }
 
 function formatDateRange(value: DateRangeValue) {
-  if (!value.start) return "Selecione um intervalo";
-  if (!value.end) return `${formatDate(value.start)} — escolha a data final`;
+  if (!value.start) return "Selecione o período...";
+  if (!value.end) return `${formatDate(value.start)} — selecione o fim...`;
   return `${formatDate(value.start)} — ${formatDate(value.end)}`;
 }
 
@@ -383,9 +386,9 @@ function CalendarPanel({
       {calendarView === "days" && <>
         {range && (
           <div className="jf-calendar__range-status" aria-live="polite">
-            <span><small>Início</small><strong>{selectedStart ? formatDate(selectedStart) : "Escolher"}</strong></span>
+            <span><small>Início</small><strong>{selectedStart ? formatDate(selectedStart) : "Selecione..."}</strong></span>
             <ChevronRight size={15} aria-hidden="true" />
-            <span><small>Fim</small><strong>{selectedEnd ? formatDate(selectedEnd) : "Escolher"}</strong></span>
+            <span><small>Fim</small><strong>{selectedEnd ? formatDate(selectedEnd) : "Selecione..."}</strong></span>
           </div>
         )}
         <div className="jf-calendar__weekdays" aria-hidden="true">{weekDays.map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}</div>
@@ -488,7 +491,7 @@ export function DateField({
           onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
         >
           <CalendarDays size={17} aria-hidden="true" />
-          <span className={selectedValue ? "" : "is-placeholder"}>{formatDate(selectedValue)}</span>
+          <span className={selectedValue ? "" : "is-placeholder"}>{selectedValue?formatDate(selectedValue):fieldPlaceholder({label,placeholder:"Selecione a data...",disabled,selection:true})}</span>
           <ChevronDown size={17} aria-hidden="true" />
         </button>
         {open && (
@@ -558,7 +561,7 @@ export function DateRangeField({
           onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
         >
           <CalendarDays size={17} aria-hidden="true" />
-          <span className={selectedRange.start ? "" : "is-placeholder"}>{formatDateRange(selectedRange)}</span>
+          <span className={selectedRange.start ? "" : "is-placeholder"}>{selectedRange.start?formatDateRange(selectedRange):fieldPlaceholder({label,placeholder:"Selecione o período...",disabled,selection:true})}</span>
           <ChevronDown size={17} aria-hidden="true" />
         </button>
         {open && (
@@ -602,7 +605,7 @@ export function SelectField({
   icon: Icon,
   value,
   options,
-  placeholder = "Selecione uma opção",
+  placeholder = "Selecione uma opção...",
   onValueChange,
   disabled = false,
   allowCreate = false,
@@ -647,7 +650,7 @@ export function SelectField({
           }}
         >
           {Icon && <Icon size={17} aria-hidden="true" />}
-          <span className={selectedOption ? "" : "is-placeholder"}>{selectedOption?.label ?? placeholder}</span>
+          <span className={selectedOption?.label?.trim() ? "" : "is-placeholder"}>{selectedOption?.label?.trim() || fieldPlaceholder({label,placeholder,disabled,selection:true})}</span>
           <ChevronDown size={17} aria-hidden="true" />
         </button>
         {open && (
@@ -678,7 +681,7 @@ export function SelectField({
                   <input
                     type="text"
                     value={newOption}
-                    placeholder={createPlaceholder}
+                    placeholder={fieldPlaceholder({label:"Nova opção",placeholder:createPlaceholder})}
                     aria-label={createPlaceholder}
                     onChange={(event) => setNewOption(event.target.value)}
                     onKeyDown={(event) => {
@@ -717,7 +720,7 @@ export function MultiSelectField({
   icon: Icon,
   values,
   options,
-  placeholder = "Selecione uma ou mais opções",
+  placeholder = "Selecione opções...",
   onValuesChange,
   disabled = false,
   allowCreate = false,
@@ -771,7 +774,7 @@ export function MultiSelectField({
                 return <i key={value}>{option?.label ?? value}</i>;
               })
             ) : (
-              <em>{placeholder}</em>
+              <em>{fieldPlaceholder({label,placeholder,disabled,selection:true})}</em>
             )}
           </span>
           <ChevronDown size={17} aria-hidden="true" />
@@ -807,7 +810,7 @@ export function MultiSelectField({
                   <input
                     type="text"
                     value={newOption}
-                    placeholder={createPlaceholder}
+                    placeholder={fieldPlaceholder({label:"Nova opção",placeholder:createPlaceholder})}
                     aria-label={createPlaceholder}
                     onChange={(event) => setNewOption(event.target.value)}
                     onKeyDown={(event) => {
@@ -847,12 +850,14 @@ export function FileUploadField({
   className = "",
 }: FileUploadFieldProps) {
   const inputId = useId();
+  const displayedValue=value?.trim()||null;
+  const guidance=emptyHint.trim()||"Selecione o arquivo...";
   const EmptyIcon = variant === "picture" ? ImagePlus : FileText;
   const FilledIcon = variant === "picture" ? FileImage : FileCheck2;
-  const StateIcon = value ? FilledIcon : EmptyIcon;
+  const StateIcon = displayedValue ? FilledIcon : EmptyIcon;
 
   return (
-    <label className={`jf-upload jf-upload--${variant} ${value ? "is-filled" : ""} ${className}`} htmlFor={inputId}>
+    <label className={`jf-upload jf-upload--${variant} ${displayedValue ? "is-filled" : ""} ${className}`} htmlFor={inputId}>
       <input
         id={inputId}
         type="file"
@@ -863,11 +868,11 @@ export function FileUploadField({
       <span className="jf-upload__icon"><StateIcon size={21} aria-hidden="true" /></span>
       <span className="jf-upload__content">
         <strong>{label}</strong>
-        <small title={value ?? undefined}>{value ?? emptyHint}</small>
+        <small title={displayedValue ?? undefined}>{displayedValue ?? guidance}</small>
       </span>
       <em>
-        {value ? <Check size={15} aria-hidden="true" /> : <UploadCloud size={15} aria-hidden="true" />}
-        {value ? "Trocar" : "Selecionar"}
+        {displayedValue ? <Check size={15} aria-hidden="true" /> : <UploadCloud size={15} aria-hidden="true" />}
+        {displayedValue ? "Trocar" : "Selecionar"}
       </em>
     </label>
   );
@@ -973,7 +978,7 @@ export function MultiFileUploadField({
         />
         <span className="jf-multi-upload__icon"><StateIcon size={22} aria-hidden="true" /></span>
         <span className="jf-multi-upload__content">
-          <strong>{hasFiles ? `${files.length} ${files.length === 1 ? "item selecionado" : "itens selecionados"}` : variant === "picture" ? "Adicione suas imagens" : "Adicione seus arquivos"}</strong>
+          <strong>{hasFiles ? `${files.length} ${files.length === 1 ? "item selecionado" : "itens selecionados"}` : variant === "picture" ? "Adicione imagens..." : "Adicione arquivos..."}</strong>
           <small>{hasFiles ? `Você ainda pode adicionar ${Math.max(0, maxFiles - files.length)} item(ns).` : emptyHint}</small>
         </span>
         <em><UploadCloud size={15} aria-hidden="true" />{hasFiles ? "Adicionar" : "Selecionar"}</em>
@@ -1069,7 +1074,8 @@ type RichTextFieldProps = {
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder = "Escreva seu texto aqui.", initialHtml = "", value, textOnly=true, resetKey, onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escreva o texto...", initialHtml = "", value, textOnly=true, resetKey, onChange }: RichTextFieldProps) {
+  const placeholder=fieldPlaceholder({label,placeholder:suppliedPlaceholder,multiline:true});
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<Range | null>(null);

@@ -14,7 +14,7 @@ import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnim
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, SlidersHorizontal, Sparkles, Type } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
-import { CheckboxField, StatusBadge, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichContent, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
+import { CheckboxField, StatusBadge, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, DisplayValue, RichContent, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
@@ -193,6 +193,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const statusSoundEnabled = useStatusSoundPreference();
   const [workspaceState,setWorkspaceState] = useState<"loading"|"error"|"empty"|"forbidden">("loading");
   const [demoRange,setDemoRange] = useState(50);
+  const [placeholderArea,setPlaceholderArea]=useState("");
   const [demoColor,setDemoColor] = useState("#20B2AA");
   const [demoRich,setDemoRich]=useState("");
   const [wideDialogOpen,setWideDialogOpen] = useState(false);
@@ -364,7 +365,12 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
           </section>
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "formularios"} aria-label="Formulários">
-            <SectionHeading title="Controles limpos, previsíveis e prontos para o produto." description="O manual agora utiliza a mesma biblioteca oficial das futuras telas. Estados, dimensões, foco e comportamento serão reaproveitados sem reconstruir componentes por página." />
+            <SectionHeading title="Controles limpos, previsíveis e prontos para o produto." description="Todo campo vazio orienta o próximo passo. Todo valor ausente comunica seu estado." />
+            <div className="ds-form-showcase ds-placeholder-guidance" aria-label="Regra global de placeholders e valores">
+              <ExampleCard title="Regra global · nenhum campo sem orientação" className="ds-form-card--wide"><div className="ds-modern-stack"><p>Placeholder é uma chamada curta para preencher o campo: <strong>verbo + dado + ...</strong></p><ul><li>Use de 2 a 4 palavras e prefira até 28 caracteres antes dos três pontos.</li><li>Finalize sempre com <code>...</code>: Digite o nome..., Busque por nome..., Selecione opções...</li><li>Mantenha o label visível. Formatos, exemplos, limites e requisitos ficam na ajuda do campo.</li><li>Não use dados fictícios, zero ou um valor preenchido apenas para ocupar o espaço.</li><li>Campos desabilitados e dependências indicam o motivo; seleções reais continuam com seu nome, sem acrescentar reticências ao valor.</li><li>Checkboxes, radios, ranges e uploads usam labels, seleção e instruções próprias. Nunca deixe o estado sem identificação.</li></ul></div></ExampleCard>
+              <ExampleCard title="Placeholders · curtos e consistentes"><div className="ds-modern-stack"><TextField label="Nome"/><TextField label="E-mail" type="email"/><TextField label="Busca" type="search"/><SelectField label="Área" value={placeholderArea} onValueChange={setPlaceholderArea} options={[{value:"produto",label:"Produto"},{value:"tecnologia",label:"Tecnologia"}]}/><TextAreaField label="Descrição" rows={3}/></div></ExampleCard>
+              <ExampleCard title="Valores · ausência não é zero"><div className="ds-modern-stack"><p>Valores de leitura mostram o dado real ou um estado explícito. Apenas o carregamento usa reticências.</p><dl className="ds-value-examples"><div><dt>Zero real</dt><dd><DisplayValue value={0}/></dd></div><div><dt>Sem informação</dt><dd><DisplayValue value={null}/></dd></div><div><dt>Aguardando resposta</dt><dd><DisplayValue value={null} state="loading"/></dd></div><div><dt>Não disponível</dt><dd><DisplayValue value={null} state="unavailable"/></dd></div></dl></div></ExampleCard>
+            </div>
             <div className="ds-form-showcase">
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
                 <div className="ds-modern-field-grid">
@@ -421,10 +427,10 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               <ExampleCard title="Range Input · controle de faixa"><TextField label={`Intensidade: ${demoRange}%`} type="range" min={0} max={100} step={1} value={demoRange} onChange={e=>setDemoRange(Number(e.target.value))} helpText="Arraste ou use as setas para ajustar o valor."/></ExampleCard>
               <ExampleCard title="Color Input · HEX e picker"><ColorField label="Cor principal" value={demoColor} previous="#20B2AA" onChange={setDemoColor}/></ExampleCard>
               <ExampleCard title="Multiline Input · texto multilinha">
-                <MultilineInput label="Apresentação" placeholder="Escreva uma apresentação em várias linhas." rows={4}/>
+                <MultilineInput label="Apresentação" placeholder="Escreva a apresentação..." rows={4}/>
               </ExampleCard>
               <ExampleCard title="Rich Text · parâmetros no texto">
-                <RichTextField textOnly label="Descrição da vaga" placeholder="Descreva as responsabilidades e o perfil que você procura." value={demoRich} onChange={setDemoRich}/>{demoRich.trim()&&<div className="ds-rich-preview" aria-label="Prévia do texto formatado"><RichContent value={demoRich}/></div>}
+                <RichTextField textOnly label="Descrição da vaga" placeholder="Escreva a descrição..." value={demoRich} onChange={setDemoRich}/>{demoRich.trim()&&<div className="ds-rich-preview" aria-label="Prévia do texto formatado"><RichContent value={demoRich}/></div>}
               </ExampleCard>
             </div>
           </section>

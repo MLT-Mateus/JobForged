@@ -44,3 +44,13 @@ O Design System e a biblioteca compartilhada de UI são a única fonte de verdad
 ## Badge de triagem
 
 A correção vertical adicional aprovada de 34px está em `app/globals.css`: `.phone-quality` usa `top: 420px` por padrão e `top: 450px` na regra responsiva existente. Manter uma única fonte de verdade. Não reintroduzir `app/phone-layout-overrides.css` nem regra `!important` de sobrescrita.
+
+
+## Regra permanente de placeholders e valores
+
+- Todo campo editável vazio deve orientar o preenchimento por meio dos componentes compartilhados. Use a política de `app/components/ui/field-copy.ts`; não copie defaults por página nem altere valores para preencher espaço.
+- Placeholder curto: verbo + dado + três pontos literais (`...`). Use 2–4 palavras e prefira até 28 caracteres antes do sufixo. Exemplos: `Digite o nome...`, `Escreva a descrição...`, `Selecione opções...`.
+- Label permanece visível. Formatos, exemplos de dados, máscaras, limites e requisitos ficam na ajuda, sem depender do placeholder.
+- Seleções reais e valores existentes não recebem reticências automaticamente. Checkbox/radio/range/file usam identificação, seleção e instruções adequadas ao tipo.
+- Valores de leitura nunca representam ausência com string vazia ou zero fictício. Use `DisplayValue` ou a representação equivalente: `Não informado` para ausência, `Carregando...` durante consulta e `Indisponível` quando não disponível. Preserve zero real.
+- Novas variações e estados devem estar na página Formulários do Design System. Referência: `docs/INPUT-CONTENT-RULES.md`.

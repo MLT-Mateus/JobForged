@@ -3,6 +3,7 @@
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { Inbox, type LucideIcon } from "lucide-react";
 import Link from "next/link";
+import {DisplayValue,type ValueState} from "./DisplayValue";
 import { ArrowLeft } from "lucide-react";
 
 export function ActionButton({ variant = "primary", icon, children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "quiet" | "danger" | "accent" | "inverse"; icon?: ReactNode }) {
@@ -25,8 +26,8 @@ export function DataTable({ headers, children, label }: { headers: string[]; chi
   return <div className="jf-table-wrap"><table className="jf-table" aria-label={label}><thead><tr>{headers.map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{children}</tbody></table></div>;
 }
 
-export function MetricCard({ label, value, detail }: { label: string; value: ReactNode; detail?: string }) {
-  return <article className="jf-metric"><span>{label}</span><strong>{value}</strong>{detail && <small>{detail}</small>}</article>;
+export function MetricCard({ label, value, detail, state }: { label: string; value: ReactNode; detail?: string; state?: ValueState }) {
+  return <article className="jf-metric"><span>{label}</span><strong><DisplayValue value={value} state={state}/></strong>{detail && <small>{detail}</small>}</article>;
 }
 
 export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HTMLElement>&{as?:"section"|"article"|"aside"}) {
