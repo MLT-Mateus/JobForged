@@ -18,6 +18,8 @@ import {
   ImagePlus,
   Images,
   Italic,
+  Info,
+  Underline,
   Link2,
   List,
   Plus,
@@ -36,8 +38,8 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
-import {ColorField} from "./ColorField";
-import {sanitizeRichText} from "./rich-content";
+import {FocusPopover} from "./Widgets";
+import {sanitizeRichText,renderRichText,richTextSource} from "./rich-content";
 import { useStatusSoundForMessage } from "./status-sound";
 
 export type SelectOption = {
@@ -1066,13 +1068,19 @@ type RichTextFieldProps = {
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", value, textOnly=false, onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", value, textOnly=true, onChange }: RichTextFieldProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<Range | null>(null);
   const emittedRef=useRef<string|undefined>(undefined);
   const [initial] = useState(textOnly?sanitizeRichText(value??initialHtml):initialHtml);
-  const [textColor,setTextColor]=useState("#20B2AA");
+  const sourceRef=useRef<HTMLTextAreaElement>(null);
+  const [source,setSource]=useState(()=>richTextSource(value??initialHtml));
+  const sourceEmitted=useRef<string|undefined>(undefined);
+  useEffect(()=>{if(value!==undefined&&value!==sourceEmitted.current)setSource(richTextSource(value))},[value]);
+  function changeSource(next:string){setSource(next);const html=renderRichText(next.replace(/\n/g,'<br>'));sourceEmitted.current=html;onChange?.(html)}
+  function sourceFormat(tag:string){const editor=sourceRef.current;if(!editor)return;const start=editor.selectionStart,end=editor.selectionEnd;const open=`[${tag}]`,close=`[/${tag}]`;changeSource(source.slice(0,start)+open+source.slice(start,end)+close+source.slice(end));requestAnimationFrame(()=>{editor.focus();editor.setSelectionRange(start+open.length,end+open.length)})}
+  const parameterHelp=<FocusPopover label="Parâmetros de formatação" triggerVariant="quiet" triggerContent={<Info size={16}/>}><strong>Formate dentro do texto</strong><p>Envolva o trecho com a abertura e o fechamento do parâmetro.</p><dl className="jf-rich-parameters"><dt>Cor hexadecimal</dt><dd><code>[color=#4169E1]Azul[/color]</code></dd><dt>Negrito, itálico e sublinhado</dt><dd><code>[b]texto[/b] · [i]texto[/i] · [u]texto[/u]</code></dd><dt>Tamanho em pixels</dt><dd><code>[size=24]Título[/size]</code><span>16, 18, 24 ou 32.</span></dd><dt>Quebra de linha</dt><dd><code>[br]</code><span>Ou pressione Enter.</span></dd></dl><p>Você pode combinar parâmetros. Cores precisam de # e seis dígitos; parâmetros inválidos permanecem como texto.</p></FocusPopover>;
   const [imageError, setImageError] = useState("");
   useStatusSoundForMessage(imageError, "danger");
   const [size, setSize] = useState("3");
@@ -1097,7 +1105,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
     if (!editor) return;
     const empty = !editor.textContent?.trim() && !editor.querySelector("img");
     editor.dataset.empty = String(empty);
-    const next=empty?"":textOnly?sanitizeRichText(editor.innerHTML):editor.innerHTML;emittedRef.current=next;onChange?.(next);
+    const next=empty?"":textOnly?renderRichText(editor.innerHTML):editor.innerHTML;emittedRef.current=next;onChange?.(next);
     saveSelection();
   }
   useEffect(() => {
@@ -1129,6 +1137,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
     };
     reader.readAsDataURL(file);
   }
+  if(textOnly)return <div className="jf-rich-text-field"><label className="jf-field__label" htmlFor={`${errorId}-source`}><b>{label}</b></label><div className="jf-rich-text"><div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto"><button type="button" aria-label="Negrito" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('b')}><Bold size={16}/></button><button type="button" aria-label="Itálico" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('i')}><Italic size={16}/></button><button type="button" aria-label="Sublinhado" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('u')}><Underline size={16}/></button>{parameterHelp}</div><textarea ref={sourceRef} id={`${errorId}-source`} className="jf-rich-text__source" aria-label={label} placeholder={placeholder} value={source} onChange={e=>changeSource(e.target.value)} rows={4}/></div></div>;
   return <div className="jf-rich-text-field"><span className="jf-field__label"><b>{label}</b></span>
     <div className="jf-rich-text">
       <div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto">
@@ -1140,7 +1149,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
         {!textOnly&&<div className="jf-rich-text__sizes" role="group" aria-label="Tamanho do texto">
           {([{"value":"3","label":"16"},{"value":"4","label":"18"},{"value":"5","label":"24"},{"value":"6","label":"32"}] as const).map(option => <button key={option.value} type="button" className="jf-rich-text__size" aria-label={`Texto de ${option.label} pixels`} title={`${option.label} px`} aria-pressed={size === option.value} onMouseDown={e => e.preventDefault()} onClick={() => { setSize(option.value); format("fontSize", option.value); }}>{option.label}</button>)}
         </div>}
-        <div className="jf-rich-text__color"><ColorField label="Cor do texto" value={textColor} onChange={color=>{setTextColor(color);if(/^#[0-9a-f]{6}$/i.test(color))format("foreColor",color)}}/></div>
+        {parameterHelp}
         <button type="button" aria-label="Remover formatação" onMouseDown={e=>e.preventDefault()} onClick={()=>format("removeFormat")}>Aa</button>
       </div>
       <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={addImage}/>

@@ -41,9 +41,6 @@
 .jf-career-invitation{padding:clamp(28px,5cqi,64px) clamp(20px,4cqi,56px);text-align:center}
 .jf-career-invitation>svg{width:36px;height:36px;color:var(--cp-link)}
 .jf-career-invitation p{max-width:560px;margin:var(--jf-ui-space-4) auto var(--jf-ui-space-5)}
-.jf-career-portal>footer{display:grid;justify-items:center;gap:var(--jf-ui-space-2);padding:var(--jf-ui-space-6);text-align:center;border-top:1px solid var(--jf-ui-border)}
-.jf-career-portal>footer p{margin:0}.jf-career-portal>footer small{font-size:11px;color:var(--jf-ui-text-muted)}
-.jf-career-portal>footer>div:last-of-type{display:flex;gap:var(--jf-ui-space-4)}
 .jf-career-banner{margin:var(--jf-ui-space-4);padding:var(--jf-ui-space-5);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card)}
 .jf-career-banner>img{width:100%;max-height:260px;object-fit:cover;border-radius:var(--jf-ui-control-radius)}
 .jf-career-example{width:100%;min-height:100vh}
@@ -80,21 +77,9 @@
 .jf-career-job-location>span{padding:4px 8px;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--cp-bg)}
 .jf-career-jobs details{border-top:1px solid var(--jf-ui-border);padding-top:16px}
 .jf-career-portal .jf-career-culture{background:color-mix(in srgb,var(--cp-primary) 5%,var(--cp-bg));border-block:1px solid var(--jf-ui-border)}
-.jf-career-portal>footer{padding-inline:var(--career-gutter)}
 .jf-career-portal[data-layout="panorama"] .mock-hero__visual{padding:0;border-radius:0}.jf-career-portal[data-layout="panorama"] .mock-hero__visual img{height:100%;border-radius:0}.jf-career-portal[data-layout="panorama"] .jf-career-photo-note,.jf-career-portal[data-layout="panorama"] .jf-career-photo-chip{display:none}
 .jf-career-portal[data-layout="vagas"] .jf-career-hero,.jf-career-portal[data-layout="essencial"] .jf-career-hero{grid-template-columns:1fr;min-height:0}
 @container(max-width:760px){.jf-career-portal .jf-career-hero{grid-template-columns:1fr;gap:32px;padding-block:36px;min-height:0}.jf-career-portal .mock-hero__copy,.jf-career-portal .mock-hero__visual{grid-column:1;grid-row:auto}.jf-career-portal .mock-hero__visual{min-height:240px;max-width:520px;width:100%;justify-self:center}.jf-career-portal .mock-hero__visual img{height:280px}.jf-career-highlights{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.jf-career-highlights>div{padding-left:0;border:0}.jf-career-section-head{display:block}.jf-career-section-head>p{max-width:none}.jf-career-portal>header nav{order:3;width:100%;margin-left:0;gap:20px}.jf-career-portal>header>.jf-status{margin-left:auto}.jf-career-search,.jf-career-jobs{grid-template-columns:1fr}.jf-career-portal .jf-career-opportunities,.jf-career-portal .jf-career-culture,.jf-career-invitation{padding-block:36px}.jf-career-culture-link{margin-left:0}.jf-career-photo-chip{right:0;font-size:11px}.jf-career-photo-note{left:0}}
 
 .jf-career-portal .jf-career-photo-chip>svg,.jf-career-portal .jf-career-photo-note>svg{width:20px;height:20px;flex-shrink:0}
 .jf-career-portal .mock-hero__copy>.jf-action{margin-right:8px;margin-bottom:8px}
-
-.jf-career-portal>.site-footer{display:block;padding:32px var(--career-gutter);text-align:left;background:var(--cp-bg)}
-.jf-career-portal .footer-shell{width:100%;max-width:1160px;padding:clamp(24px,4cqi,48px);margin:0 auto;background:linear-gradient(145deg,var(--cp-surface),color-mix(in srgb,var(--cp-primary) 7%,var(--cp-bg)));border-color:var(--jf-ui-border);color:var(--cp-text)}
-.jf-career-portal .footer-grid{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(24px,5cqi,64px)}
-.jf-career-portal .footer-contact h2{color:var(--cp-text);font-size:clamp(22px,3cqi,36px)}
-.jf-career-portal .footer-contact__links a{color:var(--cp-text);background:var(--cp-surface);border-color:var(--jf-ui-border)}
-.jf-career-portal .footer-contact__links small,.jf-career-portal .footer-brand address,.jf-career-portal .footer-description{color:var(--jf-ui-text-muted)}
-.jf-career-portal .footer-contact__links strong{font-size:12px}.jf-career-portal .footer-contact__links small{font-size:11px}
-.jf-career-portal .footer-navigation{border-color:var(--jf-ui-border)}.jf-career-portal .footer-navigation a{font-size:12px;color:var(--cp-link)}
-.jf-career-portal .footer-description{font-size:13px;max-width:360px;margin-top:20px}.jf-career-portal .footer-brand address{font-size:11px}
-@container(max-width:760px){.jf-career-portal .footer-grid,.jf-career-portal .footer-contact__links{grid-template-columns:1fr}}
