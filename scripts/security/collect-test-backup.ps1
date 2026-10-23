@@ -16,7 +16,7 @@ try {
   if(!$evidence.counts_match -or $evidence.environment -ne 'test' -or $evidence.backup -notmatch '^/opt/jbfd/backups/security/(test-[0-9]{8}T[0-9]{6}Z)$'){throw 'Invalid recovery evidence'}
   $name=$Matches[1]
   $remote="$($evidence.backup)/offsite.tar"
-  & ssh @sshArgs "tar -C $($evidence.backup) -cf $remote postgres.sql.gz storage.tar.gz objects.private.json recovery.json"
+  & ssh @sshArgs "tar -C $($evidence.backup) -cf $remote postgres.sql.gz storage.tar.gz objects.private.json recovery.json infrastructure-audit.jsonl"
   if($LASTEXITCODE -ne 0){throw 'Remote archive failed'}
   $incoming=Join-Path $resolvedRoot "$name.incoming"
   & scp -q -o BatchMode=yes -o StrictHostKeyChecking=yes "root@187.77.229.27:$remote" $incoming

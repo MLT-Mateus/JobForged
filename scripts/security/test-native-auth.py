@@ -31,6 +31,11 @@ def jwt(secret,role):
     message=enc({'alg':'HS256','typ':'JWT'})+'.'+enc({'role':role,'iss':'supabase','iat':int(time.time()),'exp':int(time.time())+3600})
     return message+'.'+base64.urlsafe_b64encode(hmac.new(secret.encode(),message.encode(),hashlib.sha256).digest()).decode().rstrip('=')
 
+def totp_code(value):
+    seed=base64.b32decode(value+'='*((8-len(value)%8)%8))
+    digest=hmac.new(seed,struct.pack('>Q',int(time.time())//30),hashlib.sha1).digest();offset=digest[-1]&15
+    return str((struct.unpack('>I',digest[offset:offset+4])[0]&0x7fffffff)%1000000).zfill(6)
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('restore');args=parser.parse_args()
     if not args.restore.startswith('jbfd-security-restore-') or inspect(args.restore)['Config']['Labels'].get('jbfd.security.disposable')!='true':
@@ -53,10 +58,10 @@ def main():
             try:data=json.loads(error.read())
             except ValueError:data=None
             return error.code,data
-    def start(name,source,env):
+    def start(name,source,env,options=None,command=None,image=None):
         file=Path('/opt/jbfd/security-work')/(name+'.env');file.write_text('\n'.join(k+'='+v for k,v in env.items())+'\n');env_files.append(file)
-        image=inspect(source)['Image']
-        run(['docker','run','-d','--name',name,'--label','jbfd.security.disposable=true','--network',network,'--memory','256m','--cpus','0.5','--env-file',str(file),image]);containers.append(name)
+        image=image or inspect(source)['Image']
+        run(['docker','run','-d','--name',name,'--label','jbfd.security.disposable=true','--network',network,'--memory','256m','--cpus','0.5','--env-file',str(file),*(options or []),image,*(command or [])]);containers.append(name)
         address=inspect(name)['NetworkSettings']['Networks'][network]['IPAddress']
         return address
     def binary_request(base,path,data,token,mime='image/png'):
@@ -146,14 +151,24 @@ def main():
         assert status==200,'Native TOTP enrollment failed'
         status,challenge=request(auth,'/factors/'+factor['id']+'/challenge',{},platform_token)
         assert status==200,'Native TOTP challenge failed'
-        seed=base64.b32decode(factor['totp']['secret']+'='*((8-len(factor['totp']['secret'])%8)%8))
-        digest=hmac.new(seed,struct.pack('>Q',int(time.time())//30),hashlib.sha1).digest();offset=digest[-1]&15
-        code=str((struct.unpack('>I',digest[offset:offset+4])[0]&0x7fffffff)%1000000).zfill(6)
+        code=totp_code(factor['totp']['secret'])
         status,verified=request(auth,'/factors/'+factor['id']+'/verify',{'challenge_id':challenge['id'],'code':code},platform_token)
         assert status==200,'Native TOTP verification failed'
         assert request(rest,'/rpc/platform_read',{'section':'overview'},verified['access_token'])[0]==200,'Native fresh MFA denied'
         sql("update auth.mfa_amr_claims set created_at=now()-interval '1 hour',updated_at=now()-interval '1 hour' where session_id in(select id from auth.sessions where user_id='"+platform+"') and authentication_method='totp';")
         assert request(rest,'/rpc/platform_read',{'section':'overview'},verified['access_token'])[0]==403,'Native old MFA accepted'
+        status,password_only=request(auth,'/token?grant_type=password',{'email':platform_email,'password':password});assert status==200
+        assert request(auth,'/factors',{'factor_type':'totp','friendly_name':'Password only attempt'},password_only['access_token'])[0] in (401,403),'Password-only session enrolled an additional MFA factor'
+        # Break-glass recovery uses the native admin endpoint, keeping application
+        # MFA enforcement enabled and preserving the user's administrative role.
+        assert request(auth,'/admin/users/'+platform+'/factors/'+factor['id'],token=admin,method='DELETE')[0] in (200,204),'Native administrative factor recovery failed'
+        assert request(rest,'/rpc/platform_read',{'section':'overview'},verified['access_token'])[0]==403,'Removed factor retained business access'
+        status,recovery_admin=request(auth,'/token?grant_type=password',{'email':platform_email,'password':password});assert status==200
+        assert request(rest,'/rpc/platform_read',{'section':'overview'},recovery_admin['access_token'])[0]==403,'Factor recovery disabled MFA enforcement'
+        status,new_factor=request(auth,'/factors',{'factor_type':'totp','friendly_name':'Recovered fixture'},recovery_admin['access_token']);assert status==200,'Recovered administrator cannot enroll'
+        status,new_challenge=request(auth,'/factors/'+new_factor['id']+'/challenge',{},recovery_admin['access_token']);assert status==200
+        status,recovered=request(auth,'/factors/'+new_factor['id']+'/verify',{'challenge_id':new_challenge['id'],'code':totp_code(new_factor['totp']['secret'])},recovery_admin['access_token']);assert status==200
+        assert request(rest,'/rpc/platform_read',{'section':'overview'},recovered['access_token'])[0]==200,'Recovered administrator denied after new factor'
         sql('update app_private.security_settings set admin_mfa_enforced=false where singleton;')
         storage_password=secrets.token_hex(24)
         sql("alter role supabase_storage_admin password '"+storage_password+"';")
@@ -202,11 +217,48 @@ def main():
         sql("update public.companies set operational_status='active' where id='"+own_context['company_id']+"';")
         assert request(auth,'/logout?scope=global',{},own_token)[0] in (200,204),'Native logout failed'
         assert request(rest,'/rpc/session_context_v1',{},own_token)==(200,None),'Native logout retained business access'
+        routes=[];clusters=[]
+        for prefix,name,port in [('/auth/v1/',auth_name,9999),('/rest/v1/',rest_name,3000),('/storage/v1/',storage_name,5000)]:
+            routes.append({'match':{'prefix':prefix},'route':{'cluster':name,'prefix_rewrite':'/','timeout':'30s'}})
+            clusters.append({'name':name,'connect_timeout':'2s','type':'STRICT_DNS','load_assignment':{'cluster_name':name,'endpoints':[{'lb_endpoints':[{'endpoint':{'address':{'socket_address':{'address':name,'port_value':port}}}}]}]}})
+        envoy_config={'static_resources':{'listeners':[{'name':'api','address':{'socket_address':{'address':'0.0.0.0','port_value':8000}},'filter_chains':[{'filters':[{'name':'envoy.filters.network.http_connection_manager','typed_config':{'@type':'type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager','stat_prefix':'isolated','route_config':{'name':'api','virtual_hosts':[{'name':'api','domains':['*'],'routes':routes}]},'http_filters':[{'name':'envoy.filters.http.router','typed_config':{'@type':'type.googleapis.com/envoy.extensions.filters.http.router.v3.Router'}}]}}]}]}],'clusters':clusters}}
+        config_file=Path('/opt/jbfd/security-work')/(network+'-envoy.json');config_file.write_text(json.dumps(envoy_config));config_file.chmod(0o644);env_files.append(config_file)
+        start(network+'-envoy','supabase-envoy',{},options=['--network-alias','supabase-envoy','-v',str(config_file)+':/etc/envoy/envoy.yaml:ro'],command=['-c','/etc/envoy/envoy.yaml'])
+        gateway_password=secrets.token_hex(24);sql("alter role jbfd_security_gateway password '"+gateway_password+"';")
+        gateway_env={'APP_ENV':'test','DATABASE_URL':'postgres://jbfd_security_gateway:'+gateway_password+'@security-db:5432/postgres','RATE_SCOPE_SECRET':secrets.token_hex(32),'UPSTREAM_URL':'http://supabase-envoy:8000','TRUSTED_PROXY_HOST':'supabase-envoy'}
+        gateways=[]
+        for number in (1,2):
+            name=network+'-gateway-'+str(number)
+            address=start(name,None,gateway_env,image='jbfd-security-gateway:isolated-acceptance');base='http://'+address+':8080'
+            for _ in range(30):
+                try:
+                    if request(base,'/healthz')[0]==200:break
+                except OSError:pass
+                time.sleep(1)
+            else:raise AssertionError('Isolated security gateway readiness failed')
+            gateways.append((name,base))
+        assert request(gateways[0][1],'/auth/v1/health')[0]==200,'Gateway Auth forwarding failed'
+        assert request(gateways[0][1],'/rest/v1/rpc/company_read_v1',{},other_session['access_token'])[0]==200,'Gateway RPC forwarding failed'
+        limited_email='gateway-rate-'+suffix
+        for index in range(5):
+            request(gateways[index%2][1],'/auth/v1/recover',{'email':limited_email})
+        status,limited=request(gateways[1][1],'/auth/v1/recover',{'email':limited_email})
+        assert status==429 and limited.get('message')=='Too many requests. Try again later.','Gateway instances did not share rate state'
+        run(['docker','restart',gateways[0][0]])
+        for _ in range(30):
+            try:
+                if request(gateways[0][1],'/healthz')[0]==200:break
+            except OSError:pass
+            time.sleep(1)
+        status,limited=request(gateways[0][1],'/auth/v1/recover',{'email':limited_email})
+        assert status==429 and limited.get('message')=='Too many requests. Try again later.','Gateway restart lost rate state'
         print(json.dumps({'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
+            'password_only_mfa_replacement_denied':True,'native_admin_factor_recovery':True,
             'native_storage_upload':True,'native_storage_tenant_isolation':True,'native_storage_requires_reservation':True,'native_asset_registration':True,'native_storage_type_restriction':True,'native_storage_size_limit':True,
             'inactive_member_denied':True,'suspended_company_denied':True,'native_logout_denied_old_jwt':True,
+            'gateway_native_forwarding':True,'gateway_shared_rate_state':True,'gateway_rate_state_survives_restart':True,
             'network_internal':True,'published_ports':[],'outbound_email':False}))
     finally:
         for name in reversed(containers):

@@ -98,6 +98,8 @@ jobs:
           node-version-file: .nvmrc
       - name: Construir aplicação completa
         run: docker build --build-arg APP_COMMIT="$GITHUB_SHA" -t jbfd:ci .
+      - name: Construir gateway de segurança
+        run: docker build -t jbfd-security-gateway:ci services/security-gateway
       - name: Preparar rede externa do proxy
         run: docker network create jbfd-ci-network
       - name: Executar dois ambientes isolados
@@ -157,6 +159,14 @@ jobs:
               --label "org.opencontainers.image.revision=$REVISION" \
               -t "$IMAGE:$REVISION" .
             docker push "$IMAGE:$REVISION"
+          fi
+          gateway_image="${IMAGE}-security-gateway"
+          if docker manifest inspect "$gateway_image:$REVISION" >/dev/null 2>&1; then
+            echo "Gateway deste commit já publicado; preservando o artefato existente."
+          else
+            docker build --label "org.opencontainers.image.revision=$REVISION" \
+              -t "$gateway_image:$REVISION" services/security-gateway
+            docker push "$gateway_image:$REVISION"
           fi
 
   deploy-test:

@@ -6,9 +6,11 @@ import pg from 'pg';
 import { clientAddress, limitsFor } from './policy.mjs';
 
 const secret=process.env.RATE_SCOPE_SECRET;
+const environment=process.env.APP_ENV;
 const upstream=new URL(process.env.UPSTREAM_URL||'http://supabase-envoy:8000');
 if(!secret||secret.length<64||!process.env.DATABASE_URL)throw new Error('Gateway configuration missing');
-if(upstream.protocol!=='http:'||upstream.hostname!=='supabase-envoy')throw new Error('Unexpected Test upstream');
+const expectedHost=environment==='test'?'supabase-envoy':environment==='live'?'supabase-live-envoy':null;
+if(!expectedHost||upstream.protocol!=='http:'||upstream.hostname!==expectedHost)throw new Error('Unexpected environment upstream');
 const pool=new pg.Pool({connectionString:process.env.DATABASE_URL,max:6,connectionTimeoutMillis:2000,query_timeout:2000,statement_timeout:1500});
 pool.on('error',()=>console.error('Gateway database connection unavailable'));
 let trustedPeers=new Set();
@@ -73,6 +75,7 @@ server.on('upgrade',async(req,socket,head)=>{
   const headers={...req.headers,host:upstream.host,'x-forwarded-for':address};delete headers.forwarded;delete headers['x-real-ip'];
   const connection=http.request(url,{method:'GET',headers,timeout:10000});
   connection.on('upgrade',(response,remote,upstreamHead)=>{
+   connection.setTimeout(0);remote.setTimeout(0);socket.setTimeout(0);
    socket.write(`HTTP/1.1 ${response.statusCode} ${response.statusMessage}\r\n`);
    for(let i=0;i<response.rawHeaders.length;i+=2)socket.write(`${response.rawHeaders[i]}: ${response.rawHeaders[i+1]}\r\n`);
    socket.write('\r\n');if(upstreamHead.length)socket.write(upstreamHead);if(head.length)remote.write(head);

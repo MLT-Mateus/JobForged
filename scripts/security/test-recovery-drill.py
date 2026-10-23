@@ -73,6 +73,8 @@ def main():
         # Manifest checks include immutable object metadata, not customer content.
         objects = sql('supabase-db', "SELECT coalesce(json_agg(x),'[]') FROM (SELECT bucket_id,name,coalesce(metadata->>'size','0') AS size FROM storage.objects ORDER BY bucket_id,name)x;")
         (folder / 'objects.private.json').write_text(objects, encoding='utf-8')
+        audit=Path('/opt/jbfd/security-work/admin-factor-recovery.jsonl')
+        (folder/'infrastructure-audit.jsonl').write_bytes(audit.read_bytes() if audit.exists() else b'')
     finally:
         # Always return previously-running Test writers; never start Live resources.
         run(['docker', 'start', *active], stdout=subprocess.DEVNULL)
@@ -149,7 +151,7 @@ def main():
                 raise RuntimeError('Restored file hash differs')
             files_verified += 1
     checksums = {name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
-                 for name in ['postgres.sql.gz', 'storage.tar.gz', 'objects.private.json']}
+                 for name in ['postgres.sql.gz', 'storage.tar.gz', 'objects.private.json','infrastructure-audit.jsonl']}
     evidence = {'environment': 'test', 'backup': str(folder), 'restore_container': restore,
                 'network': 'none', 'ports': [], 'counts_match': True,
                 'storage_objects_verified': verified, 'files_verified': files_verified,

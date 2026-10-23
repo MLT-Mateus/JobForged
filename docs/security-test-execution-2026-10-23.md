@@ -28,6 +28,9 @@ Atualização: 2026-10-23, UTC. Não constitui entrega final nem autorização d
 - Build verificado e 16 testes existentes da aplicação passaram; TypeScript passou. Lint direcionado passou após corrigir o efeito de carregamento da tela de segurança.
 - PR de trabalho: [#112](https://github.com/MLT-Mateus/JobForged/pull/112), em draft. Primeira rodada do CI: build/qualidade e Docker passaram; SQL detectou corrida no servidor temporário de inicialização (espera corrigida para TCP final); auditoria MCP detectou advisories atualizados. Zod atualizado para 4.6.7 e transitivos corrigidos; dez testes MCP passaram e `npm audit --omit=dev` retornou zero vulnerabilidades localmente. CI precisa ser repetido no novo commit.
 - Advisories: [Zod](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), [ip-address](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5), [body-parser](https://github.com/advisories/GHSA-27r3-jxmh-p828).
+- Segunda rodada do CI, commit `8015141`: quatro verificações passaram (MCP, código/build, Docker e SQL). Publicação permanece bloqueada pelo PR draft e pelas pendências funcionais.
+- Proteção de `develop` aplicada: exige PR e os quatro checks, branch atualizada, conversas resolvidas; também exige checks dos administradores; force-push e exclusão negados. Nenhuma proteção/configuração de `main` foi alterada.
+- Recuperação nativa de fator administrativo passou com conta fictícia: exclusão do fator pela API administrativa revogou as sessões, MFA continuou obrigatório e novo cadastro restaurou o acesso. Sessão apenas com senha não conseguiu adicionar fator enquanto existia fator verificado. Referência: [deleteFactor](https://supabase.com/docs/reference/javascript/auth-admin-deletefactor).
 
 ## Código preparado, ainda não publicado
 

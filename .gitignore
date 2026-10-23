@@ -43,6 +43,7 @@ next-env.d.ts
 
 # compiler caches and local credentials
 *.tsbuildinfo
+__pycache__/
 *.key
 
 !deploy/.env.live.example
