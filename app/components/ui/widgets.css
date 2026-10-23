@@ -63,3 +63,5 @@
 .jf-editor-accordion>summary:focus-visible{outline:3px solid var(--jf-ui-focus-ring);outline-offset:2px;border-radius:var(--jf-ui-radius-card)}
 .jf-editor-accordion__body{display:grid;gap:var(--jf-ui-space-5);padding:0 var(--jf-ui-space-5) var(--jf-ui-space-5);min-width:0}
 @media(max-width:1000px){.jf-editor-workbench{grid-template-columns:1fr}.jf-editor-workbench__preview{position:static}}
+
+.jf-focus-group--end>.jf-focus-group__panel{left:auto;right:0}
