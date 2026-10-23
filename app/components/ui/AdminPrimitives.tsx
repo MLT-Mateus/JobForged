@@ -17,7 +17,7 @@ export function EmptyStateVisual({icon:Icon=Inbox,variant="circle",compact=false
  return <span className={`jf-empty__icon jf-empty__icon--${variant} ${compact?'jf-empty__icon--small':''}`} aria-hidden="true">{variant==='circle'&&<i/>}<Icon strokeWidth={1.8}/></span>;
 }
 export type EmptyStateVariant = "standard" | "compact" | "inline";
-export function EmptyState({ title, description, action, icon:Icon=Inbox, variant="standard" }: { title: string; description: string; action?: ReactNode; icon?: LucideIcon; variant?: EmptyStateVariant }) {
+export function EmptyState({ title, description, action, icon:Icon=Inbox, variant="standard" }: { title: ReactNode; description: ReactNode; action?: ReactNode; icon?: LucideIcon; variant?: EmptyStateVariant }) {
   return <div className={`jf-empty jf-empty--${variant}`} role="status"><EmptyStateVisual icon={Icon}/><div className="jf-empty__content"><strong>{title}</strong><p>{description}</p>{action&&<div className="jf-empty__action">{action}</div>}</div></div>;
 }
 

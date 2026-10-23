@@ -1,3 +1,5 @@
+import {sanitizeRichText,richTextPlain} from '../ui/rich-content.ts';
+import {careerCopy} from './career-copy.ts';
 import {careerDefaults} from './career-defaults.ts';
 import type { CSSProperties } from 'react';
 import { fontPairs } from '../ui/font-pairs.ts';
@@ -50,6 +52,9 @@ export function validateBranding(content:unknown):string|null {
  const c=content as ReturnType<typeof brandContent>;
  try {
   if(!c.displayName.trim()||c.displayName.length>160||!c.shortName.trim()||c.shortName.length>24||c.slogan.length>110) return 'Revise o nome, nome curto e slogan.';
+  if(richTextPlain(c.portal.headline).length>90)return 'Use até 90 caracteres no título principal.';
+  if(c.portal.content&&Object.entries(c.portal.content).some(([key,value])=>!(key in careerCopy)||typeof value!=='string'||value.length>4000))return 'Revise os textos das seções.';
+  if(c.portal.footer){const f=c.portal.footer;if(f.links.length>6||f.links.some(link=>typeof link.label!=='string'||link.label.length>4000||!validContentLink(link.href))||!validContentLink(f.phoneUrl)||f.email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email))return 'Revise os contatos e links do rodapé.';}
   if(c.portal.layout!==undefined&&!['classico','equipe','panorama','vagas','essencial'].includes(c.portal.layout))return 'Escolha um template válido.';
   if(!fontPairs.some(p=>p.id===c.typography.fontPair))return 'Escolha um dos quatro pares tipográficos aprovados.';
   for(const palette of [c.palette,c.theme.light,c.theme.dark])for(const color of Object.values(palette))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return 'Use cores no formato #RRGGBB.';
@@ -58,3 +63,16 @@ export function validateBranding(content:unknown):string|null {
  }catch{return 'Revise os campos da identidade visual.';}
 }
 export {lightPalette,darkPalette};
+
+function validContentLink(value:string){if(value===''||/^\/(?!\/)[a-zA-Z0-9/_#?=.-]*$/.test(value))return true;try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password}catch{return false}}
+export function normalizeBrandingRichContent(input:unknown):unknown{
+ if(!input||typeof input!=='object'||Array.isArray(input))return input;
+ const c=structuredClone(input) as ReturnType<typeof brandContent>;
+ if(c.portal&&typeof c.portal==='object'){
+  for(const key of ['headline','introduction','buttonText','about','footerText','emptyStateTitle','emptyStateDescription'] as const)if(typeof c.portal[key]==='string')c.portal[key]=sanitizeRichText(c.portal[key]);
+  if(c.portal.content&&typeof c.portal.content==='object')for(const [key,value] of Object.entries(c.portal.content))if(typeof value==='string')c.portal.content[key]=sanitizeRichText(value);
+  const f=c.portal.footer;if(f&&typeof f==='object'){for(const key of ['description','legal','eyebrow','title'] as const)if(typeof f[key]==='string')f[key]=sanitizeRichText(f[key]);if(Array.isArray(f.links))for(const link of f.links)if(link&&typeof link.label==='string')link.label=sanitizeRichText(link.label);}
+ }
+ if(Array.isArray(c.banners))for(const b of c.banners)for(const key of ['title','description','buttonText'] as const)if(b&&typeof b[key]==='string')b[key]=sanitizeRichText(b[key]);
+ return c;
+}

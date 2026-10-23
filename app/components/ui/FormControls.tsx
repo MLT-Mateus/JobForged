@@ -36,6 +36,8 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
+import {ColorField} from "./ColorField";
+import {sanitizeRichText} from "./rich-content";
 import { useStatusSoundForMessage } from "./status-sound";
 
 export type SelectOption = {
@@ -1059,14 +1061,18 @@ type RichTextFieldProps = {
   label: string;
   placeholder?: string;
   initialHtml?: string;
+  value?: string;
+  textOnly?: boolean;
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", value, textOnly=false, onChange }: RichTextFieldProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<Range | null>(null);
-  const [initial] = useState(initialHtml);
+  const emittedRef=useRef<string|undefined>(undefined);
+  const [initial] = useState(textOnly?sanitizeRichText(value??initialHtml):initialHtml);
+  const [textColor,setTextColor]=useState("#20B2AA");
   const [imageError, setImageError] = useState("");
   useStatusSoundForMessage(imageError, "danger");
   const [size, setSize] = useState("3");
@@ -1091,7 +1097,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
     if (!editor) return;
     const empty = !editor.textContent?.trim() && !editor.querySelector("img");
     editor.dataset.empty = String(empty);
-    onChange?.(empty ? "" : editor.innerHTML);
+    const next=empty?"":textOnly?sanitizeRichText(editor.innerHTML):editor.innerHTML;emittedRef.current=next;onChange?.(next);
     saveSelection();
   }
   useEffect(() => {
@@ -1101,6 +1107,7 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
       editor.dataset.empty = String(!editor.textContent?.trim() && !editor.querySelector("img"));
     }
   }, [initial]);
+  useEffect(()=>{const editor=editorRef.current;if(value!==undefined&&value!==emittedRef.current&&editor&&document.activeElement!==editor){const html=textOnly?sanitizeRichText(value):value;if(editor.innerHTML!==html)editor.innerHTML=html;editor.dataset.empty=String(!editor.textContent?.trim())}},[value,textOnly]);
   function format(command: string, value?: string) {
     restoreSelection();
     document.execCommand(command, false, value);
@@ -1122,21 +1129,23 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
     };
     reader.readAsDataURL(file);
   }
-  return <div className="jf-rich-text-field">
+  return <div className="jf-rich-text-field"><span className="jf-field__label"><b>{label}</b></span>
     <div className="jf-rich-text">
       <div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto">
         <button type="button" aria-label="Negrito" title="Negrito" onMouseDown={e => e.preventDefault()} onClick={() => format("bold")}><Bold size={16}/></button>
         <button type="button" aria-label="Itálico" title="Itálico" onMouseDown={e => e.preventDefault()} onClick={() => format("italic")}><Italic size={16}/></button>
         <button type="button" aria-label="Lista" title="Lista" onMouseDown={e => e.preventDefault()} onClick={() => format("insertUnorderedList")}><List size={16}/></button>
-        <button type="button" aria-label="Adicionar link" title="Adicionar link" onMouseDown={e => e.preventDefault()} onClick={() => format("createLink", "https://jobforged.com")}><Link2 size={16}/></button>
-        <button type="button" aria-label="Adicionar imagem" title="Adicionar imagem" onMouseDown={e => e.preventDefault()} onClick={() => { saveSelection(); inputRef.current?.click(); }}><ImagePlus size={16}/></button>
-        <div className="jf-rich-text__sizes" role="group" aria-label="Tamanho do texto">
+        {!textOnly&&<button type="button" aria-label="Adicionar link" title="Adicionar link" onMouseDown={e => e.preventDefault()} onClick={() => format("createLink", "https://jobforged.com")}><Link2 size={16}/></button>}
+        {!textOnly&&<button type="button" aria-label="Adicionar imagem" title="Adicionar imagem" onMouseDown={e => e.preventDefault()} onClick={() => { saveSelection(); inputRef.current?.click(); }}><ImagePlus size={16}/></button>}
+        {!textOnly&&<div className="jf-rich-text__sizes" role="group" aria-label="Tamanho do texto">
           {([{"value":"3","label":"16"},{"value":"4","label":"18"},{"value":"5","label":"24"},{"value":"6","label":"32"}] as const).map(option => <button key={option.value} type="button" className="jf-rich-text__size" aria-label={`Texto de ${option.label} pixels`} title={`${option.label} px`} aria-pressed={size === option.value} onMouseDown={e => e.preventDefault()} onClick={() => { setSize(option.value); format("fontSize", option.value); }}>{option.label}</button>)}
-        </div>
+        </div>}
+        <div className="jf-rich-text__color"><ColorField label="Cor do texto" value={textColor} onChange={color=>{setTextColor(color);if(/^#[0-9a-f]{6}$/i.test(color))format("foreColor",color)}}/></div>
+        <button type="button" aria-label="Remover formatação" onMouseDown={e=>e.preventDefault()} onClick={()=>format("removeFormat")}>Aa</button>
       </div>
       <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={addImage}/>
       <div className="jf-rich-text__body">
-        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial} contentEditable suppressContentEditableWarning onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
+        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial} contentEditable suppressContentEditableWarning onPaste={event=>{if(textOnly){event.preventDefault();format("insertHTML",sanitizeRichText(event.clipboardData.getData("text/html")||event.clipboardData.getData("text/plain")))}}} onDrop={event=>{if(textOnly)event.preventDefault()}} onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
         <span className="jf-rich-text__placeholder" aria-hidden="true">{placeholder}</span>
       </div>
     </div>

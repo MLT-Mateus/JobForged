@@ -422,7 +422,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               <ExampleCard title="Multiline Input · texto multilinha">
                 <MultilineInput label="Apresentação" placeholder="Escreva uma apresentação em várias linhas." rows={4}/>
               </ExampleCard>
-              <ExampleCard title="Rich text">
+              <ExampleCard title="Rich text · cor hexadecimal">
                 <RichTextField label="Descrição da vaga" placeholder="Descreva responsabilidades, resultados esperados e como o time trabalha." />
               </ExampleCard>
             </div>
