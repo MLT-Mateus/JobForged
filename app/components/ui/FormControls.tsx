@@ -1065,10 +1065,11 @@ type RichTextFieldProps = {
   initialHtml?: string;
   value?: string;
   textOnly?: boolean;
+  resetKey?: string|number;
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", value, textOnly=true, onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", value, textOnly=true, resetKey, onChange }: RichTextFieldProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<Range | null>(null);
@@ -1076,8 +1077,8 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
   const [initial] = useState(textOnly?sanitizeRichText(value??initialHtml):initialHtml);
   const sourceRef=useRef<HTMLTextAreaElement>(null);
   const [source,setSource]=useState(()=>richTextSource(value??initialHtml));
-  const sourceEmitted=useRef<string|undefined>(undefined);
-  useEffect(()=>{if(value!==undefined&&value!==sourceEmitted.current)setSource(richTextSource(value))},[value]);
+  const sourceEmitted=useRef<string|undefined>(undefined),sourceVersion=useRef(resetKey);
+  useEffect(()=>{if(value!==undefined&&(value!==sourceEmitted.current||sourceVersion.current!==resetKey))setSource(richTextSource(value));sourceVersion.current=resetKey},[value,resetKey]);
   function changeSource(next:string){setSource(next);const html=renderRichText(next.replace(/\n/g,'<br>'));sourceEmitted.current=html;onChange?.(html)}
   function sourceFormat(tag:string){const editor=sourceRef.current;if(!editor)return;const start=editor.selectionStart,end=editor.selectionEnd;const open=`[${tag}]`,close=`[/${tag}]`;changeSource(source.slice(0,start)+open+source.slice(start,end)+close+source.slice(end));requestAnimationFrame(()=>{editor.focus();editor.setSelectionRange(start+open.length,end+open.length)})}
   const parameterHelp=<FocusPopover label="Parâmetros de formatação" triggerVariant="quiet" triggerContent={<Info size={16}/>}><strong>Formate dentro do texto</strong><p>Envolva o trecho com a abertura e o fechamento do parâmetro.</p><dl className="jf-rich-parameters"><dt>Cor hexadecimal</dt><dd><code>[color=#4169E1]Azul[/color]</code></dd><dt>Negrito, itálico e sublinhado</dt><dd><code>[b]texto[/b] · [i]texto[/i] · [u]texto[/u]</code></dd><dt>Tamanho em pixels</dt><dd><code>[size=24]Título[/size]</code><span>16, 18, 24 ou 32.</span></dd><dt>Quebra de linha</dt><dd><code>[br]</code><span>Ou pressione Enter.</span></dd></dl><p>Você pode combinar parâmetros. Cores precisam de # e seis dígitos; parâmetros inválidos permanecem como texto.</p></FocusPopover>;
