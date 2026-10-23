@@ -774,7 +774,7 @@ export function MultiSelectField({
                 return <i key={value}>{option?.label ?? value}</i>;
               })
             ) : (
-              <em>{fieldPlaceholder({label,placeholder,disabled,selection:true})}</em>
+              <em>{fieldPlaceholder({label,placeholder,disabled,selection:true,multiple:true})}</em>
             )}
           </span>
           <ChevronDown size={17} aria-hidden="true" />
