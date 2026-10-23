@@ -2221,7 +2221,7 @@ main {
   height: auto;
 }
 
-.footer-brand p {
+.footer-brand p, .footer-description {
   max-width: 360px;
   margin: 20px 0 0;
   color: #64736f;

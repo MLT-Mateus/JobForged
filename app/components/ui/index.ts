@@ -32,3 +32,5 @@ export {ColorField} from "./ColorField";
 export {FontPairPicker} from "./FontPairPicker";
 
 export {TextAreaField as MultilineInput} from "./FormControls";
+
+export {RichContent} from "./RichContent";

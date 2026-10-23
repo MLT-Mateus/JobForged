@@ -3,9 +3,10 @@
 import { PhoneFrame } from "./components/ui/PhoneFrame";
 import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
+import {SiteFooter} from "./components/SiteFooter";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, BarChart3, Bot, BrainCircuit, BriefcaseBusiness, Check, ChevronDown, CircleCheck, Clock3, FileText, LayoutTemplate, LogIn, Mail, Menu, MessageCircle, Paintbrush, PanelTop, ShieldCheck, SquareKanban, Sparkles, UsersRound, X } from "lucide-react";
+import { ArrowRight, BarChart3, Bot, BrainCircuit, BriefcaseBusiness, Check, ChevronDown, CircleCheck, Clock3, FileText, LayoutTemplate, LogIn, Menu, MessageCircle, Paintbrush, PanelTop, ShieldCheck, SquareKanban, Sparkles, UsersRound, X } from "lucide-react";
 import { ViewportMotion } from "./components/ViewportMotion";
 import { ThemeSelector, useThemePreference } from "@/app/components/ui";
 import { plansById } from "@/app/data/plans";
@@ -654,37 +655,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="site-footer">
-        <div className="container footer-shell">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              { }
-              <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
-              <p>ATS white label com WhatsApp integrado e agente de triagem por IA.</p>
-              <address>
-                CNPJ 65.703.328/0001-10<br />
-                © {new Date().getFullYear()} JobForged. Todos os direitos reservados.
-              </address>
-            </div>
-            <div className="footer-contact">
-              <span className="eyebrow">Vamos conversar?</span>
-              <h2>Veja a JobForged funcionando na sua operação.</h2>
-              <div className="footer-contact__links">
-                <a href="mailto:jobforged@gmail.com"><Mail /> <span><small>E-mail</small><strong>jobforged@gmail.com</strong></span></a>
-                <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><MessageCircle /> <span><small>WhatsApp</small><strong>+55 61 9 9163-0130</strong></span></a>
-              </div>
-            </div>
-          </div>
-          <div className="footer-navigation">
-            <nav aria-label="Navegação institucional e documentos legais">
-              <Link href="/design-system">Design System</Link>
-              <Link href="/termos-servico">Termos de serviço</Link>
-              <Link href="/politicas-privacidade">Privacidade</Link>
-              <Link href="/politicas-exclusao">Exclusão de dados</Link>
-            </nav>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
