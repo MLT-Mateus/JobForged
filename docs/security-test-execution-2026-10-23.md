@@ -26,6 +26,8 @@ Atualização: 2026-10-23, UTC. Não constitui entrega final nem autorização d
 - Studio Test: allowlist exclusiva do router Test exige caminho local/SSH, mantendo HTTPS e Basic Auth. Externo retornou 403; caminho local retornou 401; Studio Live permaneceu 401. Rollback `/opt/jbfd/security-work/test-studio-before-private-20261023T205756Z`.
 - Acesso administrativo de recuperação: `ssh -N -L 8443:127.0.0.1:443 root@187.77.229.27`; teste TLS mantendo hostname: `curl --resolve test.supabase.jobforged.com:8443:127.0.0.1 https://test.supabase.jobforged.com:8443/`. Navegação requer resolução local do hostname para o túnel em perfil dedicado; não desative a validação do certificado.
 - Build verificado e 16 testes existentes da aplicação passaram; TypeScript passou. Lint direcionado passou após corrigir o efeito de carregamento da tela de segurança.
+- PR de trabalho: [#112](https://github.com/MLT-Mateus/JobForged/pull/112), em draft. Primeira rodada do CI: build/qualidade e Docker passaram; SQL detectou corrida no servidor temporário de inicialização (espera corrigida para TCP final); auditoria MCP detectou advisories atualizados. Zod atualizado para 4.6.7 e transitivos corrigidos; dez testes MCP passaram e `npm audit --omit=dev` retornou zero vulnerabilidades localmente. CI precisa ser repetido no novo commit.
+- Advisories: [Zod](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), [ip-address](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5), [body-parser](https://github.com/advisories/GHSA-27r3-jxmh-p828).
 
 ## Código preparado, ainda não publicado
 

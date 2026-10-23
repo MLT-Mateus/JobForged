@@ -6,11 +6,18 @@ cleanup() { docker rm -f "$container" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 docker run -d --name "$container" --network none --memory 768m --cpus 1 \
   -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94 >/dev/null
-for attempt in $(seq 1 60); do
-  if docker exec "$container" pg_isready -U postgres >/dev/null 2>&1; then break; fi
-  sleep 1
-done
-sql() { docker exec -i "$container" psql -Xq -U postgres -v ON_ERROR_STOP=1; }
+wait_for_database() {
+  # The entrypoint starts a temporary socket-only initialization server. Wait
+  # for final TCP readiness to avoid racing its intentional shutdown.
+  for attempt in $(seq 1 60); do
+    if docker exec "$container" psql -h 127.0.0.1 -U postgres -Atqc 'select 1' >/dev/null 2>&1; then return 0; fi
+    sleep 1
+  done
+  echo 'Disposable database readiness failed' >&2
+  return 1
+}
+wait_for_database
+sql() { docker exec -i "$container" psql -h 127.0.0.1 -Xq -U postgres -v ON_ERROR_STOP=1; }
 sql < tests/security-provider-contract.sql
 for migration in supabase/migrations/[0-9]*.sql; do
   { printf 'BEGIN;\n'; cat "$migration"; printf '\nCOMMIT;\n'; } | sql
@@ -29,10 +36,7 @@ end$$;
 SQL
 # Durable state must survive process/container restarts, not just JS unit tests.
 docker restart "$container" >/dev/null
-for attempt in $(seq 1 60); do
-  if docker exec "$container" pg_isready -U postgres >/dev/null 2>&1; then break; fi
-  sleep 1
-done
+wait_for_database
 sql <<'SQL'
 set role jbfd_security_gateway;
 do $$begin
