@@ -49,6 +49,8 @@ export type SelectOption = {
   description?: string;
 };
 
+function RequiredMarker(){return <span className="jf-field-required" aria-label="Obrigatório">*</span>}
+
 type FieldBaseProps = {
   label: string;
   helpText?: string;
@@ -99,9 +101,8 @@ export function TextField({
   return (
     <div className={`jf-field ${error ? "is-error" : ""} ${className}`}>
       <label className="jf-field__label" htmlFor={inputId}>
-        <b>{label}</b>
+        <b>{label}{(inputProps.required||requiredLabel)&&<> <RequiredMarker/></>}</b>
         {labelAdornment}
-        {requiredLabel && <i>{requiredLabel}</i>}
       </label>
       <div className="jf-control">
         {startAdornment}
@@ -159,8 +160,7 @@ export function TextAreaField({
   return (
     <div className={`jf-field ${error ? "is-error" : ""} ${className}`}>
       <label className="jf-field__label" htmlFor={inputId}>
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{(textareaProps.required||requiredLabel)&&<> <RequiredMarker/></>}</b>
       </label>
       <span className="jf-control">
         <textarea
@@ -192,8 +192,7 @@ export function FieldControl({
   return (
     <label className={`jf-field jf-field--native ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <span className="jf-control">{children}</span>
       {(error || helpText) && <small className="jf-field__message">{error ?? helpText}</small>}
@@ -473,8 +472,7 @@ export function DateField({
   return (
     <div ref={rootRef} className={`jf-field jf-date ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
@@ -545,8 +543,7 @@ export function DateRangeField({
   return (
     <div ref={rootRef} className={`jf-field jf-date jf-date-range ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
@@ -631,8 +628,7 @@ export function SelectField({
   return (
     <div ref={rootRef} className={`jf-field jf-select ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
@@ -748,8 +744,7 @@ export function MultiSelectField({
   return (
     <div ref={rootRef} className={`jf-field jf-multiselect ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
