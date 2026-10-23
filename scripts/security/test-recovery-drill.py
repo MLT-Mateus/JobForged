@@ -5,6 +5,8 @@ No Live resources, published ports, external network, or restored Auth services.
 Never print dump contents, role passwords, object names, or customer records.
 """
 import datetime
+import argparse
+import fcntl
 import gzip
 import hashlib
 import json
@@ -21,16 +23,24 @@ def run(args, **kwargs):
 
 def sql(container, statement):
     result = run(['docker', 'exec', container, 'psql', '-XqAt', '-U',
-                  'restore_operator' if container.startswith('jbfd-security-restore-') else 'postgres',
+                  'supabase_admin' if container.startswith('jbfd-security-restore-') else 'postgres',
                   '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-c', statement],
                  capture_output=True, text=True)
     return result.stdout.strip()
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--keep-restore', action='store_true', help='Keep isolated database for additional acceptance tests')
+    options = parser.parse_args()
     if os.geteuid() != 0:
         raise SystemExit('VPS root required')
     os.umask(0o077)
+    lock = open('/opt/jbfd/security-work/test-backup.lock', 'w')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        raise SystemExit('Another Test backup is already running')
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     folder = Path('/opt/jbfd/backups/security') / ('test-' + stamp)
     folder.mkdir(parents=True, mode=0o700, exist_ok=False)
@@ -73,11 +83,11 @@ def main():
     run(['docker', 'run', '-d', '--name', restore, '--label', 'jbfd.security.disposable=true',
          '--network', 'none', '--memory', '768m', '--cpus', '0.75', '--user', 'postgres',
          '--entrypoint', 'bash', image, '-ec',
-         "initdb -D /tmp/jbfd-restore -U restore_operator --auth-local=trust --auth-host=reject >/tmp/init.log; exec postgres -D /tmp/jbfd-restore -c listen_addresses='' -c unix_socket_directories=/tmp -c shared_buffers=64MB -c max_connections=30"],
+         "if [ ! -f /tmp/jbfd-restore/PG_VERSION ]; then initdb -D /tmp/jbfd-restore -U supabase_admin --auth-local=trust --auth-host=reject >/tmp/init.log; printf \"listen_addresses = ''\\n\" >> /tmp/jbfd-restore/postgresql.conf; fi; exec postgres -D /tmp/jbfd-restore -c unix_socket_directories=/tmp -c shared_buffers=64MB -c max_connections=30 -c shared_preload_libraries=pg_net,pg_cron,pg_stat_statements -c cron.launch_active_jobs=off"],
         stdout=subprocess.DEVNULL)
     for _ in range(60):
         ready = subprocess.run(['docker', 'exec', restore, 'pg_isready', '-h', '/tmp',
-                                '-U', 'restore_operator'], capture_output=True)
+                                '-U', 'supabase_admin'], capture_output=True)
         if ready.returncode == 0:
             break
         time.sleep(1)
@@ -86,13 +96,16 @@ def main():
     # Capture restore diagnostics privately, not in terminal/CI.
     with gzip.open(folder / 'postgres.sql.gz', 'rb') as source, (folder / 'restore.private.log').open('wb') as log:
         process = subprocess.Popen(['docker', 'exec', '-i', restore, 'psql', '-h', '/tmp',
-                                    '-Xq', '-U', 'restore_operator', '-d', 'postgres',
+                                    '-Xq', '-U', 'supabase_admin', '-d', 'postgres',
                                     '-v', 'ON_ERROR_STOP=1'], stdin=subprocess.PIPE,
                                    stdout=log, stderr=log)
         assert process.stdin is not None
         try:
-            while chunk := source.read(1024 * 1024):
-                process.stdin.write(chunk)
+            for line in source:
+                # pg_dumpall includes its source bootstrap role. The isolated
+                # cluster already has this same superuser; preserve ALTER ROLE.
+                if line.strip() != b'CREATE ROLE supabase_admin;':
+                    process.stdin.write(line)
             process.stdin.close()
         except BrokenPipeError:
             pass
@@ -101,7 +114,7 @@ def main():
     # Isolated server socket is /tmp. No TCP network exists.
     def restored(statement):
         return run(['docker', 'exec', restore, 'psql', '-h', '/tmp', '-XqAt', '-U',
-                    'restore_operator', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-c', statement],
+                    'supabase_admin', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-c', statement],
                    capture_output=True, text=True).stdout.strip()
     restored_counts = restored("SELECT json_build_object('users',(SELECT count(*) FROM auth.users),'companies',(SELECT count(*) FROM public.companies),'members',(SELECT count(*) FROM public.company_members),'objects',(SELECT count(*) FROM storage.objects),'migrations',(SELECT count(*) FROM public.jbfd_schema_migrations));")
     if json.loads(counts) != json.loads(restored_counts):
@@ -143,6 +156,9 @@ def main():
                 'writer_downtime_seconds': downtime,
                 'total_seconds': round(time.monotonic() - started, 2), 'checksums': checksums}
     (folder / 'recovery.json').write_text(json.dumps(evidence, indent=2), encoding='utf-8')
+    if not options.keep_restore:
+        # Only the exact container created by this invocation, never shared services.
+        run(['docker', 'rm', '-f', restore], stdout=subprocess.DEVNULL)
     print(json.dumps(evidence))
 
 

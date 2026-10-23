@@ -15,9 +15,15 @@ export async function POST(request:NextRequest){
   if(form.get('companyId')!==session.company.id)return Response.json({message:'O contexto da conta mudou. Recarregue a identidade antes de enviar imagens.'},{status:409,headers});
   if(!(file instanceof File)||file.size>5242880||!['image/png','image/jpeg','image/webp'].includes(file.type)||!(/\.(png|jpe?g|webp)$/i.test(file.name)))throw new Error();
   const input=Buffer.from(await file.arrayBuffer());
-  const output=await normalizeBrandingImage(input,file.type);
   const id=randomUUID(),path=`${session.company.id}/${id}.png`;
-  const uploaded=await brandingStorage(path,output);
+  const reservation=await requestDatabase('rpc/reserve_company_image',session.accessToken,{asset_id:id});
+  if(!reservation?.ok){
+   const error=await reservation?.json().catch(()=>null) as {code?:string}|null;
+   const limited=['54000','53300'].includes(error?.code||'');
+   return Response.json({message:limited?'Limite de imagens ou de envios atingido. Aguarde e tente novamente.':'Não foi possível autorizar o envio.'},{status:limited?429:503,headers});
+  }
+  const output=await normalizeBrandingImage(input,file.type);
+  const uploaded=await brandingStorage(path,session.accessToken,output);
   if(!uploaded?.ok)return Response.json({message:'O armazenamento de imagens está indisponível. Tente novamente.'},{status:503,headers});
   const name=file.name.replace(/[^\p{L}\p{N} ._-]/gu,'').slice(0,240)||'imagem.png';
   const registered=await requestDatabase('rpc/register_company_brand_asset',session.accessToken,{asset_id:id,file_name:name,file_size:output.byteLength,file_sha256:createHash('sha256').update(output).digest('hex')});

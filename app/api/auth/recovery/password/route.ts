@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { passwordRules } from "@/app/components/auth/auth-validation";
-import { clearPasswordRecoveryCookie, clearSessionCookies, getCookie, hasPasswordRecoveryCookie, requireSameOrigin, requestAuth } from "../../_server";
+import { clearPasswordRecoveryCookie, clearSessionCookies, getCookie, hasPasswordRecoveryCookie, requireSameOrigin, requestAuth, requestDatabase } from "../../_server";
 
 export const runtime = "nodejs";
 
@@ -19,6 +19,12 @@ export async function POST(request: NextRequest) {
   if (!accessToken) return Response.json({ message: "A sessão de recuperação expirou. Solicite um novo link." }, { status: 401 });
 
   try {
+    const consumed = await requestDatabase("rpc/consume_password_recovery", accessToken, { nonce: getCookie(request, "jf_password_recovery") });
+    if (!consumed?.ok || await consumed.json() !== true) {
+      const headers = new Headers({ "Cache-Control": "no-store" });
+      clearPasswordRecoveryCookie(headers);
+      return Response.json({ message: "Esta recuperação expirou ou já foi usada. Solicite outro link." }, { status: 403, headers });
+    }
     const result = await requestAuth("user", { password }, accessToken, "PUT");
     if (!result.configured) return Response.json({ message: "A autenticação ainda não está configurada neste ambiente." }, { status: 503 });
     if (!result.response?.ok) {

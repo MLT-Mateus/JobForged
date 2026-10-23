@@ -29,8 +29,9 @@ docker inspect --format '{{.State.Health.Status}}' "$database_container" 2>/dev/
   exit 69
 }
 
+migration_role=postgres
 psql() {
-  docker exec -i "$database_container" psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
+  docker exec -i "$database_container" psql -U "$migration_role" -d postgres -v ON_ERROR_STOP=1 "$@"
 }
 
 if [[ "$mode" != "--check" ]]; then
@@ -64,10 +65,15 @@ for filename in "${migrations[@]}"; do
     continue
   fi
   [[ "$mode" != "--check" ]] || { echo "Migration pendente: $filename. Aplique com backup antes do deploy." >&2; exit 65; }
+  migration_role=postgres
+  if head -n 1 "$migrations_dir/$filename" | grep -qx -- '-- migration-role: supabase_admin'; then
+    migration_role=supabase_admin
+  fi
   {
     printf 'BEGIN;\n'
     cat "$migrations_dir/$filename"
     printf "\nINSERT INTO public.jbfd_schema_migrations (filename, checksum) VALUES ('%s', '%s');\nCOMMIT;\n" "$filename" "$checksum"
   } | psql >/dev/null
+  migration_role=postgres
   echo "Applied: $filename"
 done

@@ -11,10 +11,11 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   const address=String(url),body=typeof init?.body==='string'?JSON.parse(init.body):null;
   if(address.endsWith('/auth/v1/user'))return Response.json({id:'38000000-0000-0000-0000-000000000001',email:'owner@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
   if(address.endsWith('/rpc/is_platform_admin'))return Response.json(platform);
-  if(address.includes('/rest/v1/company_members?'))return Response.json([{id:'member',company_id:cid,role,status:'active',full_name:'Fixture Owner',companies:{id:cid,name:'Fixture Branding'}}]);
+  if(address.endsWith('/rpc/session_context_v1'))return Response.json({id:'member',company_id:cid,role,full_name:'Fixture Owner',companies:{id:cid,name:'Fixture Branding'}});
+  if(address.endsWith('/rpc/reserve_company_image'))return Response.json({assetId:body.asset_id,expiresIn:300,maxBytes:5242880});
   if(address.endsWith('/rpc/read_company_branding'))return Response.json({companyId:cid,companyName:'Fixture Branding',editable:role!=='member',version:0,draft:role==='member'?null:{},published:{},publishedVersion:0,history:[]});
   if(address.endsWith('/rpc/write_company_branding')){writes.push(body);return conflict?Response.json({code:'40001'},{status:409}):Response.json(1)}
-  if(address.includes('/storage/v1/object/company-branding/')){assert.equal(init.headers.Authorization,'Bearer bucket-only-fixture-token');if(init.method==='POST'){assert.equal(init.headers['x-upsert'],'false');stored=Buffer.from(init.body);return Response.json({ok:true})}return new Response(tampered?Buffer.from('tampered'):stored)}
+  if(address.includes('/storage/v1/object/company-branding/')){assert.equal(init.headers.Authorization,'Bearer fixture');if(init.method==='POST'){assert.equal(init.headers['x-upsert'],'false');stored=Buffer.from(init.body);return Response.json({ok:true})}return new Response(tampered?Buffer.from('tampered'):stored)}
   if(address.endsWith('/rpc/register_company_brand_asset')){asset={id:body.asset_id,path:`${cid}/${body.asset_id}.png`,sha256:body.file_sha256,size:body.file_size};assert.equal(body.file_sha256,createHash('sha256').update(stored).digest('hex'));return Response.json(asset)}
   if(address.endsWith('/rpc/read_company_brand_asset'))return Response.json(body.asset_id===asset?.id?asset:null);
   throw new Error('Unexpected request in isolated fixture');

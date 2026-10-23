@@ -17,7 +17,7 @@ export async function POST(request:NextRequest){
   // Input up to 10 MiB / 32 MP; processed PNG stays under the private bucket's 5 MiB limit.
   const output=await normalizeBrandingImage(input,file.type,{bytes:10485760,pixels:33554432});
   const id=randomUUID(),path=`platform/${id}.png`;
-  const uploaded=await brandingStorage(path,output);
+  const uploaded=await brandingStorage(path,session.accessToken,output);
   if(!uploaded?.ok)return Response.json({message:'O armazenamento de imagens está indisponível. Tente novamente.'},{status:503,headers});
   const name=file.name.replace(/[^\p{L}\p{N} ._-]/gu,'').slice(0,240)||'imagem.png';
   const registered=await requestDatabase('rpc/register_platform_banner_asset',session.accessToken,{asset_id:id,file_size:output.byteLength,file_sha256:createHash('sha256').update(output).digest('hex')});

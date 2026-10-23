@@ -18,6 +18,18 @@ permissions:
   contents: read
 
 jobs:
+  database-security:
+    name: Validar migrations e segurança SQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Testar migrations, RLS, grants, RPCs e isolamento em PostgreSQL
+        run: bash scripts/security/test-database.sh
+      - name: Testar política de limitação de requisições
+        run: node --test services/security-gateway/test.mjs
+
   mcp:
     name: Validar MCP operacional
     runs-on: ubuntu-latest
@@ -114,7 +126,7 @@ jobs:
 
   publish-test-image:
     name: Publicar imagem Test
-    needs: [mcp, validate, docker]
+    needs: [mcp, validate, docker, database-security]
     if: >-
       github.event_name == 'push' &&
       github.ref == 'refs/heads/develop' &&
