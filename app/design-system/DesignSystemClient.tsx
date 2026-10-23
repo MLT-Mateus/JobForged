@@ -194,7 +194,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const [workspaceState,setWorkspaceState] = useState<"loading"|"error"|"empty"|"forbidden">("loading");
   const [demoRange,setDemoRange] = useState(50);
   const [demoColor,setDemoColor] = useState("#20B2AA");
-  const [demoRich,setDemoRich]=useState("Seu [color=#4169E1]talento[/color]. Nosso [color=#20B2AA]futuro[/color].");
+  const [demoRich,setDemoRich]=useState("");
   const [wideDialogOpen,setWideDialogOpen] = useState(false);
   const [nestedDialogOpen,setNestedDialogOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
@@ -424,7 +424,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                 <MultilineInput label="Apresentação" placeholder="Escreva uma apresentação em várias linhas." rows={4}/>
               </ExampleCard>
               <ExampleCard title="Rich Text · parâmetros no texto">
-                <RichTextField textOnly label="Descrição da vaga" placeholder="Escreva seu texto com parâmetros de formatação" value={demoRich} onChange={setDemoRich}/><div className="ds-rich-preview" aria-label="Prévia do texto formatado"><RichContent value={demoRich}/></div>
+                <RichTextField textOnly label="Descrição da vaga" placeholder="Descreva as responsabilidades e o perfil que você procura." value={demoRich} onChange={setDemoRich}/>{demoRich.trim()&&<div className="ds-rich-preview" aria-label="Prévia do texto formatado"><RichContent value={demoRich}/></div>}
               </ExampleCard>
             </div>
           </section>
