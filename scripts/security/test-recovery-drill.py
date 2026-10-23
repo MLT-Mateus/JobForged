@@ -152,7 +152,7 @@ def main():
             files_verified += 1
     checksums = {name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
                  for name in ['postgres.sql.gz', 'storage.tar.gz', 'objects.private.json','infrastructure-audit.jsonl']}
-    evidence = {'environment': 'test', 'backup': str(folder), 'restore_container': restore,
+    evidence = {'environment': 'test', 'backup': str(folder), 'restore_container': restore,'database_image':image,
                 'network': 'none', 'ports': [], 'counts_match': True,
                 'storage_objects_verified': verified, 'files_verified': files_verified,
                 'writer_downtime_seconds': downtime,
