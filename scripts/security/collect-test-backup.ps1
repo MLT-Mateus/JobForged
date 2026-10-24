@@ -26,6 +26,9 @@ try {
   & "$PSScriptRoot\workstation-backup.ps1" -Source $incoming -Destination $encrypted | Out-Null
   $verified=& "$PSScriptRoot\workstation-backup.ps1" -Source $encrypted -Destination '' -Decrypt -Verify
   if(($verified -join '') -notmatch $expected){throw 'Encrypted backup verification failed'}
+  $encryptedHash=(Get-FileHash -LiteralPath $encrypted -Algorithm SHA256).Hash
+  & ssh @sshArgs "python3 /opt/jbfd/security-work/record-offsite-copy.py $name $expected $encryptedHash"
+  if($LASTEXITCODE -ne 0){throw 'Offsite receipt failed; encrypted archive preserved'}
   Remove-Item -LiteralPath $incoming
   $incoming=$null
   # Keep seven daily, four weekly and six monthly recovery points; never touch

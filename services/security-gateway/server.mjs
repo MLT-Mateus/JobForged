@@ -55,6 +55,9 @@ const server=http.createServer(async(req,res)=>{
     !/^\/storage\/v1\/object\/(?:authenticated\/)?company-branding\/(?:platform|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.png$/.test(canonicalPath)){
    reply(res,403,'Storage operation unavailable');return;
   }
+  if(!application&&canonicalPath.startsWith('/storage/v1/')&&!sessionClaimHints(req.headers.authorization)){
+   reply(res,401,'Session unavailable');return;
+  }
   const consumed=new Set();
   async function budgets(body){
    if(bffRequest)return true;

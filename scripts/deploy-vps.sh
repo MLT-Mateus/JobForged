@@ -80,10 +80,14 @@ case "$command" in
       gateway_image="ghcr.io/mlt-mateus/jobforged-security-gateway:${revision}"
       docker pull "$gateway_image" || fail_deploy
       python3 "$root/scripts/security/configure-test-gateway.py" "$revision" || fail_deploy
+      python3 "$root/scripts/security/configure-test-auth.py" || fail_deploy
     fi
     "${compose[@]}" config --quiet || fail_deploy
     "${compose[@]}" up -d --wait --wait-timeout 120 || fail_deploy
     "${compose[@]}" exec -T app node --input-type=module < "$root/scripts/verify-auth-readiness.mjs" || fail_deploy
+    if [[ "$environment" == test && -f "$root/scripts/security/configure-test-maintenance.py" ]]; then
+      python3 "$root/scripts/security/configure-test-maintenance.py" || fail_deploy
+    fi
     printf 'Deploy concluído: ambiente=%s commit=%s\n' "$environment" "$revision"
     ;;
 esac

@@ -144,6 +144,7 @@ compose() {
   shift 2
   local -a compose_args=(--env-file "$env_path" -f "$compose_file" -f "$override_file")
   [[ -z "$template_path" ]] || compose_args+=(-f "$template_path")
+  [[ ! -f "$stack_dir/docker-compose.security.override.yml" ]] || compose_args+=(-f "$stack_dir/docker-compose.security.override.yml")
   (cd "$stack_dir" && docker compose "${compose_args[@]}" "$@")
 }
 compose "$candidate" "$template_candidate" config --quiet

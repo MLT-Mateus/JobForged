@@ -2,6 +2,15 @@
 
 Atualização: 2026-10-23, UTC. Não constitui entrega final nem autorização de Live.
 
+## Estado revalidado em 2026-10-24, 01:00 UTC
+
+- Etapa de compatibilidade publicada pelo PR [#113](https://github.com/MLT-Mateus/JobForged/pull/113), SHA Test `33c05dfb6c5d3bc315e44c73167062d38ddd3bd5`, healthcheck `ok`. Migrations 0001–0017 aplicadas e checksums conferidos pelo runner oficial. A migration 0017 é `0017_security_read_contracts_compat.sql`, imutável; a numeração anterior dos rascunhos foi deslocada.
+- Implementação principal continua no PR #112, draft. Último checkpoint publicado `eeabbd5`: cinco checks aprovados no run `40047220038`, incluindo Auth/Storage nativos. Não representa publicação da segurança completa.
+- Backup pré-migration 0017: `test-20261023T233206Z`, restaurado e conferido, cópia cifrada no computador confirmada. Snapshot anterior `test-20261023T204429Z` também foi restaurado para testar upgrade de estrutura existente.
+- Native CI usa DDL dos provedores fixados e somente metadados de versões das migrations, sem usuários, sessões, arquivos ou credenciais de Test/Live. Recria banco, Auth, REST, Storage, Envoy e duas instâncias de gateway em rede Docker interna sem portas ou SMTP externo.
+- Testes nativos adicionais passaram: todos os símbolos de senha aprovados; JWT de 900 s; expiração de sessão em 30 dias e inatividade de 24 h; recuperação seguida de alteração real de senha; proxy BFF com preservação de HTTPS e contagem única; negação de credencial privilegiada na entrada pública e de JWT forjado apesar de hints válidos; capacidades de manutenção sem acesso empresarial/público; quarentena com cópia conferida e proteção de assets registrados.
+- Configuração Auth, gateway e worker permanecem preparados em código, ainda não aplicados ao Test ativo. MFA real continua dependendo do cadastramento privado do responsável, antes de ativar a exigência. Live permanece sem alterações.
+
 ## Decisões recebidas
 
 - Destino externo à VPS: computador atual, criptografado, sem serviço pago.
@@ -34,24 +43,26 @@ Atualização: 2026-10-23, UTC. Não constitui entrega final nem autorização d
 
 ## Código preparado, ainda não publicado
 
-- 0017: contratos de identidade/sessão, wrappers de autorização, projeções explícitas, revogação, cadastro gradual de MFA e constraints.
-- 0018: autorização temporária de recuperação ligada à identidade/sessão e consumo único; projeções de atualização.
-- 0019: reservas de uploads empresariais com quota/concorrência/taxa e validação de tamanho real no registro.
-- 0020: políticas de Storage usando sessão do usuário, sem credencial técnica global; sem UPDATE/DELETE de objetos.
-- 0021: contrato de cadastro empresarial no trigger, plano fixo e horário de aceite registrado no servidor.
+- 0018: contratos de identidade/sessão, wrappers de autorização, projeções explícitas, revogação, cadastro gradual de MFA e constraints.
+- 0019: autorização temporária de recuperação ligada à identidade/sessão e consumo único; projeções de atualização.
+- 0020: reservas de uploads empresariais com quota/concorrência/taxa e validação de tamanho real no registro.
+- 0021: políticas de Storage usando sessão do usuário, sem credencial técnica global; sem UPDATE/DELETE ordinário de objetos.
+- 0022: contrato de cadastro empresarial no trigger, plano fixo e horário de aceite registrado no servidor.
+- 0024–0026: projeções restantes, guarda de sessão nas APIs Auth e intenção de cadastro validada, temporária e de uso único, com versão real dos termos. Metadados enviados pelo cliente não autorizam papéis ou planos.
+- 0027–0029: limites transacionais de convites/processamento administrativo, prazo de sessão também no acesso aos dados e quarentena conservadora dos uploads abandonados. Ainda em validação, não aplicadas ao ambiente ativo.
 - Aplicativo: consumidores dos novos contratos, recuperação e logout, tela administrativa de MFA, uploads com reserva e JWT do próprio usuário.
 - Runner: seleção explícita de operador privilegiado por marcador de migration; funções da aplicação permanecem pertencendo a `postgres`, sem superusuário.
-- CI: job de migrations/segurança SQL como dependência da publicação de Test. Ainda não executado no GitHub.
-- 0022 e serviço de gateway: contadores persistidos no PostgreSQL, credencial dedicada sem leitura empresarial e escopos HMAC sem e-mail em claro. Testes de política e de persistência após reinício passaram. Serviço ainda não instalado em Test.
+- CI: jobs de segurança SQL e de integração nativa como dependências da publicação de Test. Ambos passaram no GitHub no checkpoint acima.
+- 0023 e serviço de gateway: contadores persistidos no PostgreSQL, credencial dedicada sem leitura empresarial e escopos HMAC sem e-mail em claro. Testes de política e de persistência após reinício passaram. Serviço ainda não instalado em Test.
 - Referências oficiais consultadas: [requisitos e rotação do GoTrue](https://github.com/supabase/auth/blob/master/README.md?plain=1), [segurança de senhas](https://supabase.com/docs/guides/auth/password-security).
 
 ## Pendências obrigatórias
 
 1. Repetir replay final após encerrar as revisões e testar concorrência real de uploads. Cobertura nativa atual está descrita acima; não substitui validação do aplicativo no navegador.
-2. Rate limits distribuídos para caminhos públicos de Auth/API, configuração nativa de senha/sessões, quotas de processamento e tratamento seguro de órfãos.
+2. Publicar e conferir em Test os limites distribuídos, a configuração de Auth e o worker de quarentena já testados isoladamente; concluir testes de retenção/recibo externo e concorrência.
 3. Completar revisão dos retornos RPC e sessões concorrentes/revogação após troca de senha.
 4. Cadastrar fator do responsável legítimo e somente depois ativar MFA obrigatório; testar recuperação administrativa. A proteção permanece em preparação, sem bloquear o único administrador.
 5. Concluir revisão das redes; Studio/portas Test já protegidos conforme evidências acima. Não alterar regras compartilhadas/Live.
 6. Recuperação exige este perfil Windows/DPAPI. Perda do computador/perfil não está coberta por chave independente.
 7. Concluir compatibilidade, lint/build, testes existentes, PR, CI, integração e publicação de Test. Confirmar SHA, migrations e healthchecks após publicação.
-8. Não há publicação concluída nesta tarefa. Nenhuma migration nova aplicada ao Test ativo. Live não recebeu alterações.
+8. Apenas a publicação de compatibilidade está concluída. Não declarar a entrega das dez medidas antes da aplicação e validação das migrations 0018 em diante, serviços e fator administrativo real. Live não recebeu alterações.

@@ -29,9 +29,9 @@ def run(args, **kw):
 def inspect(name):
     return json.loads(run(['docker','inspect',name]))[0]
 
-def jwt(secret,role):
+def jwt(secret,role,claims=None):
     enc=lambda value:base64.urlsafe_b64encode(json.dumps(value,separators=(',',':')).encode()).decode().rstrip('=')
-    message=enc({'alg':'HS256','typ':'JWT'})+'.'+enc({'role':role,'iss':'supabase','iat':int(time.time()),'exp':int(time.time())+3600})
+    message=enc({'alg':'HS256','typ':'JWT'})+'.'+enc({'role':role,'iss':'supabase','iat':int(time.time()),'exp':int(time.time())+3600,**(claims or {})})
     return message+'.'+base64.urlsafe_b64encode(hmac.new(secret.encode(),message.encode(),hashlib.sha256).digest()).decode().rstrip('=')
 
 def totp_code(value):
@@ -154,6 +154,8 @@ def main():
         assert sql("select raw_user_meta_data ? 'company_signup_nonce' from auth.users where id='"+first+"';")=='f','Raw signup capability persisted'
         assert request(rest,'/company_members?select=*',token=token)[0] in (401,403),'Direct roster SELECT exposed'
         assert request(auth,'/signup',{'email':'weak-'+suffix,'password':'abc'})[0] in (400,422),'Weak password not rejected by Auth'
+        for index,symbol in enumerate(policy['symbols']):
+            assert request(auth,'/admin/users',{'email':'symbol-'+str(index)+'-'+suffix,'password':'Abcdef9'+symbol,'email_confirm':True},admin)[0] in (200,201),'Approved password symbol rejected by Auth'
         status,link=request(auth,'/admin/generate_link',{'type':'recovery','email':email},admin)
         assert status==200,'Recovery link generation failed'
         status,recovery=request(auth,'/verify',{'type':'recovery','token_hash':link['hashed_token']})
@@ -240,6 +242,36 @@ def main():
         assert binary_request(storage,large_path,png+b'\0'*5242880,own_token)[0] in (0,400,413),'Native file size limit bypassed'
         assert request(storage,'/status')[0]==200,'Storage unavailable after large request'
         assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name='"+own_context['company_id']+'/'+large_asset+".png';")=='0','Oversized object persisted'
+        status,other_context=request(rest,'/rpc/session_context_v1',{},other_session['access_token']);assert status==200
+        orphan=str(uuid.uuid4());orphan_name=other_context['company_id']+'/'+orphan+'.png';job=str(uuid.uuid4());copy=job+'/image.png'
+        assert request(rest,'/rpc/reserve_company_image',{'asset_id':orphan},other_session['access_token'])[0]==200
+        assert binary_request(storage,'/object/company-branding/'+orphan_name,png,other_session['access_token'])[0]==200
+        sql("update storage.objects set created_at=now()-interval '2 days' where bucket_id='company-branding' and name='"+orphan_name+"';update app_private.company_upload_reservations set expires_at=now()-interval '1 day' where asset_id='"+orphan+"';")
+        assert sql("select app_private.orphan_eligible('"+orphan_name+"');")=='t','Abandoned upload not eligible'
+        sql("update storage.objects set created_at=now()-interval '2 days' where bucket_id='company-branding' and name='"+own_context['company_id']+'/'+asset+".png';")
+        assert sql("select app_private.orphan_eligible('"+own_context['company_id']+'/'+asset+".png');")=='f','Registered asset eligible for collection'
+        sql("insert into app_private.orphan_quarantine(id,company_id,object_name) values('"+job+"','"+other_context['company_id']+"','"+orphan_name+"');")
+        maintenance=jwt(signing,'authenticated',{'sub':'00000000-0000-4000-8000-000000000084','aud':'authenticated','maintenance':'orphan-cleanup','job':job,'exp':int(time.time())+120})
+        assert request(rest,'/rpc/session_context_v1',{},maintenance)==(200,None),'Maintenance capability gained business identity'
+        assert binary_request(storage,'/object/company-branding/'+orphan_name,None,maintenance)==(200,png)
+        assert binary_request(storage,path,None,maintenance)[0] in (400,403,404),'Maintenance read registered asset'
+        assert binary_request(storage,'/object/security-quarantine/'+copy,png,maintenance)[0]==200,'Private quarantine insert failed'
+        assert binary_request(storage,'/object/security-quarantine/'+copy,None,maintenance)==(200,png),'Quarantine readback failed'
+        assert binary_request(storage,'/object/security-quarantine/'+copy,None,other_session['access_token'])[0] in (400,403,404),'Ordinary user read quarantine'
+        request(storage,'/object/company-branding',{'prefixes':[orphan_name]},maintenance,method='DELETE')
+        assert sql("select exists(select 1 from storage.objects where bucket_id='company-branding' and name='"+orphan_name+"');")=='t','Unverified source deleted'
+        sql("update app_private.orphan_quarantine set verified_at=now(),sha256='"+hashlib.sha256(png).hexdigest()+"',bytes="+str(len(png))+" where id='"+job+"';")
+        assert request(storage,'/object/company-branding',{'prefixes':[orphan_name]},maintenance,method='DELETE')[0]==200,'Verified source delete failed'
+        assert sql("select exists(select 1 from storage.objects where bucket_id='company-branding' and name='"+orphan_name+"');")=='f','Verified source retained'
+        sql("update app_private.orphan_quarantine set source_removed_at=now() where id='"+job+"';")
+        request(storage,'/object/security-quarantine',{'prefixes':[copy]},maintenance,method='DELETE')
+        assert binary_request(storage,'/object/security-quarantine/'+copy,None,maintenance)==(200,png),'Quarantine purged before retention and offsite approval'
+        sql("update app_private.orphan_quarantine set verified_at=now()-interval '8 days' where id='"+job+"';")
+        request(storage,'/object/security-quarantine',{'prefixes':[copy]},maintenance,method='DELETE')
+        assert binary_request(storage,'/object/security-quarantine/'+copy,None,maintenance)==(200,png),'Quarantine purged without offsite approval'
+        sql("update app_private.orphan_quarantine set purge_approved_at=now() where id='"+job+"';")
+        assert request(storage,'/object/security-quarantine',{'prefixes':[copy]},maintenance,method='DELETE')[0]==200
+        assert binary_request(storage,'/object/security-quarantine/'+copy,None,maintenance)[0] in (400,403,404),'Approved quarantine purge failed'
         second_owner_email='security-second-owner-'+suffix;second_owner=create(second_owner_email)
         sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+own_context['company_id']+"','"+second_owner+"','"+second_owner_email+"','Isolated second owner','owner','active');")
         sql("update public.company_members set status='inactive' where user_id='"+first+"';")
@@ -258,11 +290,18 @@ def main():
         config_file=work/(network+'-envoy.json');config_file.write_text(json.dumps(envoy_config));config_file.chmod(0o644);env_files.append(config_file)
         start(network+'-envoy','supabase-envoy',{},options=['--network-alias','supabase-envoy','-v',str(config_file)+':/etc/envoy/envoy.yaml:ro'],command=['-c','/etc/envoy/envoy.yaml'])
         gateway_password=secrets.token_hex(24);sql("alter role jbfd_security_gateway password '"+gateway_password+"';")
-        gateway_env={'APP_ENV':'test','DATABASE_URL':'postgres://jbfd_security_gateway:'+gateway_password+'@security-db:5432/postgres','RATE_SCOPE_SECRET':secrets.token_hex(32),'UPSTREAM_URL':'http://supabase-envoy:8000','TRUSTED_PROXY_HOST':'supabase-envoy'}
+        stub_code="""import http from 'node:http';http.createServer(async(req,res)=>{
+          if(req.url==='/api/echo'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({host:req.headers.host,protocol:req.headers['x-forwarded-proto']}));return;}
+          const chunks=[];for await(const c of req)chunks.push(c);
+          const upstream=await fetch('http://security-gateway:8080/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json'},body:Buffer.concat(chunks)});
+          res.writeHead(upstream.status,{'Content-Type':'application/json'});res.end(await upstream.text());
+        }).listen(3000,'0.0.0.0');"""
+        start(network+'-bff',None,{},options=['--network-alias','jbfd-test-app-1','--entrypoint','node'],command=['--input-type=module','-e',stub_code],image='jbfd-security-gateway:isolated-acceptance')
+        gateway_env={'APP_ENV':'test','DATABASE_URL':'postgres://jbfd_security_gateway:'+gateway_password+'@security-db:5432/postgres','RATE_SCOPE_SECRET':secrets.token_hex(32),'UPSTREAM_URL':'http://supabase-envoy:8000','TRUSTED_PROXY_HOST':'supabase-envoy','TRUSTED_BFF_HOST':'jbfd-test-app-1'}
         gateways=[]
         for number in (1,2):
             name=network+'-gateway-'+str(number)
-            address=start(name,None,gateway_env,image='jbfd-security-gateway:isolated-acceptance');base='http://'+address+':8080'
+            address=start(name,None,gateway_env,options=['--network-alias','security-gateway'] if number==1 else [],image='jbfd-security-gateway:isolated-acceptance');base='http://'+address+':8080'
             for _ in range(30):
                 try:
                     if request(base,'/healthz')[0]==200:break
@@ -271,6 +310,14 @@ def main():
             else:raise AssertionError('Isolated security gateway readiness failed')
             gateways.append((name,base))
         assert request(gateways[0][1],'/auth/v1/health')[0]==200,'Gateway Auth forwarding failed'
+        assert binary_request(gateways[0][1],'/storage/v1/object/company-branding/'+orphan_name,None,maintenance)[0]==401,'Private maintenance capability accepted publicly'
+        assert request(gateways[0][1],'/auth/v1/signup',{'email':'unicode-'+suffix,'password':'Ab1!ééé'})[0]==422,'Gateway accepted fewer than eight Unicode characters'
+        assert request(gateways[0][1],'/auth/v1/signup',{'email':'long-'+suffix,'password':'Ab1!'+'é'*35})[0]==422,'Gateway accepted more than 72 UTF-8 bytes'
+        before=int(sql("select coalesce(sum(hits),0) from app_private.request_limits where scope like 'login-account:%';"))
+        assert request(gateways[0][1],'/api/auth/sign-in',{'email':other,'password':password})[0]==200,'BFF parent-to-native forwarding failed'
+        after=int(sql("select coalesce(sum(hits),0) from app_private.request_limits where scope like 'login-account:%';"))
+        assert after==before+1,'BFF child counted the same action twice'
+        assert request(gateways[0][1],'/api/echo')[1]['protocol']=='https','BFF proxy lost HTTPS origin'
         assert request(gateways[0][1],'/rest/v1/rpc/company_read_v1',{},other_session['access_token'])[0]==200,'Gateway RPC forwarding failed'
         assert request(gateways[0][1],'/auth/v1/user',token=own_token)[0]==401,'Gateway accepted logged-out Auth session'
         assert request(gateways[0][1],'/auth/v1/%75ser',token=own_token)[0]==400,'Encoded path bypassed session gate'
@@ -293,6 +340,26 @@ def main():
             time.sleep(1)
         status,limited=request(gateways[0][1],'/auth/v1/recover',{'email':limited_email})
         assert status==429 and limited.get('message')=='Too many requests. Try again later.','Gateway restart lost rate state'
+        expiry_email='expiry-'+suffix;expiry_person=create(expiry_email,'Expiry fixture')
+        status,expiry=request(auth,'/token?grant_type=password',{'email':expiry_email,'password':password});assert status==200
+        claims=json.loads(base64.urlsafe_b64decode(expiry['access_token'].split('.')[1]+'=='));sid=claims['session_id']
+        assert claims['exp']-claims['iat']==900,'Native JWT lifetime differs from 15 minutes'
+        sql("update auth.sessions set created_at=now()-interval '31 days' where id='"+sid+"';")
+        assert request(rest,'/rpc/company_read_v1',{},expiry['access_token'])[0]==403,'Expired session retained data access'
+        assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':expiry['refresh_token']})[0] in (400,401),'Expired session refreshed'
+        status,idle=request(auth,'/token?grant_type=password',{'email':expiry_email,'password':password});assert status==200
+        claims=json.loads(base64.urlsafe_b64decode(idle['access_token'].split('.')[1]+'=='));sid=claims['session_id']
+        sql("update auth.sessions set created_at=now()-interval '2 days',refreshed_at=(now()-interval '25 hours') at time zone 'UTC' where id='"+sid+"';")
+        assert request(rest,'/rpc/company_read_v1',{},idle['access_token'])[0]==403,'Inactive session retained data access'
+        assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':idle['refresh_token']})[0] in (400,401),'Inactive session refreshed'
+        status,link=request(auth,'/admin/generate_link',{'type':'recovery','email':expiry_email},admin);assert status==200
+        status,password_session=request(auth,'/verify',{'type':'recovery','token_hash':link['hashed_token']});assert status==200
+        status,nonce=request(rest,'/rpc/begin_password_recovery',{'purpose':'recovery'},password_session['access_token']);assert status==200
+        assert request(rest,'/rpc/consume_password_recovery',{'nonce':nonce},password_session['access_token'])==(200,True)
+        changed='Changed9!'+secrets.token_hex(12)
+        assert request(auth,'/user',{'password':changed},password_session['access_token'],method='PUT')[0]==200,'Verified password recovery update failed'
+        assert request(auth,'/token?grant_type=password',{'email':expiry_email,'password':password})[0]==400,'Old password remained valid'
+        assert request(auth,'/token?grant_type=password',{'email':expiry_email,'password':changed})[0]==200,'New password failed'
         print(json.dumps({'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
@@ -302,6 +369,8 @@ def main():
             'gateway_native_forwarding':True,'gateway_shared_rate_state':True,'gateway_rate_state_survives_restart':True,
             'validated_signup_intent':True,'metadata_cannot_grant_platform_role':True,'raw_signup_capability_not_persisted':True,
             'gateway_denies_revoked_auth_session':True,'gateway_rejects_path_alias_bypass':True,'public_privileged_credentials_denied':True,'unsigned_session_hints_do_not_authorize':True,
+            'bff_transport_and_single_budget':True,'all_password_symbols':True,'jwt_15_minutes':True,'session_30_days':True,'session_inactivity_24_hours':True,'native_password_change':True,
+            'orphan_verified_quarantine':True,'registered_assets_never_collected':True,'quarantine_retention_gate':True,'maintenance_no_business_or_public_access':True,
             'network_internal':True,'published_ports':[],'outbound_email':False}))
     finally:
         for name in reversed(containers):
