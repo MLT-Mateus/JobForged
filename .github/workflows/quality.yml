@@ -45,6 +45,8 @@ jobs:
         run: bash scripts/security/test-database.sh
       - name: Testar política de limitação de requisições
         run: node --test services/security-gateway/test.mjs tests/security-contracts.test.mjs
+      - name: Testar bloqueios do gate de backup e migrations
+        run: python3 tests/security_gate_test.py
 
   mcp:
     name: Validar MCP operacional

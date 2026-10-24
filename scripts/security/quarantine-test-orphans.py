@@ -5,6 +5,7 @@ No registered asset is collected. No service-role credential is used. A short
 maintenance JWT can access exactly one queued orphan and its quarantine copy.
 """
 import base64
+import argparse
 import datetime
 import fcntl
 import hashlib
@@ -16,21 +17,41 @@ from pathlib import Path
 import subprocess
 import time
 import urllib.request
+import tempfile
+
+database='supabase-db'
 
 def run(args,**kwargs):
     return subprocess.run(args,check=True,capture_output=True,text=True,**kwargs).stdout.strip()
 
 def sql(query):
-    return run(['docker','exec','-i','supabase-db','psql','-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],input=query)
+    return run(['docker','exec','-i',database,'psql','-h','/var/run/postgresql' if database.startswith('jbfd-security-restore-ci-') else '/tmp' if database.startswith('jbfd-security-restore-') else '/var/run/postgresql','-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],input=query)
 
 def main():
-    if os.geteuid()!=0:raise SystemExit('VPS root required')
+    global database
+    parser=argparse.ArgumentParser();parser.add_argument('--isolated-database');parser.add_argument('--isolated-storage');args=parser.parse_args()
+    isolated=bool(args.isolated_database or args.isolated_storage)
+    temporary=None
+    storage_name='supabase-storage';work=Path('/opt/jbfd/security-work');backup_root=Path('/opt/jbfd/backups/security')
+    if isolated:
+        if not args.isolated_database or not args.isolated_storage or not args.isolated_database.startswith('jbfd-security-restore-'):raise SystemExit('Both isolated provider identities required')
+        for name in [args.isolated_database,args.isolated_storage]:
+            info=json.loads(run(['docker','inspect',name]))[0]
+            if info['Config']['Labels'].get('jbfd.security.disposable')!='true' or info['HostConfig']['PortBindings']:raise SystemExit('Disposable providers without public ports required')
+        database=args.isolated_database;storage_name=args.isolated_storage
+        temporary=tempfile.TemporaryDirectory(prefix='jbfd-orphan-ci-');work=Path(temporary.name);backup_root=work/'backups'
+    elif os.geteuid()!=0:raise SystemExit('VPS root required')
     os.umask(0o077)
-    lock=open('/opt/jbfd/security-work/test-backup.lock','w')
+    lock=open(work/'test-backup.lock','w')
     fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    provider=json.loads(run(['docker','inspect','supabase-storage']))[0]
-    if provider['Name']!='/supabase-storage':raise RuntimeError('Unexpected Storage identity')
-    address=provider['NetworkSettings']['Networks']['supabase_default']['IPAddress']
+    provider=json.loads(run(['docker','inspect',storage_name]))[0]
+    if provider['Name']!='/'+storage_name:raise RuntimeError('Unexpected Storage identity')
+    networks=provider['NetworkSettings']['Networks']
+    if isolated:
+        network=next(iter(networks))
+        if not json.loads(run(['docker','network','inspect',network]))[0]['Internal']:raise RuntimeError('Isolated internal network required')
+    else:network='supabase_default'
+    address=networks[network]['IPAddress']
     if not ipaddress.ip_address(address).is_private:raise RuntimeError('Private Storage required')
     signing=dict(v.split('=',1) for v in provider['Config']['Env'])['AUTH_JWT_SECRET']
     def token(job):
@@ -72,7 +93,7 @@ order by created_at limit 20 on conflict(object_name) do nothing;""")
     # offsite copy containing the exact quarantine object. Missing receipt means
     # keep the file. Never substitute local checksums for offsite confirmation.
     manifests=[];now=datetime.datetime.now(datetime.timezone.utc)
-    for receipt in sorted(Path('/opt/jbfd/backups/security').glob('test-*/offsite-receipt.json'),reverse=True):
+    for receipt in sorted(backup_root.glob('test-*/offsite-receipt.json'),reverse=True):
         entry=json.loads(receipt.read_text());verified=datetime.datetime.fromisoformat(entry['verified_at'])
         if now-verified>datetime.timedelta(days=2):continue
         recovery=receipt.parent/'recovery.json'
@@ -90,6 +111,7 @@ order by created_at limit 20 on conflict(object_name) do nothing;""")
         sql("update app_private.orphan_quarantine set purged_at=now() where id='"+job+"';")
         purged+=1
     print(json.dumps({'environment':'test','quarantined':removed,'purged_after_offsite_receipt':purged,'registered_assets_deleted':0}))
+    if temporary:temporary.cleanup()
 
 if __name__=='__main__':
     try:main()

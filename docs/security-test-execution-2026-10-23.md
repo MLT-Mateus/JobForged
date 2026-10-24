@@ -17,6 +17,16 @@ Atualização: 2026-10-23, UTC. Não constitui entrega final nem autorização d
 - Quota empresarial: 1 GB decimal (1.000.000.000 bytes), 200 imagens; limite individual existente preservado (5 MiB).
 - Retenção do plano: 7 pontos diários, 4 semanais, 6 mensais.
 
+## Última validação antes da integração
+
+- Backup `test-20261024T010838Z`: restauração e cópia cifrada confirmadas; recibo externo registrado após conferir a decifragem autenticada no computador.
+- Upgrade 0018–0030 passou sobre nova restauração desse backup (`jbfd-security-restore-20261024t011053z`), com SQL de segurança/cadastro e preservação das contagens originais. Test ativo ainda em 0017 neste registro.
+- Worker real de quarentena passou com arquivo fictício no Storage nativo isolado. Recusa exclusão antes de readback, preserva assets registrados e nega purge sem retenção e aprovação de recibo externo.
+- Convites por RPC direto limitados a dez por hora/empresa; teste nativo passou sem envio de e-mail. Troca de senha revogou as outras duas sessões reais da fixture.
+- Rotação nativa: token antigo além da tolerância foi rejeitado. **Nesta versão do provedor, esse replay não revogou a família corrente**; o teste registra explicitamente esse resultado. Revogação empresarial imediata usa o ledger e a existência/validade da sessão para logout, bloqueios e expiração; não confundir essas garantias com revogação automática de toda família por replay.
+- O gate proposto de deploy aplica migrations somente em Test, depois da disponibilidade das imagens aprovadas e com backup restaurado, íntegro e recibo de cópia cifrada com até duas horas. Ausência, corrupção, idade excessiva e erro de checksum bloqueiam a aplicação. Seis testes de controle passaram; não substituem o upgrade real descrito acima. Live continua exigindo migrations previamente aplicadas manualmente e aprovação explícita.
+- Isolamento de rede Test preparado em script versionado: ingresso próprio, conexão adicional do Traefik sem reinício, remoção dos serviços Test da rede compartilhada, comparação das identidades/redes/portas de Live. Ainda precisa de execução e conferência no deploy.
+
 ## Evidências executadas
 
 - Checkout oficial `MLT-Mateus/JobForged`, branch `feat/security-data-foundation`, base develop `0b7d26b757650ab2df7cc23e52bc3d19297df2d8`.

@@ -22,6 +22,7 @@ import uuid
 import zlib
 import tempfile
 import traceback
+import sys
 
 def run(args, **kw):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kw).stdout.strip()
@@ -272,6 +273,15 @@ def main():
         sql("update app_private.orphan_quarantine set purge_approved_at=now() where id='"+job+"';")
         assert request(storage,'/object/security-quarantine',{'prefixes':[copy]},maintenance,method='DELETE')[0]==200
         assert binary_request(storage,'/object/security-quarantine/'+copy,None,maintenance)[0] in (400,403,404),'Approved quarantine purge failed'
+        worker_asset=str(uuid.uuid4());worker_name=other_context['company_id']+'/'+worker_asset+'.png'
+        assert request(rest,'/rpc/reserve_company_image',{'asset_id':worker_asset},other_session['access_token'])[0]==200
+        assert binary_request(storage,'/object/company-branding/'+worker_name,png,other_session['access_token'])[0]==200
+        sql("update storage.objects set created_at=now()-interval '2 days' where bucket_id='company-branding' and name='"+worker_name+"';update app_private.company_upload_reservations set expires_at=now()-interval '1 day' where asset_id='"+worker_asset+"';")
+        result=json.loads(run([sys.executable,str(Path(__file__).with_name('quarantine-test-orphans.py')),'--isolated-database',args.restore,'--isolated-storage',storage_name]))
+        assert result['quarantined']==1 and result['purged_after_offsite_receipt']==0,'Real orphan worker failed or purged without receipt'
+        for number in range(10):
+            assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-'+str(number)+'-'+suffix,'invite_role':'member'},other_session['access_token'])[0]==200,'Invitation budget rejected valid fixture'
+        assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-over-'+suffix,'invite_role':'member'},other_session['access_token'])[0]==429,'Direct invitation RPC bypassed company budget'
         second_owner_email='security-second-owner-'+suffix;second_owner=create(second_owner_email)
         sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+own_context['company_id']+"','"+second_owner+"','"+second_owner_email+"','Isolated second owner','owner','active');")
         sql("update public.company_members set status='inactive' where user_id='"+first+"';")
@@ -366,6 +376,8 @@ def main():
         sql("update auth.sessions set created_at=now()-interval '2 days',refreshed_at=(now()-interval '25 hours') at time zone 'UTC' where id='"+sid+"';")
         assert request(rest,'/rpc/company_read_v1',{},idle['access_token'])[0]==403,'Inactive session retained data access'
         assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':idle['refresh_token']})[0] in (400,401),'Inactive session refreshed'
+        status,concurrent_a=request(auth,'/token?grant_type=password',{'email':expiry_email,'password':password});assert status==200
+        status,concurrent_b=request(auth,'/token?grant_type=password',{'email':expiry_email,'password':password});assert status==200
         status,link=request(auth,'/admin/generate_link',{'type':'recovery','email':expiry_email},admin);assert status==200
         status,password_session=request(auth,'/verify',{'type':'recovery','token_hash':link['hashed_token']});assert status==200
         status,nonce=request(rest,'/rpc/begin_password_recovery',{'purpose':'recovery'},password_session['access_token']);assert status==200
@@ -374,6 +386,18 @@ def main():
         assert request(auth,'/user',{'password':changed},password_session['access_token'],method='PUT')[0]==200,'Verified password recovery update failed'
         assert request(auth,'/token?grant_type=password',{'email':expiry_email,'password':password})[0]==400,'Old password remained valid'
         assert request(auth,'/token?grant_type=password',{'email':expiry_email,'password':changed})[0]==200,'New password failed'
+        for concurrent in [concurrent_a,concurrent_b]:
+            assert request(rest,'/rpc/company_read_v1',{},concurrent['access_token'])[0]==403,'Password change retained another session'
+        rotation_email='rotation-'+suffix;create(rotation_email)
+        status,rotation=request(auth,'/token?grant_type=password',{'email':rotation_email,'password':password});assert status==200
+        status,rotated=request(auth,'/token?grant_type=refresh_token',{'refresh_token':rotation['refresh_token']});assert status==200
+        status,rotated_again=request(auth,'/token?grant_type=refresh_token',{'refresh_token':rotated['refresh_token']});assert status==200
+        assert rotation['refresh_token']!=rotated['refresh_token']!=rotated_again['refresh_token'],'Refresh tokens did not rotate'
+        time.sleep(11)
+        assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':rotation['refresh_token']})[0]==400,'Replayed refresh ancestor remained valid beyond grace'
+        # This provider rejects the stale ancestor but retains the current
+        # refresh token. Do not report family-wide revocation that did not occur.
+        assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':rotated_again['refresh_token']})[0]==200,'Current refresh token unexpectedly rejected'
         print(json.dumps({'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
@@ -386,6 +410,8 @@ def main():
             'bff_transport_and_single_budget':True,'all_password_symbols':True,'jwt_15_minutes':True,'session_30_days':True,'session_inactivity_24_hours':True,'native_password_change':True,
             'orphan_verified_quarantine':True,'registered_assets_never_collected':True,'quarantine_retention_gate':True,'maintenance_no_business_or_public_access':True,
             'root_approved_session_bound_factor_recovery':True,
+            'real_orphan_worker':True,
+            'direct_invitation_budget':True,'password_change_revokes_other_sessions':True,'refresh_rotation_old_token_rejected':True,'native_replay_revokes_current_family':False,
             'network_internal':True,'published_ports':[],'outbound_email':False}))
     finally:
         for name in reversed(containers):
