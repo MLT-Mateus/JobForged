@@ -11,7 +11,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{id:strin
  if(!row?.ok)return new Response(null,{status:404,headers});
  const asset=await row.json() as {path:string;sha256:string;size:number}|null;
  if(!asset)return new Response(null,{status:404,headers});
- const stored=await brandingStorage(asset.path);if(!stored?.ok)return new Response(null,{status:503,headers});
+ const stored=await brandingStorage(asset.path,session.accessToken);if(!stored?.ok)return new Response(null,{status:503,headers});
  const bytes=Buffer.from(await stored.arrayBuffer());
  if(bytes.byteLength!==asset.size||createHash('sha256').update(bytes).digest('hex')!==asset.sha256)return new Response(null,{status:503,headers});
  headers.set('Content-Type','image/png');return new Response(bytes,{headers});

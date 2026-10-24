@@ -50,7 +50,11 @@ case "$command" in
     [[ "$revision" =~ ^[0-9a-f]{40}$ ]] || { echo "Informe o SHA completo do commit" >&2; exit 64; }
     image="ghcr.io/mlt-mateus/jobforged:${revision}"
     # A matching image alone does not prove database or Auth readiness.
-    bash "$root/scripts/supabase-migrate.sh" "$environment" --check
+    # Live remains a manual migration prerequisite. Test's controlled gate runs
+    # after the approved images are present, before any dependent configuration.
+    if [[ "$environment" != test || ! -f "$root/scripts/security/apply-test-migrations.py" ]]; then
+      bash "$root/scripts/supabase-migrate.sh" "$environment" --check
+    fi
     current_image="$(awk -F= '$1 == "JBFD_IMAGE" { sub(/^[^=]*=/, ""); print; count++ } END { if (count != 1) exit 1 }' "$JBFD_ENV_FILE")" || {
       echo "O .env precisa ter exatamente uma linha JBFD_IMAGE" >&2; exit 65;
     }
@@ -76,9 +80,20 @@ case "$command" in
       fail_deploy
     fi
     [[ "$image_revision" == "$revision" ]] || fail_deploy
+    if [[ "$environment" == test && -f "$root/deploy/compose.security-test.yml" ]]; then
+      gateway_image="ghcr.io/mlt-mateus/jobforged-security-gateway:${revision}"
+      docker pull "$gateway_image" || fail_deploy
+      python3 "$root/scripts/security/apply-test-migrations.py" || fail_deploy
+      python3 "$root/scripts/security/isolate-test-ingress.py" || fail_deploy
+      python3 "$root/scripts/security/configure-test-gateway.py" "$revision" || fail_deploy
+      python3 "$root/scripts/security/configure-test-auth.py" || fail_deploy
+    fi
     "${compose[@]}" config --quiet || fail_deploy
     "${compose[@]}" up -d --wait --wait-timeout 120 || fail_deploy
     "${compose[@]}" exec -T app node --input-type=module < "$root/scripts/verify-auth-readiness.mjs" || fail_deploy
+    if [[ "$environment" == test && -f "$root/scripts/security/configure-test-maintenance.py" ]]; then
+      python3 "$root/scripts/security/configure-test-maintenance.py" || fail_deploy
+    fi
     printf 'Deploy concluído: ambiente=%s commit=%s\n' "$environment" "$revision"
     ;;
 esac

@@ -8,6 +8,8 @@ export async function POST(request:NextRequest){
  if(!requireSameOrigin(request))return Response.json({message:'Origem inválida.'},{status:403});
  const headers=new Headers({'Cache-Control':'no-store'}),session=await readSession(request,headers);
  if(!session?.platformAdmin)return Response.json({message:'Acesso negado.'},{status:403,headers});
+ const permitted=await requestDatabase('rpc/begin_platform_image_upload',session.accessToken,{});
+ if(!permitted?.ok)return Response.json({message:permitted?.status===429?'Limite temporário atingido. Tente novamente mais tarde.':'Confirme sua autenticação na seção Segurança antes de enviar a imagem.'},{status:permitted?.status===429?429:403,headers});
  try{
   const reader=request.body?.getReader(),chunks:Uint8Array[]=[];let size=0;
   if(!reader)throw new Error();while(true){const chunk=await reader.read();if(chunk.done)break;size+=chunk.value.byteLength;if(size>10551296){await reader.cancel();return Response.json({message:'Envie uma imagem de até 10 MB.'},{status:413,headers})}chunks.push(chunk.value)}
@@ -17,7 +19,7 @@ export async function POST(request:NextRequest){
   // Input up to 10 MiB / 32 MP; processed PNG stays under the private bucket's 5 MiB limit.
   const output=await normalizeBrandingImage(input,file.type,{bytes:10485760,pixels:33554432});
   const id=randomUUID(),path=`platform/${id}.png`;
-  const uploaded=await brandingStorage(path,output);
+  const uploaded=await brandingStorage(path,session.accessToken,output);
   if(!uploaded?.ok)return Response.json({message:'O armazenamento de imagens está indisponível. Tente novamente.'},{status:503,headers});
   const name=file.name.replace(/[^\p{L}\p{N} ._-]/gu,'').slice(0,240)||'imagem.png';
   const registered=await requestDatabase('rpc/register_platform_banner_asset',session.accessToken,{asset_id:id,file_size:output.byteLength,file_sha256:createHash('sha256').update(output).digest('hex')});

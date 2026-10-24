@@ -1,0 +1,42 @@
+services:
+  gateway:
+    image: ${JBFD_SECURITY_GATEWAY_IMAGE:?Use a imagem do commit aprovado}
+    container_name: jbfd-test-security-gateway
+    env_file:
+      - ${JBFD_SECURITY_GATEWAY_ENV_FILE:?Use o arquivo privado de Test}
+    environment:
+      APP_ENV: test
+      UPSTREAM_URL: http://supabase-envoy:8000
+      TRUSTED_PROXY_HOST: jobforged_traefik
+      TRUSTED_BFF_HOST: jbfd-test-app-1
+    networks:
+      - supabase-test
+      - traefik
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    cpus: 0.5
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=jbfd-test-ingress
+      - traefik.http.routers.jbfd-test-security-api.rule=Host(`test.jobforged.com`) && (PathPrefix(`/api/`) || PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
+      - traefik.http.routers.jbfd-test-security-api.priority=1000
+      - traefik.http.routers.jbfd-test-security-api.entrypoints=websecure
+      - traefik.http.routers.jbfd-test-security-api.tls=true
+      - traefik.http.routers.jbfd-test-security-api.tls.certresolver=letsencrypt
+      - traefik.http.services.jbfd-test-security-api.loadbalancer.server.port=8080
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '3'}
+networks:
+  supabase-test:
+    name: supabase_default
+    external: true
+  traefik:
+    name: jbfd-test-ingress
+    external: true

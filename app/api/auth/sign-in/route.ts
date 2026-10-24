@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { isEmail } from "@/app/components/auth/auth-validation";
-import { requireSameOrigin, requestAuth, setSessionCookies, type SupabaseSessionPayload } from "../_server";
+import { clearPasswordRecoveryCookie, requireSameOrigin, requestAuth, setSessionCookies, type SupabaseSessionPayload } from "../_server";
 
 export const runtime = "nodejs";
 
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const headers = new Headers({ "Cache-Control": "no-store" });
+    clearPasswordRecoveryCookie(headers);
     setSessionCookies(headers, result.payload as SupabaseSessionPayload);
     return Response.json({ ok: true }, { headers });
   } catch {

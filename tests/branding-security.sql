@@ -1,5 +1,5 @@
 -- Test only. Prepend a transaction, the migration if not applied, and branding-fixture.mjs output.
-select set_config('jbfd.test_admin',(select user_id::text from public.platform_admins limit 1),true);
+-- Fictional administrator is created by security-session-fixtures.sql.
 insert into auth.users(id,email,email_confirmed_at) values
  ('38000000-0000-0000-0000-000000000001','branding-owner@example.invalid',now()),
  ('38000000-0000-0000-0000-000000000002','branding-member@example.invalid',now()),
@@ -13,7 +13,7 @@ insert into storage.objects(bucket_id,name) values('company-branding','38000000-
 insert into public.company_branding_assets(id,company_id,path,name,size,sha256,created_by) values
  ('38000000-0000-0000-0000-000000000041','38000000-0000-0000-0000-000000000011','38000000-0000-0000-0000-000000000011/38000000-0000-0000-0000-000000000041.png','fixture.png',1,repeat('a',64),'38000000-0000-0000-0000-000000000001');
 set local role authenticated;
-select set_config('request.jwt.claim.sub','38000000-0000-0000-0000-000000000001',true);
+select pg_temp.assume_user('38000000-0000-0000-0000-000000000001');
 do $$declare config jsonb:=current_setting('jbfd.fixture_config')::jsonb;v bigint;result jsonb;pair text;
 begin
  if public.read_company_branding()->>'companyId'<>'38000000-0000-0000-0000-000000000011' then raise exception 'wrong company';end if;
@@ -41,39 +41,39 @@ begin
  begin update public.company_branding_history set snapshot='{}';raise exception 'history mutable';exception when insufficient_privilege then null;end;
  begin insert into storage.objects(bucket_id,name) values('company-branding','38000000-0000-0000-0000-000000000011/38000000-0000-0000-0000-000000000031.png');raise exception 'client bypassed image processor';exception when insufficient_privilege then null;end;
 end$$;
-select set_config('request.jwt.claim.sub','38000000-0000-0000-0000-000000000002',true);
+select pg_temp.assume_user('38000000-0000-0000-0000-000000000002');
 do $$declare result jsonb;begin
  result:=public.read_company_branding();if result->>'editable'<>'false' or result->'draft'<>'null'::jsonb or result->'history'<>'[]'::jsonb then raise exception 'member draft leak';end if;
  if public.read_company_brand_asset('38000000-0000-0000-0000-000000000041') is not null then raise exception 'member read draft-only asset';end if;
  begin perform public.write_company_branding('save',(result->>'version')::bigint,current_setting('jbfd.fixture_config')::jsonb);raise exception 'member write';exception when insufficient_privilege then null;end;
 end$$;
-select set_config('request.jwt.claim.sub','38000000-0000-0000-0000-000000000001',true);
+select pg_temp.assume_user('38000000-0000-0000-0000-000000000001');
 do $$declare config jsonb:=current_setting('jbfd.fixture_config')::jsonb;v bigint;begin
  if public.read_company_brand_asset('38000000-0000-0000-0000-000000000041') is null then raise exception 'owner cannot preview image';end if;
  config:=jsonb_set(config,'{assets,logoMain}','{"id":"38000000-0000-0000-0000-000000000041","kind":"logoMain","name":"fixture.png","url":"/api/company/branding/assets/38000000-0000-0000-0000-000000000041","format":"PNG","size":1,"updatedAt":""}');
  v:=(public.read_company_branding()->>'version')::bigint;perform public.write_company_branding('publish',v,config);
 end$$;
-select set_config('request.jwt.claim.sub','38000000-0000-0000-0000-000000000002',true);
+select pg_temp.assume_user('38000000-0000-0000-0000-000000000002');
 do $$begin if public.read_company_brand_asset('38000000-0000-0000-0000-000000000041') is null then raise exception 'member cannot read published image';end if;end$$;
-select set_config('request.jwt.claim.sub','38000000-0000-0000-0000-000000000003',true);
+select pg_temp.assume_user('38000000-0000-0000-0000-000000000003');
 do $$begin
  if public.read_company_branding()->'published'<>'{}'::jsonb then raise exception 'cross company read';end if;
  if public.read_company_brand_asset('38000000-0000-0000-0000-000000000041') is not null then raise exception 'cross company asset read';end if;
  begin perform public.write_company_branding('restore',0,null,current_setting('jbfd.history_id')::uuid);raise exception 'cross company restore';exception when invalid_parameter_value then null;end;
 end$$;
-select set_config('request.jwt.claim.sub',current_setting('jbfd.test_admin'),true);
+select pg_temp.assume_user(current_setting('jbfd.test_admin')::uuid);
 do $$begin begin perform public.read_company_branding();raise exception 'backoffice got company access';exception when insufficient_privilege then null;end;end$$;
 reset role;
 update public.companies set operational_status='suspended' where id='38000000-0000-0000-0000-000000000011';
 set local role authenticated;
-select set_config('request.jwt.claim.sub','38000000-0000-0000-0000-000000000001',true);
+select pg_temp.assume_user('38000000-0000-0000-0000-000000000001');
 do $$begin begin perform public.read_company_branding();raise exception 'suspended company read';exception when insufficient_privilege then null;end;end$$;
--- A dedicated non-account subject can access this bucket but no application data.
-select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000083',true);
+-- Retired global credential must no longer access files or application data.
+-- Retired technical credential has no real Auth session.
 select set_config('request.jwt.claims','{"sub":"00000000-0000-4000-8000-000000000083","role":"authenticated","jbfd_branding_storage":"v1"}',true);
-insert into storage.objects(bucket_id,name) values('company-branding','38000000-0000-0000-0000-000000000011/38000000-0000-0000-0000-000000000031.png');
+do $$begin begin insert into storage.objects(bucket_id,name) values('company-branding','38000000-0000-0000-0000-000000000011/38000000-0000-0000-0000-000000000031.png');raise exception 'retired storage credential wrote object';exception when insufficient_privilege then null;end;end$$;
 do $$begin
- if (select count(*) from public.companies)<>0 then raise exception 'storage credential accessed companies';end if;
+ begin perform * from public.companies;raise exception 'storage credential accessed companies';exception when insufficient_privilege then null;end;
  begin perform public.read_company_branding();raise exception 'storage credential reached app';exception when insufficient_privilege then null;end;
 end$$;
 reset role;

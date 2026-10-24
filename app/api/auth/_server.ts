@@ -42,12 +42,12 @@ export function setSessionCookies(headers: Headers, session: SupabaseSessionPayl
   if (session.refresh_token) headers.append("Set-Cookie", serializeCookie(REFRESH_COOKIE, session.refresh_token, COOKIE_MAX_AGE));
 }
 
-export function setPasswordRecoveryCookie(headers: Headers) {
-  headers.append("Set-Cookie", serializeCookie(PASSWORD_RECOVERY_COOKIE, "1", 15 * 60));
+export function setPasswordRecoveryCookie(headers: Headers, nonce: string) {
+  headers.append("Set-Cookie", serializeCookie(PASSWORD_RECOVERY_COOKIE, nonce, 15 * 60));
 }
 
 export function hasPasswordRecoveryCookie(request: NextRequest) {
-  return getCookie(request, PASSWORD_RECOVERY_COOKIE) === "1";
+  return /^[0-9a-f]{64}$/.test(getCookie(request, PASSWORD_RECOVERY_COOKIE) || "");
 }
 
 export function clearPasswordRecoveryCookie(headers: Headers) {
@@ -62,7 +62,7 @@ export function clearSessionCookies(headers: Headers) {
   }
 }
 
-export async function requestAuth(path: string, body?: unknown, accessToken?: string, method?: "GET" | "POST" | "PUT") {
+export async function requestAuth(path: string, body?: unknown, accessToken?: string, method?: "GET" | "POST" | "PUT" | "DELETE") {
   const config = getSupabaseConfig();
   if (!config) return { configured: false as const, response: null, payload: null };
   const response = await fetch(`${config.url}/auth/v1/${path}`, {
@@ -107,9 +107,9 @@ export function requireSameOrigin(request: NextRequest) {
 export async function readSession(request: NextRequest, headers: Headers) {
   const accessToken = getCookie(request, ACCESS_COOKIE);
   const refreshToken = getCookie(request, REFRESH_COOKIE);
-  if (!accessToken) return null;
+  if (!accessToken && !refreshToken) return null;
 
-  let currentAccessToken = accessToken;
+  let currentAccessToken = accessToken || "";
   let userResponse = await requestAuth("user", undefined, currentAccessToken);
   if (!userResponse.configured) return null;
 
@@ -143,11 +143,11 @@ export async function readSession(request: NextRequest, headers: Headers) {
   const admin = await requestDatabase("rpc/is_platform_admin", currentAccessToken, {});
   if (admin?.ok && await admin.json() === true) return { id: user.id, email: user.email ?? "", platformAdmin: true, company: null, role: "platform_admin", accessToken: currentAccessToken };
   try {
-    const membership = await requestDatabase('rpc/session_context_v1', currentAccessToken, {});
+    const membership = await requestDatabase("rpc/session_context_v1", currentAccessToken, {});
     if (!membership?.ok) throw new Error("Company membership could not be verified");
-    const member = await membership.json() as { id: string; company_id: string; role: string; full_name: string; companies?: { id: string; name: string } } | null;
-    if (!member) return null;
-    return { id: user.id, email: user.email ?? "", platformAdmin: false, company: member.companies ?? { id: member.company_id, name: "Empresa" }, role: member.role, fullName: member.full_name, accessToken: currentAccessToken };
+    const row = await membership.json() as { company_id: string; role: string; full_name: string; companies: { id: string; name: string } } | null;
+    if (!row) return null;
+    return { id: user.id, email: user.email ?? "", platformAdmin: false, company: row.companies, role: row.role, fullName: row.full_name, accessToken: currentAccessToken };
   } catch {
     return null;
   }
