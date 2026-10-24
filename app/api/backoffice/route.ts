@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { readSession, requestDatabase, requireSameOrigin } from "@/app/api/auth/_server";
 import { sendCompanyInvitationEmail } from "@/app/lib/brevo-email";
 import { isValidCnpj } from "@/app/components/auth/auth-validation";
+import {administrativeFailure} from '@/app/lib/administrative-feedback';
 
 export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     (company && !/^[0-9a-f-]{36}$/i.test(company)) || !Number.isInteger(page) || page < 1 || page > 10000 || (params.get("search") || "").length > 160)
     return Response.json({ message: "Consulta inválida." }, { status: 400, headers });
   const response = await requestDatabase("rpc/platform_read", session.accessToken, { section, search_text: params.get("search") || "", status_filter: params.get("status") || "", page_number: page, company_filter: company });
-  if (!response?.ok) return Response.json({ message: "Não foi possível carregar os dados autorizados." }, { status: response?.status === 403 ? 403 : 503, headers });
+  if (!response?.ok) return administrativeFailure(response,"Não foi possível carregar os dados autorizados.",headers,503);
   return Response.json({ data: await response.json() }, { headers });
 }
 
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     catch { return Response.json({ message: "Informe um endereço HTTPS de suporte válido." }, { status: 400, headers }); }
   }
   const response = await requestDatabase("rpc/platform_manage", session.accessToken, { operation: body.operation, target_company: body.company || null, target_record: body.target || null, values_json: body.values, change_reason: body.reason });
-  if (!response?.ok) return Response.json({ message: "Operação recusada. Confira os dados, o responsável ativo e possíveis vínculos existentes." }, { status: 400, headers });
+  if (!response?.ok) return administrativeFailure(response,"Operação recusada. Confira os dados, o responsável ativo e possíveis vínculos existentes.",headers);
   const result = await response.json() as { id?: string; token?: string; email?: string; company_name?: string };
   if (result.token && result.email) {
     const delivered = await sendCompanyInvitationEmail(result.email, result.company_name || "Empresa", result.token);
