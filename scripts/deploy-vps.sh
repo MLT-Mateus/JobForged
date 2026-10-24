@@ -79,6 +79,7 @@ case "$command" in
     if [[ "$environment" == test && -f "$root/deploy/compose.security-test.yml" ]]; then
       gateway_image="ghcr.io/mlt-mateus/jobforged-security-gateway:${revision}"
       docker pull "$gateway_image" || fail_deploy
+      python3 "$root/scripts/security/isolate-test-ingress.py" || fail_deploy
       python3 "$root/scripts/security/configure-test-gateway.py" "$revision" || fail_deploy
       python3 "$root/scripts/security/configure-test-auth.py" || fail_deploy
     fi

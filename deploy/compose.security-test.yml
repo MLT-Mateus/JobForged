@@ -23,7 +23,7 @@ services:
     cpus: 0.5
     labels:
       - traefik.enable=true
-      - traefik.docker.network=jobforged_jobforged_network
+      - traefik.docker.network=jbfd-test-ingress
       - traefik.http.routers.jbfd-test-security-api.rule=Host(`test.jobforged.com`) && (PathPrefix(`/api/`) || PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
       - traefik.http.routers.jbfd-test-security-api.priority=1000
       - traefik.http.routers.jbfd-test-security-api.entrypoints=websecure
@@ -38,5 +38,5 @@ networks:
     name: supabase_default
     external: true
   traefik:
-    name: jobforged_jobforged_network
+    name: jbfd-test-ingress
     external: true

@@ -87,7 +87,7 @@ const server=http.createServer(async(req,res)=>{
    if(!hint){reply(res,401,'Session unavailable');return;}
    const sensitive=(canonicalPath==='/auth/v1/user'&&!['GET','HEAD'].includes(req.method))||
     (canonicalPath==='/auth/v1/factors'&&req.method==='POST')||req.method==='DELETE'||req.method==='PUT';
-   const gate=await pool.query('select app_private.gateway_session_active($1,$2,$3,$4) allowed',[hint.person,hint.session,hint.aal,sensitive]);
+   const gate=await pool.query('select app_private.gateway_session_active($1,$2,$3,$4,$5) allowed',[hint.person,hint.session,hint.aal,sensitive,req.method+' '+canonicalPath]);
    if(gate.rows[0]?.allowed!==true){reply(res,401,'Session unavailable');return;}
   }
   const headers=new Headers();

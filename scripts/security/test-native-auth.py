@@ -318,6 +318,20 @@ def main():
         after=int(sql("select coalesce(sum(hits),0) from app_private.request_limits where scope like 'login-account:%';"))
         assert after==before+1,'BFF child counted the same action twice'
         assert request(gateways[0][1],'/api/echo')[1]['protocol']=='https','BFF proxy lost HTTPS origin'
+        sql('update app_private.security_settings set admin_mfa_enforced=true where singleton;')
+        assert request(auth,'/admin/users/'+platform+'/factors/'+new_factor['id'],token=admin,method='DELETE')[0] in (200,204)
+        status,admin_reentry=request(auth,'/token?grant_type=password',{'email':platform_email,'password':password});assert status==200
+        assert request(gateways[0][1],'/auth/v1/factors',{'factor_type':'totp','friendly_name':'Denied without root approval'},admin_reentry['access_token'])[0]==401,'Unapproved factor recovery accepted'
+        reentry_claims=json.loads(base64.urlsafe_b64decode(admin_reentry['access_token'].split('.')[1]+'=='))
+        sql("insert into app_private.administrative_factor_recovery(user_id,session_id,expires_at,reason) values('"+platform+"','"+reentry_claims['session_id']+"',now()+interval '10 minutes','Isolated acceptance recovery approval');")
+        status,public_factor=request(gateways[0][1],'/auth/v1/factors',{'factor_type':'totp','friendly_name':'Root approved recovery'},admin_reentry['access_token']);assert status==200,'Root-approved session cannot enroll through gateway'
+        assert request(gateways[0][1],'/auth/v1/factors',{'factor_type':'totp','friendly_name':'Reused approval'},admin_reentry['access_token'])[0]==401,'Recovery approval reused'
+        status,public_challenge=request(gateways[0][1],'/auth/v1/factors/'+public_factor['id']+'/challenge',{},admin_reentry['access_token']);assert status==200
+        status,public_verified=request(gateways[0][1],'/auth/v1/factors/'+public_factor['id']+'/verify',{'challenge_id':public_challenge['id'],'code':totp_code(public_factor['totp']['secret'])},admin_reentry['access_token']);assert status==200
+        assert request(gateways[0][1],'/rest/v1/rpc/platform_read',{'section':'overview'},public_verified['access_token'])[0]==200,'Re-enrolled administrator denied'
+        assert int(sql("select count(*) from app_private.administrative_recovery_audit where user_id='"+platform+"';"))==2,'Factor recovery approval/consumption not audited'
+        assert request(auth,'/logout?scope=global',{},public_verified['access_token'])[0] in (200,204),'Recovery grant prevented session cleanup'
+        sql('update app_private.security_settings set admin_mfa_enforced=false where singleton;')
         assert request(gateways[0][1],'/rest/v1/rpc/company_read_v1',{},other_session['access_token'])[0]==200,'Gateway RPC forwarding failed'
         assert request(gateways[0][1],'/auth/v1/user',token=own_token)[0]==401,'Gateway accepted logged-out Auth session'
         assert request(gateways[0][1],'/auth/v1/%75ser',token=own_token)[0]==400,'Encoded path bypassed session gate'
@@ -371,6 +385,7 @@ def main():
             'gateway_denies_revoked_auth_session':True,'gateway_rejects_path_alias_bypass':True,'public_privileged_credentials_denied':True,'unsigned_session_hints_do_not_authorize':True,
             'bff_transport_and_single_budget':True,'all_password_symbols':True,'jwt_15_minutes':True,'session_30_days':True,'session_inactivity_24_hours':True,'native_password_change':True,
             'orphan_verified_quarantine':True,'registered_assets_never_collected':True,'quarantine_retention_gate':True,'maintenance_no_business_or_public_access':True,
+            'root_approved_session_bound_factor_recovery':True,
             'network_internal':True,'published_ports':[],'outbound_email':False}))
     finally:
         for name in reversed(containers):
