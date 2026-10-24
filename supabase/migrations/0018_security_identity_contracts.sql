@@ -97,7 +97,7 @@ declare f record; arguments text; identity_arguments text; result_type text; cal
 begin
  for f in select p.*,n.nspname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
  where n.nspname='public' and p.prokind='f' and p.proname not in
- ('is_platform_admin','handle_new_company_admin','touch_updated_at','company_invitation_matches','platform_public_settings')
+ ('is_platform_admin','handle_new_company_admin','touch_updated_at','company_invitation_matches','platform_public_settings','session_context_v1','company_read_v1')
  loop
   arguments:=pg_get_function_arguments(f.oid);identity_arguments:=pg_get_function_identity_arguments(f.oid);
   result_type:=pg_get_function_result(f.oid);
@@ -116,14 +116,14 @@ begin
  end loop;
 end;$$;
 
-create function public.session_context_v1() returns jsonb language sql stable security definer
+create or replace function public.session_context_v1() returns jsonb language sql stable security definer
 set search_path=pg_catalog as $$
  select jsonb_build_object('id',m.id,'company_id',m.company_id,'role',m.role,'full_name',m.full_name,
  'companies',jsonb_build_object('id',c.id,'name',c.name))
  from public.company_members m join public.companies c on c.id=m.company_id
  where m.user_id=auth.uid() and m.status='active' and app_private.is_company_member(c.id) limit 1;
 $$;
-create function public.company_read_v1() returns jsonb language plpgsql stable security definer
+create or replace function public.company_read_v1() returns jsonb language plpgsql stable security definer
 set search_path=pg_catalog as $$
 declare cid uuid; actor_role text;
 begin

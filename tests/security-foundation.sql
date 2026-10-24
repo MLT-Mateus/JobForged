@@ -7,20 +7,35 @@ insert into auth.users(id,email,email_confirmed_at,role,raw_user_meta_data) valu
 ('17000000-0000-4000-8000-000000000001','security-owner@example.invalid',now(),'authenticated','{}'),
 ('17000000-0000-4000-8000-000000000002','security-other@example.invalid',now(),'authenticated','{}'),
 ('17000000-0000-4000-8000-000000000003','security-unlinked@example.invalid',now(),'authenticated','{}'),
-('17000000-0000-4000-8000-000000000004','security-platform@example.invalid',now(),'authenticated','{}');
+('17000000-0000-4000-8000-000000000004','security-platform@example.invalid',now(),'authenticated','{}'),
+('17000000-0000-4000-8000-000000000005','security-member@example.invalid',now(),'authenticated','{}');
 insert into auth.sessions(id,user_id,created_at,updated_at,aal) values
 ('17000000-0000-4000-8000-000000000101','17000000-0000-4000-8000-000000000001',now(),now(),'aal1'),
 ('17000000-0000-4000-8000-000000000102','17000000-0000-4000-8000-000000000002',now(),now(),'aal1'),
 ('17000000-0000-4000-8000-000000000103','17000000-0000-4000-8000-000000000003',now(),now(),'aal1'),
-('17000000-0000-4000-8000-000000000104','17000000-0000-4000-8000-000000000004',now(),now(),'aal1');
+('17000000-0000-4000-8000-000000000104','17000000-0000-4000-8000-000000000004',now(),now(),'aal1'),
+('17000000-0000-4000-8000-000000000105','17000000-0000-4000-8000-000000000005',now(),now(),'aal1');
 insert into public.companies(id,name) values
 ('17000000-0000-4000-8000-000000000011','Security fixture A'),
 ('17000000-0000-4000-8000-000000000012','Security fixture B');
 insert into public.company_members(company_id,user_id,email,full_name,role,status) values
 ('17000000-0000-4000-8000-000000000011','17000000-0000-4000-8000-000000000001','security-owner@example.invalid','Fixture A','owner','active'),
-('17000000-0000-4000-8000-000000000012','17000000-0000-4000-8000-000000000002','security-other@example.invalid','Fixture B','owner','active');
+('17000000-0000-4000-8000-000000000012','17000000-0000-4000-8000-000000000002','security-other@example.invalid','Fixture B','owner','active'),
+('17000000-0000-4000-8000-000000000011','17000000-0000-4000-8000-000000000005','security-member@example.invalid','Fixture Member','member','active');
 insert into public.platform_admins(user_id,email,role) values('17000000-0000-4000-8000-000000000004','security-platform@example.invalid','platform_admin');
 alter table public.companies add column security_fixture_secret text default 'DO_NOT_EXPOSE';
+alter table public.company_members add column security_fixture_secret text default 'DO_NOT_EXPOSE';
+alter table public.platform_settings add column security_fixture_secret text default 'DO_NOT_EXPOSE';
+alter table public.platform_banners add column security_fixture_secret text default 'DO_NOT_EXPOSE';
+alter table public.platform_communications add column security_fixture_secret text default 'DO_NOT_EXPOSE';
+insert into public.company_branding(company_id,published_by,published_version)
+values('17000000-0000-4000-8000-000000000011','17000000-0000-4000-8000-000000000001',1);
+insert into public.platform_banner_assets(id,path,size,sha256,created_by)
+values('17000000-0000-4000-8000-000000000501','platform/17000000-0000-4000-8000-000000000501.png',1,repeat('a',64),'17000000-0000-4000-8000-000000000004');
+insert into public.platform_banners(title,image_id,created_by)
+values('Security fixture banner','17000000-0000-4000-8000-000000000501','17000000-0000-4000-8000-000000000004');
+insert into public.platform_communications(title,message,audience,channel,created_by)
+values('Security fixture campaign','Fixture only','companies','inapp','17000000-0000-4000-8000-000000000004');
 -- Existing objects, including orphans, count toward both quota dimensions.
 insert into storage.objects(bucket_id,name,metadata)
 select 'company-branding','17000000-0000-4000-8000-000000000011/'||md5(n::text)||'.png',jsonb_build_object('size',1)
@@ -66,6 +81,13 @@ do $$declare result jsonb;begin
  begin perform public.update_company_profile('17000000-0000-4000-8000-000000000012','Invalid cross tenant',null,null);raise exception 'cross tenant write';exception when insufficient_privilege then null;end;
  begin perform public.update_company_profile('17000000-0000-4000-8000-000000000011','Fixture','11111111111111',null);raise exception 'invalid CNPJ accepted';exception when check_violation then null;end;
  begin perform public.begin_password_recovery('recovery');raise exception 'password session minted recovery';exception when insufficient_privilege then null;end;
+ if public.update_my_member_profile('Fixture owner changed') ? 'security_fixture_secret' then raise exception 'profile projection leak';end if;
+end$$;
+select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
+do $$declare result jsonb;begin
+ result:=public.company_read_v1();
+ if exists(select 1 from jsonb_array_elements(result->'members') m where m ? 'email' or m ? 'security_fixture_secret') then raise exception 'member roster projection leak';end if;
+ if public.read_company_branding()->>'publishedBy' is not null then raise exception 'member received colleague email';end if;
 end$$;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000003","session_id":"17000000-0000-4000-8000-000000000103","aal":"aal1","role":"authenticated"}',true);
 do $$begin
@@ -105,6 +127,10 @@ do $$declare result jsonb;begin
  perform public.platform_read('overview');
  result:=public.platform_read('company','','',1,'17000000-0000-4000-8000-000000000011');
  if result->'company' ? 'security_fixture_secret' then raise exception 'platform projection leak';end if;
+ if public.platform_read('settings') ? 'security_fixture_secret' then raise exception 'settings projection leak';end if;
+ result:=public.communications_read('manage');
+ if exists(select 1 from jsonb_array_elements(result->'banners') b where b ? 'security_fixture_secret') then raise exception 'banner projection leak';end if;
+ if exists(select 1 from jsonb_array_elements(result->'campaigns') c where c ? 'security_fixture_secret') then raise exception 'campaign projection leak';end if;
 end$$;
 reset role;
 update auth.mfa_amr_claims set updated_at=now()-interval '1 hour',created_at=now()-interval '1 hour' where session_id='17000000-0000-4000-8000-000000000104';

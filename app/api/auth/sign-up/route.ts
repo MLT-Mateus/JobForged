@@ -2,7 +2,9 @@ import type { NextRequest } from "next/server";
 import { onlyDigits, validateSignup, type SignupValues } from "@/app/components/auth/auth-validation";
 import { sendCompanyWelcomeEmail } from "@/app/lib/brevo-email";
 import { resolveEmailTheme } from "@/app/design-system/email-template-catalog";
-import { requireSameOrigin, requestAuth, setSessionCookies, type SupabaseSessionPayload } from "../_server";
+import { requireSameOrigin, requestAuth, requestDatabase,getSupabaseConfig,setSessionCookies, type SupabaseSessionPayload } from "../_server";
+import {createHash} from 'node:crypto';
+import {termsOfServiceHtml} from '@/app/legal-documents';
 
 export const runtime = "nodejs";
 
@@ -27,11 +29,21 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const config=getSupabaseConfig();
+    if(!config)return Response.json({message:'Serviço indisponível.'},{status:503});
+    const intent=await requestDatabase('rpc/create_company_signup_intent',config.anonKey,{
+      email:values.email,company_name:values.company.trim(),responsible_name:values.responsible.trim(),
+      cnpj:onlyDigits(values.cnpj),phone:onlyDigits(values.phone),accepted_terms:true,
+      terms_revision:createHash('sha256').update(termsOfServiceHtml).digest('hex'),
+    });
+    const nonce=intent?.ok?await intent.json():null;
+    if(typeof nonce!=='string'||!/^[0-9a-f]{64}$/.test(nonce))return Response.json({message:'Não foi possível validar o cadastro. Recarregue e tente novamente.'},{status:503});
     const result = await requestAuth("signup", {
       email: values.email,
       password: values.password,
       data: {
         account_type: "company_admin",
+        company_signup_nonce:nonce,
         responsible_name: values.responsible.trim(),
         company_name: values.company.trim(),
         company_cnpj: onlyDigits(values.cnpj),

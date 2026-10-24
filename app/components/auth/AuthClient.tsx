@@ -307,7 +307,8 @@ export function SignupClient() {
             [rules.length, "8 caracteres"],
             [rules.upper && rules.lower, "Maiúscula e minúscula"],
             [rules.number, "Um número"],
-            [rules.special, "Um símbolo"],
+            [rules.special, "Um símbolo (!@#...)"],
+            [rules.maxBytes, "Até 72 bytes UTF-8"],
           ].map(([valid, label]) => (
             <li className={valid ? "is-valid" : ""} key={String(label)}>
               <Check aria-hidden="true" />{label}
@@ -495,7 +496,8 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
             [rules.length, "8 caracteres"],
             [rules.upper && rules.lower, "Maiúscula e minúscula"],
             [rules.number, "Um número"],
-            [rules.special, "Um símbolo"],
+            [rules.special, "Um símbolo (!@#...)"],
+            [rules.maxBytes, "Até 72 bytes UTF-8"],
           ].map(([valid, label]) => <li className={valid ? "is-valid" : ""} key={String(label)}><Check aria-hidden="true" />{label}</li>)}
         </ul>
         <TextField

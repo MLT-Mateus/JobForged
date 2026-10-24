@@ -18,6 +18,8 @@ export async function POST(request: NextRequest) {
   const accessToken = getCookie(request, "jf_auth_access");
   if (!accessToken) return Response.json({ message: "A sessão de recuperação expirou. Solicite um novo link." }, { status: 401 });
 
+  let recoveryConsumed=false;
+  const failureHeaders=new Headers({"Cache-Control":"no-store"});
   try {
     const consumed = await requestDatabase("rpc/consume_password_recovery", accessToken, { nonce: getCookie(request, "jf_password_recovery") });
     if (!consumed?.ok || await consumed.json() !== true) {
@@ -25,6 +27,7 @@ export async function POST(request: NextRequest) {
       clearPasswordRecoveryCookie(headers);
       return Response.json({ message: "Esta recuperação expirou ou já foi usada. Solicite outro link." }, { status: 403, headers });
     }
+    recoveryConsumed=true;
     const result = await requestAuth("user", { password }, accessToken, "PUT");
     if (!result.configured) return Response.json({ message: "A autenticação ainda não está configurada neste ambiente." }, { status: 503 });
     if (!result.response?.ok) {
@@ -33,7 +36,7 @@ export async function POST(request: NextRequest) {
       if (result.response?.status === 401 || result.response?.status === 403) clearSessionCookies(headers);
       return Response.json({ message: result.response?.status === 401 || result.response?.status === 403
         ? "A sessão de recuperação expirou. Solicite um novo link."
-        : "Não foi possível atualizar a senha. Verifique os requisitos e tente novamente." }, { status: result.response?.status === 401 || result.response?.status === 403 ? 401 : 400, headers });
+        : "Não foi possível atualizar a senha. Solicite um novo link de recuperação." }, { status: result.response?.status === 401 || result.response?.status === 403 ? 401 : 400, headers });
     }
 
     const headers = new Headers({ "Cache-Control": "no-store" });
@@ -42,6 +45,7 @@ export async function POST(request: NextRequest) {
     clearSessionCookies(headers);
     return Response.json({ ok: true }, { headers });
   } catch {
-    return Response.json({ message: "Serviço de autenticação indisponível. Tente novamente." }, { status: 503 });
+    if(recoveryConsumed)clearPasswordRecoveryCookie(failureHeaders);
+    return Response.json({ message: recoveryConsumed?"Não foi possível concluir a recuperação. Solicite um novo link.":"Serviço de autenticação indisponível. Tente novamente." }, { status: 503,headers:failureHeaders });
   }
 }

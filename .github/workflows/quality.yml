@@ -18,6 +18,18 @@ permissions:
   contents: read
 
 jobs:
+  native-security:
+    name: Validar Auth e Storage nativos
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Construir gateway isolado
+        run: docker build -f services/security-gateway/Dockerfile -t jbfd-security-gateway:isolated-acceptance .
+      - name: Testar provedores reais sem dados ou credenciais dos ambientes
+        run: python3 scripts/security/test-native-auth.py --ci
+
   database-security:
     name: Validar migrations e segurança SQL
     runs-on: ubuntu-latest
@@ -25,6 +37,10 @@ jobs:
     steps:
       - name: Baixar o código
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configurar Node.js para as fixtures versionadas
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
       - name: Testar migrations, RLS, grants, RPCs e isolamento em PostgreSQL
         run: bash scripts/security/test-database.sh
       - name: Testar política de limitação de requisições
@@ -99,7 +115,7 @@ jobs:
       - name: Construir aplicação completa
         run: docker build --build-arg APP_COMMIT="$GITHUB_SHA" -t jbfd:ci .
       - name: Construir gateway de segurança
-        run: docker build -t jbfd-security-gateway:ci services/security-gateway
+        run: docker build -f services/security-gateway/Dockerfile -t jbfd-security-gateway:ci .
       - name: Preparar rede externa do proxy
         run: docker network create jbfd-ci-network
       - name: Executar dois ambientes isolados
@@ -128,7 +144,7 @@ jobs:
 
   publish-test-image:
     name: Publicar imagem Test
-    needs: [mcp, validate, docker, database-security]
+    needs: [mcp, validate, docker, database-security, native-security]
     if: >-
       github.event_name == 'push' &&
       github.ref == 'refs/heads/develop' &&
@@ -165,13 +181,13 @@ jobs:
             echo "Gateway deste commit já publicado; preservando o artefato existente."
           else
             docker build --label "org.opencontainers.image.revision=$REVISION" \
-              -t "$gateway_image:$REVISION" services/security-gateway
+              -t "$gateway_image:$REVISION" -f services/security-gateway/Dockerfile .
             docker push "$gateway_image:$REVISION"
           fi
 
   deploy-test:
     name: Implantar Test
-    needs: [mcp, validate, docker, publish-test-image]
+    needs: [mcp, validate, docker, database-security, native-security, publish-test-image]
     if: needs.publish-test-image.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20

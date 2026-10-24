@@ -1,6 +1,6 @@
 -- Run with psql ON_ERROR_STOP=1 against Test only; everything is rolled back.
-begin;
-select set_config('jbfd.test_admin',(select user_id::text from public.platform_admins limit 1),true);
+-- Transaction is started by the isolated security harness.
+-- Fictional administrator is created by security-session-fixtures.sql.
 insert into auth.users(id,email,email_confirmed_at) values
  ('26000000-0000-0000-0000-000000000001','fixture-owner-26@example.invalid',now()),
  ('26000000-0000-0000-0000-000000000002','fixture-other-26@example.invalid',now()),
@@ -12,15 +12,16 @@ insert into public.company_members(id,company_id,user_id,email,full_name,role,st
  ('26000000-0000-0000-0000-000000000021','26000000-0000-0000-0000-000000000011','26000000-0000-0000-0000-000000000001','fixture-owner-26@example.invalid','Fixture A','owner','active'),
  ('26000000-0000-0000-0000-000000000022','26000000-0000-0000-0000-000000000012','26000000-0000-0000-0000-000000000002','fixture-other-26@example.invalid','Fixture B','owner','active');
 set local role authenticated;
-select set_config('request.jwt.claim.sub','26000000-0000-0000-0000-000000000001',true);
+select pg_temp.assume_user('26000000-0000-0000-0000-000000000001');
 do $$begin
- if (select count(*) from public.companies)<>1 then raise exception 'RLS company leak'; end if;
+ if public.company_read_v1()->'company'->>'id'<>'26000000-0000-0000-0000-000000000011' then raise exception 'company contract leak';end if;
+ begin perform * from public.companies;raise exception 'direct company SELECT allowed';exception when insufficient_privilege then null;end;
  begin perform public.platform_read('overview');raise exception 'tenant reached platform';exception when insufficient_privilege then null;end;
  begin perform public.platform_manage('company.status','26000000-0000-0000-0000-000000000012',null,'{"status":"suspended"}','test denied');raise exception 'tenant mutation succeeded';exception when insufficient_privilege then null;end;
  begin insert into public.platform_audit_events(actor_user_id,action,reason) values(auth.uid(),'fake','test');raise exception 'audit mutable';exception when insufficient_privilege then null;end;
  begin insert into public.platform_admins(user_id,email,role) values(auth.uid(),'fixture-owner-26@example.invalid','platform_admin');raise exception 'platform escalation allowed';exception when insufficient_privilege then null;end;
 end$$;
-select set_config('request.jwt.claim.sub',current_setting('jbfd.test_admin'),true);
+select pg_temp.assume_user(current_setting('jbfd.test_admin')::uuid);
 do $$declare result jsonb; token_value text; invitation uuid;begin
  perform public.platform_read('overview');
  perform public.platform_read('companies','Fixture 26');
@@ -45,21 +46,21 @@ do $$declare result jsonb; token_value text; invitation uuid;begin
  perform public.platform_manage('company.status','26000000-0000-0000-0000-000000000011',null,'{"status":"suspended"}','suspend fixture test');
  if public.company_invitation_matches(result->>'token','fixture-invite-26@example.invalid') then raise exception 'suspended invitation valid';end if;
 end$$;
-select set_config('request.jwt.claim.sub','26000000-0000-0000-0000-000000000001',true);
+select pg_temp.assume_user('26000000-0000-0000-0000-000000000001');
 do $$begin
- if exists(select 1 from public.companies) or exists(select 1 from public.company_members) then raise exception 'suspended RLS leak';end if;
+ if public.session_context_v1() is not null then raise exception 'suspended context leak';end if;
  begin perform public.update_my_member_profile('Attempt suspended');raise exception 'suspended profile writable';exception when insufficient_privilege then null;end;
 end$$;
-select set_config('request.jwt.claim.sub',current_setting('jbfd.test_admin'),true);
+select pg_temp.assume_user(current_setting('jbfd.test_admin')::uuid);
 select public.platform_manage('company.status','26000000-0000-0000-0000-000000000011',null,'{"status":"active"}','reactivate fixture test')->>'ok' reactivated;
-select set_config('request.jwt.claim.sub','26000000-0000-0000-0000-000000000001',true);
-do $$begin if (select count(*) from public.companies)<>1 then raise exception 'reactivation failed';end if;end$$;
-select set_config('request.jwt.claim.sub',current_setting('jbfd.test_admin'),true);
+select pg_temp.assume_user('26000000-0000-0000-0000-000000000001');
+do $$begin if public.company_read_v1()->'company'->>'id'<>'26000000-0000-0000-0000-000000000011' then raise exception 'reactivation failed';end if;end$$;
+select pg_temp.assume_user(current_setting('jbfd.test_admin')::uuid);
 do $$declare result jsonb;begin
  result:=public.platform_manage('invitation.create','26000000-0000-0000-0000-000000000011',null,'{"email":"fixture-invite-26@example.invalid","role":"member"}','single use fixture test');
  perform set_config('jbfd.invite_token',result->>'token',true);
 end$$;
-select set_config('request.jwt.claim.sub','26000000-0000-0000-0000-000000000003',true);
+select pg_temp.assume_user('26000000-0000-0000-0000-000000000003');
 select public.accept_company_invitation(current_setting('jbfd.invite_token')) is not null accepted;
 do $$begin
  begin perform public.accept_company_invitation(current_setting('jbfd.invite_token'));raise exception 'token accepted twice';exception when invalid_parameter_value then null;end;

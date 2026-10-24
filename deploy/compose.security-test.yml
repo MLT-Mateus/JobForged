@@ -8,6 +8,7 @@ services:
       APP_ENV: test
       UPSTREAM_URL: http://supabase-envoy:8000
       TRUSTED_PROXY_HOST: jobforged_traefik
+      TRUSTED_BFF_HOST: jbfd-test-app-1
     networks:
       - supabase-test
       - traefik
@@ -23,7 +24,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=jobforged_jobforged_network
-      - traefik.http.routers.jbfd-test-security-api.rule=Host(`test.jobforged.com`) && (PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
+      - traefik.http.routers.jbfd-test-security-api.rule=Host(`test.jobforged.com`) && (PathPrefix(`/api/`) || PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
       - traefik.http.routers.jbfd-test-security-api.priority=1000
       - traefik.http.routers.jbfd-test-security-api.entrypoints=websecure
       - traefik.http.routers.jbfd-test-security-api.tls=true

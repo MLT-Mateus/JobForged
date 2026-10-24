@@ -19,6 +19,9 @@ import time
 import urllib.error
 import urllib.request
 import uuid
+import zlib
+import tempfile
+import traceback
 
 def run(args, **kw):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kw).stdout.strip()
@@ -37,7 +40,14 @@ def totp_code(value):
     return str((struct.unpack('>I',digest[offset:offset+4])[0]&0x7fffffff)%1000000).zfill(6)
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('restore');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('restore',nargs='?');parser.add_argument('--ci',action='store_true');args=parser.parse_args()
+    ci_images={}
+    policy=json.loads((Path(__file__).resolve().parents[2]/'shared/password-policy.json').read_text())
+    characters=':'.join(policy[group].replace(':','\\:') for group in ('lower','upper','digits','symbols'))
+    if args.ci:
+        from native_ci_database import create_database
+        args.restore,ci_images=create_database(Path(__file__).resolve().parents[2])
+    if not args.restore:raise SystemExit('Disposable restore or --ci required')
     if not args.restore.startswith('jbfd-security-restore-') or inspect(args.restore)['Config']['Labels'].get('jbfd.security.disposable')!='true':
         raise SystemExit('Disposable restore required')
     if inspect(args.restore)['HostConfig']['PortBindings']:
@@ -45,8 +55,10 @@ def main():
     os.umask(0o077)
     stamp=str(int(time.time()));network='jbfd-security-http-'+stamp
     auth_name=network+'-auth';rest_name=network+'-rest';storage_name=network+'-storage';containers=[];env_files=[]
+    work=Path(tempfile.mkdtemp(prefix='jbfd-native-http-')) if args.ci else Path('/opt/jbfd/security-work')
+    socket='/var/run/postgresql' if args.ci else '/tmp'
     def sql(statement):
-        return run(['docker','exec','-i',args.restore,'psql','-h','/tmp','-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],input=statement)
+        return run(['docker','exec','-i',args.restore,'psql','-h',socket,'-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],input=statement)
     def request(base,path,body=None,token=None,method=None):
         headers={'Content-Type':'application/json'}
         if token:headers['Authorization']='Bearer '+token
@@ -59,8 +71,8 @@ def main():
             except ValueError:data=None
             return error.code,data
     def start(name,source,env,options=None,command=None,image=None):
-        file=Path('/opt/jbfd/security-work')/(name+'.env');file.write_text('\n'.join(k+'='+v for k,v in env.items())+'\n');env_files.append(file)
-        image=image or inspect(source)['Image']
+        file=work/(name+'.env');file.write_text('\n'.join(k+'='+v for k,v in env.items())+'\n');env_files.append(file)
+        image=image or ci_images.get(source) or inspect(source)['Image']
         run(['docker','run','-d','--name',name,'--label','jbfd.security.disposable=true','--network',network,'--memory','256m','--cpus','0.5','--env-file',str(file),*(options or []),image,*(command or [])]);containers.append(name)
         address=inspect(name)['NetworkSettings']['Networks'][network]['IPAddress']
         return address
@@ -77,7 +89,7 @@ def main():
         if 'none' in inspect(args.restore)['NetworkSettings']['Networks']:
             run(['docker','network','disconnect','none',args.restore])
         run(['docker','network','connect','--alias','security-db',network,args.restore])
-        run(['docker','exec','-u','postgres',args.restore,'bash','-c',"printf '\nhost all all "+subnet+" scram-sha-256\\n' >> /tmp/jbfd-restore/pg_hba.conf"])
+        if not args.ci:run(['docker','exec','-u','postgres',args.restore,'bash','-c',"printf '\nhost all all "+subnet+" scram-sha-256\\n' >> /tmp/jbfd-restore/pg_hba.conf"])
         auth_password=secrets.token_hex(24);rest_password=secrets.token_hex(24);signing=secrets.token_hex(32)
         sql("alter role supabase_auth_admin password '"+auth_password+"';alter role authenticator password '"+rest_password+"';alter system set listen_addresses='*';")
         run(['docker','restart',args.restore])
@@ -93,24 +105,41 @@ def main():
             'GOTRUE_JWT_DEFAULT_GROUP_NAME':'authenticated','GOTRUE_JWT_ADMIN_ROLES':'service_role',
             'GOTRUE_EXTERNAL_EMAIL_ENABLED':'true','GOTRUE_MAILER_AUTOCONFIRM':'false',
             'GOTRUE_SMTP_HOST':'example.invalid','GOTRUE_SMTP_PORT':'25','GOTRUE_SMTP_ADMIN_EMAIL':'no-reply@example.invalid',
-            'GOTRUE_PASSWORD_MIN_LENGTH':'8','GOTRUE_PASSWORD_REQUIRED_CHARACTERS':'abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789:!@#$%^&*',
-            'GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED':'true','GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL':'0',
+            'GOTRUE_PASSWORD_MIN_LENGTH':'8','GOTRUE_PASSWORD_REQUIRED_CHARACTERS':characters,
+            'GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED':'true','GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL':'10',
+            'GOTRUE_SESSIONS_TIMEBOX':'720h','GOTRUE_SESSIONS_INACTIVITY_TIMEOUT':'24h',
             'GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION':'true',
             'GOTRUE_MFA_TOTP_ENROLL_ENABLED':'true','GOTRUE_MFA_TOTP_VERIFY_ENABLED':'true'})
         rest_ip=start(rest_name,'supabase-rest',{'PGRST_DB_URI':'postgres://authenticator:'+rest_password+'@security-db:5432/postgres',
             'PGRST_DB_SCHEMAS':'public','PGRST_DB_ANON_ROLE':'anon','PGRST_JWT_SECRET':signing,'PGRST_SERVER_PORT':'3000'})
         auth='http://'+auth_ip+':9999';rest='http://'+rest_ip+':3000'
         for _ in range(60):
-            if inspect(auth_name)['State']['Status']=='exited':raise AssertionError('Isolated Auth configuration failed')
+            if inspect(auth_name)['State']['Status']=='exited':
+                logs=subprocess.run(['docker','logs',auth_name],capture_output=True,text=True)
+                diagnostic=work/(auth_name+'.diagnostic');diagnostic.write_text(logs.stdout+logs.stderr)
+                raise AssertionError('Isolated Auth configuration failed; private diagnostic '+str(diagnostic))
             try:
                 if request(auth,'/health')[0]==200:break
             except OSError:pass
             time.sleep(1)
         else:raise AssertionError('Isolated Auth readiness failed')
+        for _ in range(30):
+            try:
+                if request(rest,'/rpc/registration_requirements',{},jwt(signing,'anon'))[0]==200:break
+            except OSError:pass
+            time.sleep(1)
+        else:
+            logs=subprocess.run(['docker','logs',rest_name],capture_output=True,text=True)
+            diagnostic=work/(rest_name+'.diagnostic');diagnostic.write_text(logs.stdout+logs.stderr)
+            raise AssertionError('Isolated REST readiness failed; private diagnostic '+str(diagnostic))
         admin=jwt(signing,'service_role');password='Fixture9!'+secrets.token_hex(12)
         def create(email,company=None):
             data={'email':email,'password':password,'email_confirm':True}
-            if company:data['user_metadata']={'account_type':'company_admin','company_name':company,'responsible_name':'Security fixture','company_cnpj':'11222333000181','phone':'11999999999','terms_accepted_at':'2026-01-01T00:00:00Z'}
+            if company:
+                status,requirements=request(rest,'/rpc/registration_requirements',{},jwt(signing,'anon'));assert status==200,'Registration requirements HTTP '+str(status)+' code '+str(requirements.get('code') if isinstance(requirements,dict) else None)
+                status,nonce=request(rest,'/rpc/create_company_signup_intent',{'email':email,'company_name':company,'responsible_name':'Security fixture','cnpj':'11222333000181','phone':'11999999999','accepted_terms':True,'terms_revision':requirements['termsRevision']},jwt(signing,'anon'))
+                assert status==200,'Native signup intent creation failed'
+                data['user_metadata']={'account_type':'company_admin','company_signup_nonce':nonce,'company_name':'Untrusted override','role':'platform_admin','plan_id':'paid'}
             status,user=request(auth,'/admin/users',data,admin)
             if status not in (200,201):raise AssertionError('Native fixture creation failed')
             return user['id']
@@ -120,6 +149,9 @@ def main():
         assert status==200,'Native password sign-in failed'
         token=session['access_token'];status,context=request(rest,'/rpc/session_context_v1',{},token)
         assert status==200 and context['company_id'],'Signed JWT session contract failed'
+        assert context['companies']['name']=='Native fixture A' and context['role']=='owner','Metadata overrode validated signup intent'
+        assert request(rest,'/rpc/is_platform_admin',{},token)==(200,False),'Signup metadata granted platform role'
+        assert sql("select raw_user_meta_data ? 'company_signup_nonce' from auth.users where id='"+first+"';")=='f','Raw signup capability persisted'
         assert request(rest,'/company_members?select=*',token=token)[0] in (401,403),'Direct roster SELECT exposed'
         assert request(auth,'/signup',{'email':'weak-'+suffix,'password':'abc'})[0] in (400,422),'Weak password not rejected by Auth'
         status,link=request(auth,'/admin/generate_link',{'type':'recovery','email':email},admin)
@@ -192,7 +224,8 @@ def main():
         status,other_session=request(auth,'/token?grant_type=password',{'email':other,'password':password});assert status==200
         asset=str(uuid.uuid4());path='/object/company-branding/'+own_context['company_id']+'/'+asset+'.png'
         assert request(rest,'/rpc/reserve_company_image',{'asset_id':asset},own_token)[0]==200,'Native upload reservation failed'
-        png=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS9sAAAAASUVORK5CYII=')
+        def chunk(kind,data):return struct.pack('>I',len(data))+kind+data+struct.pack('>I',zlib.crc32(kind+data))
+        png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',1,1,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(b'\0\0\x80\x80\xff'))+chunk(b'IEND',b'')
         assert binary_request(storage,path,png,own_token)[0]==200,'Native reserved upload failed'
         assert binary_request(storage,path,None,own_token)==(200,png),'Native own asset read failed'
         assert binary_request(storage,path,None,other_session['access_token'])[0] in (400,403,404),'Native cross-tenant asset exposed'
@@ -222,7 +255,7 @@ def main():
             routes.append({'match':{'prefix':prefix},'route':{'cluster':name,'prefix_rewrite':'/','timeout':'30s'}})
             clusters.append({'name':name,'connect_timeout':'2s','type':'STRICT_DNS','load_assignment':{'cluster_name':name,'endpoints':[{'lb_endpoints':[{'endpoint':{'address':{'socket_address':{'address':name,'port_value':port}}}}]}]}})
         envoy_config={'static_resources':{'listeners':[{'name':'api','address':{'socket_address':{'address':'0.0.0.0','port_value':8000}},'filter_chains':[{'filters':[{'name':'envoy.filters.network.http_connection_manager','typed_config':{'@type':'type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager','stat_prefix':'isolated','route_config':{'name':'api','virtual_hosts':[{'name':'api','domains':['*'],'routes':routes}]},'http_filters':[{'name':'envoy.filters.http.router','typed_config':{'@type':'type.googleapis.com/envoy.extensions.filters.http.router.v3.Router'}}]}}]}]}],'clusters':clusters}}
-        config_file=Path('/opt/jbfd/security-work')/(network+'-envoy.json');config_file.write_text(json.dumps(envoy_config));config_file.chmod(0o644);env_files.append(config_file)
+        config_file=work/(network+'-envoy.json');config_file.write_text(json.dumps(envoy_config));config_file.chmod(0o644);env_files.append(config_file)
         start(network+'-envoy','supabase-envoy',{},options=['--network-alias','supabase-envoy','-v',str(config_file)+':/etc/envoy/envoy.yaml:ro'],command=['-c','/etc/envoy/envoy.yaml'])
         gateway_password=secrets.token_hex(24);sql("alter role jbfd_security_gateway password '"+gateway_password+"';")
         gateway_env={'APP_ENV':'test','DATABASE_URL':'postgres://jbfd_security_gateway:'+gateway_password+'@security-db:5432/postgres','RATE_SCOPE_SECRET':secrets.token_hex(32),'UPSTREAM_URL':'http://supabase-envoy:8000','TRUSTED_PROXY_HOST':'supabase-envoy'}
@@ -239,6 +272,14 @@ def main():
             gateways.append((name,base))
         assert request(gateways[0][1],'/auth/v1/health')[0]==200,'Gateway Auth forwarding failed'
         assert request(gateways[0][1],'/rest/v1/rpc/company_read_v1',{},other_session['access_token'])[0]==200,'Gateway RPC forwarding failed'
+        assert request(gateways[0][1],'/auth/v1/user',token=own_token)[0]==401,'Gateway accepted logged-out Auth session'
+        assert request(gateways[0][1],'/auth/v1/%75ser',token=own_token)[0]==400,'Encoded path bypassed session gate'
+        assert request(gateways[0][1],'/auth/v1/admin/users',token=admin)[0]==403,'Privileged Auth exposed publicly'
+        assert request(gateways[0][1],'/rest/v1/companies',token=admin)[0]==403,'Service credential accepted at public API'
+        assert request(gateways[0][1],'/storage/v1/object/sign/company-branding/test',{},other_session['access_token'])[0]==403,'Unbound signed URL capability exposed'
+        hints=json.loads(base64.urlsafe_b64decode(other_session['access_token'].split('.')[1]+'=='))
+        fake=jwt(signing,'authenticated').split('.');fake[1]=base64.urlsafe_b64encode(json.dumps(hints).encode()).decode().rstrip('=')
+        assert request(gateways[0][1],'/auth/v1/user',token='.'.join(fake))[0] in (401,403),'Unverified session hints authorized forged JWT'
         limited_email='gateway-rate-'+suffix
         for index in range(5):
             request(gateways[index%2][1],'/auth/v1/recover',{'email':limited_email})
@@ -259,18 +300,22 @@ def main():
             'native_storage_upload':True,'native_storage_tenant_isolation':True,'native_storage_requires_reservation':True,'native_asset_registration':True,'native_storage_type_restriction':True,'native_storage_size_limit':True,
             'inactive_member_denied':True,'suspended_company_denied':True,'native_logout_denied_old_jwt':True,
             'gateway_native_forwarding':True,'gateway_shared_rate_state':True,'gateway_rate_state_survives_restart':True,
+            'validated_signup_intent':True,'metadata_cannot_grant_platform_role':True,'raw_signup_capability_not_persisted':True,
+            'gateway_denies_revoked_auth_session':True,'gateway_rejects_path_alias_bypass':True,'public_privileged_credentials_denied':True,'unsigned_session_hints_do_not_authorize':True,
             'network_internal':True,'published_ports':[],'outbound_email':False}))
     finally:
         for name in reversed(containers):
             subprocess.run(['docker','rm','-f',name],capture_output=True)
         for file in env_files:file.unlink(missing_ok=True)
         subprocess.run(['docker','network','disconnect',network,args.restore],capture_output=True)
-        subprocess.run(['docker','network','connect','none',args.restore],capture_output=True)
+        if args.ci:subprocess.run(['docker','rm','-fv',args.restore],capture_output=True)
+        else:subprocess.run(['docker','network','connect','none',args.restore],capture_output=True)
         subprocess.run(['docker','network','rm',network],capture_output=True)
+        if args.ci and not any(work.iterdir()):work.rmdir()
 
 if __name__=='__main__':
     try:main()
     except Exception as error:
         # No provider payloads, generated credentials or request contents.
-        print(json.dumps({'passed':False,'error_type':type(error).__name__,'operation':error.cmd[:4] if isinstance(error,subprocess.CalledProcessError) else None,'detail':str(error) if isinstance(error,AssertionError) else 'Inspect private isolated service diagnostics'}))
+        print(json.dumps({'passed':False,'error_type':type(error).__name__,'line':traceback.extract_tb(error.__traceback__)[-1].lineno,'operation':error.cmd[:4] if isinstance(error,subprocess.CalledProcessError) else None,'detail':str(error) if isinstance(error,AssertionError) else 'Inspect private isolated service diagnostics'}))
         raise SystemExit(1)
