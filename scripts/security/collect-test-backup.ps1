@@ -1,4 +1,4 @@
-param([string]$BackupRoot="$env:LOCALAPPDATA\JobForged\Backups\Test")
+param([string]$BackupRoot=(Join-Path ([Environment]::GetFolderPath('UserProfile')) 'JobForged-Backups\Test'))
 $ErrorActionPreference='Stop'
 # Install together with workstation-backup.ps1 in a protected local directory.
 # Runs in the signed-in user's context, which is required for DPAPI CurrentUser.
@@ -9,7 +9,7 @@ try {
   $resolvedRoot=[IO.Path]::GetFullPath($BackupRoot).TrimEnd('\')
   if(!(Test-Path -LiteralPath $resolvedRoot -PathType Container)){throw 'Protected backup directory missing'}
   $lock=[IO.File]::Open($lockPath,[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
-  $sshArgs=@('-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=15','root@187.77.229.27')
+  $sshArgs=@('-n','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=15','root@187.77.229.27')
   $raw=& ssh @sshArgs 'python3 /opt/jbfd/security-work/test-recovery-drill.py'
   if($LASTEXITCODE -ne 0){throw 'Test backup or isolated restoration failed'}
   $evidence=($raw -join "`n")|ConvertFrom-Json
@@ -19,7 +19,7 @@ try {
   & ssh @sshArgs "tar -C $($evidence.backup) -cf $remote postgres.sql.gz storage.tar.gz objects.private.json recovery.json infrastructure-audit.jsonl"
   if($LASTEXITCODE -ne 0){throw 'Remote archive failed'}
   $incoming=Join-Path $resolvedRoot "$name.incoming"
-  & scp -q -o BatchMode=yes -o StrictHostKeyChecking=yes "root@187.77.229.27:$remote" $incoming
+  & scp -q -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 "root@187.77.229.27:$remote" $incoming
   if($LASTEXITCODE -ne 0){throw 'Encrypted-copy transfer failed'}
   $expected=(Get-FileHash -LiteralPath $incoming -Algorithm SHA256).Hash
   $encrypted=Join-Path $resolvedRoot "$name.jfenc"

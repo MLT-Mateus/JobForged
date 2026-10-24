@@ -1,5 +1,9 @@
 # Execução de segurança em Test — em andamento
 
+**Estado mais recente:** publicação funcional concluída pelo PR #112, SHA `6113d6b0ff5ab2f3808a24b7163c2552d4438a8e`; migrations 0001–0030 conferidas, healthcheck `ok`. Relatório consolidado: `security-test-result-2026-10-24.md`. A cronologia abaixo registra também etapas anteriores; não confundir seus pendentes históricos com o estado consolidado. MFA humano permanece pendente.
+
+**Backup externo:** destino canônico atual `C:\Users\suporte01\JobForged-Backups\Test`. Agendador testado com resultado 0 e backup `test-20261024T024802Z`; o caminho anterior em AppData não era visível à tarefa. A cópia anterior foi preservada, e o coletor agora usa SSH sem stdin interativo. Sem custo ou serviço contratado.
+
 Atualização: 2026-10-23, UTC. Não constitui entrega final nem autorização de Live.
 
 ## Estado revalidado em 2026-10-24, 01:00 UTC
