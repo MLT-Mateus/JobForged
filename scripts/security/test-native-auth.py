@@ -60,8 +60,9 @@ def main():
     socket='/var/run/postgresql' if args.ci else '/tmp'
     def sql(statement):
         return run(['docker','exec','-i',args.restore,'psql','-h',socket,'-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],input=statement)
-    def request(base,path,body=None,token=None,method=None):
+    def request(base,path,body=None,token=None,method=None,request_headers=None):
         headers={'Content-Type':'application/json'}
+        headers.update(request_headers or {})
         if token:headers['Authorization']='Bearer '+token
         req=urllib.request.Request(base+path,data=json.dumps(body).encode() if body is not None else None,headers=headers,method=method)
         try:
@@ -300,8 +301,13 @@ def main():
         config_file=work/(network+'-envoy.json');config_file.write_text(json.dumps(envoy_config));config_file.chmod(0o644);env_files.append(config_file)
         start(network+'-envoy','supabase-envoy',{},options=['--network-alias','supabase-envoy','-v',str(config_file)+':/etc/envoy/envoy.yaml:ro'],command=['-c','/etc/envoy/envoy.yaml'])
         gateway_password=secrets.token_hex(24);sql("alter role jbfd_security_gateway password '"+gateway_password+"';")
-        stub_code="""import http from 'node:http';http.createServer(async(req,res)=>{
-          if(req.url==='/api/echo'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({host:req.headers.host,protocol:req.headers['x-forwarded-proto']}));return;}
+        stub_code="""import http from 'node:http';import * as zlib from 'node:zlib';http.createServer(async(req,res)=>{
+          if(req.url==='/api/echo'){
+            const text=JSON.stringify({host:req.headers.host,protocol:req.headers['x-forwarded-proto'],encoding:req.headers['accept-encoding']});
+            res.setHeader('Content-Type','application/json');
+            if(req.headers['accept-encoding']?.includes('zstd')){res.setHeader('Content-Encoding','zstd');res.end(zlib.zstdCompressSync(text));}
+            else res.end(text);return;
+          }
           const chunks=[];for await(const c of req)chunks.push(c);
           const upstream=await fetch('http://security-gateway:8080/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json'},body:Buffer.concat(chunks)});
           res.writeHead(upstream.status,{'Content-Type':'application/json'});res.end(await upstream.text());
@@ -328,6 +334,8 @@ def main():
         after=int(sql("select coalesce(sum(hits),0) from app_private.request_limits where scope like 'login-account:%';"))
         assert after==before+1,'BFF child counted the same action twice'
         assert request(gateways[0][1],'/api/echo')[1]['protocol']=='https','BFF proxy lost HTTPS origin'
+        status,browser_response=request(gateways[0][1],'/api/echo',request_headers={'Accept-Encoding':'zstd, br, gzip, deflate'})
+        assert status==200 and browser_response['encoding']=='identity','Browser compression corrupted JSON through gateway'
         sql('update app_private.security_settings set admin_mfa_enforced=true where singleton;')
         assert request(auth,'/admin/users/'+platform+'/factors/'+new_factor['id'],token=admin,method='DELETE')[0] in (200,204)
         status,admin_reentry=request(auth,'/token?grant_type=password',{'email':platform_email,'password':password});assert status==200
@@ -411,6 +419,7 @@ def main():
             'orphan_verified_quarantine':True,'registered_assets_never_collected':True,'quarantine_retention_gate':True,'maintenance_no_business_or_public_access':True,
             'root_approved_session_bound_factor_recovery':True,
             'real_orphan_worker':True,
+            'browser_zstd_negotiation_safe':True,
             'direct_invitation_budget':True,'password_change_revokes_other_sessions':True,'refresh_rotation_old_token_rejected':True,'native_replay_revokes_current_family':False,
             'network_internal':True,'published_ports':[],'outbound_email':False}))
     finally:
