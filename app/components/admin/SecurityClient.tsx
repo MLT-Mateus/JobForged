@@ -4,10 +4,10 @@ import {useCallback,useEffect,useState,type FormEvent} from 'react';
 import {ActionButton,Panel,PanelHeading,SelectField,TextField,WorkspaceState,InlineNotice} from '@/app/components/ui';
 type Status={mfaEnforced:boolean;aal:string;verifiedFactors:number;factors:Array<{id:string;name:string}>};
 async function readSecurityStatus(){const response=await fetch('/api/backoffice/security',{cache:'no-store'});if(!response.ok)throw Error('Não foi possível conferir a segurança.');return await response.json() as Status;}
-export function SecurityClient(){
+export function SecurityClient({revision=0}:{revision?:number}){
  const [status,setStatus]=useState<Status|null>(null),[factor,setFactor]=useState(''),[qr,setQr]=useState(''),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
  const load=useCallback(async()=>{const next=await readSecurityStatus();setStatus(next);setFactor(current=>current||next.factors[0]?.id||'');},[]);
- useEffect(()=>{let active=true;readSecurityStatus().then(next=>{if(active){setStatus(next);setFactor(current=>current||next.factors[0]?.id||'')}}).catch(()=>{if(active)setMessage('Não foi possível conferir a segurança.')});return()=>{active=false}},[]);
+ useEffect(()=>{let active=true;readSecurityStatus().then(next=>{if(active){setStatus(next);setFactor(current=>current||next.factors[0]?.id||'');setMessage('')}}).catch(()=>{if(active)setMessage('Não foi possível conferir a segurança.')});return()=>{active=false}},[revision]);
  async function act(operation:string){setBusy(true);setMessage('');try{const r=await fetch('/api/backoffice/security',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({operation,factorId:factor,code})});const result=await r.json() as {message?:string;factorId?:string;qr?:string};if(!r.ok)throw Error(result.message||'Não foi possível concluir.');if(result.factorId&&result.qr){setFactor(result.factorId);setQr(result.qr)}else{setQr('');setCode('');setMessage(operation==='enable'?'Proteção administrativa ativada.':'Código confirmado.');await load()}}catch(error){setMessage(error instanceof Error?error.message:'Tente novamente.')}finally{setBusy(false)}}
  if(!status&&!message)return <WorkspaceState title="Conferindo segurança..."/>;
  return <Panel><PanelHeading title="Segurança da conta" description="Use um aplicativo autenticador para proteger o acesso administrativo."/><div className="jf-panel-body jf-workspace-stack">
