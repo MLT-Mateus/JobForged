@@ -1,5 +1,14 @@
 # Segurança e modelagem — publicação em Test
 
+## Atualização de 26/10/2026
+
+- Continuação no PR #114, sem nova migration e sem alteração de Live.
+- Backup atual confirmado pelo próprio Agendador: `test-20261026T173417Z`, com restauração, cifra/decifragem conferidas e recibo externo. A tarefa retornou 0 e `last-run.json` registrou `succeeded` com o novo arquivo.
+- Acrescentado wrapper que exige comprovante novo e arquivo cifrado existente antes de retornar sucesso. Casos sintéticos de comprovante recente, antigo, ausente e falha do coletor passaram no Windows. Um problema de conversão de datas JSON foi detectado por esses testes e corrigido.
+- Validação autenticada no navegador identificou resposta JSON comprimida com zstd sem cabeçalho compatível no proxy. O gateway passou a negociar `identity` a montante; PNG já é comprimido. Regressão com os encodings de um navegador moderno incluída na integração nativa. A correção não relaxa permissões ou lê credenciais.
+- Melhoradas as mensagens de MFA/limites e a atualização da tela de Segurança, preservando os campos. Confirmação administrativa pode abrir em outra aba.
+- Login administrativo confirmado pelo usuário; cadastro/ativação do fator ainda precisam de confirmação real. Não equiparar login à exigência de MFA concluída.
+
 ## Situação da entrega
 
 Implementação publicada pelo [PR #112](https://github.com/MLT-Mateus/JobForged/pull/112), após a compatibilidade do [PR #113](https://github.com/MLT-Mateus/JobForged/pull/113).
