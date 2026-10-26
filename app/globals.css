@@ -5888,3 +5888,18 @@ html[data-theme="dark"] .app-loader__inline [fill="#4169E1"] { fill:#7E9CFF; }
 @media(prefers-reduced-motion:reduce) {
  .lp-reveal.is-revealed,.landing-page .faq-answer.is-open p { animation:none; }
 }
+
+/* Shared system-state composition: existing 404 layout, shared controls and tokens. */
+.system-page { background: var(--jf-ui-surface-soft); color: var(--jf-ui-text); }
+.system-page .not-found-header { justify-content: space-between; gap: var(--jf-ui-space-4); }
+.system-page .not-found-window { background: var(--jf-ui-surface); border-color: var(--jf-ui-border); }
+.system-page .not-found-window__body { background: var(--jf-ui-surface); }
+.system-page .not-found-copy h1 { color: var(--jf-ui-text); }
+.system-page .not-found-copy > p, .system-page .not-found-window__body small { color: var(--jf-ui-text-muted); }
+.system-page__search { margin-top: var(--jf-ui-space-6); }
+.system-page__links { display: flex; flex-wrap: wrap; gap: var(--jf-ui-space-2); margin-top: var(--jf-ui-space-3); }
+.system-page__help { margin-top: var(--jf-ui-space-4); font-size: .875rem; }
+.system-state-catalog { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--jf-ui-space-6); margin-top: var(--jf-ui-space-6); }
+.system-state-catalog .jf-panel { padding: var(--jf-ui-space-6); }
+.system-state-catalog p { margin-block: var(--jf-ui-space-4); }
+@media (max-width: 700px) { .system-state-catalog { grid-template-columns: minmax(0,1fr); } .system-page .not-found-visual { display: none; } .system-page .not-found-content { grid-template-columns: minmax(0,1fr); } }

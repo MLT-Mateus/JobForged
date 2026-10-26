@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { safeReturnPath } from "@/app/components/system/safe-return";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, Building2, Check, LockKeyhole, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
@@ -77,7 +78,7 @@ export function LoginClient() {
       setValues(current => ({ ...current, password: "" }));
       const session = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).catch(() => null) as { platformAdmin?: boolean } | null;
       playStatusSound("success");
-      router.replace(session?.platformAdmin ? "/backoffice" : "/app/home");
+      router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")) ?? (session?.platformAdmin ? "/backoffice" : "/app/home"));
     } finally {
       setLoading(false);
     }
