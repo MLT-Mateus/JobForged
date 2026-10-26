@@ -93,9 +93,10 @@ test("existing system pages render with shared brand assets", async () => {
       { waitUntil() {}, passThroughOnException() {} },
     );
     assert.equal(response.status, 200, path);
-    const rendered = rscPayload(await response.text());
+    const html = await response.text();
+    const rendered = rscPayload(html);
     assert.ok(rendered.includes(path), `route data missing from server render: ${path}`);
-    assert.match(rendered, /jobforged-(?:logo-primary|symbol)\.svg/, path);
+    assert.match(html, /jobforged-(?:logo-primary|symbol)\.svg/, path);
   }
 });
 
@@ -111,6 +112,6 @@ test("system state routes preserve their HTTP status and shared actions", async 
   }
   const denied = await worker.fetch(new Request("http://localhost/backoffice"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
   assert.equal(denied.status, 401);
-  const missing = await worker.fetch(new Request("http://localhost/rota-inexistente-para-contrato"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
+  const missing = await worker.fetch(new Request("http://localhost/rota-inexistente/para-contrato"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
   assert.equal(missing.status, 404);
 });
