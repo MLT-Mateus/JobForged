@@ -209,3 +209,13 @@ Não autorizada nesta entrega. Antes de qualquer promoção:
 6. Em falha de migration, parar etapas dependentes e corrigir por migration nova. Não desfazer schema ou restaurar backup automaticamente sobre dados mais recentes. Rollback da aplicação exige imagem compatível; restauração exige decisão sobre os dados posteriores ao ponto de recuperação.
 
 Live não está pronto para promoção enquanto houver medida obrigatória pendente ou teste reprovado.
+
+
+## Diagnóstico de cadastro TOTP — 26/10/2026
+
+- Leitura atual do Auth: tentativas de cadastro e challenge aceitas (HTTP 200), seguidas de recusas de verificação (422, `mfa_verification_failed`). Três fatores TOTP não confirmados; nenhum fator confirmado ou exigência habilitada. Horário UTC da VPS comparado com o relógio de referência: sem divergência relevante. Não foram consultados QR, chaves ou códigos do responsável.
+- Isso confirma a recusa real pelo provedor, mas não permite afirmar se o responsável usou uma entrada de outro serviço, um QR anterior ou se o celular está fora de hora. A pergunta foi apresentada ao usuário; não culpar o aplicativo Google nem declarar a causa individual sem essa evidência.
+- Ajuste de usabilidade: issuer explícito JobForged Test (JobForged nos demais ambientes), orientação para criar entrada específica pelo botão + do Google Authenticator, QR com fundo branco e margem fixa em ambos os temas, alternativa manual em acordeão aprovado com chave mascarada, limpeza do campo após tentativa recusada e mensagens distintas de sessão/limite/código.
+- A chave manual é entregue apenas no retorno privado/no-store do cadastro autorizado e permanece somente no estado da tela. Não entra no GET, banco adicional, armazenamento local, logs ou documentação. Acordeão e campo usam componentes compartilhados; agente não deve abrir/observar essa chave ou o QR real. Nenhum fator antigo é apagado automaticamente e nenhuma exigência é habilitada durante a correção.
+- Testes adicionados: parâmetros `otpauth` (issuer, segredo correspondente, SHA1/6 dígitos/30 segundos) e verificação real pelo GoTrue em fixture descartável; contrato simulado da API para cadastro privado, GET sem segredo, recusa e atualização dos cookies após sucesso. Diferenciar a fixture da confirmação pessoal ainda necessária em Test.
+- Referência primária: https://supabase.com/docs/guides/auth/auth-mfa/totp . Após publicar, o responsável deve cadastrar uma nova entrada com o QR mais recente ou a alternativa manual, confirmar e ativar a proteção; só então concluir o aceite real de MFA.

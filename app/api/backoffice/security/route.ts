@@ -3,7 +3,7 @@ import { readSession, requestAuth, requestDatabase, requireSameOrigin, setSessio
 
 export const runtime='nodejs';
 export async function GET(request:NextRequest){
- const headers=new Headers({'Cache-Control':'no-store'}),session=await readSession(request,headers);
+ const headers=new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'}),session=await readSession(request,headers);
  if(!session?.platformAdmin)return Response.json({message:'Acesso negado.'},{status:403,headers});
  const [status,user]=await Promise.all([requestDatabase('rpc/security_status',session.accessToken,{}),requestAuth('user',undefined,session.accessToken)]);
  if(!status?.ok||!user.response?.ok)return Response.json({message:'Não foi possível conferir a segurança.'},{status:503,headers});
@@ -12,25 +12,29 @@ export async function GET(request:NextRequest){
 }
 export async function POST(request:NextRequest){
  if(!requireSameOrigin(request))return Response.json({message:'Origem inválida.'},{status:403});
- const headers=new Headers({'Cache-Control':'no-store'}),session=await readSession(request,headers);
+ const headers=new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'}),session=await readSession(request,headers);
  if(!session?.platformAdmin)return Response.json({message:'Acesso negado.'},{status:403,headers});
  if(Number(request.headers.get('content-length')||0)>2048)return Response.json({message:'Solicitação inválida.'},{status:413,headers});
  const body=await request.json().catch(()=>null) as {operation?:string;factorId?:string;code?:string}|null;
  if(body?.operation==='enroll'){
-  const result=await requestAuth('factors',{factor_type:'totp',friendly_name:'JobForged '+new Date().toISOString().slice(0,19)},session.accessToken);
-  const factor=result.payload as {id?:string;totp?:{qr_code?:string}}|null;
-  if(!result.response?.ok||!factor?.id||!factor.totp?.qr_code)return Response.json({message:'Não foi possível iniciar o cadastro do fator.'},{status:400,headers});
+  const issuer=process.env.APP_ENV==='test'?'JobForged Test':'JobForged';
+  const result=await requestAuth('factors',{factor_type:'totp',issuer,friendly_name:issuer+' '+new Date().toISOString().slice(0,19)},session.accessToken);
+  const factor=result.payload as {id?:string;totp?:{qr_code?:string;secret?:string}}|null;
+  if(!result.response?.ok||!factor?.id||!factor.totp?.qr_code||!factor.totp.secret||!/^[A-Z2-7]+=*$/i.test(factor.totp.secret))return Response.json({message:'Não foi possível iniciar o cadastro. Aguarde e tente novamente.'},{status:400,headers});
   // Render as an image, never inject provider SVG into the page DOM.
   const qr=factor.totp.qr_code;
-  return Response.json({factorId:factor.id,qr:qr.startsWith('data:image/')?qr:`data:image/svg+xml;base64,${Buffer.from(qr).toString('base64')}`},{headers});
+  return Response.json({factorId:factor.id,issuer,account:session.email,manualKey:factor.totp.secret,qr:qr.startsWith('data:image/')?qr:`data:image/svg+xml;base64,${Buffer.from(qr).toString('base64')}`},{headers});
  }
  if(body?.operation==='verify'&&/^[0-9a-f-]{36}$/i.test(body.factorId||'')&&/^\d{6}$/.test(body.code||'')){
   const challenge=await requestAuth(`factors/${body.factorId}/challenge`,{},session.accessToken);
   const id=challenge.payload?.id;
-  if(!challenge.response?.ok||typeof id!=='string')return Response.json({message:'Não foi possível solicitar a verificação.'},{status:400,headers});
+  if(!challenge.response?.ok||typeof id!=='string')return Response.json({message:challenge.response?.status===429?'Muitas tentativas. Aguarde antes de tentar novamente.':'Não foi possível solicitar a verificação. Confira sua sessão e tente novamente.'},{status:challenge.response?.status===429?429:400,headers});
   const result=await requestAuth(`factors/${body.factorId}/verify`,{challenge_id:id,code:body.code},session.accessToken);
   const upgraded=result.payload as SupabaseSessionPayload;
-  if(!result.response?.ok||!upgraded?.access_token)return Response.json({message:'Código inválido ou expirado.'},{status:400,headers});
+  if(!result.response?.ok||!upgraded?.access_token){
+   const invalid=result.payload?.error_code==='mfa_verification_failed';
+   return Response.json({message:invalid?'Código não corresponde a este cadastro. Use a entrada JobForged criada com este QR, aguarde o próximo código e confira o horário automático do celular.':result.response?.status===429?'Muitas tentativas. Aguarde antes de tentar novamente.':'Não foi possível verificar o código. Confira sua sessão e tente novamente.'},{status:result.response?.status===429?429:400,headers});
+  }
   setSessionCookies(headers,upgraded);
   return Response.json({ok:true},{headers});
  }
