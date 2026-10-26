@@ -18,6 +18,7 @@ import subprocess
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
 import uuid
 import zlib
 import tempfile
@@ -183,11 +184,17 @@ def main():
         platform_token=platform_session['access_token']
         sql('update app_private.security_settings set admin_mfa_enforced=true where singleton;')
         assert request(rest,'/rpc/platform_read',{'section':'overview'},platform_token)[0]==403,'Native AAL1 bypassed MFA'
-        status,factor=request(auth,'/factors',{'factor_type':'totp','friendly_name':'Isolated fixture'},platform_token)
+        status,factor=request(auth,'/factors',{'factor_type':'totp','issuer':'JobForged Test','friendly_name':'Isolated fixture'},platform_token)
         assert status==200,'Native TOTP enrollment failed'
+        enrollment=urllib.parse.urlparse(factor['totp']['uri']);parameters=urllib.parse.parse_qs(enrollment.query)
+        assert enrollment.scheme=='otpauth' and enrollment.netloc=='totp','Authenticator URI is not TOTP'
+        assert parameters.get('issuer')==['JobForged Test'],'Authenticator issuer differs from the UI'
+        assert parameters.get('secret')==[factor['totp']['secret']],'Manual key differs from the provisioning URI'
+        assert parameters.get('algorithm',['SHA1'])==['SHA1'] and parameters.get('digits',['6'])==['6'] and parameters.get('period',['30'])==['30'],'Google Authenticator TOTP parameters differ'
+        assert factor['totp']['qr_code'],'Enrollment QR is missing'
         status,challenge=request(auth,'/factors/'+factor['id']+'/challenge',{},platform_token)
         assert status==200,'Native TOTP challenge failed'
-        code=totp_code(factor['totp']['secret'])
+        code=totp_code(parameters['secret'][0])
         status,verified=request(auth,'/factors/'+factor['id']+'/verify',{'challenge_id':challenge['id'],'code':code},platform_token)
         assert status==200,'Native TOTP verification failed'
         assert request(rest,'/rpc/platform_read',{'section':'overview'},verified['access_token'])[0]==200,'Native fresh MFA denied'

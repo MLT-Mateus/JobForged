@@ -281,3 +281,5 @@ body:has(.admin-shell){overflow:hidden}
 .backoffice-audit-data { white-space:pre-wrap; overflow-wrap:anywhere; font-size:var(--jf-ui-font-size-sm); }
 .admin-main dd { margin:var(--jf-ui-space-1) 0 0; overflow-wrap:anywhere; }
 .admin-main dt { color:var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); }
+.jf-authenticator-qr { width: fit-content; max-width: 100%; padding: var(--jf-ui-space-5); border-radius: var(--jf-ui-radius-card); background: #fff; }
+.jf-authenticator-qr img { display: block; width: 240px; max-width: 100%; height: auto; }
