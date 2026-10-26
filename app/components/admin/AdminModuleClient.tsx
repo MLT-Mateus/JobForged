@@ -32,7 +32,7 @@ export function AdminShell({ module, context, children }: { module: WorkspaceMod
   const auth=useCompanyAuthSession();
   const {theme}=useThemePreference();
   const [branding,setBranding]=useState<{companyId:string;value:Customization}|null>(null);
-  useEffect(()=>{if(!auth.checking&&(!auth.authenticated||auth.platformAdmin||!auth.company))router.replace(auth.platformAdmin?"/backoffice":"/login")},[auth.checking,auth.authenticated,auth.platformAdmin,auth.company,router]);
+  useEffect(()=>{if(!auth.checking&&(!auth.authenticated||auth.platformAdmin||!auth.company))router.replace(`${auth.authenticated ? "/403" : "/401"}?next=${encodeURIComponent(window.location.pathname)}`)},[auth.checking,auth.authenticated,auth.platformAdmin,auth.company,router]);
   useEffect(()=>{if(!auth.company?.id||auth.platformAdmin)return;let active=true;const companyId=auth.company.id;
     const load=()=>{void customizationService.load().then(value=>{if(active&&value.published.organizationId===companyId)setBranding({companyId,value:value.published})}).catch(()=>{if(active)setBranding(null)})};
     load();window.addEventListener('jobforged-customization-published',load);window.addEventListener('focus',load);

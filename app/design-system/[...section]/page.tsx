@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import DesignSystemClient from "../DesignSystemClient";
 import "../design-system.css";
@@ -10,6 +9,5 @@ export const metadata: Metadata = {
 
 export default async function DesignSystemSectionPage({params}:{params:Promise<{section:string[]}>}) {
   const {section}=await params;
-  if(section[0] === "aplicacao") notFound();
   return <DesignSystemClient initialSection={section[0]} />;
 }

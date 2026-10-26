@@ -83,7 +83,9 @@ try {
     }
     for (const route of routes) {
       const response = await fetch(`${base}${route}`, { signal: AbortSignal.timeout(15_000) });
-      assert.equal(response.status, 200, `${environment}: ${route}`);
+      const stateCode = /^\/(401|403|404|500|503)$/.exec(route);
+      const expected = stateCode ? Number(stateCode[1]) : /^\/backoffice(\/|$)/.test(route) ? 401 : 200;
+      assert.equal(response.status, expected, `${environment}: ${route}`);
       assert.match(response.headers.get("content-type") ?? "", /text\/html/);
       const html = await response.text();
       assert.match(html, /<html/);
