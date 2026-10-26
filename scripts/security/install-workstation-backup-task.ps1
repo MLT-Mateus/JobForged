@@ -19,13 +19,13 @@ foreach($identity in @($sid,[Security.Principal.SecurityIdentifier]::new('S-1-5-
 $tools=Join-Path $base 'Tools';$destination=Join-Path $base 'Test'
 [IO.Directory]::CreateDirectory($tools)|Out-Null
 [IO.Directory]::CreateDirectory($destination)|Out-Null
-foreach($name in @('collect-test-backup.ps1','workstation-backup.ps1')){
+foreach($name in @('collect-test-backup.ps1','workstation-backup.ps1','run-workstation-backup-task.ps1')){
  $source=Join-Path $PSScriptRoot $name;$target=Join-Path $tools $name
  if([IO.Path]::GetFullPath($source) -ne [IO.Path]::GetFullPath($target)){Copy-Item -LiteralPath $source -Destination $target}
 }
 $engine=[IO.Path]::GetFullPath($EnginePath)
 if(!(Test-Path -LiteralPath $engine -PathType Leaf)){throw 'PowerShell runtime missing'}
-$collector=Join-Path $tools 'collect-test-backup.ps1'
+$collector=Join-Path $tools 'run-workstation-backup-task.ps1'
 $action=New-ScheduledTaskAction -Execute $engine -Argument ('-NoProfile -NonInteractive -WindowStyle Hidden -File "'+$collector+'"') -WorkingDirectory $tools
 $principal=New-ScheduledTaskPrincipal -UserId ([Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited
 $trigger=New-ScheduledTaskTrigger -Daily -At '03:00'
