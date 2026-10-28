@@ -34,7 +34,8 @@ EXCLUDED = ('auth.sessions','auth.refresh_tokens','auth.mfa_factors','auth.mfa_c
             'app_private.request_limits','app_private.company_upload_reservations')
 
 def sql(container, statement, database='postgres'):
-    result=subprocess.run(['docker','exec','-i',container,'psql','-XqAt','-U','supabase_admin',
+    socket=['-h','/tmp'] if re.fullmatch(r'jbfd-security-restore-(test|live)-[a-z0-9-]+',container) else []
+    result=subprocess.run(['docker','exec','-i',container,'psql',*socket,'-XqAt','-U','supabase_admin',
                            '-d',database,'-v','ON_ERROR_STOP=1'],input=statement,capture_output=True,text=True)
     if result.returncode:
         # Do not expose SQL diagnostics: rows can include hashes/private content.
