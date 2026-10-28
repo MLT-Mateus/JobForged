@@ -106,7 +106,7 @@ jobs:
       - name: Validar proteção de publicação sem Auth
         run: |
           bash -n scripts/deploy-vps.sh scripts/supabase-migrate.sh scripts/jbfd-deploy-live-root.sh scripts/jbfd-deploy-test-root.sh scripts/jbfd-supabase-smtp-test-root.sh
-          node --test tests/auth-readiness.test.mjs
+          node --test tests/auth-readiness.test.mjs tests/live-deploy-stdin.test.mjs
 
       - name: Testar e validar a publicação
         run: npm test
