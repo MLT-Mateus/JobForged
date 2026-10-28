@@ -53,6 +53,7 @@ jobs:
         run: |
           python3 tests/environment_profiles_test.py
           python3 tests/environment_profiles_test.py --compose
+          python3 tests/compose_yaml_test.py
 
   mcp:
     name: Validar MCP operacional
