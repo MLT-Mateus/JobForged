@@ -56,7 +56,7 @@ def retarget(value):
         return 'https://jobforged.com/'+value[len('https://test.jobforged.com/'):]
     return value
 
-def collect(container, expected, database='postgres'):
+def collect(container, expected, database='postgres', responsible_email='jobforged@gmail.com'):
     for table in EMPTY_SOURCE:
         if sql(container,'select count(*) from '+table+';',database)!='0':
             raise ValueError('Unexpected invitation, campaign or quarantine state requires review')
@@ -85,7 +85,11 @@ def collect(container, expected, database='postgres'):
         data[table]=rows
     counts={'users':len(data['auth.users']),'companies':len(data['public.companies']),'objects':len(data['storage.objects'])}
     if counts!=expected:raise ValueError('Source counts differ from explicitly approved scope')
+    responsible=[row for row in data['auth.users'] if row['email'].lower()==responsible_email.lower() and row['email_confirmed_at'] is not None]
+    if len(responsible)!=1:raise ValueError('Approved confirmed administrator identity missing')
+    if sql(container,'select count(*) from public.platform_admins where user_id='+literal(responsible[0]['id'])+"::uuid and role='platform_admin';",database)!='1':raise ValueError('Source administrator identity mismatch')
     return {'format':1,'source':'test','destination':'live','expected':counts,'tables':data,
+            'responsible_user_id':responsible[0]['id'],'responsible_email':responsible_email.lower(),
             'excluded':list(EXCLUDED)+['public.platform_admins','provider credentials and settings'],
             'url_retarget':'structured Test-host URLs only; audit records unchanged'}
 
@@ -93,6 +97,8 @@ def import_transaction(container, package, database='postgres'):
     if package.get('format')!=1 or package.get('source')!='test' or package.get('destination')!='live':raise ValueError('Unexpected transfer package')
     data=package['tables']
     if set(data)!=set(TABLES):raise ValueError('Unexpected data table')
+    responsible=str(uuid.UUID(package['responsible_user_id']))
+    if not any(row['id']==responsible and row['email'].lower()==package['responsible_email'] and row['email_confirmed_at'] is not None for row in data['auth.users']):raise ValueError('Approved audit identity missing')
     for key,table in [('users','auth.users'),('companies','public.companies'),('objects','storage.objects')]:
         if len(data[table])!=package['expected'][key]:raise ValueError('Transfer manifest count mismatch')
     statements=['BEGIN;',"SET LOCAL lock_timeout='10s';", "SET LOCAL statement_timeout='120s';"]
@@ -119,7 +125,7 @@ def import_transaction(container, package, database='postgres'):
     for table in TABLES:statements.append('ALTER TABLE '+table+' ENABLE TRIGGER USER;')
     for table in ('public.company_audit_events','public.platform_audit_events'):
         statements.append("SELECT setval(pg_get_serial_sequence('"+table+"','id'),greatest(coalesce(max(id),0),1),coalesce(max(id),0)>0) FROM "+table+';')
-    statements.append("INSERT INTO public.platform_audit_events(action,reason,details) VALUES ('platform.data.import','Explicit human-approved Test to Live transfer',jsonb_build_object('source','test','users',"+str(package['expected']['users'])+",'companies',"+str(package['expected']['companies'])+",'objects',"+str(package['expected']['objects'])+",'sessions_copied',false,'mfa_copied',false));")
+    statements.append("INSERT INTO public.platform_audit_events(actor_user_id,action,reason,details) VALUES ("+literal(responsible)+"::uuid,'platform.data.import','Explicit human-approved Test to Live transfer',jsonb_build_object('source','test','operator','vps-root','users',"+str(package['expected']['users'])+",'companies',"+str(package['expected']['companies'])+",'objects',"+str(package['expected']['objects'])+",'sessions_copied',false,'mfa_copied',false));")
     for table in EXCLUDED:
         statements.append("DO $$BEGIN IF EXISTS(SELECT 1 FROM "+table+") THEN RAISE EXCEPTION 'Ephemeral authorization state imported'; END IF; END$$;")
     statements.append('COMMIT;')
@@ -187,6 +193,7 @@ def apply_live(revision, authorization, package_path, archive_path):
     if record.get('transfer_sha256')!=hashlib.sha256(package_path.read_bytes()).hexdigest() or record.get('transfer_storage_sha256')!=hashlib.sha256(archive_path.read_bytes()).hexdigest():raise ValueError('Explicit protected transfer manifest required')
     package=json.loads(package_path.read_text())
     if package['expected']!={'users':4,'companies':3,'objects':20}:raise ValueError('Scope differs from human-approved counts')
+    if package['responsible_email']!=record.get('responsible_email','').lower():raise ValueError('Approved administrator identity differs')
     release=Path(__file__).resolve().parents[2]
     if subprocess.run(['git','-C',str(release),'rev-parse','HEAD'],capture_output=True,text=True,check=True).stdout.strip()!=revision:raise ValueError('Source revision mismatch')
     subprocess.run(['bash',str(release/'scripts/supabase-migrate.sh'),'live','--check'],capture_output=True,check=True)
