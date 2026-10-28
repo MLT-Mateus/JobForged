@@ -63,7 +63,9 @@ export function AppToastHost() {
 function ToastView({ active, target }: { active: ActiveToast; target: HTMLElement }) {
   const { notice, serial } = active;
   const urgent = notice.kind === "danger" || notice.kind === "warning";
-  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const paused = hovered || focused;
   const ref = useRef<HTMLDivElement>(null);
   // Native dialogs occupy the browser top layer; a body z-index cannot cover
   // them. A manual popover stays fixed to the viewport and inside modal focus.
@@ -86,7 +88,7 @@ function ToastView({ active, target }: { active: ActiveToast; target: HTMLElemen
   }, [paused, notice.action, serial, urgent]);
 
   return createPortal(
-    <div ref={ref} popover="manual" className={`jf-toast jf-toast--${notice.kind}`} role={urgent ? "alert" : "status"} aria-live={urgent ? "assertive" : "polite"} aria-atomic="true" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }}>
+    <div ref={ref} popover="manual" className={`jf-toast jf-toast--${notice.kind}`} role={urgent ? "alert" : "status"} aria-live={urgent ? "assertive" : "polite"} aria-atomic="true" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}>
       <span className="jf-toast__icon"><ToastIcon kind={notice.kind} /></span>
       <div>
         <strong>{notice.title}</strong>
