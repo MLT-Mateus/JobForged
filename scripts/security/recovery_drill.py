@@ -75,6 +75,8 @@ def main():
         with tarfile.open(folder / 'storage.tar.gz', 'w:gz') as archive:
             archive.add(str(environment.stack/'volumes/storage'), arcname='storage')
         schema_fingerprint = sql(environment.database, "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','auth','storage','app_private') AND c.relkind IN ('r','p');")
+        database_owner = sql(environment.database, "SELECT pg_get_userbyid(datdba) FROM pg_database WHERE datname='postgres';")
+        if database_owner not in ('postgres','supabase_admin'):raise RuntimeError('Unexpected database owner')
         counts = sql(environment.database, "SELECT json_build_object('users',(SELECT count(*) FROM auth.users),'companies',(SELECT count(*) FROM public.companies),'members',(SELECT count(*) FROM public.company_members),'objects',(SELECT count(*) FROM storage.objects),'migrations',(SELECT count(*) FROM public.jbfd_schema_migrations));")
         # Manifest checks include immutable object metadata, not customer content.
         objects = sql(environment.database, "SELECT coalesce(json_agg(x),'[]') FROM (SELECT bucket_id,name,coalesce(metadata->>'size','0') AS size FROM storage.objects ORDER BY bucket_id,name)x;")
@@ -125,6 +127,8 @@ def main():
                     'supabase_admin', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-c', statement],
                    capture_output=True, text=True).stdout.strip()
     restored_counts = restored("SELECT json_build_object('users',(SELECT count(*) FROM auth.users),'companies',(SELECT count(*) FROM public.companies),'members',(SELECT count(*) FROM public.company_members),'objects',(SELECT count(*) FROM storage.objects),'migrations',(SELECT count(*) FROM public.jbfd_schema_migrations));")
+    restored('ALTER DATABASE postgres OWNER TO '+database_owner+';')
+    if restored("SELECT pg_get_userbyid(datdba) FROM pg_database WHERE datname='postgres';") != database_owner:raise RuntimeError('Restored database owner mismatch')
     if json.loads(counts) != json.loads(restored_counts):
         raise RuntimeError('Restored record counts do not match backup')
     if restored("SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','auth','storage','app_private') AND c.relkind IN ('r','p');") != schema_fingerprint:
@@ -159,7 +163,7 @@ def main():
     checksums = {name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
                  for name in ['postgres.sql.gz', 'storage.tar.gz', 'objects.private.json','infrastructure-audit.jsonl']}
     evidence = {'environment': environment.name, 'backup': str(folder), 'restore_container': restore,'database_image':image,
-                'network': 'none', 'ports': [], 'counts_match': True,
+                'network': 'none', 'ports': [], 'counts_match': True, 'database_owner':database_owner,
                 'storage_objects_verified': verified, 'files_verified': files_verified,
                 'writer_downtime_seconds': downtime,
                 'total_seconds': round(time.monotonic() - started, 2), 'checksums': checksums}
