@@ -4,6 +4,12 @@ umask 077
 
 [[ $(id -u) -eq 0 ]] || { echo "Este helper precisa ser chamado pelo sudo autorizado." >&2; exit 77; }
 
+if [[ $# -eq 2 && "$1" == probe-readiness && "$2" =~ ^[0-9a-f]{40}$ ]]; then
+  python3 "/opt/jbfd/releases/$2/scripts/security/verify-live-release.py" "$2" >/dev/null
+  echo "jbfd-live-readiness-v1"
+  exit 0
+fi
+
 if [[ $# -eq 1 && "$1" == probe-brevo ]]; then
   echo "jbfd-brevo-live-protocol-v1"
   exit 0
@@ -18,6 +24,11 @@ if [[ $# -ne 1 || "$1" != configure-brevo ]]; then
   echo "Comando Live inválido." >&2
   exit 64
 fi
+
+# Direct SSH use must not bypass the workflow's release preparation gate.
+live_approved_revision="$(python3 -c 'import json,sys;sys.path.insert(0,"/opt/jbfd/security-work/live-tools");from environment_profiles import private_file;print(json.loads(private_file("/opt/jbfd/security-work/live-release-approval.json").read_text())["revision"])')"
+[[ "$live_approved_revision" =~ ^[0-9a-f]{40}$ ]] || exit 64
+python3 "/opt/jbfd/releases/$live_approved_revision/scripts/security/verify-live-release.py" "$live_approved_revision" >/dev/null
 
 # The Live gateway only sends secrets through stdin. Never accept them as arguments.
 IFS= read -r brevo_api_key || { echo "A chave de API Brevo está ausente." >&2; exit 64; }
@@ -151,7 +162,7 @@ if header.get("alg") != "HS256" or claims.get("role") != "anon" or not hmac.comp
 sys.stdout.write(key)
 ')"
 write_updated_env "$app_env" "$app_candidate" "BREVO_API_KEY=$brevo_api_key" \
-  SUPABASE_INTERNAL_URL=http://supabase-live-envoy:8000 \
+  SUPABASE_INTERNAL_URL=http://jbfd-live-security-gateway:8080 \
   "SUPABASE_ANON_KEY=$live_anon_key"
 unset live_anon_key
 write_updated_env "$supabase_env" "$smtp_candidate" \
@@ -189,8 +200,12 @@ compose_auth() {
   shift
   (
     cd "$supabase_root"
+    security_overrides=()
+    for override in docker-compose.jbfd-email-template.override.yml docker-compose.security.override.yml; do
+      [[ ! -f "$supabase_root/$override" ]] || security_overrides+=(-f "$supabase_root/$override")
+    done
     docker compose --project-name supabase-live --env-file "$env_file" \
-      -f "$supabase_compose" -f "$supabase_override" "$@"
+      -f "$supabase_compose" -f "$supabase_override" "${security_overrides[@]}" "$@"
   )
 }
 compose_app "$app_candidate" config --quiet

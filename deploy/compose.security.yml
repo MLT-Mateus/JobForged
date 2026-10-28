@@ -1,0 +1,39 @@
+services:
+  gateway:
+    image: ${JBFD_SECURITY_GATEWAY_IMAGE:?Approved immutable image required}
+    container_name: ${JBFD_GATEWAY_CONTAINER:?Explicit environment identity required}
+    env_file:
+      - ${JBFD_SECURITY_GATEWAY_ENV_FILE:?Private environment-specific credentials required}
+    environment:
+      APP_ENV: ${APP_ENV:?Explicit environment required}
+      UPSTREAM_URL: ${JBFD_AUTH_UPSTREAM:?Environment-specific provider required}
+      TRUSTED_PROXY_HOST: jobforged_traefik
+      TRUSTED_BFF_HOST: ${JBFD_BFF_CONTAINER:?Environment-specific BFF required}
+    networks: [provider, ingress]
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=16m']
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    cpus: 0.5
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${JBFD_INGRESS_NETWORK:?Explicit ingress required}
+      - traefik.http.routers.jbfd-${APP_ENV}-security-api.rule=Host(`${APP_ORIGIN}`) && (PathPrefix(`/api/`) || PathPrefix(`/auth/v1`) || PathPrefix(`/rest/v1`) || PathPrefix(`/storage/v1`) || PathPrefix(`/realtime/v1`) || PathPrefix(`/functions/v1`) || PathPrefix(`/graphql/v1`))
+      - traefik.http.routers.jbfd-${APP_ENV}-security-api.priority=1000
+      - traefik.http.routers.jbfd-${APP_ENV}-security-api.entrypoints=websecure
+      - traefik.http.routers.jbfd-${APP_ENV}-security-api.tls=true
+      - traefik.http.routers.jbfd-${APP_ENV}-security-api.tls.certresolver=letsencrypt
+      - traefik.http.services.jbfd-${APP_ENV}-security-api.loadbalancer.server.port=8080
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '3'}
+networks:
+  provider:
+    name: ${JBFD_PROVIDER_NETWORK:?Explicit provider network required}
+    external: true
+  ingress:
+    name: ${JBFD_INGRESS_NETWORK:?Explicit ingress required}
+    external: true

@@ -1,0 +1,29 @@
+services:
+  maintenance:
+    image: ${JBFD_SECURITY_GATEWAY_IMAGE:?Approved immutable image required}
+    container_name: jbfd-${APP_ENV}-maintenance
+    command: [node, maintenance-server.mjs]
+    environment:
+      JBFD_MAINTENANCE_LISTEN: 'true'
+      UPSTREAM_APP_URL: http://${JBFD_BFF_CONTAINER}:3000
+    networks: [ingress]
+    read_only: true
+    init: true
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    cpus: 0.25
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${JBFD_INGRESS_NETWORK}
+      - traefik.http.routers.jbfd-${APP_ENV}-maintenance.rule=${APP_HOST_RULE:?Explicit public hosts required}
+      - traefik.http.routers.jbfd-${APP_ENV}-maintenance.priority=2000
+      - traefik.http.routers.jbfd-${APP_ENV}-maintenance.entrypoints=websecure
+      - traefik.http.routers.jbfd-${APP_ENV}-maintenance.tls=true
+      - traefik.http.routers.jbfd-${APP_ENV}-maintenance.tls.certresolver=letsencrypt
+      - traefik.http.services.jbfd-${APP_ENV}-maintenance.loadbalancer.server.port=8080
+networks:
+  ingress:
+    name: ${JBFD_INGRESS_NETWORK:?Explicit ingress required}
+    external: true

@@ -83,6 +83,20 @@ grant usage,create on schema public to postgres;
                 sql("""insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data) values('16000000-0000-4000-8000-000000000001','legacy-native@example.invalid',now(),'{}');
 insert into public.companies(id,name,cnpj,phone) values('16000000-0000-4000-8000-000000000011','Legacy native fixture','11222333000181','11999999999');
 insert into public.company_members(company_id,user_id,email,full_name,role,status) values('16000000-0000-4000-8000-000000000011','16000000-0000-4000-8000-000000000001','legacy-native@example.invalid','Legacy fixture','owner','active');""")
+                # Prove the production baseline path without copying Live data.
+                # Restore the actual 0001/0002 database archive, then continue all
+                # remaining migrations against that restored database. Both DBs
+                # stay in this network-none container with synthetic identities.
+                stage='legacy baseline backup and restoration'
+                before=sql("select row_to_json(x) from (select (select count(*) from auth.users) users,(select count(*) from public.companies) companies,(select count(*) from public.company_members) members)x;")
+                run(['docker','exec',name,'pg_dump','-U','supabase_admin','-d','postgres','-Fc','-f','/tmp/jbfd-legacy-baseline.dump'])
+                run(['docker','exec',name,'createdb','-U','supabase_admin','jbfd_baseline_restore'])
+                run(['docker','exec',name,'pg_restore','-U','supabase_admin','--exit-on-error','--clean','--if-exists','-d','jbfd_baseline_restore','/tmp/jbfd-legacy-baseline.dump'])
+                for statement in ['alter database postgres rename to jbfd_baseline_original;', 'alter database jbfd_baseline_restore rename to postgres;']:
+                    run(['docker','exec',name,'psql','-Xq','-U','supabase_admin','-d','template1','-v','ON_ERROR_STOP=1','-c',statement])
+                after=sql("select row_to_json(x) from (select (select count(*) from auth.users) users,(select count(*) from public.companies) companies,(select count(*) from public.company_members) members)x;")
+                if before!=after:raise AssertionError('Restored legacy baseline count mismatch')
+                stage='application migrations after restored legacy baseline'
         sql('''do $$declare r record;begin
 for r in select oid::regclass object from pg_class where relnamespace='auth'::regnamespace and relkind in ('r','p') loop
 execute format('alter table %s owner to supabase_auth_admin',r.object);end loop;

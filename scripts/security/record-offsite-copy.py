@@ -11,10 +11,10 @@ import sys
 def main():
     if os.geteuid()!=0 or len(sys.argv)!=4:raise SystemExit('Root and copy evidence required')
     name,plain,encrypted=sys.argv[1:]
-    if not re.fullmatch(r'test-[0-9]{8}T[0-9]{6}Z',name) or any(not re.fullmatch(r'[a-fA-F0-9]{64}',v) for v in (plain,encrypted)):raise SystemExit('Invalid receipt')
+    if not re.fullmatch(r'(?:test|live)-[0-9]{8}T[0-9]{6}Z',name) or any(not re.fullmatch(r'[a-fA-F0-9]{64}',v) for v in (plain,encrypted)):raise SystemExit('Invalid receipt')
     folder=Path('/opt/jbfd/backups/security')/name
     recovery=json.loads((folder/'recovery.json').read_text())
-    if recovery.get('environment')!='test' or recovery.get('counts_match') is not True:raise SystemExit('Verified restoration required')
+    if recovery.get('environment')!=name.split('-',1)[0] or recovery.get('counts_match') is not True:raise SystemExit('Verified restoration required')
     digest=hashlib.file_digest((folder/'offsite.tar').open('rb'),'sha256').hexdigest()
     if digest!=plain.lower():raise SystemExit('Transferred archive differs')
     os.umask(0o077)
