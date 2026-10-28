@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 import subprocess
 import compose_yaml
-from environment_profiles import Environment, authorize_live
+from environment_profiles import Environment, authorize_live, native_compose
 
 def run(args):
     return subprocess.run(args,check=True,capture_output=True,text=True).stdout.strip()
@@ -27,6 +27,7 @@ def live_state(environment):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--environment',choices=['test','live'],default='test');parser.add_argument('--authorization');options=parser.parse_args()
     environment=Environment(options.environment)
+    if inspect(environment.envoy)['Config']['Labels'].get('com.docker.compose.project')!=environment.native_project:raise SystemExit('Unexpected native Compose project')
     if os.geteuid()!=0:raise SystemExit('Root required')
     revision=run(['git','-C',str(Path(__file__).resolve().parents[2]),'rev-parse','HEAD'])
     authorize_live(environment,revision,options.authorization)
@@ -57,7 +58,7 @@ def main():
     files=[root/'docker-compose.yml',path]
     for name in ['docker-compose.jbfd-email-template.override.yml','docker-compose.security.override.yml']:
         if (root/name).exists():files.append(root/name)
-    command=['docker','compose','--project-directory',str(root)]
+    command=native_compose(environment)
     for file in files:command+=['-f',str(file)]
     try:
         path.write_text(updated);app.write_text(new_app)

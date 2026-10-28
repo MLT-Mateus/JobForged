@@ -10,7 +10,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
-from environment_profiles import Environment, authorize_live, auth_policy
+from environment_profiles import Environment, authorize_live, auth_policy, native_compose
 
 def run(args):
     return subprocess.run(args,check=True,capture_output=True,text=True).stdout.strip()
@@ -34,6 +34,7 @@ def main():
     policy=json.loads((release/'shared/password-policy.json').read_text())
     desired=auth_policy(policy)
     info=inspect(environment.auth);labels=info['Config']['Labels'];stack=environment.stack
+    if labels.get('com.docker.compose.project')!=environment.native_project:raise SystemExit('Unexpected native Compose project')
     files=labels['com.docker.compose.project.config_files'].split(',')
     allowed=[str(stack/name) for name in ('docker-compose.yml',environment.override,'docker-compose.jbfd-email-template.override.yml','docker-compose.security.override.yml')]
     if any(name not in allowed for name in files) or labels.get('com.docker.compose.service')!='auth':raise SystemExit('Unexpected target Auth identity')
@@ -49,7 +50,7 @@ def main():
     evidence.write_text(json.dumps({'environment':environment.name,'before':{k:existing.get(k) for k in desired},'after':desired,'previous_override':previous},indent=2))
     active_files=[name for name in files if name!=str(override)]+[str(override)]
     def compose(paths):
-        command=['docker','compose','--project-directory',str(stack)]
+        command=native_compose(environment)
         for name in paths:command+=['-f',name]
         return command
     try:
