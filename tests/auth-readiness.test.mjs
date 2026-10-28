@@ -45,6 +45,10 @@ test("Configuração desabilitada na aplicação bloqueia deploy", async () => {
 test("Live exige a conexão interna exclusiva de Live", async () => {
   assert.equal(await check({ APP_ENV: "live" }), 1);
 });
+
+test("Test rejeita também o gateway interno de Live", async () => {
+  assert.equal(await check({ SUPABASE_INTERNAL_URL: "http://jbfd-live-security-gateway:8080" }), 1);
+});
 test("Cadastro desabilitado impede publicar uma versão pronta para cadastro", async () => {
   assert.equal(await check({}, 200, true, { disable_signup: true }), 1);
 });

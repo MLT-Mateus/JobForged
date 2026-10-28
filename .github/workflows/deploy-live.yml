@@ -81,6 +81,21 @@ jobs:
             exit 1
           }
 
+      - name: Conferir backup, recuperação, MFA e rollback antes de alterar Live
+        env:
+          VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
+          VPS_DEPLOY_USER: ${{ vars.VPS_DEPLOY_USER }}
+          REVISION: ${{ inputs.commit_sha }}
+        run: |
+          readiness="$(ssh -i "$HOME/.ssh/jbfd_deploy" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$VPS_DEPLOY_USER@$VPS_DEPLOY_HOST" "probe readiness live $REVISION")"
+          [[ "$readiness" == "jbfd-live-readiness-v1" ]] || {
+            echo "Preparação Live incompleta. Nenhum envio de credenciais ou deploy autorizado."
+            exit 1
+          }
+
       - name: Configurar Brevo em Live por SSH seguro
         env:
           VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}

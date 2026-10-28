@@ -7,6 +7,18 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export JBFD_ENV_FILE="/opt/jbfd/${environment}/.env"
 [[ -f "$JBFD_ENV_FILE" ]] || { echo "Arquivo ausente: $JBFD_ENV_FILE" >&2; exit 66; }
 
+# Before deterministic env writes, image changes or service operations. A Test
+# deploy never creates the protected approval/rollback records required by Live.
+verified_live_rollback=""
+hold_live_maintenance="false"
+if [[ "$environment" == live && "$command" == deploy ]]; then
+  live_gate_args=("${3:-}")
+  [[ "${JBFD_LIVE_BOOTSTRAP:-0}" != 1 ]] || live_gate_args+=(--bootstrap)
+  live_gate="$(python3 "$root/scripts/security/verify-live-release.py" "${live_gate_args[@]}")"
+  verified_live_rollback="$(printf '%s' "$live_gate" | python3 -c 'import json,sys; print(json.load(sys.stdin)["rollback_image"])')"
+  hold_live_maintenance="$(printf '%s' "$live_gate" | python3 -c 'import json,sys; print(str(json.load(sys.stdin)["hold_maintenance_on_failure"]).lower())')"
+fi
+
 # Keep canonical host and public URL available for legacy VPS .env files.
 # These values are public runtime settings; no secrets are written or displayed.
 if [[ "$environment" == "live" ]]; then
@@ -66,10 +78,16 @@ case "$command" in
       mv -f "$temporary" "$JBFD_ENV_FILE"
     }
     restore_image() {
-      write_image "$current_image"
+      # The previous Live image can use revoked contracts after the upgrade.
+      # Only a separately accepted compatible image may be used for rollback.
+      write_image "${verified_live_rollback:-$current_image}"
       "${compose[@]}" up -d --wait --wait-timeout 120 || true
     }
     fail_deploy() {
+      if [[ "$environment" == live && "$hold_live_maintenance" == true ]]; then
+        echo "Deploy Live falhou. Manutenção preservada; não restaurar imagem incompatível nem banco automaticamente." >&2
+        exit 1
+      fi
       echo "Deploy falhou; restaurando a imagem anterior." >&2
       restore_image
       exit 1

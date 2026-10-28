@@ -44,9 +44,13 @@ jobs:
       - name: Testar migrations, RLS, grants, RPCs e isolamento em PostgreSQL
         run: bash scripts/security/test-database.sh
       - name: Testar política de limitação de requisições
-        run: node --test services/security-gateway/test.mjs tests/security-contracts.test.mjs
+        run: node --test services/security-gateway/test.mjs services/security-gateway/maintenance.test.mjs tests/security-contracts.test.mjs
       - name: Testar bloqueios do gate de backup e migrations
         run: python3 tests/security_gate_test.py
+      - name: Validar separação de ambientes e bloqueios de promoção
+        run: |
+          python3 tests/environment_profiles_test.py
+          python3 tests/environment_profiles_test.py --compose
 
   mcp:
     name: Validar MCP operacional

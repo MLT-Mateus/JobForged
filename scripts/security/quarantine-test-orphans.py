@@ -18,6 +18,7 @@ import subprocess
 import time
 import urllib.request
 import tempfile
+from environment_profiles import Environment, authorize_maintenance
 
 database='supabase-db'
 
@@ -29,20 +30,25 @@ def sql(query):
 
 def main():
     global database
-    parser=argparse.ArgumentParser();parser.add_argument('--isolated-database');parser.add_argument('--isolated-storage');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--isolated-database');parser.add_argument('--isolated-storage');parser.add_argument('--environment',choices=['test','live'],default='test');parser.add_argument('--revision');args=parser.parse_args()
+    environment=Environment(args.environment)
     isolated=bool(args.isolated_database or args.isolated_storage)
     temporary=None
-    storage_name='supabase-storage';work=Path('/opt/jbfd/security-work');backup_root=Path('/opt/jbfd/backups/security')
+    database=environment.database
+    storage_name=environment.storage;work=Path('/opt/jbfd/security-work');backup_root=Path('/opt/jbfd/backups/security')
     if isolated:
+        if environment.name!='test':raise SystemExit('Isolated acceptance cannot select Live identities')
         if not args.isolated_database or not args.isolated_storage or not args.isolated_database.startswith('jbfd-security-restore-'):raise SystemExit('Both isolated provider identities required')
         for name in [args.isolated_database,args.isolated_storage]:
             info=json.loads(run(['docker','inspect',name]))[0]
             if info['Config']['Labels'].get('jbfd.security.disposable')!='true' or info['HostConfig']['PortBindings']:raise SystemExit('Disposable providers without public ports required')
         database=args.isolated_database;storage_name=args.isolated_storage
         temporary=tempfile.TemporaryDirectory(prefix='jbfd-orphan-ci-');work=Path(temporary.name);backup_root=work/'backups'
-    elif os.geteuid()!=0:raise SystemExit('VPS root required')
+    else:
+        if os.geteuid()!=0:raise SystemExit('VPS root required')
+        authorize_maintenance(environment,'bounded-orphan-maintenance',args.revision)
     os.umask(0o077)
-    lock=open(work/'test-backup.lock','w')
+    lock=open(work/(environment.name+'-backup.lock'),'w')
     fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     provider=json.loads(run(['docker','inspect',storage_name]))[0]
     if provider['Name']!='/'+storage_name:raise RuntimeError('Unexpected Storage identity')
@@ -50,7 +56,7 @@ def main():
     if isolated:
         network=next(iter(networks))
         if not json.loads(run(['docker','network','inspect',network]))[0]['Internal']:raise RuntimeError('Isolated internal network required')
-    else:network='supabase_default'
+    else:network=environment.provider_network
     address=networks[network]['IPAddress']
     if not ipaddress.ip_address(address).is_private:raise RuntimeError('Private Storage required')
     signing=dict(v.split('=',1) for v in provider['Config']['Env'])['AUTH_JWT_SECRET']
@@ -93,12 +99,16 @@ order by created_at limit 20 on conflict(object_name) do nothing;""")
     # offsite copy containing the exact quarantine object. Missing receipt means
     # keep the file. Never substitute local checksums for offsite confirmation.
     manifests=[];now=datetime.datetime.now(datetime.timezone.utc)
-    for receipt in sorted(backup_root.glob('test-*/offsite-receipt.json'),reverse=True):
+    for receipt in sorted(backup_root.glob(environment.name+'-*/offsite-receipt.json'),reverse=True):
         entry=json.loads(receipt.read_text());verified=datetime.datetime.fromisoformat(entry['verified_at'])
         if now-verified>datetime.timedelta(days=2):continue
         recovery=receipt.parent/'recovery.json'
         if hashlib.sha256(recovery.read_bytes()).hexdigest()!=entry['recovery_sha256']:continue
-        objects=json.loads((receipt.parent/'objects.private.json').read_text())
+        metadata=json.loads(recovery.read_text())
+        if metadata.get('environment')!=environment.name or metadata.get('counts_match') is not True:continue
+        objects_file=receipt.parent/'objects.private.json'
+        if hashlib.sha256(objects_file.read_bytes()).hexdigest()!=metadata.get('checksums',{}).get('objects.private.json'):continue
+        objects=json.loads(objects_file.read_text())
         manifests.append({(v['bucket_id'],v['name']) for v in objects})
     purged=0
     old=json.loads(sql("select coalesce(json_agg(q),'[]') from(select id from app_private.orphan_quarantine where source_removed_at is not null and verified_at<now()-interval '7 days' and purged_at is null order by verified_at limit 20)q;"))
@@ -110,7 +120,7 @@ order by created_at limit 20 on conflict(object_name) do nothing;""")
         if sql("select exists(select 1 from storage.objects where bucket_id='security-quarantine' and name='"+path+"');")=='t':raise RuntimeError('Quarantine purge was not confirmed')
         sql("update app_private.orphan_quarantine set purged_at=now() where id='"+job+"';")
         purged+=1
-    print(json.dumps({'environment':'test','quarantined':removed,'purged_after_offsite_receipt':purged,'registered_assets_deleted':0}))
+    print(json.dumps({'environment':environment.name,'quarantined':removed,'purged_after_offsite_receipt':purged,'registered_assets_deleted':0}))
     if temporary:temporary.cleanup()
 
 if __name__=='__main__':

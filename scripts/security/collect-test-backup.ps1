@@ -1,4 +1,12 @@
-param([string]$BackupRoot=(Join-Path ([Environment]::GetFolderPath('UserProfile')) 'JobForged-Backups\Test'))
+param(
+  [ValidateSet('test','live')][string]$Environment='test',
+  [string]$BackupRoot='',
+  [switch]$Scheduled,
+  [ValidatePattern('^[a-f0-9]{40}$')][string]$Revision,
+  [ValidatePattern('^/opt/jbfd/security-work/[a-zA-Z0-9._-]+\.json$')][string]$Authorization
+)
+if(!$BackupRoot){$BackupRoot=Join-Path ([Environment]::GetFolderPath('UserProfile')) ('JobForged-Backups\'+(Get-Culture).TextInfo.ToTitleCase($Environment))}
+if($Environment -eq 'live' -and !$Scheduled -and (!$Revision -or !$Authorization)){throw 'Live backup requires prior release-specific approval'}
 $ErrorActionPreference='Stop'
 # Install together with workstation-backup.ps1 in a protected local directory.
 # Runs in the signed-in user's context, which is required for DPAPI CurrentUser.
@@ -10,10 +18,12 @@ try {
   if(!(Test-Path -LiteralPath $resolvedRoot -PathType Container)){throw 'Protected backup directory missing'}
   $lock=[IO.File]::Open($lockPath,[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
   $sshArgs=@('-n','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=15','root@187.77.229.27')
-  $raw=& ssh @sshArgs 'python3 /opt/jbfd/security-work/test-recovery-drill.py'
-  if($LASTEXITCODE -ne 0){throw 'Test backup or isolated restoration failed'}
+  $backupCommand='python3 /opt/jbfd/security-work/test-recovery-drill.py --environment '+$Environment
+  if($Scheduled){$backupCommand+=' --scheduled'}elseif($Environment -eq 'live'){$backupCommand+=' --revision '+$Revision+' --authorization '+$Authorization}
+  $raw=& ssh @sshArgs $backupCommand
+  if($LASTEXITCODE -ne 0){throw 'Target backup or isolated restoration failed'}
   $evidence=($raw -join "`n")|ConvertFrom-Json
-  if(!$evidence.counts_match -or $evidence.environment -ne 'test' -or $evidence.backup -notmatch '^/opt/jbfd/backups/security/(test-[0-9]{8}T[0-9]{6}Z)$'){throw 'Invalid recovery evidence'}
+  if(!$evidence.counts_match -or $evidence.environment -ne $Environment -or $evidence.backup -notmatch ('^/opt/jbfd/backups/security/('+$Environment+'-[0-9]{8}T[0-9]{6}Z)$')){throw 'Invalid recovery evidence'}
   $name=$Matches[1]
   $remote="$($evidence.backup)/offsite.tar"
   & ssh @sshArgs "tar -C $($evidence.backup) -cf $remote postgres.sql.gz storage.tar.gz objects.private.json recovery.json infrastructure-audit.jsonl"
@@ -34,7 +44,7 @@ try {
   # Keep seven daily, four weekly and six monthly recovery points; never touch
   # unrelated extensions/names. Only rotate after a successful new verified copy.
   $archives=@(Get-ChildItem -LiteralPath $resolvedRoot -File -Filter '*.jfenc' |
-    Where-Object {$_.Name -match '^test-[0-9]{8}T[0-9]{6}Z\.jfenc$'} | Sort-Object Name -Descending)
+    Where-Object {$_.Name -match ('^'+$Environment+'-[0-9]{8}T[0-9]{6}Z\.jfenc$')} | Sort-Object Name -Descending)
   $keep=[Collections.Generic.HashSet[string]]::new()
   $daily=@{};$weekly=@{};$monthly=@{}
   foreach($archive in $archives){

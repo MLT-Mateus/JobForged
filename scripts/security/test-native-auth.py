@@ -413,6 +413,21 @@ def main():
         # This provider rejects the stale ancestor but retains the current
         # refresh token. Do not report family-wide revocation that did not occur.
         assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':rotated_again['refresh_token']})[0]==200,'Current refresh token unexpectedly rejected'
+        # The exact bootstrap statement used by the approved Live helper runs
+        # only on a synthetic identity in this disposable provider network.
+        import importlib.util
+        bootstrap_spec=importlib.util.spec_from_file_location('bootstrap_fixture',Path(__file__).with_name('bootstrap-live-admin.py'))
+        bootstrap=importlib.util.module_from_spec(bootstrap_spec);bootstrap_spec.loader.exec_module(bootstrap)
+        bootstrap_email='bootstrap-'+suffix;bootstrap_id=create(bootstrap_email)
+        status,bootstrap_session=request(auth,'/token?grant_type=password',{'email':bootstrap_email,'password':password});assert status==200
+        sql(bootstrap.bootstrap_sql(bootstrap_email,'isolated-human-approval-fixture'))
+        assert request(gateways[0][1],'/rest/v1/rpc/platform_read',{'section':'overview'},bootstrap_session['access_token'])[0] in (401,403),'Bootstrap granted business access before MFA'
+        status,bootstrap_factor=request(gateways[0][1],'/auth/v1/factors',{'factor_type':'totp','friendly_name':'Bootstrap isolated fixture'},bootstrap_session['access_token']);assert status==200,'Bootstrap enrollment capability failed'
+        assert request(gateways[0][1],'/auth/v1/factors',{'factor_type':'totp','friendly_name':'Bootstrap capability replay'},bootstrap_session['access_token'])[0]==401,'Bootstrap capability replayed'
+        status,bootstrap_challenge=request(gateways[0][1],'/auth/v1/factors/'+bootstrap_factor['id']+'/challenge',{},bootstrap_session['access_token']);assert status==200
+        status,bootstrap_verified=request(gateways[0][1],'/auth/v1/factors/'+bootstrap_factor['id']+'/verify',{'challenge_id':bootstrap_challenge['id'],'code':totp_code(bootstrap_factor['totp']['secret'])},bootstrap_session['access_token']);assert status==200,'Bootstrap MFA verification failed'
+        assert request(gateways[0][1],'/rest/v1/rpc/platform_read',{'section':'overview'},bootstrap_verified['access_token'])[0]==200,'Bootstrap administrator denied after fresh MFA'
+        assert sql("select count(*) from public.platform_audit_events where actor_user_id='"+bootstrap_id+"' and action='platform.security.bootstrap';")=='1','Bootstrap ownership grant was not audited'
         print(json.dumps({'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
@@ -426,7 +441,7 @@ def main():
             'orphan_verified_quarantine':True,'registered_assets_never_collected':True,'quarantine_retention_gate':True,'maintenance_no_business_or_public_access':True,
             'root_approved_session_bound_factor_recovery':True,
             'real_orphan_worker':True,
-            'browser_zstd_negotiation_safe':True,
+            'browser_zstd_negotiation_safe':True,'legacy_baseline_backup_restore_upgrade':True,'bootstrap_mfa_session_bound_single_use':True,
             'direct_invitation_budget':True,'password_change_revokes_other_sessions':True,'refresh_rotation_old_token_rejected':True,'native_replay_revokes_current_family':False,
             'network_internal':True,'published_ports':[],'outbound_email':False}))
     finally:
