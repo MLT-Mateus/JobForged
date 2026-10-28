@@ -7,14 +7,19 @@ import { WorkspaceShell } from "../components/ui/WorkspaceShell";
 import { InlineBrandLoader } from "../components/InlineBrandLoader";
 import { WidgetsIcon } from "../components/ui/Icons";
 import { WidgetsSection } from "./WidgetsSection";
+import { ApplicationStatesSection } from "./ApplicationStatesSection";
 import { EmailTemplatesSection } from "./EmailTemplatesSection";
 import { useThemePreference } from "@/app/components/ui";
 import { BrandAsset } from "@/app/components/BrandAsset";
 import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnimation";
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, Bell, BriefcaseBusiness, CalendarDays, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, House, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, ShieldCheck, SlidersHorizontal, Sparkles, TrendingUp, Type, UserRound, UserRoundCheck, UsersRound, WalletCards } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, SlidersHorizontal, Sparkles, Type } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
-import { CheckboxField, AppToast, DateField, DateRangeField, FileUploadField, MultiFileUploadField, MultiSelectField, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, type ToastNotice, type DateRangeValue, type SelectOption } from "@/app/components/ui";
+import { CheckboxField, StatusBadge, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, DisplayValue, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
+import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
+import { fontPairs } from "@/app/components/ui/font-pairs";
+import { CommunicationsDemo } from './CommunicationsDemo';
+import { BrandingDesignSystemDemo } from '../components/personalization/BrandingDesignSystemDemo';
 
 type AlertKind = "success" | "info" | "warning" | "danger";
 
@@ -54,17 +59,6 @@ const spacingScale = [
   { token: "--jf-ui-space-9", value: 64, label: "Seções" },
 ];
 
-const applicationMenu = [
-  { label: "Home", icon: House },
-  { label: "Dashboards", icon: LayoutDashboard },
-  { label: "Vagas", icon: BriefcaseBusiness },
-  { label: "Candidaturas", icon: UsersRound },
-  { label: "Agenda", icon: CalendarDays },
-  { label: "Personalização", icon: Palette },
-  { label: "Administradores", icon: ShieldCheck },
-  { label: "Financeiro", icon: WalletCards },
-  { label: "Configurações", icon: Settings2 },
-];
 
 const colorTokens = [
   { name: "Turquesa JobForged", variable: "--jf-ui-brand", group: "brand", use: "Ações principais e progresso" },
@@ -87,11 +81,11 @@ const animatedBrandAssets: Array<{ title: string; description: string; asset: st
   { title: "Animação alternativa", description: "Azul na mira e turquesa na pessoa.", asset: "/brand/jobforged-loader-alternate.svg" },
 ];
 
-const quickAlerts: Array<{ kind: AlertKind; label: string; title: string; text: string }> = [
-  { kind: "success", label: "Sucesso", title: "Alterações salvas", text: "As informações foram atualizadas com sucesso." },
-  { kind: "info", label: "Informação", title: "Novo candidato", text: "Uma nova candidatura chegou para avaliação." },
-  { kind: "warning", label: "Atenção", title: "Perfil incompleto", text: "Revise os critérios obrigatórios antes de avançar." },
-  { kind: "danger", label: "Erro", title: "Não foi possível concluir", text: "Tente novamente ou fale com o suporte." },
+const quickAlerts: Array<{ kind: AlertKind; label: string; title: string; text: string; sound: string }> = [
+  { kind: "success", label: "Sucesso", title: "Alterações salvas", text: "As informações foram atualizadas com sucesso.", sound: "Som padrão de sucesso" },
+  { kind: "info", label: "Informação", title: "Novo candidato", text: "Uma nova candidatura chegou para avaliação.", sound: "Som padrão de informação" },
+  { kind: "warning", label: "Atenção", title: "Perfil incompleto", text: "Revise os critérios obrigatórios antes de avançar.", sound: "Som padrão de atenção" },
+  { kind: "danger", label: "Erro", title: "Não foi possível concluir", text: "Tente novamente ou fale com o suporte.", sound: "Som padrão de erro" },
 ];
 
 const workModelOptions: SelectOption[] = [
@@ -125,14 +119,18 @@ const brandFamilies = [
     title: "Assinatura principal",
     description: "Turquesa conduz a mira; azul destaca a pessoa e o nome Job.",
     logo: "/brand/jobforged-logo-primary.svg",
+    logoPng: "/brand/jobforged-logo.png",
     symbol: "/brand/jobforged-symbol.svg",
+    symbolPng: "/brand/jobforged-symbol-download.png",
   },
   {
     number: "02",
     title: "Assinatura alternativa",
     description: "Azul conduz a mira; turquesa destaca a pessoa e o nome Job.",
     logo: "/brand/jobforged-logo-alternate.svg",
+    logoPng: "/brand/jobforged-logo-alternate-download.png",
     symbol: "/brand/jobforged-icon-alternate.svg",
+    symbolPng: "/brand/jobforged-icon-alternate-download.png",
   },
 ];
 
@@ -194,8 +192,14 @@ function AlertIcon({ kind, size = 18 }: { kind: AlertKind; size?: number }) {
 
 export default function DesignSystemClient({initialSection="fundamentos"}:{initialSection?:string}) {
   const { theme } = useThemePreference();
+  const statusSoundEnabled = useStatusSoundPreference();
+  const [workspaceState,setWorkspaceState] = useState<"loading"|"error"|"empty"|"forbidden">("loading");
+  const [demoRange,setDemoRange] = useState(50);
+  const [demoColor,setDemoColor] = useState("#20B2AA");
+  const [demoRich,setDemoRich]=useState("");
+  const [wideDialogOpen,setWideDialogOpen] = useState(false);
+  const [nestedDialogOpen,setNestedDialogOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(true);
-  const [appSidebarExpanded, setAppSidebarExpanded] = useState(true);
   const [activePage, setActivePage] = useState(() => Math.max(0,navigation.findIndex(item=>item.id===initialSection)));
   const [copied, setCopied] = useState<string | null>(null);
   const [activeAlert, setActiveAlert] = useState<ToastNotice | null>(null);
@@ -264,7 +268,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
       textarea.remove();
     }
     setCopied(label);
-    setActiveAlert({ kind: "success", title: "Conteúdo copiado", text: `${label} foi copiado para a área de transferência.` });
+    setActiveAlert(createToastNotice({ kind: "success", title: "Conteúdo copiado", text: `${label} foi copiado para a área de transferência.` }));
   }
 
   function addStage(label: string) {
@@ -309,14 +313,14 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <article className="ds-brand-family" key={family.title}>
                     <header><span>{family.number}</span><div><strong>{family.title}</strong><p>{family.description}</p></div></header>
                     <div className="ds-brand-family__preview ds-brand-family__preview--logo"><div className="ds-brand-family__logo"><small>Logo horizontal</small><BrandAsset src={family.logo} alt={`${family.title} da JobForged`} /></div></div>
-                    <footer><span>Arquivo vetorial oficial</span><div><a href={family.logo} download className="ds-download-button"><Download size={15} />Logo SVG</a></div></footer>
+                    <footer><span>Arquivos oficiais</span><div><a href={family.logo} download className="ds-download-button"><Download size={15} />Logo SVG</a><a href={family.logoPng} download className="ds-download-button"><Download size={15} />Logo PNG</a></div></footer>
                   </article>
                 ))}
               </div>
             </div>
             <div className="ds-asset-section">
               <header><span>02</span><div><h3>Ícones</h3><p>Símbolos compactos para favicons, menus, avatares e estados reduzidos.</p></div></header>
-              <div className="ds-brand-icons">{brandFamilies.map((family) => <article key={family.symbol}><BrandAsset src={family.symbol} alt={`Ícone da ${family.title.toLowerCase()}`} /><span><strong>{family.title}</strong><small>SVG vetorial · fundo transparente</small></span><a href={family.symbol} download className="ds-download-button"><Download size={15} />Ícone SVG</a></article>)}</div>
+              <div className="ds-brand-icons">{brandFamilies.map((family) => <article key={family.symbol}><BrandAsset src={family.symbol} alt={`Ícone da ${family.title.toLowerCase()}`} /><span><strong>{family.title}</strong><small>SVG vetorial · PNG transparente</small></span><div className="ds-brand-icons__downloads"><a href={family.symbol} download className="ds-download-button"><Download size={15} />Ícone SVG</a><a href={family.symbolPng} download className="ds-download-button"><Download size={15} />Ícone PNG</a></div></article>)}</div>
             </div>
             <div className="ds-asset-section">
               <header><span>03</span><div><h3>Animações</h3><p>Assets de carregamento para transições, inicialização e processamento.</p></div></header>
@@ -345,12 +349,13 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <SectionHeading title="Duas fontes, uma hierarquia fácil de reconhecer." description="Montserrat lidera; Open Sans sustenta a leitura. A combinação equilibra personalidade de marca e clareza em interfaces densas." />
             <div className="ds-type-families"><article className="ds-type-family ds-type-family--montserrat"><span>Aa</span><div><strong>Montserrat Variable</strong><em>Fonte primária</em><p>Títulos, navegação, botões, métricas e labels curtas. Use pesos de 600 a 780 para dar direção e presença.</p></div></article><article className="ds-type-family ds-type-family--opensans"><span>Aa</span><div><strong>Open Sans Variable</strong><em>Fonte secundária</em><p>Parágrafos, campos, tabelas, descrições e conteúdos longos. Use pesos de 400 a 650 para maximizar a leitura.</p></div></article></div>
             <div className="ds-type-scale"><div><span>Display · Montserrat 52/58</span><strong>Talentos que movem negócios.</strong></div><div><span>Heading · Montserrat 32/40</span><strong>Visão completa do processo.</strong></div><div><span>Body · Open Sans 15/24</span><p>Informação organizada para o RH decidir com mais segurança, contexto e agilidade.</p></div><div><span>Label · Montserrat 12/16</span><small>ETAPA ATUAL · ENTREVISTA</small></div></div>
+            <BrandingDesignSystemDemo theme={theme}/><div className="ds-type-pairs"><header><h3>Pares de tipografia para empresas</h3><p>A identidade JobForged é a referência. As outras três combinações estão disponíveis para a identidade do painel empresarial e das prévias de vagas.</p></header><div className="ds-type-pairs__grid">{fontPairs.map((pair) => <article key={pair.id} className="ds-type-pair" style={{"--pair-heading":pair.heading,"--pair-body":pair.body} as CSSProperties}><span>{pair.label}</span><h4>Uma vaga que combina com você.</h4><p>Conheça a equipe, os desafios e as oportunidades de crescimento antes de se candidatar.</p><small>{pair.headingName} + {pair.bodyName}</small></article>)}</div></div>
           </section>
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "botoes"} aria-label="Botões">
             <SectionHeading title="Botões compactos, claros e consistentes." description="Cantos discretos e cores leves mantêm as ações acessíveis sem competir com o conteúdo." />
             <div className="ds-examples-grid">
-              <ExampleCard title="Principais · com e sem ícone"><div className="ds-button-row"><button type="button" className="jf-action jf-action--primary"><Plus size={16} />Nova vaga</button><button type="button" className="jf-action jf-action--accent">Ver candidatos</button></div><p className="ds-component-spec">Altura 40 px · padding 14 px · gap 8 px · raio 8 px. Use ícone de 16 px quando ele acelerar o reconhecimento da ação.</p></ExampleCard>
+              <ExampleCard title="Principais · com e sem ícone"><div className="ds-button-row"><button type="button" className="jf-action jf-action--primary"><Plus size={16} />Nova vaga</button><button type="button" className="jf-action jf-action--accent">Ver candidatos</button></div><p className="ds-component-spec">Use ícone quando ele acelerar o reconhecimento da ação.</p></ExampleCard>
               <ExampleCard title="Transparentes · com e sem ícone"><div className="ds-button-row"><button type="button" className="jf-action jf-action--secondary"><Sparkles size={16} />Editar processo</button><button type="button" className="jf-action jf-action--quiet">Cancelar</button><button type="button" className="ds-icon-button" aria-label="Mais opções"><MoreHorizontal size={18} /></button></div><p className="ds-component-spec">Outline para ações secundárias; ghost para baixa ênfase; somente ícone em ações reconhecíveis, sempre com nome acessível.</p></ExampleCard>
               <ExampleCard title="Ações de risco e fundos escuros"><div className="ds-button-row"><button type="button" className="jf-action jf-action--danger">Excluir</button><span style={{background:"var(--jf-ui-night)",padding:12,borderRadius:"var(--jf-ui-control-radius)"}}><button type="button" className="jf-action jf-action--inverse">Falar com a equipe</button></span></div><p className="ds-component-spec">Mesmas variantes compartilhadas com o painel e a Landing Page.</p><div style={{background:"var(--jf-ui-fixed-dark)",padding:16,borderRadius:"var(--jf-ui-control-radius)"}}><button type="button" className="jf-action jf-action--on-dark">Solicitar demonstração</button></div><p className="ds-component-spec">Fundo escuro fixo: contraste preservado nos dois temas.</p></ExampleCard>
               <ExampleCard title="Botão de menu"><div className="ds-menu-button-showcase"><button type="button" className="ds-menu-button-demo" aria-label={sidebarPinned ? "Reduzir menu" : "Expandir menu"} onClick={() => setSidebarPinned((pinned) => !pinned)}>{sidebarPinned ? <PanelLeftClose size={19} /> : <PanelLeftOpen size={19} />}</button><span><strong>{sidebarPinned ? "Reduzir menu lateral" : "Expandir menu lateral"}</strong><small>40 × 40 px · alterna entre navegação completa e compacta com ícones.</small></span></div></ExampleCard>
@@ -358,20 +363,26 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               <ExampleCard title="Tamanhos"><div className="ds-size-showcase"><div><span>Preenchido</span><div className="ds-button-row ds-button-row--sizes"><button type="button" className="jf-action jf-action--primary jf-action--small">Pequeno</button><button type="button" className="jf-action jf-action--primary">Padrão</button><button type="button" className="jf-action jf-action--primary jf-action--large">Grande</button></div></div><div><span>Contornado</span><div className="ds-button-row ds-button-row--sizes"><button type="button" className="jf-action jf-action--secondary jf-action--small">Pequeno</button><button type="button" className="jf-action jf-action--secondary">Padrão</button><button type="button" className="jf-action jf-action--secondary jf-action--large">Grande</button></div></div><div><span>Transparente</span><div className="ds-button-row ds-button-row--sizes"><button type="button" className="jf-action jf-action--quiet jf-action--small">Pequeno</button><button type="button" className="jf-action jf-action--quiet">Padrão</button><button type="button" className="jf-action jf-action--quiet jf-action--large">Grande</button></div></div></div></ExampleCard>
               <ExampleCard title="Estados"><div className="ds-button-states"><div><button type="button" className="jf-action jf-action--primary">Salvar</button><span><strong>Padrão</strong><small>Pronto para interação</small></span></div><div><button type="button" className="jf-action jf-action--primary is-hover">Salvar</button><span><strong>Hover</strong><small>Elevação e contraste suave</small></span></div><div><button type="button" className="jf-action jf-action--primary is-focus">Salvar</button><span><strong>Focus</strong><small>Contorno visível pelo teclado</small></span></div><div><button type="button" className="jf-action jf-action--primary" disabled>Salvar</button><span><strong>Desabilitado</strong><small>Ação temporariamente indisponível</small></span></div></div></ExampleCard>
             </div>
-            <ButtonSpecs />
           </section>
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "formularios"} aria-label="Formulários">
-            <SectionHeading title="Controles limpos, previsíveis e prontos para o produto." description="O manual agora utiliza a mesma biblioteca oficial das futuras telas. Estados, dimensões, foco e comportamento serão reaproveitados sem reconstruir componentes por página." />
+            <SectionHeading title="Controles limpos, previsíveis e prontos para o produto." description="Todo campo vazio orienta o próximo passo. Todo valor ausente comunica seu estado." />
+            <div className="ds-form-showcase ds-placeholder-guidance" aria-label="Regra global de placeholders e valores">
+              <ExampleCard title="Placeholder · curto e direto"><div className="ds-modern-stack"><p><strong>Verbo + dado + ...</strong><br/>Use 2–4 palavras. Prefira até 28 caracteres.</p><TextField label="Nome"/><TextField label="E-mail" type="email"/><p>Label sempre visível. Formatos e requisitos ficam na ajuda.</p></div></ExampleCard>
+              <ExampleCard title="Valores · mostre o estado"><div className="ds-modern-stack"><p>Campo vazio orienta. Valor ausente informa.</p><dl className="ds-value-examples"><div><dt>Sem dado</dt><dd><DisplayValue value={null}/></dd></div><div><dt>Em carregamento</dt><dd><DisplayValue value={null} state="loading"/></dd></div><div><dt>Indisponível</dt><dd><DisplayValue value={null} state="unavailable"/></dd></div><div><dt>Zero real</dt><dd><DisplayValue value={0}/></dd></div></dl><p>Não preencha com dados fictícios.</p></div></ExampleCard>
+            </div>
+            <div className="ds-form-showcase ds-placeholder-guidance" aria-label="Campos obrigatórios">
+              <ExampleCard title="Preenchimento obrigatório" className="ds-form-card--wide"><div className="ds-modern-stack"><p>O asterisco vermelho em negrito junto ao título indica um campo obrigatório. Campos sem asterisco são opcionais.</p><p>Mantenha a indicação no título, nunca no placeholder. Informe o que falta na validação.</p><div className="ds-modern-field-grid"><TextField label="Nome completo" required/><TextField label="Complemento"/><MultilineInput label="Motivo" required rows={3}/></div></div></ExampleCard>
+            </div>
             <div className="ds-form-showcase">
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
                 <div className="ds-modern-field-grid">
-                  <TextField label="Nome da vaga" requiredLabel="Obrigatório" icon={BriefcaseBusiness} placeholder="Ex.: Analista de Customer Success" defaultValue="Analista de Customer Success" helpText="Use um título reconhecido pelo mercado." />
+                  <TextField label="Nome da vaga" required icon={BriefcaseBusiness} placeholder="Ex.: Analista de Customer Success" defaultValue="Analista de Customer Success" helpText="Use um título reconhecido pelo mercado." />
                   <TextField label="Foco compartilhado" className="is-focus-demo" icon={Check} defaultValue="Token único · tema atual" readOnly helpText="Usa --jf-ui-focus, o mesmo token dos formulários do app." />
                   <TextField label="E-mail do responsável" icon={Mail} type="email" placeholder="nome@empresa.com" helpText="Usado apenas nas comunicações sobre a vaga." />
                   <TextField label="Buscar candidato" icon={Search} type="search" placeholder="Nome, e-mail ou competência" helpText="Pesquise por dados ou competências do perfil." />
                   <TextField label="Senha de acesso" icon={LockKeyhole} type="password" placeholder="Digite ao menos 8 caracteres" defaultValue="12345" error="A senha precisa ter pelo menos 8 caracteres." />
-                  <TextField label="Desabilitado" icon={LockKeyhole} defaultValue="Indisponível" disabled helpText="Estado inativo do mesmo componente compartilhado." />
+                  <TextField label="Desabilitado" labelAdornment={<StatusBadge>Em breve</StatusBadge>} icon={LockKeyhole} defaultValue="Indisponível" disabled helpText="Estado inativo do mesmo componente compartilhado." />
                 </div>
               </ExampleCard>
               <ExampleCard title="Dropdowns">
@@ -416,8 +427,13 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <MultiFileUploadField label="Galeria da empresa" files={uploadedPictures} accept="image/png,image/jpeg,image/webp" emptyHint="Arraste ou selecione até 8 imagens" variant="picture" maxFiles={8} onFilesChange={setUploadedPictures} helpText="As imagens aparecem em miniaturas e podem ser removidas individualmente." />
                 </div>
               </ExampleCard>
-              <ExampleCard title="Rich text">
-                <RichTextField label="Descrição da vaga" placeholder="Descreva responsabilidades, resultados esperados e como o time trabalha." />
+              <ExampleCard title="Range Input · controle de faixa"><TextField label={`Intensidade: ${demoRange}%`} type="range" min={0} max={100} step={1} value={demoRange} onChange={e=>setDemoRange(Number(e.target.value))} helpText="Arraste ou use as setas para ajustar o valor."/></ExampleCard>
+              <ExampleCard title="Color Input · HEX e picker"><ColorField label="Cor principal" value={demoColor} previous="#20B2AA" onChange={setDemoColor}/></ExampleCard>
+              <ExampleCard title="Multiline Input · texto multilinha">
+                <MultilineInput label="Apresentação" placeholder="Escreva a apresentação..." rows={4}/>
+              </ExampleCard>
+              <ExampleCard title="Rich Text · parâmetros no texto">
+                <RichTextField textOnly label="Descrição da vaga" placeholder="Escreva a descrição..." value={demoRich} onChange={setDemoRich}/>
               </ExampleCard>
             </div>
           </section>
@@ -425,10 +441,13 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "componentes"} aria-label="Biblioteca">
             <SectionHeading title="Peças pequenas que formam experiências completas." description="Combine status, pessoas e notificações com o mesmo vocabulário visual em todo o produto." />
             <div className="ds-components-grid">
-              <ExampleCard title="Status"><div className="ds-badge-list"><span className="ds-badge ds-badge--success"><CircleCheck size={14} />Aprovado</span><span className="ds-badge ds-badge--warning"><Clock3 size={14} />Em avaliação</span><span className="ds-badge ds-badge--danger"><CircleX size={14} />Não selecionado</span><span className="ds-badge ds-badge--info"><CircleAlert size={14} />Novo</span></div></ExampleCard>
-              <ExampleCard title="Pessoas"><div className="ds-person-list"><div className="ds-person"><span className="ds-avatar ds-avatar--teal">BS</span><div><strong>Beatriz Souza</strong><small>Product Designer</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle ds-person__settings" aria-label="Configurações de Beatriz Souza"><Settings2 size={17} /></button></div><div className="ds-person"><span className="ds-avatar ds-avatar--blue">AM</span><div><strong>André Martins</strong><small>Customer Success</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle" aria-label="Opções de André Martins"><MoreHorizontal size={17} /></button></div></div></ExampleCard>
-              <ExampleCard title="Alertas rápidos"><div className="ds-alert-actions">{quickAlerts.map((alert) => <button key={alert.kind} type="button" className={`ds-alert-trigger ds-alert-trigger--${alert.kind}`} onClick={() => setActiveAlert(alert)}><AlertIcon kind={alert.kind} size={16} />{alert.label}</button>)}</div><small className="ds-example-hint">Clique para visualizar a notificação.</small></ExampleCard>
+              <ExampleCard title="Estrutura das páginas internas"><div className="ds-workspace-example"><WorkspacePageHeader section="Painel / Organização" title="Dados da empresa" description="Ações e informações seguem o mesmo padrão em todas as áreas."/><Panel><PanelHeading title="Identificação da empresa" description="Título e contexto do módulo"/><div className="jf-panel-body"><InlineNotice>Alterações da organização aparecem neste espaço.</InlineNotice></div></Panel></div></ExampleCard>
+              <ExampleCard title="Status e pessoas"><div className="ds-status-people"><div><h3>Status</h3><div className="ds-badge-list"><span className="ds-badge ds-badge--success"><CircleCheck size={14} />Aprovado</span><span className="ds-badge ds-badge--warning"><Clock3 size={14} />Em avaliação</span><span className="ds-badge ds-badge--danger"><CircleX size={14} />Não selecionado</span><span className="ds-badge ds-badge--info"><CircleAlert size={14} />Novo</span></div></div><div><h3>Pessoas</h3><div className="ds-person-list"><div className="ds-person"><span className="ds-avatar ds-avatar--teal">BS</span><div><strong>Beatriz Souza</strong><small>Product Designer</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle ds-person__settings" aria-label="Configurações de Beatriz Souza"><Settings2 size={17} /></button></div><div className="ds-person"><span className="ds-avatar ds-avatar--blue">AM</span><div><strong>André Martins</strong><small>Customer Success</small></div><button type="button" className="ds-icon-button ds-icon-button--subtle" aria-label="Opções de André Martins"><MoreHorizontal size={17} /></button></div></div></div></div></ExampleCard>
+              <ExampleCard title="Notificação do aplicativo"><p className="ds-example-hint">Esta demonstração usa os quatro sons padrão nas notificações de autenticação, empresa, vagas e backoffice.</p><div className="ds-alert-actions">{quickAlerts.map(({sound,...alert}) => <button key={alert.kind} type="button" className={`ds-alert-trigger ds-alert-trigger--${alert.kind}`} title={sound} aria-label={`${alert.label}: ${sound}`} onClick={() => setActiveAlert(createToastNotice(alert))}><AlertIcon kind={alert.kind} size={16} />{alert.label}</button>)}</div><ToggleSwitch label="Som dos alertas" description="Ative ou silencie os sons de status neste navegador." checked={statusSoundEnabled} onCheckedChange={setStatusSoundEnabled} /><small className="ds-example-hint">Clique em um status para ver o popup e ouvir o som associado.</small></ExampleCard>
+              <ExampleCard title="Navegação e estados do painel" className="ds-workspace-patterns"><div className="jf-workspace-stack"><WorkspaceTabs label="Estados da demonstração" value={workspaceState} onValueChange={setWorkspaceState} items={[{id:"loading",label:"Carregando"},{id:"empty",label:"Vazio"},{id:"error",label:"Erro"},{id:"forbidden",label:"Sem permissão"}]}/><WorkspaceState kind={workspaceState} title={workspaceState==="loading"?"Carregando informações…":workspaceState==="empty"?"Nenhum registro encontrado":workspaceState==="error"?"Não foi possível carregar os dados":"Acesso indisponível"} description={workspaceState==="forbidden"?"Sua conta não tem permissão para acessar este conteúdo.":"O mesmo componente é utilizado no painel empresarial e no backoffice."}/><div className="ds-button-row ds-workspace-demo-actions"><ActionButton variant="secondary" onClick={()=>setWideDialogOpen(true)}>Abrir janela ampla</ActionButton><WorkspaceActionMenu label="Ações da demonstração"><ActionButton variant="quiet" onClick={()=>setWideDialogOpen(true)}>Abrir detalhes</ActionButton><ActionButton variant="quiet" onClick={()=>setWorkspaceState("empty")}>Ver estado vazio</ActionButton></WorkspaceActionMenu></div></div></ExampleCard>
             </div>
+            <WidgetDialog open={wideDialogOpen} onClose={()=>setWideDialogOpen(false)} title="Janela ampla" description="Pré-visualizações, histórico e comparações usam a mesma estrutura." size="wide" footer={<ActionButton variant="secondary" onClick={()=>setWideDialogOpen(false)}>Fechar demonstração</ActionButton>}><div className="jf-workspace-grid"><Panel><PanelHeading title="Conteúdo principal"/><div className="jf-panel-body"><TextField label="Título" defaultValue="Prévia da oportunidade"/></div></Panel><Panel><PanelHeading title="Informações relacionadas"/><div className="jf-panel-body"><InlineNotice>A janela mantém o foco e a rolagem no próprio conteúdo.</InlineNotice><ActionButton variant="secondary" onClick={()=>setNestedDialogOpen(true)}>Abrir confirmação</ActionButton></div></Panel></div></WidgetDialog>
+            <WidgetDialog open={nestedDialogOpen} onClose={()=>setNestedDialogOpen(false)} title="Confirmar exemplo" description="Esta confirmação usa a mesma janela compartilhada." footer={<ActionButton variant="secondary" onClick={()=>setNestedDialogOpen(false)}>Voltar à janela ampla</ActionButton>}><p>Ao fechar as duas janelas, a rolagem da página volta ao normal.</p></WidgetDialog>
             <IconLibrary/>
           </section>
 
@@ -438,6 +457,8 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <SectionHeading title="Espaço também comunica hierarquia." description="A interface deve respirar. Margens, gutters e intervalos consistentes separam contextos, reduzem a sensação de sufoco e ajudam cada informação a ocupar o espaço certo." />
             <div className="ds-spacing-principle"><div><span>Princípio prioritário</span><h3>Organizar sem comprimir.</h3><p>Proximidade indica relação; distância indica mudança de assunto. Nunca compense excesso de conteúdo diminuindo indiscriminadamente os espaços. Reorganize, agrupe e priorize.</p></div><div className="ds-spacing-breath" aria-label="Comparação entre conteúdo comprimido e conteúdo com respiro"><article className="is-tight"><span/><span/><span/><span/></article><i>→</i><article className="is-correct"><span/><span/><span/><span/></article></div></div>
             <div className="ds-spacing-scale" aria-label="Escala oficial de espaçamento">{spacingScale.map(({token,value,label})=><article key={token}><span style={{"--space":`var(${token})`} as CSSProperties}/><strong>{value} px</strong><small>{label}</small><code>{token}</code></article>)}</div>
+            <div className="ds-spacing-context"><h3>Composição de widgets</h3><p>Em coleções de cartões, use 8 px entre detalhes próximos, 16 px entre controles, 24 px dentro de grupos e 32 px entre assuntos. Divisórias separam contextos; espaço em branco conecta elementos do mesmo grupo.</p><div>{[8,16,24,32].map(value=><span key={value}><i style={{width:value}}/>{value} px</span>)}</div></div>
+            <div className="ds-spacing-context"><h3>Dimensões dos botões</h3><p>Altura, espaçamento interno e distância entre ícone e texto seguem a escala de cada tamanho.</p><ButtonSpecs/></div>
             <div className="ds-layout-rules">
               <article className="ds-layout-anatomy"><header><span>Envelope principal</span><strong>Desktop como referência</strong></header><div className="ds-layout-canvas"><i className="is-gutter-left"/><div><span>Conteúdo até 1180 px</span><b>Área útil ampla, centralizada e protegida por gutters.</b><small>Em monitores maiores, o espaço externo cresce igualmente dos dois lados.</small></div><i className="is-gutter-right"/></div><footer><span>Viewport</span><i/><strong>gutter</strong><i/><b>conteúdo</b></footer></article>
               <article className="ds-layout-table"><header><span>Limites por contexto</span><strong>Largura não é densidade</strong></header><div><span>Página pública / Landing</span><b>1180 px</b><small>Conteúdo comercial e institucional</small></div><div><span>Autenticação e adesão</span><b>1180 px</b><small>Formulário + contexto lado a lado</small></div><div><span>Documentos legais</span><b>1180 px</b><small>Envelope amplo; leitura interna até 900 px</small></div><div><span>Aplicação administrativa</span><b>Fluido</b><small>Limitado conforme densidade do módulo</small></div></article>
@@ -450,7 +471,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "dashboards"} aria-label="Dashboards">
             <SectionHeading title="Elementos para dashboards." description="Referências visuais reutilizáveis para indicadores e gráficos da aplicação." />
-            <div className="ds-dashboard-catalog">
+            <CommunicationsDemo/><div className="ds-dashboard-catalog">
               <article className="ds-dashboard-template ds-dashboard-template--funnel">
                 <header><div><strong>Funil compacto</strong><small>Use em resumos quando o objetivo for identificar rapidamente a queda entre etapas.</small></div></header>
                 <div className="ds-funnel-chart">{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div>
@@ -474,34 +495,8 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
             <AdvancedCharts />
           </section>
 
-          <section className="ds-section ds-section--first" hidden={currentPage.id !== "aplicacao"} aria-label="Aplicação">
-            <SectionHeading title="Uma miniatura fiel da aplicação." description="A proporção, a navegação e a densidade de informação antecipam a tela real do produto — com o dashboard como primeira experiência." />
-            <div className={`ds-app-preview ${appSidebarExpanded ? "is-menu-expanded" : "is-menu-collapsed"}`}>
-              <aside className="ds-app-preview__sidebar" aria-label="Menu da aplicação demonstrativa">
-              <div className="ds-app-preview__brand"><span><BrandAsset src="/brand/jobforged-symbol.svg" alt="" /><strong>JobForged</strong></span><button type="button" className="ds-app-preview__collapse" aria-label={appSidebarExpanded ? "Reduzir menu lateral" : "Expandir menu lateral"} aria-pressed={!appSidebarExpanded} onClick={() => setAppSidebarExpanded((expanded) => !expanded)}>{appSidebarExpanded ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}</button></div>
-                <nav>{applicationMenu.map(({ label, icon: Icon }, index) => <button type="button" key={label} className={index === 1 ? "is-active" : ""}><Icon size={15} strokeWidth={1.8} /><span>{label}</span></button>)}</nav>
-                <button type="button" className="ds-app-preview__profile" aria-label="Abrir meu perfil"><span><UserRound size={15} /></span><strong>Mateus</strong></button>
-              </aside>
-
-              <div className="ds-app-preview__main">
-                <header className="ds-app-preview__topbar"><div><span>Dashboards / Visão geral</span><strong>Bom dia, Mateus 👋</strong><small>Acompanhe os resultados da sua operação de talentos.</small></div><div><button type="button" className="ds-app-preview__period"><CalendarDays size={14} />Últimos 30 dias</button><button type="button" className="ds-app-preview__notice" aria-label="Notificações"><Bell size={15} /><i /></button></div></header>
-
-                <div className="ds-app-preview__kpis"><article><span><BriefcaseBusiness size={14} />Vagas ativas</span><strong>18</strong><small><TrendingUp size={12} />3 novas neste mês</small></article><article><span><UsersRound size={14} />Candidaturas</span><strong>1.284</strong><small><TrendingUp size={12} />18,4% no período</small></article><article><span><CalendarDays size={14} />Entrevistas</span><strong>96</strong><small>24 nesta semana</small></article><article><span><UserRoundCheck size={14} />Taxa de contratação</span><strong>12,8%</strong><small><TrendingUp size={12} />2,1 p.p.</small></article></div>
-
-                <div className="ds-app-preview__analytics">
-                  <article className="ds-app-panel ds-app-panel--funnel"><header><div><strong>Funil de recrutamento</strong><small>Conversão por etapa</small></div><button type="button"><MoreHorizontal size={14} /></button></header><div>{dashboardFunnel.map((stage) => <div key={stage.label}><span>{stage.label}</span><i style={{ "--funnel-width": `${stage.width}%` } as CSSProperties} /><strong>{stage.value}</strong></div>)}</div></article>
-                  <article className="ds-app-panel ds-app-panel--weekly"><header><div><strong>Candidaturas</strong><small>Volume nas últimas 6 semanas</small></div><span>+18,4%</span></header><div className="ds-app-bars"><i style={{ "--bar": "36%" } as CSSProperties} /><i style={{ "--bar": "53%" } as CSSProperties} /><i style={{ "--bar": "47%" } as CSSProperties} /><i style={{ "--bar": "69%" } as CSSProperties} /><i style={{ "--bar": "62%" } as CSSProperties} /><i style={{ "--bar": "88%" } as CSSProperties} /></div><footer><span>S1</span><span>S2</span><span>S3</span><span>S4</span><span>S5</span><span>S6</span></footer></article>
-                </div>
-
-                <div className="ds-app-preview__bottom">
-                  <article className="ds-app-panel ds-app-panel--vacancies"><header><div><strong>Vagas em destaque</strong><small>Maior volume de candidatos</small></div><button type="button">Ver todas</button></header><div><span>Product Designer</span><strong>142 candidatos</strong><i><b style={{ width: "92%" }} /></i><small>92% aderência média</small></div><div><span>Customer Success</span><strong>98 candidatos</strong><i><b style={{ width: "78%" }} /></i><small>87% aderência média</small></div><div><span>People Analyst</span><strong>76 candidatos</strong><i><b style={{ width: "66%" }} /></i><small>89% aderência média</small></div></article>
-                  <article className="ds-app-panel ds-app-panel--activity"><header><div><strong>Atividade recente</strong><small>Atualizações do time</small></div></header><ul><li><span className="ds-avatar ds-avatar--teal">BS</span><p><strong>Beatriz Souza</strong> avançou para entrevista<small>Há 12 minutos</small></p></li><li><span className="ds-avatar ds-avatar--blue">AM</span><p><strong>André Martins</strong> enviou o teste técnico<small>Há 38 minutos</small></p></li><li><span className="ds-avatar ds-avatar--green">LR</span><p><strong>Larissa Rocha</strong> recebeu uma proposta<small>Há 1 hora</small></p></li></ul></article>
-                </div>
-              </div>
-            </div>
-          </section>
-
           {currentPage.id === "emails" && <EmailTemplatesSection />}
+          {currentPage.id === "aplicacao" && <ApplicationStatesSection />}
 
           {currentPage.id === "widgets" && <WidgetsSection />}
 

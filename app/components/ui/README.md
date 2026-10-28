@@ -29,9 +29,16 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 
 ## Painel empresarial
 
-- `AdminShell` é a estrutura única de todas as dez rotas, inclusive Home; a organização ativa substitui tokens, sem criar outro tema por tela.
+- `AdminShell` é a estrutura única das rotas empresariais, inclusive Home; a organização ativa substitui tokens, sem criar outro tema por tela.
 - `Panel` fornece superfície, borda e raio compartilhados. Cada módulo define apenas a disposição do conteúdo com os tokens de espaçamento.
 - `MetricCard` é o indicador comum da Home, Dashboard e Vagas. O Design System renderiza a mesma implementação.
 - Buscas e filtros usam `TextField` e `SelectField`; controles nativos específicos usam `FieldControl` sem estilos descendentes próprios.
 - Notificações usam `AppToast`, na posição global. Telas não implementam notificações locais.
-- Títulos de páginas seguem a mesma hierarquia em `admin.css`. Os módulos consomem as famílias, cores, raios e espaçamentos de `ui.css`.
+- O popup de `AppToast` e os sons de `status-sound.ts` são demonstrados em `/design-system/componentes`. Os arquivos padrão ficam em `public/sounds/` e seguem o mapeamento sucesso, informação, atenção e erro. Páginas de autenticação e gestão usam a mesma camada de áudio para resultados e erros; mensagens persistentes podem permanecer inline para contexto.
+- Títulos de páginas seguem a hierarquia compartilhada em `ui.css`. Os módulos consomem as famílias, cores, raios e espaçamentos de `ui.css`.
+- `WorkspacePageHeader`, `PanelHeading` e `InlineNotice` definem a hierarquia das páginas internas, títulos dos cartões e mensagens de estado. O catálogo em `/design-system/componentes` renderiza esses mesmos componentes.
+
+- `WorkspacePageHeader` concentra seção, retorno, título, metadados e ações. As ações quebram em linhas sem exigir rolagem lateral.
+- `jf-workspace-stack`, `jf-workspace-grid` e `jf-workspace-toolbar` organizam módulos e formulários com a escala oficial; mantenha estilos de domínio apenas para a composição específica.
+- `WorkspaceTabs`, `WorkspaceActionMenu` e `WorkspaceState` são demonstrados no catálogo e usados nas páginas. Estados de erro persistentes emitem um único sinal, sem duplicar um toast.
+- `WidgetDialog` atende confirmações, histórico, prévia ampla e drawer. O tamanho `wide` e janelas sobrepostas preservam foco, Escape e a liberação da rolagem ao fechar a última janela.

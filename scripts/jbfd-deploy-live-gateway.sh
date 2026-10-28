@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${SSH_ORIGINAL_COMMAND:-}" =~ ^probe\ readiness\ live\ ([0-9a-f]{40})$ ]]; then
+  exec sudo -n /opt/jbfd/bin/jbfd-deploy-live-root.sh probe-readiness "${BASH_REMATCH[1]}"
+fi
+
 if [[ "${SSH_ORIGINAL_COMMAND:-}" == "probe brevo live" ]]; then
   exec sudo -n /opt/jbfd/bin/jbfd-deploy-live-root.sh probe-brevo
 fi

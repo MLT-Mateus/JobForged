@@ -7,6 +7,18 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export JBFD_ENV_FILE="/opt/jbfd/${environment}/.env"
 [[ -f "$JBFD_ENV_FILE" ]] || { echo "Arquivo ausente: $JBFD_ENV_FILE" >&2; exit 66; }
 
+# Before deterministic env writes, image changes or service operations. A Test
+# deploy never creates the protected approval/rollback records required by Live.
+verified_live_rollback=""
+hold_live_maintenance="false"
+if [[ "$environment" == live && "$command" == deploy ]]; then
+  live_gate_args=("${3:-}")
+  [[ "${JBFD_LIVE_BOOTSTRAP:-0}" != 1 ]] || live_gate_args+=(--bootstrap)
+  live_gate="$(python3 "$root/scripts/security/verify-live-release.py" "${live_gate_args[@]}")"
+  verified_live_rollback="$(printf '%s' "$live_gate" | python3 -c 'import json,sys; print(json.load(sys.stdin)["rollback_image"])')"
+  hold_live_maintenance="$(printf '%s' "$live_gate" | python3 -c 'import json,sys; print(str(json.load(sys.stdin)["hold_maintenance_on_failure"]).lower())')"
+fi
+
 # Keep canonical host and public URL available for legacy VPS .env files.
 # These values are public runtime settings; no secrets are written or displayed.
 if [[ "$environment" == "live" ]]; then
@@ -50,7 +62,11 @@ case "$command" in
     [[ "$revision" =~ ^[0-9a-f]{40}$ ]] || { echo "Informe o SHA completo do commit" >&2; exit 64; }
     image="ghcr.io/mlt-mateus/jobforged:${revision}"
     # A matching image alone does not prove database or Auth readiness.
-    bash "$root/scripts/supabase-migrate.sh" "$environment" --check
+    # Live remains a manual migration prerequisite. Test's controlled gate runs
+    # after the approved images are present, before any dependent configuration.
+    if [[ "$environment" != test || ! -f "$root/scripts/security/apply-test-migrations.py" ]]; then
+      bash "$root/scripts/supabase-migrate.sh" "$environment" --check
+    fi
     current_image="$(awk -F= '$1 == "JBFD_IMAGE" { sub(/^[^=]*=/, ""); print; count++ } END { if (count != 1) exit 1 }' "$JBFD_ENV_FILE")" || {
       echo "O .env precisa ter exatamente uma linha JBFD_IMAGE" >&2; exit 65;
     }
@@ -62,10 +78,16 @@ case "$command" in
       mv -f "$temporary" "$JBFD_ENV_FILE"
     }
     restore_image() {
-      write_image "$current_image"
+      # The previous Live image can use revoked contracts after the upgrade.
+      # Only a separately accepted compatible image may be used for rollback.
+      write_image "${verified_live_rollback:-$current_image}"
       "${compose[@]}" up -d --wait --wait-timeout 120 || true
     }
     fail_deploy() {
+      if [[ "$environment" == live && "$hold_live_maintenance" == true ]]; then
+        echo "Deploy Live falhou. Manutenção preservada; não restaurar imagem incompatível nem banco automaticamente." >&2
+        exit 1
+      fi
       echo "Deploy falhou; restaurando a imagem anterior." >&2
       restore_image
       exit 1
@@ -76,9 +98,20 @@ case "$command" in
       fail_deploy
     fi
     [[ "$image_revision" == "$revision" ]] || fail_deploy
+    if [[ "$environment" == test && -f "$root/deploy/compose.security-test.yml" ]]; then
+      gateway_image="ghcr.io/mlt-mateus/jobforged-security-gateway:${revision}"
+      docker pull "$gateway_image" || fail_deploy
+      python3 "$root/scripts/security/apply-test-migrations.py" || fail_deploy
+      python3 "$root/scripts/security/isolate-test-ingress.py" || fail_deploy
+      python3 "$root/scripts/security/configure-test-gateway.py" "$revision" || fail_deploy
+      python3 "$root/scripts/security/configure-test-auth.py" || fail_deploy
+    fi
     "${compose[@]}" config --quiet || fail_deploy
     "${compose[@]}" up -d --wait --wait-timeout 120 || fail_deploy
     "${compose[@]}" exec -T app node --input-type=module < "$root/scripts/verify-auth-readiness.mjs" || fail_deploy
+    if [[ "$environment" == test && -f "$root/scripts/security/configure-test-maintenance.py" ]]; then
+      python3 "$root/scripts/security/configure-test-maintenance.py" || fail_deploy
+    fi
     printf 'Deploy concluído: ambiente=%s commit=%s\n' "$environment" "$revision"
     ;;
 esac

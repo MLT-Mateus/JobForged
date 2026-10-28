@@ -24,7 +24,7 @@
 - Migrations de produção devem ser compatíveis com a imagem Live anterior para permitir rollback do app sem rollback improvisado do banco.
 - A mesma promoção deve incluir frontend, backend, dependências e migrations do SHA Test. Segredos, DNS, configurações específicas de ambiente, usuários e dados de clientes não são copiados entre ambientes.
 - Nunca copiar o banco ou dados pessoais de Live para Test como parte de deploy. Refresh de dados é operação separada, manual e sanitizada.
-- O deploy atual aplica automaticamente a imagem em Test; não aplica migrations automaticamente. Até a automação de migrations ser concluída e verificada, uma publicação que dependa de alteração de schema fica bloqueada até a migration ter sido aplicada e confirmada em Test e existir um passo controlado equivalente para Live.
+- O deploy de Test usa o gate versionado `scripts/security/apply-test-migrations.py`: após conferir a disponibilidade das imagens aprovadas, só aplica migrations pelo runner se houver backup íntegro com restauração isolada comprovada e recibo de cópia cifrada externa com até duas horas. Falha de checksum, backup ou migration bloqueia as etapas dependentes. Live continua exigindo aplicação controlada prévia e autorização explícita; o gate de Test não autoriza migrations em Live.
 
 ## Estado atual do produto
 
@@ -44,3 +44,13 @@ O Design System e a biblioteca compartilhada de UI são a única fonte de verdad
 ## Badge de triagem
 
 A correção vertical adicional aprovada de 34px está em `app/globals.css`: `.phone-quality` usa `top: 420px` por padrão e `top: 450px` na regra responsiva existente. Manter uma única fonte de verdade. Não reintroduzir `app/phone-layout-overrides.css` nem regra `!important` de sobrescrita.
+
+
+## Regra permanente de placeholders e valores
+
+- Todo campo editável vazio deve orientar o preenchimento por meio dos componentes compartilhados. Use a política de `app/components/ui/field-copy.ts`; não copie defaults por página nem altere valores para preencher espaço.
+- Placeholder curto: verbo + dado + três pontos literais (`...`). Use 2–4 palavras e prefira até 28 caracteres antes do sufixo. Exemplos: `Digite o nome...`, `Escreva a descrição...`, `Selecione opções...`.
+- Label permanece visível. Formatos, exemplos de dados, máscaras, limites e requisitos ficam na ajuda, sem depender do placeholder.
+- Seleções reais e valores existentes não recebem reticências automaticamente. Checkbox/radio/range/file usam identificação, seleção e instruções adequadas ao tipo.
+- Valores de leitura nunca representam ausência com string vazia ou zero fictício. Use `DisplayValue` ou a representação equivalente: `Não informado` para ausência, `Carregando...` durante consulta e `Indisponível` quando não disponível. Preserve zero real.
+- Novas variações e estados devem estar na página Formulários do Design System. Referência: `docs/INPUT-CONTENT-RULES.md`.

@@ -9,6 +9,10 @@ export type AuthSessionState = {
   checking: boolean;
   demo: false;
   email?: string;
+  company?: { id: string; name: string } | null;
+  role?: string;
+  platformAdmin?: boolean;
+  fullName?: string;
 };
 
 async function postAuth(path: string, body?: unknown): Promise<AuthResult> {
@@ -48,8 +52,8 @@ export function requestPasswordRecovery(email: string) {
   return postAuth("recover", { email: email.trim().toLowerCase() });
 }
 
-export function verifyPasswordRecovery(tokenHash: string) {
-  return postAuth("recovery/session", { tokenHash, type: "recovery" });
+export function verifyPasswordRecovery(tokenHash: string, type: "recovery" | "invite" = "recovery") {
+  return postAuth("recovery/session", { tokenHash, type });
 }
 
 export function updateRecoveredPassword(password: string, confirmPassword: string) {
@@ -57,7 +61,7 @@ export function updateRecoveredPassword(password: string, confirmPassword: strin
 }
 
 export async function signOutCompany() {
-  await postAuth("sign-out");
+  return postAuth("sign-out");
 }
 
 const initialState: AuthSessionState = { authenticated: false, checking: true, demo: false };
@@ -70,13 +74,17 @@ export function useCompanyAuthSession(): AuthSessionState {
     const refresh = async () => {
       try {
         const response = await fetch("/api/auth/session", { cache: "no-store", credentials: "same-origin" });
-        const session = response.ok ? (await response.json()) as { email?: string } : null;
+        const session = response.ok ? (await response.json()) as { email?: string; company?: { id: string; name: string } | null; role?: string; platformAdmin?: boolean; fullName?: string } : null;
         if (!active) return;
         setState({
           authenticated: Boolean(session),
           checking: false,
           demo: false,
           email: session?.email,
+          company: session?.company,
+          role: session?.role,
+          platformAdmin: session?.platformAdmin,
+          fullName: session?.fullName,
         });
       } catch {
         if (active) setState({ authenticated: false, checking: false, demo: false });
@@ -84,7 +92,9 @@ export function useCompanyAuthSession(): AuthSessionState {
     };
 
     void refresh();
-    return () => { active = false; };
+    window.addEventListener('focus',refresh);
+    window.addEventListener('pageshow',refresh);
+    return () => { active = false; window.removeEventListener('focus',refresh); window.removeEventListener('pageshow',refresh); };
   }, []);
 
   return state;

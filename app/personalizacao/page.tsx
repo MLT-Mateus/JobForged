@@ -1,2 +1,1 @@
-import { AdminPage, metadataFor } from "@/app/components/admin/AdminPage";
-export const metadata=metadataFor("personalizacao"); export default function Page(){return <AdminPage module="personalizacao"/>}
+export {metadata, default} from "@/app/app/personalizacao/page";

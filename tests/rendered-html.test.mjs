@@ -93,8 +93,25 @@ test("existing system pages render with shared brand assets", async () => {
       { waitUntil() {}, passThroughOnException() {} },
     );
     assert.equal(response.status, 200, path);
-    const rendered = rscPayload(await response.text());
+    const html = await response.text();
+    const rendered = rscPayload(html);
     assert.ok(rendered.includes(path), `route data missing from server render: ${path}`);
-    assert.match(rendered, /jobforged-(?:logo-primary|symbol)\.svg/, path);
+    assert.match(html, /jobforged-(?:logo-primary|symbol)\.svg/, path);
   }
+});
+
+// Explicit links and runtime boundaries share one UI and preserve real HTTP statuses.
+test("system state routes preserve their HTTP status and shared actions", async () => {
+  const { default: worker } = await import("../dist/server/index.js");
+  for (const code of [401, 403, 404, 500, 503]) {
+    const response = await worker.fetch(new Request(`http://localhost/${code}`), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
+    assert.equal(response.status, code, `/${code}`);
+    const html = await response.text();
+    assert.match(html, /jf-action/);
+    assert.match(html, /jobforged-logo-primary/);
+  }
+  const denied = await worker.fetch(new Request("http://localhost/backoffice"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
+  assert.equal(denied.status, 401);
+  const missing = await worker.fetch(new Request("http://localhost/rota-inexistente/para-contrato"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
+  assert.equal(missing.status, 404);
 });

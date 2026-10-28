@@ -10,22 +10,24 @@ body:has(.admin-shell){overflow:hidden}
 .admin-brand button{display:grid;width:38px;height:38px;flex:0 0 38px;place-items:center;padding:0;cursor:pointer}
 .admin-brand svg,.admin-menu svg,.admin-notice svg,.admin-icon svg{width:18px}
 .admin-close{display:none!important}
-.admin-sidebar nav{min-height:0;overflow-y:auto;flex:1;align-content:start;display:grid;gap:var(--jf-ui-space-2);padding-top:var(--jf-ui-space-4)}
-.admin-sidebar nav a{display:flex;min-height:44px;align-items:center;gap:var(--jf-ui-space-3);padding:0 var(--jf-ui-space-3);border-radius:var(--jf-ui-control-radius);color:var(--jf-ui-text-muted);font-family:var(--jf-ui-font-heading);font-size:var(--jf-ui-font-size-sm);font-weight:650;white-space:nowrap}
+.admin-sidebar nav{min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;flex:1;align-content:start;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--jf-ui-space-2);padding-top:var(--jf-ui-space-4)}
+.admin-sidebar nav a{display:flex;min-width:0;width:100%;min-height:44px;align-items:center;gap:var(--jf-ui-space-3);padding:0 var(--jf-ui-space-3);border-radius:var(--jf-ui-control-radius);color:var(--jf-ui-text-muted);font-family:var(--jf-ui-font-heading);font-size:var(--jf-ui-font-size-sm);font-weight:650;white-space:nowrap}
 .admin-sidebar nav a svg{width:19px;flex:0 0 19px}
 .admin-sidebar nav a:hover,.admin-sidebar nav a.is-active{background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong)}
-.admin-user{flex-shrink:0;display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:center;gap:var(--jf-ui-space-1);margin-top:auto;padding-top:var(--jf-ui-space-3);border-top:1px solid var(--jf-ui-border)}
+.admin-sidebar nav a .admin-nav-label{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis}
+.admin-sidebar nav a .admin-nav-status{display:grid;width:18px;height:18px;flex:0 0 18px;place-items:center;margin-left:auto;border-radius:50%;background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted)}
+.admin-sidebar nav a .admin-nav-status--beta{background:var(--jf-ui-warning-soft);color:var(--jf-ui-warning)}
+.admin-sidebar nav a .admin-nav-status svg{width:13px;height:13px}
+.admin-user{flex-shrink:0;display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:var(--jf-ui-space-1);margin-top:auto;padding-top:var(--jf-ui-space-3);border-top:1px solid var(--jf-ui-border)}
 .admin-user>a{display:flex;min-width:0;align-items:center;gap:var(--jf-ui-space-2)}
 .admin-user>a>span:first-child{display:grid;width:36px;height:36px;flex:0 0 36px;place-items:center;border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong);font-size:var(--jf-ui-font-size-xs);font-weight:800}
 .admin-user>a>span:last-child{display:grid;min-width:0}
 .admin-user strong,.admin-user small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .admin-user strong{font-size:var(--jf-ui-font-size-sm)}
 .admin-user small{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
-.admin-user>button{display:grid;width:34px;height:34px;place-items:center;padding:0;cursor:pointer}
-.admin-user svg{width:16px}
 .is-collapsed .admin-brand{justify-content:center;padding-inline:0}
 .is-collapsed .admin-brand>span,.is-collapsed .admin-sidebar nav a span,.is-collapsed .admin-user>a>span:last-child{display:none}
-.is-collapsed .admin-user>button{display:none}
+.is-collapsed .admin-sidebar nav a .admin-nav-status{display:none}
 .is-collapsed .admin-sidebar nav a{justify-content:center;padding:0}
 .is-collapsed .admin-user{display:flex;justify-content:center}
 .admin-workspace{height:100%;min-width:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
@@ -39,12 +41,11 @@ body:has(.admin-shell){overflow:hidden}
 .admin-org strong{font-size:var(--jf-ui-font-size-sm)}
 .admin-notice{position:relative;background:var(--jf-ui-surface)}
 .admin-notice i{position:absolute;top:8px;right:8px;width:7px;height:7px;border:2px solid var(--jf-ui-surface);border-radius:50%;background:var(--jf-ui-danger)}
-.admin-content{width:min(var(--jf-ui-layout-content-max),100%);margin:auto;padding:clamp(var(--jf-ui-space-6),3vw,var(--jf-ui-space-8))}
-.admin-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--jf-ui-space-6);margin-bottom:var(--jf-ui-space-6)}
-.admin-page-head>div:first-child{display:grid;gap:var(--jf-ui-space-1)}
-.admin-page-head span{color:var(--jf-ui-brand-strong);font-size:var(--jf-ui-font-size-xs);font-weight:750;text-transform:uppercase}
-
-.admin-page-head p{max-width:700px;margin:0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.6}
+.admin-content{width:min(var(--jf-ui-layout-content-max),100%);min-width:0;margin:auto;padding:var(--jf-ui-space-7) var(--jf-ui-space-6)}
+.admin-availability{display:flex;align-items:center;gap:var(--jf-ui-space-3);margin-bottom:var(--jf-ui-space-5);padding:var(--jf-ui-space-3) var(--jf-ui-space-4);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface)}
+.admin-availability--beta{border-color:color-mix(in srgb,var(--jf-ui-warning) 32%,var(--jf-ui-border))}
+.admin-availability p{margin:0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.5}
+.admin-availability-preview{opacity:.68}
 .admin-actions{display:flex;gap:var(--jf-ui-space-2)}
 .admin-toolbar{display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-3);margin-bottom:var(--jf-ui-space-3)}
 .admin-toolbar>label{display:flex;width:min(420px,100%);min-height:42px;align-items:center;gap:var(--jf-ui-space-2);padding:0 var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface)}
@@ -53,7 +54,7 @@ body:has(.admin-shell){overflow:hidden}
 .admin-toolbar>div{display:flex;align-items:center;gap:var(--jf-ui-space-2)}
 .admin-card{overflow:hidden;}
 .admin-card>header{display:flex;min-height:72px;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-4) var(--jf-ui-space-5);border-bottom:1px solid var(--jf-ui-border)}
-.admin-card h2{margin:0;font-size:var(--jf-ui-font-size-md)}
+.admin-card h2{margin:0;font-size:var(--jf-ui-font-size-lg);line-height:1.4}
 .admin-card header p{margin:var(--jf-ui-space-1) 0 0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
 .admin-card td b{font-family:var(--jf-ui-font-heading);font-size:var(--jf-ui-font-size-sm)}
 .admin-card td small{display:block;margin-top:var(--jf-ui-space-1);color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
@@ -160,7 +161,8 @@ body:has(.admin-shell){overflow:hidden}
 .admin-sidebar{position:fixed;inset:0 auto 0 0;z-index:30;width:min(290px,86vw);height:100dvh;transform:translateX(-105%);transition:transform .25s ease}
 .admin-sidebar.is-open{transform:none}
 .admin-sidebar.is-open .admin-brand>span,.admin-sidebar.is-open nav a span,.admin-sidebar.is-open .admin-user>a>span:last-child{display:flex}
-.admin-sidebar.is-open .admin-user>button{display:flex}
+.admin-sidebar.is-open nav a .admin-nav-label{display:block}
+.admin-sidebar.is-open nav a .admin-nav-status{display:grid}
 .admin-sidebar.is-open .admin-user>a>span:last-child{display:grid}
 .admin-sidebar.is-open nav a{justify-content:flex-start;padding:0 var(--jf-ui-space-3)}
 .admin-sidebar .admin-brand>button:not(.admin-close){display:none}
@@ -174,8 +176,7 @@ body:has(.admin-shell){overflow:hidden}
 
 @media(max-width:680px){.admin-content{padding:var(--jf-ui-space-5) var(--jf-ui-space-4) var(--jf-ui-space-7)}
 .admin-org{display:none}
-.admin-page-head{align-items:flex-start;flex-direction:column}
-.admin-page-head>.jf-action,.admin-page-head>.admin-actions{width:100%}
+.jf-page-head>.jf-action,.jf-page-head>.admin-actions{width:100%}
 .admin-actions{display:grid;grid-template-columns:1fr 1fr}
 .admin-toolbar{align-items:stretch;flex-direction:column}
 .admin-toolbar>label{width:100%}
@@ -214,32 +215,16 @@ body:has(.admin-shell){overflow:hidden}
 .jf-control input[type=color]:focus-visible{outline:2px solid var(--jf-ui-focus);outline-offset:2px}
 
 
+/* Shell owns navigation and framing; reusable content styles live in ui.css. */
 .admin-shell { font-size:var(--jf-ui-font-size-md); line-height:1.5; }
 .admin-shell :is(button,a,input,textarea,select):focus-visible { outline:2px solid var(--jf-ui-focus); outline-offset:3px; }
 .admin-shell :is(h1,h2,h3,h4) { font-family:var(--jf-ui-font-heading); overflow-wrap:anywhere; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { margin:0; font:700 clamp(1.5rem,2.5vw,2rem)/1.25 var(--jf-ui-font-heading); letter-spacing:-.025em; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-7); gap:var(--jf-ui-space-6); flex-wrap:wrap; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-detail-head) p { margin-top:var(--jf-ui-space-2); font-size:var(--jf-ui-font-size-md); line-height:1.6; }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) h2 { font-size:var(--jf-ui-font-size-lg); line-height:1.4; }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) { min-width:0; }
-.admin-shell .jf-field { min-width:0; }
-.admin-shell .jf-action { flex-shrink:0; text-decoration:none; }
-.admin-shell .admin-actions { flex-wrap:wrap; }
+.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card,.jf-field) { min-width:0; }
+.admin-shell .jf-action { text-decoration:none; }
 .admin-shell .admin-topbar { z-index:40; }
 .admin-shell .admin-sidebar { z-index:50; }
 .admin-shell .admin-scrim { z-index:49; }
-.admin-sidebar nav a { flex-shrink:0; }
-.admin-card>header { padding:var(--jf-ui-space-6); }
-.admin-form .jf-field { padding:var(--jf-ui-space-3) var(--jf-ui-space-6); }
-.admin-toggle-list .jf-toggle-row strong { font-size:var(--jf-ui-font-size-sm); }
-.admin-toggle-list .jf-toggle-row>div span { font-size:var(--jf-ui-font-size-sm); }
-@media(max-width:680px) {
- .admin-content { padding:var(--jf-ui-space-6) var(--jf-ui-layout-gutter-mobile); }
- .admin-page-head,.custom-head,.job-wizard-head,.job-detail-head { align-items:flex-start; }
- .admin-shell .admin-card>header { flex-wrap:wrap; padding:var(--jf-ui-space-4); }
- .admin-form .jf-field { padding:var(--jf-ui-space-3) var(--jf-ui-space-4); }
- .admin-org strong { overflow-wrap:anywhere; }
-}
+.admin-card:has(.jf-select.is-open),.custom-card:has(.jf-select.is-open),.job-stage:has(.jf-select.is-open) { position:relative; overflow:visible; z-index:30; }
 @media(prefers-reduced-motion:reduce) { .admin-shell * { transition:none!important; animation:none!important; scroll-behavior:auto!important; } }
 
 /* Approved complete signature; compact navigation moves the symbol to the header. */
@@ -251,71 +236,50 @@ body:has(.admin-shell){overflow:hidden}
   .has-full-brand.is-menu-open .admin-org .admin-org__brand-icon { display:none; }
 }
 
-/* Shared company-panel finish: all modules inherit the approved UI tokens. */
-.admin-shell {
-  background:var(--jf-ui-surface-soft);
-  color:var(--jf-ui-text);
-  font-family:var(--jf-ui-font-body);
-}
-.admin-shell .admin-workspace { background:var(--jf-ui-surface-soft); }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) {
-  border-color:var(--jf-ui-border);
-  border-radius:var(--jf-ui-radius-card);
-  background:var(--jf-ui-surface);
-  color:var(--jf-ui-text);
-}
-.admin-shell :is(.admin-metrics,.admin-chart-grid,.admin-settings-grid,.admin-agenda,.admin-account) {
-  gap:var(--jf-ui-space-4);
-}
-.admin-shell .admin-card > header {
-  min-height:76px;
-  padding:var(--jf-ui-space-5) var(--jf-ui-space-6);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) :is(h2,h3,h4) {
-  color:var(--jf-ui-text);
-  font-family:var(--jf-ui-font-heading);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.custom-card) :is(p,small,dd,dt,label) {
-  font-family:var(--jf-ui-font-body);
-}
-.admin-shell .jf-table-wrap { border-radius:0 0 var(--jf-ui-radius-card) var(--jf-ui-radius-card); }
-.admin-shell .jf-table th {
-  background:var(--jf-ui-surface-soft);
-  color:var(--jf-ui-text-muted);
-  font-family:var(--jf-ui-font-heading);
-  letter-spacing:.035em;
-}
-.admin-shell .jf-table td { color:var(--jf-ui-text); line-height:1.5; }
-.admin-shell .admin-page-head > div:first-child { max-width:760px; }
-.admin-shell .admin-page-head > div:first-child > span { letter-spacing:.06em; }
-.admin-shell .admin-toolbar { gap:var(--jf-ui-space-4); }
-.admin-shell .admin-kanban { gap:var(--jf-ui-space-3); }
-.admin-shell .admin-kanban > section { border-radius:var(--jf-ui-radius-card); }
-.admin-shell .admin-kanban article { border-radius:var(--jf-ui-control-radius); }
-.admin-shell .admin-workspace { min-width:0; }
-.admin-shell .admin-content { width:min(var(--jf-ui-layout-content-max),100%); margin-inline:auto; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { align-items:flex-end; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) h1 { letter-spacing:-.035em; }
-.admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) p { max-width:68ch; color:var(--jf-ui-text-muted); }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) {
-  box-shadow:0 1px 2px color-mix(in srgb,var(--jf-ui-text) 4%,transparent);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) > header {
-  gap:var(--jf-ui-space-4);
-}
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) :is(h2,h3) { letter-spacing:-.02em; }
-.admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) p { line-height:1.65; }
-.admin-shell .jf-action { min-height:40px; gap:var(--jf-ui-space-2); }
-.admin-shell .jf-action--small { min-height:36px; }
-.admin-shell :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea) { font-size:var(--jf-ui-font-size-md); }
-.admin-shell .jf-table th { padding-block:var(--jf-ui-space-3); }
-.admin-shell .jf-table td { padding-block:var(--jf-ui-space-4); }
-.admin-shell :is(.admin-toolbar,.jobs-toolbar,.custom-head-actions) { row-gap:var(--jf-ui-space-3); }
-.admin-shell :is(.admin-empty,.home-empty,.jf-empty) { line-height:1.6; }
-@media(max-width:680px) {
-  .admin-shell .admin-card > header { padding:var(--jf-ui-space-4); }
-  .admin-shell :is(.admin-metrics,.admin-chart-grid,.admin-settings-grid,.admin-agenda,.admin-account) { gap:var(--jf-ui-space-3); }
-  .admin-shell :is(.admin-page-head,.home-welcome,.custom-head,.job-wizard-head,.job-detail-head) { margin-bottom:var(--jf-ui-space-5); }
-  .admin-shell :is(.admin-card,.home-panel,.job-panel,.job-stage,.custom-card) { border-radius:var(--jf-ui-control-radius); }
-  .admin-shell .jf-table td { padding-block:var(--jf-ui-space-3); }
-}
+/* Workspace content uses the same spacing and surfaces as the component catalog. */
+.admin-shell .admin-main{min-width:0}
+.admin-shell .admin-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--jf-ui-space-6)}
+.admin-shell .admin-management-stack{display:grid;gap:var(--jf-ui-space-4)}
+.admin-shell .admin-form-stack{display:grid;gap:var(--jf-ui-space-4)}
+.admin-shell .admin-form-stack>.jf-action{justify-self:start}
+.admin-shell .admin-record-list,.admin-shell .admin-audit-list{margin:0;padding:0;list-style:none}
+.admin-shell .admin-record-list li{display:flex;min-width:0;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-4) var(--jf-ui-space-6);border-bottom:1px solid var(--jf-ui-border)}
+.admin-shell .admin-record-list li:last-child{border-bottom:0}
+.admin-shell .admin-record-list li>div{display:grid;min-width:0;gap:var(--jf-ui-space-1)}
+.admin-shell .admin-record-list strong{overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-record-list small,.admin-shell .admin-muted,.admin-shell .admin-facts span,.admin-shell .admin-audit-list time{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.6}
+.admin-shell .admin-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:var(--jf-ui-space-3)}
+.admin-shell .admin-facts>div{display:grid;align-content:start;gap:var(--jf-ui-space-1);padding:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface-soft)}
+.admin-shell .admin-facts strong{overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-subheading{margin:var(--jf-ui-space-6) 0 var(--jf-ui-space-3);font-size:var(--jf-ui-font-size-md)}
+.admin-shell .admin-audit-list li{display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--jf-ui-space-2);padding:var(--jf-ui-space-3) 0;border-bottom:1px solid var(--jf-ui-border);font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-audit-list li:last-child{border-bottom:0}
+.admin-shell .admin-team-list{display:grid}
+.admin-shell .admin-team-list article{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) auto minmax(150px,.8fr) auto;align-items:center;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-4) var(--jf-ui-space-6);border-bottom:1px solid var(--jf-ui-border)}
+.admin-shell .admin-team-list article:last-child{border-bottom:0}
+.admin-shell .admin-team-list :is(strong,small){min-width:0;overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}
+.admin-shell .admin-team-list small{color:var(--jf-ui-text-muted)}
+.admin-shell .admin-team-list select{min-width:0;width:100%;min-height:var(--jf-ui-control-height);padding-inline:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface);color:var(--jf-ui-text)}
+.admin-shell .admin-panel-feedback{padding:0 var(--jf-ui-space-6) var(--jf-ui-space-6)}
+.admin-shell .admin-panel-feedback .jf-inline-notice{margin:0}
+@media(max-width:1050px){.admin-shell .admin-team-list article{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.admin-shell .admin-team-list article>select{grid-column:1/3}.admin-shell .admin-team-list article>.jf-action{grid-column:3;grid-row:2}}
+@media(max-width:680px){.admin-shell .admin-team-list article{grid-template-columns:minmax(0,1fr) auto;padding:var(--jf-ui-space-4)}.admin-shell .admin-team-list article>small{grid-column:1/-1;grid-row:2}.admin-shell .admin-team-list article>select{grid-column:1;grid-row:3}.admin-shell .admin-team-list article>.jf-action{grid-column:2;grid-row:3}.admin-shell .admin-record-list li{padding-inline:var(--jf-ui-space-4)}.admin-shell .admin-panel-feedback{padding:0 var(--jf-ui-space-4) var(--jf-ui-space-4)}}
+
+.admin-org > span { min-width:0; }
+.admin-org strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.admin-topbar > div:last-child { flex-shrink:0; }
+.admin-availability { margin-bottom:var(--jf-ui-space-6); }
+.admin-card > .jf-panel-head { padding:var(--jf-ui-space-5) var(--jf-ui-space-6); }
+.admin-card .jf-table th { background:var(--jf-ui-surface-soft); font-family:var(--jf-ui-font-heading); }
+.admin-team-list .jf-select { min-width:0; }
+.admin-team-list .jf-select .jf-field__label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.admin-team-list .jf-select { gap:0; }
+.admin-shell .admin-team-list article > .jf-select { grid-column:auto; }
+@media(max-width:1050px) { .admin-shell .admin-team-list article > .jf-select { grid-column:1/3; } }
+@media(max-width:680px) { .admin-content{padding:var(--jf-ui-space-6) var(--jf-ui-layout-gutter-mobile)} .admin-availability{align-items:flex-start;margin-bottom:var(--jf-ui-space-4)} .admin-card > .jf-panel-head{padding:var(--jf-ui-space-4)} .admin-shell .admin-team-list article > .jf-select{grid-column:1;grid-row:3} .admin-topbar{gap:var(--jf-ui-space-2);padding-inline:var(--jf-ui-layout-gutter-mobile)} }
+
+.backoffice-audit-data { white-space:pre-wrap; overflow-wrap:anywhere; font-size:var(--jf-ui-font-size-sm); }
+.admin-main dd { margin:var(--jf-ui-space-1) 0 0; overflow-wrap:anywhere; }
+.admin-main dt { color:var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); }
+.jf-authenticator-qr { width: fit-content; max-width: 100%; padding: var(--jf-ui-space-5); border-radius: var(--jf-ui-radius-card); background: #fff; }
+.jf-authenticator-qr img { display: block; width: 240px; max-width: 100%; height: auto; }

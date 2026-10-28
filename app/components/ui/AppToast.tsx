@@ -1,16 +1,23 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { CircleAlert, CircleCheck, CircleX, Info } from "lucide-react";
+import { playStatusSound } from "./status-sound";
 
 export type ToastKind = "success" | "info" | "warning" | "danger";
 
 export type ToastNotice = {
+  id?: number;
   kind: ToastKind;
   title: string;
   text: string;
 };
+
+let nextNoticeId = 0;
+export function createToastNotice(notice: Omit<ToastNotice, "id">): ToastNotice {
+  return { ...notice, id: ++nextNoticeId };
+}
 
 function ToastIcon({ kind }: { kind: ToastKind }) {
   if (kind === "success") return <CircleCheck size={19} aria-hidden="true" />;
@@ -26,6 +33,10 @@ const serverMounted = () => false;
 export function AppToast({ notice, onClose }: { notice: ToastNotice; onClose: () => void }) {
   const urgent = notice.kind === "danger" || notice.kind === "warning";
   const mounted = useSyncExternalStore(subscribeToMount, clientMounted, serverMounted);
+
+  useEffect(() => {
+    playStatusSound(notice.kind);
+  }, [notice.id, notice.kind, notice.title, notice.text]);
 
   if (!mounted) return null;
 

@@ -18,6 +18,8 @@ import {
   ImagePlus,
   Images,
   Italic,
+  Info,
+  Underline,
   Link2,
   List,
   Plus,
@@ -36,12 +38,18 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from "react";
+import {fieldPlaceholder} from "./field-copy";
+import {FocusPopover} from "./Widgets";
+import {sanitizeRichText,renderRichText,richTextSource} from "./rich-content";
+import { useStatusSoundForMessage } from "./status-sound";
 
 export type SelectOption = {
   value: string;
   label: string;
   description?: string;
 };
+
+function RequiredMarker(){return <span className="jf-field-required" aria-label="Obrigatório">*</span>}
 
 type FieldBaseProps = {
   label: string;
@@ -54,6 +62,8 @@ type FieldBaseProps = {
 
 type TextFieldProps = FieldBaseProps &
   Omit<InputHTMLAttributes<HTMLInputElement>, "className"> & {
+    labelAdornment?: ReactNode;
+    startAdornment?: ReactNode;
     endAdornment?: ReactNode;
   };
 
@@ -63,6 +73,8 @@ export function TextField({
   error,
   requiredLabel,
   icon: Icon,
+  labelAdornment,
+  startAdornment,
   endAdornment,
   className = "",
   id,
@@ -89,13 +101,15 @@ export function TextField({
   return (
     <div className={`jf-field ${error ? "is-error" : ""} ${className}`}>
       <label className="jf-field__label" htmlFor={inputId}>
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{(inputProps.required||requiredLabel)&&<> <RequiredMarker/></>}</b>
+        {labelAdornment}
       </label>
-      <span className="jf-control">
+      <div className="jf-control">
+        {startAdornment}
         {Icon && <Icon size={17} aria-hidden="true" />}
         <input
           {...inputProps}
+          placeholder={fieldPlaceholder({label,type,placeholder:inputProps.placeholder,disabled:inputProps.disabled,readOnly:inputProps.readOnly})}
           ref={inputRef}
           id={inputId}
           type={isPassword && passwordVisible ? "text" : type}
@@ -120,7 +134,7 @@ export function TextField({
             {passwordVisible ? <EyeOff size={17} aria-hidden="true" /> : <Eye size={17} aria-hidden="true" />}
           </button>
         )}
-      </span>
+      </div>
       {(error || helpText) && <small id={messageId}>{error ?? helpText}</small>}
     </div>
   );
@@ -146,12 +160,12 @@ export function TextAreaField({
   return (
     <div className={`jf-field ${error ? "is-error" : ""} ${className}`}>
       <label className="jf-field__label" htmlFor={inputId}>
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{(textareaProps.required||requiredLabel)&&<> <RequiredMarker/></>}</b>
       </label>
       <span className="jf-control">
         <textarea
           {...textareaProps}
+          placeholder={fieldPlaceholder({label,placeholder:textareaProps.placeholder,multiline:true,disabled:textareaProps.disabled,readOnly:textareaProps.readOnly})}
           id={inputId}
           aria-invalid={Boolean(error)}
           aria-describedby={helpText || error ? messageId : undefined}
@@ -178,8 +192,7 @@ export function FieldControl({
   return (
     <label className={`jf-field jf-field--native ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <span className="jf-control">{children}</span>
       {(error || helpText) && <small className="jf-field__message">{error ?? helpText}</small>}
@@ -250,12 +263,12 @@ function dateToIso(date: Date) {
 
 function formatDate(value?: string) {
   const date = dateFromIso(value);
-  return date ? new Intl.DateTimeFormat("pt-BR").format(date) : "Selecione uma data";
+  return date ? new Intl.DateTimeFormat("pt-BR").format(date) : "Selecione a data...";
 }
 
 function formatDateRange(value: DateRangeValue) {
-  if (!value.start) return "Selecione um intervalo";
-  if (!value.end) return `${formatDate(value.start)} — escolha a data final`;
+  if (!value.start) return "Selecione o período...";
+  if (!value.end) return `${formatDate(value.start)} — selecione o fim...`;
   return `${formatDate(value.start)} — ${formatDate(value.end)}`;
 }
 
@@ -372,9 +385,9 @@ function CalendarPanel({
       {calendarView === "days" && <>
         {range && (
           <div className="jf-calendar__range-status" aria-live="polite">
-            <span><small>Início</small><strong>{selectedStart ? formatDate(selectedStart) : "Escolher"}</strong></span>
+            <span><small>Início</small><strong>{selectedStart ? formatDate(selectedStart) : "Selecione..."}</strong></span>
             <ChevronRight size={15} aria-hidden="true" />
-            <span><small>Fim</small><strong>{selectedEnd ? formatDate(selectedEnd) : "Escolher"}</strong></span>
+            <span><small>Fim</small><strong>{selectedEnd ? formatDate(selectedEnd) : "Selecione..."}</strong></span>
           </div>
         )}
         <div className="jf-calendar__weekdays" aria-hidden="true">{weekDays.map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}</div>
@@ -459,8 +472,7 @@ export function DateField({
   return (
     <div ref={rootRef} className={`jf-field jf-date ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
@@ -477,7 +489,7 @@ export function DateField({
           onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
         >
           <CalendarDays size={17} aria-hidden="true" />
-          <span className={selectedValue ? "" : "is-placeholder"}>{formatDate(selectedValue)}</span>
+          <span className={selectedValue ? "" : "is-placeholder"}>{selectedValue?formatDate(selectedValue):fieldPlaceholder({label,placeholder:"Selecione a data...",disabled,selection:true})}</span>
           <ChevronDown size={17} aria-hidden="true" />
         </button>
         {open && (
@@ -531,8 +543,7 @@ export function DateRangeField({
   return (
     <div ref={rootRef} className={`jf-field jf-date jf-date-range ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
@@ -547,7 +558,7 @@ export function DateRangeField({
           onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
         >
           <CalendarDays size={17} aria-hidden="true" />
-          <span className={selectedRange.start ? "" : "is-placeholder"}>{formatDateRange(selectedRange)}</span>
+          <span className={selectedRange.start ? "" : "is-placeholder"}>{selectedRange.start?formatDateRange(selectedRange):fieldPlaceholder({label,placeholder:"Selecione o período...",disabled,selection:true})}</span>
           <ChevronDown size={17} aria-hidden="true" />
         </button>
         {open && (
@@ -591,7 +602,7 @@ export function SelectField({
   icon: Icon,
   value,
   options,
-  placeholder = "Selecione uma opção",
+  placeholder = "Selecione uma opção...",
   onValueChange,
   disabled = false,
   allowCreate = false,
@@ -617,8 +628,7 @@ export function SelectField({
   return (
     <div ref={rootRef} className={`jf-field jf-select ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
@@ -636,7 +646,7 @@ export function SelectField({
           }}
         >
           {Icon && <Icon size={17} aria-hidden="true" />}
-          <span className={selectedOption ? "" : "is-placeholder"}>{selectedOption?.label ?? placeholder}</span>
+          <span className={selectedOption?.label?.trim() ? "" : "is-placeholder"}>{selectedOption?.label?.trim() || fieldPlaceholder({label,placeholder,disabled,selection:true})}</span>
           <ChevronDown size={17} aria-hidden="true" />
         </button>
         {open && (
@@ -667,7 +677,7 @@ export function SelectField({
                   <input
                     type="text"
                     value={newOption}
-                    placeholder={createPlaceholder}
+                    placeholder={fieldPlaceholder({label:"Nova opção",placeholder:createPlaceholder})}
                     aria-label={createPlaceholder}
                     onChange={(event) => setNewOption(event.target.value)}
                     onKeyDown={(event) => {
@@ -706,7 +716,7 @@ export function MultiSelectField({
   icon: Icon,
   values,
   options,
-  placeholder = "Selecione uma ou mais opções",
+  placeholder = "Selecione opções...",
   onValuesChange,
   disabled = false,
   allowCreate = false,
@@ -734,8 +744,7 @@ export function MultiSelectField({
   return (
     <div ref={rootRef} className={`jf-field jf-multiselect ${open ? "is-open" : ""} ${error ? "is-error" : ""} ${className}`}>
       <span className="jf-field__label">
-        <b>{label}</b>
-        {requiredLabel && <i>{requiredLabel}</i>}
+        <b>{label}{requiredLabel&&<> <RequiredMarker/></>}</b>
       </span>
       <div className="jf-floating-field">
         <button
@@ -760,7 +769,7 @@ export function MultiSelectField({
                 return <i key={value}>{option?.label ?? value}</i>;
               })
             ) : (
-              <em>{placeholder}</em>
+              <em>{fieldPlaceholder({label,placeholder,disabled,selection:true,multiple:true})}</em>
             )}
           </span>
           <ChevronDown size={17} aria-hidden="true" />
@@ -796,7 +805,7 @@ export function MultiSelectField({
                   <input
                     type="text"
                     value={newOption}
-                    placeholder={createPlaceholder}
+                    placeholder={fieldPlaceholder({label:"Nova opção",placeholder:createPlaceholder})}
                     aria-label={createPlaceholder}
                     onChange={(event) => setNewOption(event.target.value)}
                     onKeyDown={(event) => {
@@ -817,6 +826,7 @@ export function MultiSelectField({
 }
 
 type FileUploadFieldProps = FieldBaseProps & {
+  disabled?: boolean;
   value: string | null;
   accept: string;
   emptyHint: string;
@@ -830,30 +840,34 @@ export function FileUploadField({
   accept,
   emptyHint,
   variant = "file",
+  disabled = false,
   onFileChange,
   className = "",
 }: FileUploadFieldProps) {
   const inputId = useId();
+  const displayedValue=value?.trim()||null;
+  const guidance=emptyHint.trim()||"Selecione o arquivo...";
   const EmptyIcon = variant === "picture" ? ImagePlus : FileText;
   const FilledIcon = variant === "picture" ? FileImage : FileCheck2;
-  const StateIcon = value ? FilledIcon : EmptyIcon;
+  const StateIcon = displayedValue ? FilledIcon : EmptyIcon;
 
   return (
-    <label className={`jf-upload jf-upload--${variant} ${value ? "is-filled" : ""} ${className}`} htmlFor={inputId}>
+    <label className={`jf-upload jf-upload--${variant} ${displayedValue ? "is-filled" : ""} ${className}`} htmlFor={inputId}>
       <input
         id={inputId}
         type="file"
         accept={accept}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => onFileChange(event.target.files?.[0] ?? null)}
+        disabled={disabled}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { onFileChange(event.target.files?.[0] ?? null); event.target.value = ""; }}
       />
       <span className="jf-upload__icon"><StateIcon size={21} aria-hidden="true" /></span>
       <span className="jf-upload__content">
         <strong>{label}</strong>
-        <small title={value ?? undefined}>{value ?? emptyHint}</small>
+        <small title={displayedValue ?? undefined}>{displayedValue ?? guidance}</small>
       </span>
       <em>
-        {value ? <Check size={15} aria-hidden="true" /> : <UploadCloud size={15} aria-hidden="true" />}
-        {value ? "Trocar" : "Selecionar"}
+        {displayedValue ? <Check size={15} aria-hidden="true" /> : <UploadCloud size={15} aria-hidden="true" />}
+        {displayedValue ? "Trocar" : "Selecionar"}
       </em>
     </label>
   );
@@ -959,7 +973,7 @@ export function MultiFileUploadField({
         />
         <span className="jf-multi-upload__icon"><StateIcon size={22} aria-hidden="true" /></span>
         <span className="jf-multi-upload__content">
-          <strong>{hasFiles ? `${files.length} ${files.length === 1 ? "item selecionado" : "itens selecionados"}` : variant === "picture" ? "Adicione suas imagens" : "Adicione seus arquivos"}</strong>
+          <strong>{hasFiles ? `${files.length} ${files.length === 1 ? "item selecionado" : "itens selecionados"}` : variant === "picture" ? "Adicione imagens..." : "Adicione arquivos..."}</strong>
           <small>{hasFiles ? `Você ainda pode adicionar ${Math.max(0, maxFiles - files.length)} item(ns).` : emptyHint}</small>
         </span>
         <em><UploadCloud size={15} aria-hidden="true" />{hasFiles ? "Adicionar" : "Selecionar"}</em>
@@ -1049,15 +1063,28 @@ type RichTextFieldProps = {
   label: string;
   placeholder?: string;
   initialHtml?: string;
+  value?: string;
+  textOnly?: boolean;
+  resetKey?: string|number;
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder = "Digite seu texto…", initialHtml = "", onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escreva o texto...", initialHtml = "", value, textOnly=true, resetKey, onChange }: RichTextFieldProps) {
+  const placeholder=fieldPlaceholder({label,placeholder:suppliedPlaceholder,multiline:true});
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<Range | null>(null);
-  const [initial] = useState(initialHtml);
+  const emittedRef=useRef<string|undefined>(undefined);
+  const [initial] = useState(textOnly?sanitizeRichText(value??initialHtml):initialHtml);
+  const sourceRef=useRef<HTMLTextAreaElement>(null);
+  const [source,setSource]=useState(()=>richTextSource(value??initialHtml));
+  const sourceEmitted=useRef<string|undefined>(undefined),sourceVersion=useRef(resetKey);
+  useEffect(()=>{if(value!==undefined&&(value!==sourceEmitted.current||sourceVersion.current!==resetKey))setSource(richTextSource(value));sourceVersion.current=resetKey},[value,resetKey]);
+  function changeSource(next:string){setSource(next);const html=renderRichText(next.replace(/\n/g,'<br>'));sourceEmitted.current=html;onChange?.(html)}
+  function sourceFormat(tag:string){const editor=sourceRef.current;if(!editor)return;const start=editor.selectionStart,end=editor.selectionEnd;const open=`[${tag}]`,close=`[/${tag}]`;changeSource(source.slice(0,start)+open+source.slice(start,end)+close+source.slice(end));requestAnimationFrame(()=>{editor.focus();editor.setSelectionRange(start+open.length,end+open.length)})}
+  const parameterHelp=<FocusPopover showCloseAction={false} label="Parâmetros de formatação" triggerVariant="quiet" triggerContent={<Info size={16}/>}><strong>Formatação rápida</strong><dl className="jf-rich-parameters"><dt>Cor do texto</dt><dd><code>[color=#4169E1]Texto[/color]</code></dd><dt>Estilo</dt><dd><code>[b]negrito[/b] · [i]itálico[/i] · [u]sublinhado[/u]</code></dd><dt>Tamanho</dt><dd><code>[size=24]Texto[/size]</code><span>16, 18, 24 ou 32 px.</span></dd><dt>Atalhos · Ctrl ou ⌘</dt><dd><span>B: negrito · I: itálico · U: sublinhado.</span></dd></dl></FocusPopover>;
   const [imageError, setImageError] = useState("");
+  useStatusSoundForMessage(imageError, "danger");
   const [size, setSize] = useState("3");
   const errorId = useId();
 
@@ -1080,13 +1107,17 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
     if (!editor) return;
     const empty = !editor.textContent?.trim() && !editor.querySelector("img");
     editor.dataset.empty = String(empty);
-    onChange?.(empty ? "" : editor.innerHTML);
+    const next=empty?"":textOnly?renderRichText(editor.innerHTML):editor.innerHTML;emittedRef.current=next;onChange?.(next);
     saveSelection();
   }
   useEffect(() => {
     const editor = editorRef.current;
-    if (editor) editor.dataset.empty = String(!editor.textContent?.trim() && !editor.querySelector("img"));
-  }, []);
+    if (editor) {
+      editor.innerHTML = initial;
+      editor.dataset.empty = String(!editor.textContent?.trim() && !editor.querySelector("img"));
+    }
+  }, [initial]);
+  useEffect(()=>{const editor=editorRef.current;if(value!==undefined&&value!==emittedRef.current&&editor&&document.activeElement!==editor){const html=textOnly?sanitizeRichText(value):value;if(editor.innerHTML!==html)editor.innerHTML=html;editor.dataset.empty=String(!editor.textContent?.trim())}},[value,textOnly]);
   function format(command: string, value?: string) {
     restoreSelection();
     document.execCommand(command, false, value);
@@ -1108,21 +1139,24 @@ export function RichTextField({ label, placeholder = "Digite seu texto…", init
     };
     reader.readAsDataURL(file);
   }
-  return <div className="jf-rich-text-field">
+  if(textOnly)return <div className="jf-rich-text-field"><label className="jf-field__label" htmlFor={`${errorId}-source`}><b>{label}</b></label><div className="jf-rich-text"><div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto"><button type="button" aria-label="Negrito" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('b')}><Bold size={16}/></button><button type="button" aria-label="Itálico" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('i')}><Italic size={16}/></button><button type="button" aria-label="Sublinhado" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('u')}><Underline size={16}/></button>{parameterHelp}</div><textarea ref={sourceRef} id={`${errorId}-source`} className="jf-rich-text__source" aria-label={label} placeholder={placeholder} value={source} onKeyDown={e=>{if(e.nativeEvent.isComposing||e.altKey||e.shiftKey||!(e.ctrlKey||e.metaKey))return;const tag=({b:'b',i:'i',u:'u'} as Record<string,string>)[e.key.toLowerCase()];if(tag){e.preventDefault();sourceFormat(tag)}}} onChange={e=>changeSource(e.target.value)} rows={4}/></div></div>;
+  return <div className="jf-rich-text-field"><span className="jf-field__label"><b>{label}</b></span>
     <div className="jf-rich-text">
       <div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto">
         <button type="button" aria-label="Negrito" title="Negrito" onMouseDown={e => e.preventDefault()} onClick={() => format("bold")}><Bold size={16}/></button>
         <button type="button" aria-label="Itálico" title="Itálico" onMouseDown={e => e.preventDefault()} onClick={() => format("italic")}><Italic size={16}/></button>
         <button type="button" aria-label="Lista" title="Lista" onMouseDown={e => e.preventDefault()} onClick={() => format("insertUnorderedList")}><List size={16}/></button>
-        <button type="button" aria-label="Adicionar link" title="Adicionar link" onMouseDown={e => e.preventDefault()} onClick={() => format("createLink", "https://jobforged.com")}><Link2 size={16}/></button>
-        <button type="button" aria-label="Adicionar imagem" title="Adicionar imagem" onMouseDown={e => e.preventDefault()} onClick={() => { saveSelection(); inputRef.current?.click(); }}><ImagePlus size={16}/></button>
-        <select className="jf-rich-text__size" aria-label="Tamanho do texto" title="Tamanho do texto" value={size} onChange={e => { setSize(e.target.value); format("fontSize", e.target.value); }}>
-          <option value="3">Normal · 16 px</option><option value="4">Grande · 18 px</option><option value="5">Maior · 24 px</option><option value="6">Título · 32 px</option>
-        </select>
+        {!textOnly&&<button type="button" aria-label="Adicionar link" title="Adicionar link" onMouseDown={e => e.preventDefault()} onClick={() => format("createLink", "https://jobforged.com")}><Link2 size={16}/></button>}
+        {!textOnly&&<button type="button" aria-label="Adicionar imagem" title="Adicionar imagem" onMouseDown={e => e.preventDefault()} onClick={() => { saveSelection(); inputRef.current?.click(); }}><ImagePlus size={16}/></button>}
+        {!textOnly&&<div className="jf-rich-text__sizes" role="group" aria-label="Tamanho do texto">
+          {([{"value":"3","label":"16"},{"value":"4","label":"18"},{"value":"5","label":"24"},{"value":"6","label":"32"}] as const).map(option => <button key={option.value} type="button" className="jf-rich-text__size" aria-label={`Texto de ${option.label} pixels`} title={`${option.label} px`} aria-pressed={size === option.value} onMouseDown={e => e.preventDefault()} onClick={() => { setSize(option.value); format("fontSize", option.value); }}>{option.label}</button>)}
+        </div>}
+        {parameterHelp}
+        <button type="button" aria-label="Remover formatação" onMouseDown={e=>e.preventDefault()} onClick={()=>format("removeFormat")}>Aa</button>
       </div>
       <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={addImage}/>
       <div className="jf-rich-text__body">
-        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial} contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: initial }} onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
+        <div ref={editorRef} className="jf-rich-text__editor" role="textbox" aria-label={label} aria-multiline="true" aria-placeholder={placeholder} aria-describedby={imageError ? errorId : undefined} data-empty={!initial} contentEditable suppressContentEditableWarning onPaste={event=>{if(textOnly){event.preventDefault();format("insertHTML",sanitizeRichText(event.clipboardData.getData("text/html")||event.clipboardData.getData("text/plain")))}}} onDrop={event=>{if(textOnly)event.preventDefault()}} onInput={changed} onMouseUp={saveSelection} onKeyUp={saveSelection} onBlur={saveSelection}/>
         <span className="jf-rich-text__placeholder" aria-hidden="true">{placeholder}</span>
       </div>
     </div>

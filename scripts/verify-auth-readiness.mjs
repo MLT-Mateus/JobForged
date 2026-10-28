@@ -8,8 +8,8 @@ try {
   const key = process.env.SUPABASE_ANON_KEY;
   assert.ok(url && key, "Configuração Supabase ausente");
   const host = new URL(url).hostname;
-  if (environment === "live") assert.equal(host, "supabase-live-envoy");
-  else assert.notEqual(host, "supabase-live-envoy");
+  if (environment === "live") assert.ok(["supabase-live-envoy","jbfd-live-security-gateway"].includes(host));
+  else assert.ok(!["supabase-live-envoy","jbfd-live-security-gateway"].includes(host));
   const claims = JSON.parse(Buffer.from(key.split(".")[1], "base64url"));
   assert.equal(claims.role, "anon");
   const headers = { apikey: key, Authorization: `Bearer ${key}` };
