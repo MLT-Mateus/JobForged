@@ -9,7 +9,7 @@ import re
 import subprocess
 import urllib.request
 import urllib.error
-from environment_profiles import Environment, authorize_live, private_file
+from environment_profiles import Environment, authorize_live, private_file, auth_policy
 
 def validate_rollback(evidence, expected, now=None):
     now=now or datetime.datetime.now(datetime.timezone.utc)
@@ -50,6 +50,13 @@ def main():
     if test.get('commit')!=args.revision or test.get('status')!='ok':raise SystemExit('Same release must be healthy in Test')
     check=subprocess.run(['bash',str(root/'scripts/supabase-migrate.sh'),'live','--check'],capture_output=True,text=True)
     if check.returncode:raise SystemExit('Live migrations or checksums are not ready')
+    auth=json.loads(subprocess.run(['docker','inspect',environment.auth],capture_output=True,text=True,check=True).stdout)[0]
+    settings=dict(value.split('=',1) for value in auth['Config']['Env'])
+    policy=auth_policy(json.loads((root/'shared/password-policy.json').read_text()))
+    if any(settings.get(key)!=value for key,value in policy.items()) or settings.get('GOTRUE_MAILER_AUTOCONFIRM')!='false':raise SystemExit('Live native Auth policy is not ready')
+    gateway=json.loads(subprocess.run(['docker','inspect',environment.gateway],capture_output=True,text=True,check=True).stdout)[0]
+    gateway_env=dict(value.split('=',1) for value in gateway['Config']['Env'])
+    if gateway['Config'].get('Image')!='ghcr.io/mlt-mateus/jobforged-security-gateway:'+args.revision or gateway['State'].get('Health',{}).get('Status')!='healthy' or gateway_env.get('APP_ENV')!='live' or gateway_env.get('UPSTREAM_URL')!='http://'+environment.envoy+':8000':raise SystemExit('Approved healthy Live gateway required')
     enforced="exists(select 1 from app_private.security_settings where singleton and admin_mfa_enforced)"
     statement='select '+enforced+(';' if args.bootstrap else " and exists(select 1 from public.platform_admins) and not exists(select 1 from public.platform_admins p where not exists(select 1 from auth.mfa_factors f where f.user_id=p.user_id and f.status='verified'));")
     state=subprocess.run(['docker','exec',environment.database,'psql','-XqAt','-U','postgres','-d','postgres','-c',statement],capture_output=True,text=True)
