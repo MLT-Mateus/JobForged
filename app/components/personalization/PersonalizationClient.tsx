@@ -15,16 +15,14 @@ import {brandingDefaults,brandContent,validateBranding,foreground,contrast,light
 import {CompanyBrandingGuard} from "./CompanyBranding";
 import {AppearancePreviewPanel} from "./AppearancePreviewPanel";
 import {AppearanceTemplatePicker,appearanceTemplates} from "./AppearanceTemplates";
-import {useStatusSoundForMessage} from "../ui/status-sound";
 import {fontPairs} from "../ui/font-pairs";
 import type {BrandAsset,Customization,HistoryEntry,OrganizationBanner,Palette as PaletteType} from "./personalization-types";
 import "./personalization.css";
 function SectionCard({title,description,action,children}:{title:string;description?:string;action?:ReactNode;children:ReactNode}){return <Panel as="section" className="custom-card"><PanelHeading title={title} description={description} action={action}/><div className="custom-card-body jf-panel-body">{children}</div></Panel>}
 function AssetUploader({companyId,kind,label,asset,onChange,maxMb=5,ratio,onBusyChange}:{companyId:string;kind:string;label:string;asset:BrandAsset|null;onChange:(x:BrandAsset|null)=>void;maxMb?:number;ratio:string;onBusyChange?:(value:boolean)=>void}){
  const [uploading,setUploading]=useState(false),[error,setError]=useState("");
- useStatusSoundForMessage(error,"danger");
  const choose=async(file:File|null)=>{if(!file)return;setError("");if(file.size>maxMb*1024*1024){setError(`O arquivo excede ${maxMb} MB.`);return}setUploading(true);onBusyChange?.(true);try{onChange(await customizationService.uploadAsset(file,kind,companyId))}catch(e){setError(e instanceof Error?e.message:"Não foi possível enviar a imagem.")}finally{setUploading(false);onBusyChange?.(false)}};
- return <div className="appearance-asset"><FileUploadField label={uploading?`${label} · Enviando…`:label} value={asset?.name||null} accept="image/png,image/jpeg,image/webp" emptyHint={`PNG, JPG ou WebP estático · até ${maxMb} MB`} variant="picture" disabled={uploading} onFileChange={file=>void choose(file)}/><small>Recomendado: {ratio}</small>{asset&&<div className="appearance-asset__preview"><img src={asset.url} alt={`Prévia de ${label}`}/><ActionButton variant="danger" disabled={uploading} onClick={()=>onChange(null)} aria-label={`Remover ${label}`} icon={<Trash2/>}>Remover</ActionButton></div>}{error&&<InlineNotice tone="danger">{error}</InlineNotice>}</div>
+ return <div className="appearance-asset"><FileUploadField label={uploading?`${label} · Enviando…`:label} value={asset?.name||null} accept="image/png,image/jpeg,image/webp" emptyHint={`PNG, JPG ou WebP estático · até ${maxMb} MB`} variant="picture" disabled={uploading} onFileChange={file=>void choose(file)}/><small>Recomendado: {ratio}</small>{asset&&<div className="appearance-asset__preview"><img src={asset.url} alt={`Prévia de ${label}`}/><ActionButton variant="danger" disabled={uploading} onClick={()=>onChange(null)} aria-label={`Remover ${label}`} icon={<Trash2/>}>Remover</ActionButton></div>}{error&&<AppToast notice={{kind:"danger",title:"Imagem não enviada",text:error}} onClose={()=>setError("")}/>}</div>
 }
 
 function emptyBanner(organizationId:string,order:number):OrganizationBanner{return{id:`banner-${Date.now()}`,organizationId,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),status:"Ativo",title:"Novo destaque",description:"Adicione uma mensagem curta e útil para sua equipe ou candidatos.",buttonText:"Saiba mais",link:"",image:"",startAt:"",endAt:"",placement:"Home e portal",order}}

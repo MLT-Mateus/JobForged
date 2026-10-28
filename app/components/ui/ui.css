@@ -593,16 +593,19 @@
 .jf-toast {
   --jf-toast-color: var(--jf-ui-accent);
   position: fixed;
+  inset: auto;
+  margin: 0;
   right: 24px;
   bottom: 24px;
   z-index: 180;
   display: flex;
   width: min(420px, calc(100% - 32px));
   min-height: 76px;
+  max-height: calc(100dvh - 32px);
   align-items: center;
   gap: var(--jf-ui-space-3);
   padding: var(--jf-ui-space-4);
-  overflow: hidden;
+  overflow: auto;
   border: 1px solid var(--jf-ui-border);
   border-radius: var(--jf-ui-radius-card);
   background: var(--jf-ui-surface-raised);
@@ -614,7 +617,8 @@
 
 .jf-toast::before { position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--jf-toast-color); content: ""; }
 .jf-toast__icon { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border-radius: var(--jf-ui-control-radius); background: color-mix(in srgb, var(--jf-toast-color) 10%, var(--jf-ui-surface)); color: var(--jf-toast-color); }
-.jf-toast > div { display: grid; flex: 1; gap: 4px; }
+.jf-toast > div { display: grid; flex: 1; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.jf-toast__action { margin-top: var(--jf-ui-space-2); }
 .jf-toast strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: var(--jf-ui-font-size-sm); }
 .jf-toast > div > span { color: var(--jf-ui-text-muted); font-size: var(--jf-ui-font-size-xs); line-height: 1.5; }
 .jf-toast > button { display: grid; width: 30px; height: 30px; flex: 0 0 30px; place-items: center; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--jf-ui-text-soft); cursor: pointer; transition: background 160ms ease, color 160ms ease; }
@@ -631,8 +635,8 @@
 }
 
 @keyframes jf-toast-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { transform: translateY(8px); }
+  to { transform: translateY(0); }
 }
 
 @media (max-width: 680px) {

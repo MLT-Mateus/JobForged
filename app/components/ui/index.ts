@@ -16,7 +16,7 @@ export {
   type SelectOption,
 } from "./FormControls";
 
-export { AppToast, createToastNotice, type ToastKind, type ToastNotice } from "./AppToast";
+export { AppToast, AppToastHost, createToastNotice, type ToastKind, type ToastNotice } from "./AppToast";
 export { ThemeSelector, type ThemeMode } from "./ThemeSelector";
 export { ActionButton, Panel, MetricCard, DataTable, EmptyState, EmptyStateVisual, StatusBadge, WorkspacePageHeader, PanelHeading, InlineNotice } from "./AdminPrimitives";
 

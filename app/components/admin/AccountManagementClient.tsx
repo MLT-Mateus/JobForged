@@ -3,7 +3,7 @@ import { roleLabel } from "./display-labels";
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ActionButton, AppToast, InlineNotice, Panel, PanelHeading, TextField, WorkspacePageHeader, WorkspaceState } from "@/app/components/ui";
+import { ActionButton, AppToast, Panel, PanelHeading, TextField, WorkspacePageHeader, WorkspaceState } from "@/app/components/ui";
 import { signOutCompany, useCompanyAuthSession, type AuthSessionState } from "@/app/components/auth/auth-service";
 import type { ToastKind } from "@/app/components/ui";
 
@@ -30,6 +30,6 @@ function AccountEditor({ session,embedded }: { session: AuthSessionState;embedde
     <div className="jf-workspace-grid"><Panel as="section" className="admin-card"><PanelHeading title="Meu perfil" description="Informações da conta confirmada"/>
       <form className="admin-form-stack jf-panel-body" onSubmit={event=>session.platformAdmin?event.preventDefault():void save(event)}><TextField readOnly={session.platformAdmin} label="Nome completo" placeholder="Seu nome completo" value={fullName} maxLength={120} onChange={event => setFullName(event.target.value)} required />
         <TextField label="E-mail confirmado" placeholder="nome@empresa.com.br" type="email" value={session.email ?? ""} readOnly />
-        {!session.platformAdmin&&<ActionButton type="submit" disabled={busy}>Salvar perfil</ActionButton>}</form>{message && <><div className="admin-panel-feedback"><InlineNotice tone={messageKind === "danger" ? "danger" : messageKind === "success" ? "success" : "info"}>{message}</InlineNotice></div><AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Não foi possível concluir a ação" : "Perfil atualizado",text:message}} onClose={() => setMessage("")}/></>}</Panel>
+        {!session.platformAdmin&&<ActionButton type="submit" disabled={busy}>Salvar perfil</ActionButton>}</form>{message && <AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Não foi possível concluir a ação" : "Perfil atualizado",text:message}} onClose={() => setMessage("")}/>}</Panel>
       <Panel as="section" className="admin-card"><PanelHeading title="Acesso e segurança" description="Vínculo empresarial e recuperação da conta"/><div className="jf-panel-body"><div className="admin-facts"><div><span>Empresa</span><strong>{session.platformAdmin?"JobForged":session.company?.name}</strong></div><div><span>Função</span><strong>{session.platformAdmin?"Administrador da plataforma":roleLabel(session.role)}</strong></div></div><p className="admin-muted">Para alterar sua senha, solicite um link de uso único ao seu e-mail.</p><Link className="jf-action jf-action--secondary" href="/recuperar-senha">Solicitar alteração de senha</Link><div className="jf-workspace-toolbar"><ActionButton type="button" variant="secondary" disabled={busy} onClick={async()=>{setBusy(true);const result=await signOutCompany();if(result.ok){location.replace("/login");return}setBusy(false);setMessageKind("danger");setMessage("Não foi possível encerrar a sessão. Tente novamente.")}}>Sair da conta</ActionButton></div></div></Panel></div></>;
 }

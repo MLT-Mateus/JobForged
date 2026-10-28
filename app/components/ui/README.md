@@ -42,3 +42,10 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 - `jf-workspace-stack`, `jf-workspace-grid` e `jf-workspace-toolbar` organizam módulos e formulários com a escala oficial; mantenha estilos de domínio apenas para a composição específica.
 - `WorkspaceTabs`, `WorkspaceActionMenu` e `WorkspaceState` são demonstrados no catálogo e usados nas páginas. Estados de erro persistentes emitem um único sinal, sem duplicar um toast.
 - `WidgetDialog` atende confirmações, histórico, prévia ampla e drawer. O tamanho `wide` e janelas sobrepostas preservam foco, Escape e a liberação da rolagem ao fechar a última janela.
+
+## Feedback de ações
+
+- Publique resultados de salvar, enviar, excluir e falhas de ação com `AppToast` e `createToastNotice`. O `AppToastHost` único do layout mantém apenas o alerta mais recente, inclusive sobre `WidgetDialog` e drawers. Não duplique o mesmo resultado com parágrafos ou `InlineNotice`.
+- Sucesso/informação duram 6 segundos; atenção/erro, 10. Hover, foco e aba oculta pausam a leitura. Alertas com link de ação exigida permanecem até fechamento.
+- Validação de campo permanece junto ao campo. Orientações persistentes usam `InlineNotice`; falhas que impedem carregar um módulo usam `WorkspaceState` com nova tentativa.
+- Preserve os ícones, tokens e sons aprovados. O Design System demonstra a mesma implementação, sem temporizador próprio.
