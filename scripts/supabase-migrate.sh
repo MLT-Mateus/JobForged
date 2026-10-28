@@ -65,15 +65,9 @@ for filename in "${migrations[@]}"; do
     continue
   fi
   [[ "$mode" != "--check" ]] || { echo "Migration pendente: $filename. Aplique com backup antes do deploy." >&2; exit 65; }
-  migration_role=postgres
-  if head -n 1 "$migrations_dir/$filename" | grep -qx -- '-- migration-role: supabase_admin'; then
-    migration_role=supabase_admin
-  fi
-  {
-    printf 'BEGIN;\n'
-    cat "$migrations_dir/$filename"
-    printf "\nINSERT INTO public.jbfd_schema_migrations (filename, checksum) VALUES ('%s', '%s');\nCOMMIT;\n" "$filename" "$checksum"
-  } | psql >/dev/null
+  transaction_builder="$(dirname "$0")/security/migration_transaction.py"
+  migration_role=$(python3 "$transaction_builder" "$migrations_dir/$filename" --operator)
+  python3 "$transaction_builder" "$migrations_dir/$filename" | psql >/dev/null
   migration_role=postgres
   echo "Applied: $filename"
 done

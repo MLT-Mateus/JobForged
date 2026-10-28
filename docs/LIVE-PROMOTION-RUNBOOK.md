@@ -72,3 +72,11 @@ Este exemplo não deve ser copiado como aprovação real. O modo alternativo de 
 ## Limites atuais
 
 O ensaio sintético não comprova a integridade dos dados particulares de Live; sua restauração/upgrade própria ainda precisa ocorrer após aprovação. A criação e matrícula MFA da conta Live exigem participação humana. As configurações/root wrappers não são instalados em Live durante o deploy de Test. O pacote preparado e CI verde não equivalem a promoção realizada ou a garantia de prontidão total.
+
+## Ajuste descoberto no ensaio próprio de Live — 28/10
+
+O clone isolado do backup real revelou duas diferenças que o baseline sintético anterior não exercitava: dono de database após initdb e propriedade nativa de storage.objects. O backup agora registra e confere o dono; a restauração exige esse metadado. O teste nativo preserva supabase_storage_admin como dono dos objetos desde o início.
+
+As migrations imutáveis0008 e0013 continuam idênticas. O runner usa uma transação sob supabase_admin que concede a postgres a capacidade de proprietário de Storage apenas dentro da própria transação, executa a migration como postgres, revoga a capacidade e registra o checksum antes do commit. A concessão não fica visível a outras sessões e falhas revertem tudo. Vínculos previamente existentes fazem o runner parar em vez de revogar permissões legítimas. O CI exercita sucesso e rollback, além de verificar ausência da concessão persistente. Objetos empresariais continuam com seu proprietário original.
+
+A primeira tentativa isolada parou antes de qualquer migration no banco ativo. O ensaio corrigido atingiu0030, preservou contagens de identidade/empresas/vínculos/arquivos e não encontrou constraints sem validação. Publicar a correção primeiro em Test e reutilizar esse novo SHA na promoção; não prosseguir com o candidato anterior do runner.
