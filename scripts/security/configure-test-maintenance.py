@@ -25,10 +25,12 @@ def main():
         approval=json.loads(Path(options.authorization).read_text())
         record={'environment':'live','revision':revision,'scopes':['consistent-backup','bounded-orphan-maintenance'],'approval_reference':approval['approval_reference']}
         Path('/opt/jbfd/security-work/live-maintenance-approved.json').write_text(json.dumps(record))
-    target=Path('/opt/jbfd/security-work/record-offsite-copy.py')
+    tools=Path('/opt/jbfd/security-work')/('live-tools' if environment.name=='live' else '')
+    tools.mkdir(mode=0o700,exist_ok=True)
+    target=tools/'record-offsite-copy.py'
     shutil.copyfile(release/'scripts/security/record-offsite-copy.py',target);target.chmod(0o600)
     for name in ['test-recovery-drill.py','recovery_drill.py','environment_profiles.py']:
-        backup_tool=Path('/opt/jbfd/security-work')/name
+        backup_tool=tools/name
         shutil.copyfile(release/'scripts/security'/name,backup_tool);backup_tool.chmod(0o600)
     service='''[Unit]
 Description=JobForged Test verified orphan quarantine

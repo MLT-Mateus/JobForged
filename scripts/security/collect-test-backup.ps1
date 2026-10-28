@@ -18,7 +18,9 @@ try {
   if(!(Test-Path -LiteralPath $resolvedRoot -PathType Container)){throw 'Protected backup directory missing'}
   $lock=[IO.File]::Open($lockPath,[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
   $sshArgs=@('-n','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=15','root@187.77.229.27')
-  $backupCommand='python3 /opt/jbfd/security-work/test-recovery-drill.py --environment '+$Environment
+  $remoteTools='/opt/jbfd/security-work'
+  if($Environment -eq 'live'){$remoteTools=if($Scheduled){'/opt/jbfd/security-work/live-tools'}else{'/opt/jbfd/releases/'+$Revision+'/scripts/security'}}
+  $backupCommand='python3 '+$remoteTools+'/test-recovery-drill.py --environment '+$Environment
   if($Scheduled){$backupCommand+=' --scheduled'}elseif($Environment -eq 'live'){$backupCommand+=' --revision '+$Revision+' --authorization '+$Authorization}
   $raw=& ssh @sshArgs $backupCommand
   if($LASTEXITCODE -ne 0){throw 'Target backup or isolated restoration failed'}
@@ -37,7 +39,7 @@ try {
   $verified=& "$PSScriptRoot\workstation-backup.ps1" -Source $encrypted -Destination '' -Decrypt -Verify
   if(($verified -join '') -notmatch $expected){throw 'Encrypted backup verification failed'}
   $encryptedHash=(Get-FileHash -LiteralPath $encrypted -Algorithm SHA256).Hash
-  & ssh @sshArgs "python3 /opt/jbfd/security-work/record-offsite-copy.py $name $expected $encryptedHash"
+  & ssh @sshArgs "python3 $remoteTools/record-offsite-copy.py $name $expected $encryptedHash"
   if($LASTEXITCODE -ne 0){throw 'Offsite receipt failed; encrypted archive preserved'}
   Remove-Item -LiteralPath $incoming
   $incoming=$null

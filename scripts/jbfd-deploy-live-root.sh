@@ -26,7 +26,7 @@ if [[ $# -ne 1 || "$1" != configure-brevo ]]; then
 fi
 
 # Direct SSH use must not bypass the workflow's release preparation gate.
-live_approved_revision="$(python3 -c 'import json,sys;sys.path.insert(0,"/opt/jbfd/security-work");from environment_profiles import private_file;print(json.loads(private_file("/opt/jbfd/security-work/live-release-approval.json").read_text())["revision"])')"
+live_approved_revision="$(python3 -c 'import json,sys;sys.path.insert(0,"/opt/jbfd/security-work/live-tools");from environment_profiles import private_file;print(json.loads(private_file("/opt/jbfd/security-work/live-release-approval.json").read_text())["revision"])')"
 [[ "$live_approved_revision" =~ ^[0-9a-f]{40}$ ]] || exit 64
 python3 "/opt/jbfd/releases/$live_approved_revision/scripts/security/verify-live-release.py" "$live_approved_revision" >/dev/null
 
