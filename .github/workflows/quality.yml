@@ -51,8 +51,10 @@ jobs:
         run: python3 tests/security_gate_test.py
       - name: Validar separação de ambientes e bloqueios de promoção
         run: |
+          python3 -m pip install --disable-pip-version-check --no-deps --require-hashes -r scripts/security/requirements-ci.txt
           python3 tests/environment_profiles_test.py
           python3 tests/environment_profiles_test.py --compose
+          python3 tests/compose_yaml_test.py
 
   mcp:
     name: Validar MCP operacional

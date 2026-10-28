@@ -10,7 +10,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
-import yaml
+import compose_yaml
 from environment_profiles import Environment, authorize_live
 
 def run(args):
@@ -33,7 +33,7 @@ def main():
     os.umask(0o077)
     before=live_state(environment.peer);traefik=inspect('jobforged_traefik')['Id'];network=environment.ingress
     root=environment.stack;path=root/environment.override;app=environment.app_env
-    original=path.read_text();old_app=app.read_text();document=yaml.safe_load(original)
+    original=path.read_text();old_app=app.read_text();document=compose_yaml.load(original)
     if document['networks']['traefik']['name'] not in ['jobforged_jobforged_network',network]:raise SystemExit('Unexpected Test network')
     document['networks']['traefik']['name']=network
     for service in ['studio','api-gw']:
@@ -44,7 +44,7 @@ def main():
         run(['docker','network','create','--label','jbfd.environment='+environment.name,network])
     if network not in inspect('jobforged_traefik')['NetworkSettings']['Networks']:
         run(['docker','network','connect',network,'jobforged_traefik'])
-    updated=json.dumps(document,indent=2)+'\n'
+    updated=compose_yaml.dump(document)
     lines=old_app.splitlines()
     if sum(line.startswith('JBFD_DOCKER_NETWORK=') for line in lines)!=1:raise SystemExit('Unique Test ingress setting required')
     new_app='\n'.join('JBFD_DOCKER_NETWORK='+network if line.startswith('JBFD_DOCKER_NETWORK=') else line for line in lines)+'\n'
