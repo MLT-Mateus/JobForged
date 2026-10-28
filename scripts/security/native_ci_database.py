@@ -86,7 +86,7 @@ grant select,insert,update,delete on all tables in schema storage to postgres;
                     try:sql(transaction(invalid),operator(invalid))
                     except AssertionError:pass
                     else:raise AssertionError('Expected migration failure')
-                    if 't' in sql("select pg_has_role('postgres','supabase_storage_admin','MEMBER');").splitlines():raise AssertionError('Failed migration leaked Storage membership')
+                    sql("DO $$BEGIN IF pg_has_role('postgres','supabase_storage_admin','MEMBER') THEN RAISE EXCEPTION 'Failed migration leaked Storage membership'; END IF; END$$;")
                 finally:invalid.unlink(missing_ok=True)
             try:sql(transaction(migration),operator(migration))
             except AssertionError as error:raise AssertionError(migration.name+': '+str(error)) from None
@@ -119,7 +119,7 @@ grant select on all tables in schema storage to postgres;
 do $$begin
 if not exists(select 1 from public.companies where id='16000000-0000-4000-8000-000000000011' and name='Legacy native fixture' and terms_revision is null) then raise exception 'legacy fixture changed';end if;
 end$$;''')
-        if 't' in sql("select pg_has_role('postgres','supabase_storage_admin','MEMBER');").splitlines():raise AssertionError('Storage migration privilege leaked')
+        sql("DO $$BEGIN IF pg_has_role('postgres','supabase_storage_admin','MEMBER') THEN RAISE EXCEPTION 'Storage migration privilege leaked'; END IF; END$$;")
         return name,images
     except Exception as error:
         subprocess.run(['docker','rm','-fv',name],capture_output=True)
