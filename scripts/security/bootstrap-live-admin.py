@@ -14,6 +14,7 @@ from environment_profiles import Environment, authorize_live, private_file
 
 def bootstrap_sql(email,reference,prepare_only=False):
     if not re.fullmatch(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+',email):raise ValueError('Invalid approved identity')
+    if not re.fullmatch(r'[A-Za-z0-9 _/#:.-]{10,160}',reference):raise ValueError('Plain approval reference required')
     reason='Approved Live bootstrap: '+reference
     literal=lambda value:"'"+value.replace("'","''")+"'"
     if prepare_only:
@@ -26,6 +27,7 @@ end$$;commit;"""%literal(reason)
     else:
         statement="""begin;
 do $$declare person uuid;current_session uuid;session_count integer;begin
+if (select count(*) from auth.users where lower(email)=%s and email_confirmed_at is not null and deleted_at is null and (banned_until is null or banned_until<=now()))<>1 then raise exception 'Exactly one approved confirmed identity required';end if;
 select id into person from auth.users where lower(email)=%s and email_confirmed_at is not null and deleted_at is null and (banned_until is null or banned_until<=now());
 if person is null then raise exception 'Approved confirmed Live account missing; human signup required';end if;
 if exists(select 1 from public.platform_admins p where p.user_id<>person and not exists(select 1 from auth.mfa_factors f where f.user_id=p.user_id and f.status='verified')) then raise exception 'Other legitimate administrators require their own enrollment';end if;
@@ -42,7 +44,7 @@ if current_session is not null then
  insert into app_private.administrative_factor_recovery(user_id,session_id,expires_at,reason) values(person,current_session,now()+interval '15 minutes',%s);
 end if;
 insert into public.platform_audit_events(actor_user_id,action,reason,details) values(person,'platform.security.bootstrap',%s,'{"operator":"vps-root","identity_previously_confirmed":true}');
-end$$;commit;"""%(literal(email),literal(email),literal(email),literal(reason),literal(reason))
+end$$;commit;"""%(literal(email),literal(email),literal(email),literal(email),literal(reason),literal(reason))
     return statement
 
 def main():
