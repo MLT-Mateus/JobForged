@@ -5,7 +5,7 @@ umask 077
 [[ $(id -u) -eq 0 ]] || { echo "Este helper precisa ser chamado pelo sudo autorizado." >&2; exit 77; }
 
 if [[ $# -eq 2 && "$1" == probe-readiness && "$2" =~ ^[0-9a-f]{40}$ ]]; then
-  python3 "/opt/jbfd/releases/$2/scripts/security/verify-live-release.py" "$2" >/dev/null
+  python3 "/opt/jbfd/releases/$2/scripts/security/verify-live-release.py" "$2" </dev/null >/dev/null
   echo "jbfd-live-readiness-v1"
   exit 0
 fi
@@ -28,7 +28,7 @@ fi
 # Direct SSH use must not bypass the workflow's release preparation gate.
 live_approved_revision="$(python3 -c 'import json,sys;sys.path.insert(0,"/opt/jbfd/security-work/live-tools");from environment_profiles import private_file;print(json.loads(private_file("/opt/jbfd/security-work/live-release-approval.json").read_text())["revision"])')"
 [[ "$live_approved_revision" =~ ^[0-9a-f]{40}$ ]] || exit 64
-python3 "/opt/jbfd/releases/$live_approved_revision/scripts/security/verify-live-release.py" "$live_approved_revision" >/dev/null
+python3 "/opt/jbfd/releases/$live_approved_revision/scripts/security/verify-live-release.py" "$live_approved_revision" </dev/null >/dev/null
 
 # The Live gateway only sends secrets through stdin. Never accept them as arguments.
 IFS= read -r brevo_api_key || { echo "A chave de API Brevo está ausente." >&2; exit 64; }
