@@ -56,6 +56,9 @@ def main():
     for table,count in counts.items():
         actual=run(['docker','exec',name,'psql','-h','/tmp','-XqAt','-U','supabase_admin','-d','postgres','-c','select count(*) from '+table])
         if int(actual)!=count:raise SystemExit('Restored count mismatch')
+    owner=evidence.get('database_owner')
+    if owner not in ('postgres','supabase_admin'):raise SystemExit('Archive lacks verified database ownership metadata; create a fresh backup')
+    run(['docker','exec',name,'psql','-h','/tmp','-Xq','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1','-c','ALTER DATABASE postgres OWNER TO '+owner+';'])
     print(json.dumps({'environment':environment.name,'restore_container':name,'archive_checksums_verified':True,'counts_match':True,'network':'none','ports':[],'active_environment_untouched':True}))
 
 if __name__=='__main__':main()

@@ -7,6 +7,7 @@ import secrets
 import subprocess
 import tempfile
 import time
+from migration_transaction import operator, transaction
 
 def run(args,**kwargs):
     result=subprocess.run(args,capture_output=True,text=True,**kwargs)
@@ -64,20 +65,30 @@ do $$declare r record;begin
 for r in select oid::regclass object from pg_class where relnamespace='auth'::regnamespace and relkind in ('r','p') loop
 execute format('alter table %s owner to postgres',r.object);end loop;
 for r in select oid::regclass object from pg_class where relnamespace='storage'::regnamespace and relkind in ('r','p') loop
-execute format('alter table %s owner to postgres',r.object);end loop;
+execute format('alter table %s owner to supabase_storage_admin',r.object);end loop;
 end$$;
 grant select on all tables in schema auth to postgres;
 grant trigger on auth.users to postgres;
 alter database postgres owner to supabase_admin;
 grant create on database postgres to postgres;
 grant usage,create on schema public to postgres;
+grant select,insert,update,delete on all tables in schema storage to postgres;
 ''')
         stage='migration operator'
         sql('alter role postgres nosuperuser bypassrls;')
         stage='application migrations'
         for migration in sorted((root/'supabase/migrations').glob('[0-9]*.sql')):
-            body=migration.read_text();operator='supabase_admin' if body.startswith('-- migration-role: supabase_admin') else 'postgres'
-            try:sql('begin;\n'+body+'\ncommit;',operator)
+            if migration.name=='0008_company_branding.sql':
+                # Exercise failure rollback with the same ownership boundary.
+                invalid=directory/migration.name
+                invalid.write_text("select 1/0;")
+                try:
+                    try:sql(transaction(invalid),operator(invalid))
+                    except AssertionError:pass
+                    else:raise AssertionError('Expected migration failure')
+                    if 't' in sql("select pg_has_role('postgres','supabase_storage_admin','MEMBER');").splitlines():raise AssertionError('Failed migration leaked Storage membership')
+                finally:invalid.unlink(missing_ok=True)
+            try:sql(transaction(migration),operator(migration))
             except AssertionError as error:raise AssertionError(migration.name+': '+str(error)) from None
             if migration.name.startswith('0002_'):
                 sql("""insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data) values('16000000-0000-4000-8000-000000000001','legacy-native@example.invalid',now(),'{}');
@@ -108,6 +119,7 @@ grant select on all tables in schema storage to postgres;
 do $$begin
 if not exists(select 1 from public.companies where id='16000000-0000-4000-8000-000000000011' and name='Legacy native fixture' and terms_revision is null) then raise exception 'legacy fixture changed';end if;
 end$$;''')
+        if 't' in sql("select pg_has_role('postgres','supabase_storage_admin','MEMBER');").splitlines():raise AssertionError('Storage migration privilege leaked')
         return name,images
     except Exception as error:
         subprocess.run(['docker','rm','-fv',name],capture_output=True)
