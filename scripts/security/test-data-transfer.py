@@ -19,6 +19,8 @@ try:
     subprocess.run(['docker','exec',container,'pg_dump','-U','supabase_admin','-d','postgres','--schema-only','-Fc','-f','/tmp/transfer-schema.dump'],capture_output=True,check=True)
     subprocess.run(['docker','exec',container,'createdb','-U','supabase_admin','jbfd_transfer_target'],capture_output=True,check=True)
     subprocess.run(['docker','exec',container,'pg_restore','-U','supabase_admin','--exit-on-error','--clean','--if-exists','-d','jbfd_transfer_target','/tmp/transfer-schema.dump'],capture_output=True,check=True)
+    # Migration-created local settings, not copied from the source environment.
+    sql(container,'insert into app_private.security_settings(singleton) values(true);','jbfd_transfer_target')
     # Failure after identity insert must leave no partial accounts or disabled triggers.
     bad=copy.deepcopy(package);bad['tables']['public.company_members'][0]['company_id']='19000000-0000-4000-8000-000000000099'
     try:sql(container,import_transaction(container,bad,'jbfd_transfer_target'),'jbfd_transfer_target')
