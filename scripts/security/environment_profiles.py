@@ -21,6 +21,8 @@ class Environment:
     @property
     def prefix(self): return 'supabase' if self.name == 'test' else 'supabase-live'
     @property
+    def native_project(self): return self.prefix
+    @property
     def database(self): return self.prefix + '-db'
     @property
     def auth(self): return self.prefix + '-auth'
@@ -53,6 +55,11 @@ def private_file(path):
     if not stat.S_ISREG(info.st_mode) or info.st_mode & 0o077 or info.st_uid != 0:
         raise ValueError('Root-owned private regular evidence file required')
     return path
+
+def native_compose(environment):
+    # The upstream base file names itself "supabase" even in the Live folder.
+    # Never infer project identity from that file or the current directory.
+    return ['docker','compose','--project-name',environment.native_project,'--project-directory',str(environment.stack)]
 
 def verified_backup(environment, folder, now=None):
     """Same backup contract in both environments; never accept the peer's receipt."""
