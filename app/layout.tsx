@@ -11,6 +11,7 @@ import "./globals.css";
 import "./components/ui/ui.css";
 import GlobalInteractions from "./components/GlobalInteractions";
 import NavigationLoader from "./components/NavigationLoader";
+import { AppToastHost } from './components/ui/AppToast';
 
 const canonicalOrigin = process.env.APP_PUBLIC_URL || "https://jobforged.com";
 
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <NavigationLoader />
         <GlobalInteractions />
+        <AppToastHost />
         <script dangerouslySetInnerHTML={{__html:'performance.mark("jobforged-loader-first-paint");'}}/>
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />

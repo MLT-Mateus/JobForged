@@ -42,7 +42,7 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
     {status === "success" && <><p>E-mail confirmado. Entre na sua conta ou volte ao convite recebido para concluir a associação à empresa.</p><Link href="/login">Ir para o login</Link></>}
     {status === "invalid" && <><p>Este link expirou, já foi usado ou é inválido. Peça outro e-mail de confirmação.</p>
       <form className="auth-form" noValidate onSubmit={resend}><TextField name="email" label="E-mail do cadastro" type="email" value={email} onChange={event => setEmail(event.target.value)} />
-      <ActionButton type="submit">Solicitar novo e-mail</ActionButton></form>{message && <><p role="status">{message}</p><AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Confira a solicitação" : "Confirmação de e-mail",text:message}} onClose={() => setMessage("")}/></>}</>}
+      <ActionButton type="submit">Solicitar novo e-mail</ActionButton></form>{message && <AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Confira a solicitação" : "Confirmação de e-mail",text:message}} onClose={() => setMessage("")}/>}</>}
     <p><Link href="/login">Voltar ao login</Link></p>
   </section></div></main>;
 }
