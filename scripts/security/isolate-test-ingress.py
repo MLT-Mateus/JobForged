@@ -10,8 +10,8 @@ import json
 import os
 from pathlib import Path
 import subprocess
-import yaml
-from environment_profiles import Environment, authorize_live
+import compose_yaml
+from environment_profiles import Environment, authorize_live, native_compose
 
 def run(args):
     return subprocess.run(args,check=True,capture_output=True,text=True).stdout.strip()
@@ -27,13 +27,14 @@ def live_state(environment):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--environment',choices=['test','live'],default='test');parser.add_argument('--authorization');options=parser.parse_args()
     environment=Environment(options.environment)
+    if inspect(environment.envoy)['Config']['Labels'].get('com.docker.compose.project')!=environment.native_project:raise SystemExit('Unexpected native Compose project')
     if os.geteuid()!=0:raise SystemExit('Root required')
     revision=run(['git','-C',str(Path(__file__).resolve().parents[2]),'rev-parse','HEAD'])
     authorize_live(environment,revision,options.authorization)
     os.umask(0o077)
     before=live_state(environment.peer);traefik=inspect('jobforged_traefik')['Id'];network=environment.ingress
     root=environment.stack;path=root/environment.override;app=environment.app_env
-    original=path.read_text();old_app=app.read_text();document=yaml.safe_load(original)
+    original=path.read_text();old_app=app.read_text();document=compose_yaml.load(original)
     if document['networks']['traefik']['name'] not in ['jobforged_jobforged_network',network]:raise SystemExit('Unexpected Test network')
     document['networks']['traefik']['name']=network
     for service in ['studio','api-gw']:
@@ -44,7 +45,7 @@ def main():
         run(['docker','network','create','--label','jbfd.environment='+environment.name,network])
     if network not in inspect('jobforged_traefik')['NetworkSettings']['Networks']:
         run(['docker','network','connect',network,'jobforged_traefik'])
-    updated=json.dumps(document,indent=2)+'\n'
+    updated=compose_yaml.dump(document)
     lines=old_app.splitlines()
     if sum(line.startswith('JBFD_DOCKER_NETWORK=') for line in lines)!=1:raise SystemExit('Unique Test ingress setting required')
     new_app='\n'.join('JBFD_DOCKER_NETWORK='+network if line.startswith('JBFD_DOCKER_NETWORK=') else line for line in lines)+'\n'
@@ -57,7 +58,7 @@ def main():
     files=[root/'docker-compose.yml',path]
     for name in ['docker-compose.jbfd-email-template.override.yml','docker-compose.security.override.yml']:
         if (root/name).exists():files.append(root/name)
-    command=['docker','compose','--project-directory',str(root)]
+    command=native_compose(environment)
     for file in files:command+=['-f',str(file)]
     try:
         path.write_text(updated);app.write_text(new_app)

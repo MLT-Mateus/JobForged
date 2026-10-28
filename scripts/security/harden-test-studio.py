@@ -8,8 +8,8 @@ from pathlib import Path
 import subprocess
 import time
 import os
-import yaml
-from environment_profiles import Environment, authorize_live, private_studio_override
+import compose_yaml
+from environment_profiles import Environment, authorize_live, private_studio_override, native_compose
 
 def run(args):
     return subprocess.run(args,check=True,capture_output=True,text=True).stdout.strip()
@@ -31,19 +31,20 @@ def main():
     traefik=json.loads(run(['docker','inspect','jobforged_traefik']))[0]
     gateway=traefik['NetworkSettings']['Networks']['jobforged_jobforged_network']['Gateway']
     before_peer=status(live=environment.peer.name=='live')
-    document=yaml.safe_load(original);updated=private_studio_override(document,environment,gateway)
+    document=compose_yaml.load(original);updated=private_studio_override(document,environment,gateway)
     if document==updated:
         print(json.dumps({'environment':environment.name,'studio':'existing allowlist and BasicAuth preserved'}));return
     stamp=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     backup=Path('/opt/jbfd/security-work')/(environment.name+'-studio-before-private-'+stamp);backup.write_text(original);backup.chmod(0o600)
     info=json.loads(run(['docker','inspect',environment.prefix+'-studio']))[0]
+    if info['Config']['Labels'].get('com.docker.compose.project')!=environment.native_project:raise SystemExit('Unexpected native Compose project')
     files=info['Config']['Labels']['com.docker.compose.project.config_files'].split(',')
     allowed=[str(root/name) for name in ['docker-compose.yml',environment.override,'docker-compose.security.override.yml','docker-compose.jbfd-email-template.override.yml']]
     if any(file not in allowed for file in files) or str(path) not in files:raise SystemExit('Unexpected Studio compose identity')
-    compose=['docker','compose','--project-directory',str(root)]
+    compose=native_compose(environment)
     for file in files:compose+=['-f',file]
     try:
-        path.write_text(json.dumps(updated,indent=2)+'\n')
+        path.write_text(compose_yaml.dump(updated))
         run(compose+['config','--quiet']);run(compose+['up','-d','--no-deps','--wait','--wait-timeout','90','studio'])
         if status(local=True,live=environment.name=='live')!='401':raise RuntimeError('SSH tunnel HTTPS/BasicAuth path failed')
         if status(live=environment.peer.name=='live')!=before_peer:raise RuntimeError('Peer Studio response unexpectedly changed')
