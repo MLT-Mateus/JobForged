@@ -29,6 +29,8 @@ jobs:
         run: docker build -f services/security-gateway/Dockerfile -t jbfd-security-gateway:isolated-acceptance .
       - name: Testar provedores reais sem dados ou credenciais dos ambientes
         run: python3 scripts/security/test-native-auth.py --ci
+      - name: Validar transferência autorizada em banco isolado com dados sintéticos
+        run: python3 scripts/security/test-data-transfer.py
 
   database-security:
     name: Validar migrations e segurança SQL

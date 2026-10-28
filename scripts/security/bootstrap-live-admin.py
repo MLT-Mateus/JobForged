@@ -19,11 +19,14 @@ def bootstrap_sql(email,reference,prepare_only=False):
     literal=lambda value:"'"+value.replace("'","''")+"'"
     if prepare_only:
         statement="""begin;
-do $$begin
+do $$declare person uuid;begin
 if exists(select 1 from public.platform_admins) then raise exception 'Initial enforcement preparation requires an empty administrative registry';end if;
+if (select count(*) from auth.users where lower(email)=%s and email_confirmed_at is not null and deleted_at is null and (banned_until is null or banned_until<=now()))<>1 then raise exception 'Exactly one approved confirmed identity required';end if;
+select id into person from auth.users where lower(email)=%s and email_confirmed_at is not null and deleted_at is null;
 update app_private.security_settings set admin_mfa_enforced=true where singleton;
-insert into public.platform_audit_events(action,reason,details) values('platform.security.enforcement_prepared',%s,'{"operator":"vps-root"}');
-end$$;commit;"""%literal(reason)
+if not found then raise exception 'Local security settings missing';end if;
+insert into public.platform_audit_events(actor_user_id,action,reason,details) values(person,'platform.security.enforcement_prepared',%s,'{"operator":"vps-root"}');
+end$$;commit;"""%(literal(email),literal(email),literal(reason))
     else:
         statement="""begin;
 do $$declare person uuid;current_session uuid;session_count integer;begin
