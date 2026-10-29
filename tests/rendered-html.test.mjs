@@ -115,3 +115,16 @@ test("system state routes preserve their HTTP status and shared actions", async 
   const missing = await worker.fetch(new Request("http://localhost/rota-inexistente/para-contrato"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
   assert.equal(missing.status, 404);
 });
+
+// Removing the static example must also remove the root slug catch-all fallback.
+test("retired career showcase and root company slugs return real 404 responses", async () => {
+  const { default: worker } = await import("../dist/server/index.js");
+  for (const path of ["/jobforged", "/jobforged-carreiras", "/empresa-exemplo-sem-rota"]) {
+    const response = await worker.fetch(new Request(`http://localhost${path}`), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
+    assert.equal(response.status, 404, path);
+    assert.match(await response.text(), /Vamos reencontrar o caminho/);
+  }
+  const preview = await worker.fetch(new Request("http://localhost/app/personalizacao/previa"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
+  assert.equal(preview.status, 200);
+  assert.match(await preview.text(), /Carregando prévia da empresa/);
+});

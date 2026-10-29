@@ -43,7 +43,6 @@
 .jf-career-invitation p{max-width:560px;margin:var(--jf-ui-space-4) auto var(--jf-ui-space-5)}
 .jf-career-banner{margin:var(--jf-ui-space-4);padding:var(--jf-ui-space-5);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card)}
 .jf-career-banner>img{width:100%;max-height:260px;object-fit:cover;border-radius:var(--jf-ui-control-radius)}
-.jf-career-example{width:100%;min-height:100vh}
 @container(max-width:680px){.jf-career-portal .jf-career-hero{grid-template-columns:1fr}.jf-career-portal .mock-hero__copy,.jf-career-portal .mock-hero__visual{grid-column:1;grid-row:auto}.jf-career-values{grid-template-columns:1fr}.jf-career-values article{display:grid;grid-template-columns:32px 1fr;column-gap:var(--jf-ui-space-3)}.jf-career-values article>svg{grid-row:1/3}.jf-career-values h3{margin:0 0 var(--jf-ui-space-2)}.jf-career-search,.jf-career-jobs{grid-template-columns:1fr}}
 
 /* Full-width sections share a readable inner alignment, including embedded previews. */

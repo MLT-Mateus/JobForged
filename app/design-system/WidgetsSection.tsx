@@ -7,7 +7,7 @@ import { FocusPopover, WidgetDialog, WidgetDivider, WidgetGroup } from "../compo
 import { WidgetsIcon } from "../components/ui/Icons";
 import "./widgets-section.css";
 import {AppearancePreviewPanel} from "../components/personalization/AppearancePreviewPanel";
-import {jobforgedCareerExample} from "../components/personalization/jobforged-career-example";
+import {brandingDefaults} from "../components/personalization/branding-model";
 
 function Demo({number,title,description,children}:{number:string;title:string;description:string;children:ReactNode}) {
  return <section className="ds-widget-demo"><header><span className="ds-widget-index">{number}</span><div><h2>{title}</h2><p>{description}</p></div></header><div className="ds-widget-demo__stage">{children}</div></section>;
@@ -17,7 +17,7 @@ function OverlayPreview({kind}:{kind:"modal"|"focus"|"drawer"}) {
 }
 export function WidgetsSection() {
  const [previewTheme,setPreviewTheme]=useState<"light"|"dark">("light");
- const example=jobforgedCareerExample();
+ const example=brandingDefaults('design-system-preview','Sua empresa');
  const [editorTitle,setEditorTitle]=useState("Faça parte da nossa equipe");
  const [overlay,setOverlay]=useState<"modal"|"drawer"|"sheet"|null>(null),[onlyActive,setOnlyActive]=useState(true),[sheetChoice,setSheetChoice]=useState(true),[preview,setPreview]=useState(true);
  const close=()=>setOverlay(null);
