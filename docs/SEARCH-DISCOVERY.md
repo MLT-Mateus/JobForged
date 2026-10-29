@@ -38,3 +38,7 @@ Fontes oficiais:
 - https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview
 - https://developers.google.com/search/docs/monitor-debug/search-console-start
 - https://developers.google.com/search/docs/fundamentals/how-search-works
+
+## Canonicalização na borda
+
+Leitura da VPS confirmou entradas Traefik web=:80 e websecure=:443. HTTP Live retornava404 e www HTTPS200; a expressão do middleware estava duplamente escapada e não correspondia ao hostname. Compose corrige a expressão usando [.] e inclui router HTTP por ambiente com redirecionamento HTTPS permanente. Somente labels da aplicação do ambiente implantado mudam; não há alteração global do Traefik. Em Test validar http://test.jobforged.com antes de promover a mesma configuração com os valores próprios de Live. Live permanece com o comportamento anterior até promoção aprovada.

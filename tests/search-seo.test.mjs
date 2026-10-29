@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {searchEnvironment,landingStructuredData,publicSearchPaths} from '../app/lib/seo.ts';
@@ -32,4 +33,14 @@ test('rendered metadata, headers, canonicals and sitemaps obey environment at ru
    const login=await get('/login');assert.match(login.headers.get('x-robots-tag')||'',/noindex/);assert.match(await login.text(),/noindex/);
   }
  }finally{keys.forEach((k,i)=>before[i]===undefined?delete process.env[k]:process.env[k]=before[i])}
+});
+
+test('edge routes redirect HTTP and canonical www without matching other hosts',()=>{
+ const compose=readFileSync(new URL('../deploy/compose.yml',import.meta.url),'utf8');
+ const expression=compose.match(/canonical\.redirectregex\.regex=(.+)/)[1];
+ assert.ok(new RegExp(expression).test('https://www.jobforged.com/a?b=c'));
+ assert.ok(!new RegExp(expression).test('https://www.jobforged.com.evil.invalid/a'));
+ assert.ok(compose.includes('-http.entrypoints=web'));
+ assert.ok(compose.includes('-https.redirectscheme.scheme=https'));
+ assert.ok(compose.includes('-https.redirectscheme.permanent=true'));
 });
