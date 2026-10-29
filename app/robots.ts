@@ -1,11 +1,8 @@
-import type { MetadataRoute } from "next";
-
-const siteUrl = process.env.APP_PUBLIC_URL || "https://jobforged.com";
-
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: [{ userAgent: "*", allow: "/" }],
-    sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
-  };
+import type {MetadataRoute} from 'next';
+import {searchEnvironment} from './lib/seo';
+export const dynamic='force-dynamic';
+export default function robots():MetadataRoute.Robots{
+ const {origin,indexable}=searchEnvironment();
+ // Crawlers must be able to read noindex, including on previously discoverable Test pages.
+ return {rules:[{userAgent:'*',allow:'/'}],...(indexable?{sitemap:`${origin}/sitemap.xml`,host:origin}:{})};
 }
