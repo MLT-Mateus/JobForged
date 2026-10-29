@@ -1,5 +1,6 @@
 :root {
   --jf-ui-header-control-height: 42px;
+  --jf-ui-workspace-header-height: 80px;
   --jf-ui-device-frame: #102e2c;
   --jf-ui-device-edge: #64827d;
   --jf-ui-fixed-dark: #072f2d;

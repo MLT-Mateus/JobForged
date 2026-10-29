@@ -49,3 +49,5 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 - Sucesso/informação duram 6 segundos; atenção/erro, 10. Hover, foco e aba oculta pausam a leitura. Alertas com link de ação exigida permanecem até fechamento.
 - Validação de campo permanece junto ao campo. Orientações persistentes usam `InlineNotice`; falhas que impedem carregar um módulo usam `WorkspaceState` com nova tentativa.
 - Preserve os ícones, tokens e sons aprovados. O Design System demonstra a mesma implementação, sem temporizador próprio.
+
+- A divisória da marca lateral e a base do menu superior compartilham `--jf-ui-workspace-header-height` (80px). A área da marca desconta o padding superior da sidebar; não definir alturas independentes por página. O mesmo shell atende Design System, Backoffice e painel empresarial, inclusive menu recolhido e drawer móvel.
