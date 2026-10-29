@@ -78,6 +78,6 @@
 .jf-viewport-preview__stage{position:relative;overflow:hidden;margin-inline:auto;max-width:100%}
 .jf-viewport-preview iframe{position:absolute;left:0;top:0;max-width:none;border:0;transform-origin:top left;background:var(--jf-ui-surface)}
 
-.jf-preview-dock{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface);color:var(--jf-ui-text);box-shadow:var(--jf-ui-shadow);max-width:calc(100vw - 32px)}
+.jf-preview-dock{width:max-content;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface);color:var(--jf-ui-text);box-shadow:var(--jf-ui-shadow);max-width:calc(100vw - 32px)}
 .jf-preview-dock.is-floating{position:fixed;right:var(--jf-ui-space-4);bottom:max(var(--jf-ui-space-4),env(safe-area-inset-bottom));z-index:40}
 .jf-preview-dock .jf-action{white-space:normal}

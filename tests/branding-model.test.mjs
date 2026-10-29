@@ -41,7 +41,7 @@ test('presentation controls are additive, validated and preserve old snapshots',
 test('chrome, navigation and reset defaults are bounded and theme specific',async()=>{
  const {portalChrome,portalMenu,portalFooter}=await import('../app/components/personalization/portal-chrome.ts');
  const {isDefaultBranding,normalizeBrandingRichContent}=await import('../app/components/personalization/branding-model.ts');
- const c=brandingDefaults('fixture','Fixture');assert.equal(isDefaultBranding(c,'Fixture'),true);assert.equal(isDefaultBranding({...c,revision:42,publishedAt:'ignored'},'Fixture'),true);
+ const c=brandingDefaults('fixture','Fixture');assert.equal(isDefaultBranding(c,'Fixture'),true);const legacy=structuredClone(c);delete legacy.portal.footer;assert.equal(isDefaultBranding(legacy,'Fixture'),true);assert.equal(isDefaultBranding({...c,revision:42,publishedAt:'ignored'},'Fixture'),true);
  assert.equal(isDefaultBranding({...normalizeBrandingRichContent(c),organizationId:c.organizationId},'Fixture'),true);
  c.portal.chrome=portalChrome(c);c.portal.navigation=portalMenu(c);assert.equal(isDefaultBranding(c,'Fixture'),true);
  c.portal.navigation[0].href='https://example.invalid/culture';assert.equal(validateBranding(brandContent(c)),null);assert.equal(isDefaultBranding(c,'Fixture'),false);
