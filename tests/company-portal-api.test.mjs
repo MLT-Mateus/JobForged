@@ -18,7 +18,7 @@ test('portal BFF protects tenant operations and exposes only public image bytes'
   throw new Error('Unexpected isolated request');
  };
  try{const {default:worker}=await import('../dist/server/index.js');
-  const request=(path,body,cookie='jf_auth_access=fixture',origin='http://localhost')=>worker.fetch(new Request('http://localhost'+path,{method:body?'POST':'GET',headers:{host:'localhost',origin,cookie,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{});
+  const request=(path,body,cookie='jf_auth_access=fixture',origin='http://localhost')=>worker.fetch(new Request('http://localhost'+path,{method:body?'POST':'GET',headers:{host:'localhost',origin,cookie,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
   assert.equal((await request('/fixture-company',null,'')).status,404);published=true;const page=await request('/fixture-company',null,'');assert.equal(page.status,200);const html=await page.text();assert.match(html,/Public Fixture/);assert.doesNotMatch(html,/Vagas de exemplo|Product Designer|fixture@example.invalid/);
   assert.equal((await request('/api/company/portal',null,'')).status,403);
   assert.equal((await request('/api/company/portal')).status,200);

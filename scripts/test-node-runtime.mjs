@@ -90,6 +90,15 @@ try {
       const html = await response.text();
       assert.match(html, /<html/);
       if (route === "/") {
+        const officialOrigin=environment==='live'?'https://jobforged.com':'https://test.jobforged.com';
+        assert.match(html,/<title>JobForged \| ATS para recrutamento e seleção<\/title>/);
+        assert.ok(html.includes(`href="${officialOrigin}/"`),'Home canonical must use the current environment');
+        const robots=html.match(/<meta[^>]*name="robots"[^>]*>/g)?.join('')||'';
+        if(environment==='test'){
+          assert.match(robots,/noindex/);assert.match(response.headers.get('x-robots-tag')||'',/noindex/);
+        }else{
+          assert.doesNotMatch(robots,/noindex/);assert.equal(response.headers.get('x-robots-tag'),null);
+        }
         const assets = [...html.matchAll(/(?:src|href)="([^" ]+\.(?:js|css))"/g)].map((match) => match[1]);
         assert.ok(assets.length > 0, "Página sem assets JS/CSS");
         for (const asset of assets) {
@@ -98,7 +107,12 @@ try {
         }
       }
     }
-    console.log(`${environment}: ${routes.length} rotas e assets passaram`);
+    const sitemap=await (await fetch(`${base}/sitemap.xml`)).text();
+    assert.equal(sitemap.includes('<loc>'),environment==='live');
+    assert.ok(!sitemap.includes('/design-system'));assert.ok(!sitemap.includes('<lastmod>'));
+    const robotsFile=await (await fetch(`${base}/robots.txt`)).text();
+    assert.equal(robotsFile.includes('Sitemap:'),environment==='live');
+    console.log(`${environment}: ${routes.length} rotas, SEO e assets passaram`);
   }
 } finally {
   for (const child of children) child.kill("SIGTERM");

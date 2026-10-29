@@ -22,7 +22,7 @@ test('branding API authorizes roles, handles conflicts and processes private ima
  };
  try{
   const {default:worker}=await import('../dist/server/index.js');
-  const request=(path,body,headers={})=>worker.fetch(new Request(`http://localhost${path}`,{method:body?'POST':'GET',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture',...(body&&!(body instanceof FormData)?{'content-type':'application/json'}:{}),...headers},...(body?{body:body instanceof FormData?body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{});
+  const request=(path,body,headers={})=>worker.fetch(new Request(`http://localhost${path}`,{method:body?'POST':'GET',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture',...(body&&!(body instanceof FormData)?{'content-type':'application/json'}:{}),...headers},...(body?{body:body instanceof FormData?body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
   assert.equal((await request('/api/company/branding',null,{cookie:''})).status,403);
   platform=true;assert.equal((await request('/api/company/branding')).status,403);platform=false;
   assert.equal((await request('/api/company/branding')).status,200);

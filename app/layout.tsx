@@ -13,9 +13,10 @@ import GlobalInteractions from "./components/GlobalInteractions";
 import NavigationLoader from "./components/NavigationLoader";
 import { AppToastHost } from './components/ui/AppToast';
 
-const canonicalOrigin = process.env.APP_PUBLIC_URL || "https://jobforged.com";
+import {searchEnvironment} from "./lib/seo";
 
-export const metadata: Metadata = {
+
+export function generateMetadata():Metadata {const canonicalOrigin=searchEnvironment().origin;return {
   metadataBase: new URL(canonicalOrigin),
   title: "JobForged",
   description:
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     "página de carreiras",
     "gestão de candidatos",
   ],
-  alternates: { canonical: "/" },
+  robots: {index:false,follow:true},
   openGraph: {
     title: "JobForged",
     description: "Recrutamento organizado para PMEs, com vagas, currículos, Kanban, histórico de candidatos e triagem assistida por IA.",
@@ -48,17 +49,9 @@ export const metadata: Metadata = {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     shortcut: "/favicon.svg",
   },
-};
+}}
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "JobForged",
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
-    description: "ATS white label para recrutamento e seleção, com triagem por IA, entrevistas pelo WhatsApp e personalização de marca e domínio.",
-  };
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
@@ -76,7 +69,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <AppToastHost />
         <script dangerouslySetInnerHTML={{__html:'performance.mark("jobforged-loader-first-paint");'}}/>
         {children}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </body>
     </html>
   );
