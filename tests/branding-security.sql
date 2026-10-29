@@ -18,11 +18,11 @@ do $$declare config jsonb:=current_setting('jbfd.fixture_config')::jsonb;v bigin
 begin
  if public.read_company_branding()->>'companyId'<>'38000000-0000-0000-0000-000000000011' then raise exception 'wrong company';end if;
  v:=public.write_company_branding('save',0,config);
- result:=public.read_company_branding();if result->'published'<>'{}'::jsonb or result->'draft'<>config then raise exception 'draft published early';end if;
+ result:=public.read_company_branding();if result->'published'<>config or result->'draft'<>config then raise exception 'save not public';end if;
  perform public.write_company_branding('publish',v,config);
- result:=public.read_company_branding();if result->'published'<>config or jsonb_array_length(result->'history')<>1 then raise exception 'publication missing';end if;
+ result:=public.read_company_branding();if result->'published'<>config or jsonb_array_length(result->'history')<>2 then raise exception 'publication missing';end if;
  perform set_config('jbfd.history_id',result#>>'{history,0,id}',true);
- begin perform public.write_company_branding('save',v,config);raise exception 'stale version accepted';exception when serialization_failure then null;end;
+ begin perform public.write_company_branding('save',v,config);raise exception 'stale version accepted';exception when sqlstate 'PT409' then null;end;
  foreach pair in array array['jobforged','contemporaneo','objetivo','editorial'] loop
   v:=(public.read_company_branding()->>'version')::bigint;
   perform public.write_company_branding('save',v,jsonb_set(config,'{typography,fontPair}',to_jsonb(pair)));
@@ -37,7 +37,7 @@ begin
  v:=public.write_company_branding('reset',v,config);
  v:=public.write_company_branding('restore',v,null,current_setting('jbfd.history_id')::uuid);
  v:=public.write_company_branding('discard',v);
- result:=public.read_company_branding();if result->'draft'<>result->'published' or jsonb_array_length(result->'history')<>1 then raise exception 'history lost';end if;
+ result:=public.read_company_branding();if result->'draft'<>result->'published' or jsonb_array_length(result->'history')<>8 then raise exception 'history lost';end if;
  begin update public.company_branding_history set snapshot='{}';raise exception 'history mutable';exception when insufficient_privilege then null;end;
  begin insert into storage.objects(bucket_id,name) values('company-branding','38000000-0000-0000-0000-000000000011/38000000-0000-0000-0000-000000000031.png');raise exception 'client bypassed image processor';exception when insufficient_privilege then null;end;
 end$$;

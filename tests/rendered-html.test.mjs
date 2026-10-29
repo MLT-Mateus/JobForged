@@ -117,7 +117,7 @@ test("system state routes preserve their HTTP status and shared actions", async 
 });
 
 // No static platform showcase: unpublished or missing company addresses stay 404.
-test("unpublished or missing company addresses return real 404 responses", async () => {
+test("missing company addresses return 404 and legacy preview opens the public address", async () => {
   const { default: worker } = await import("../dist/server/index.js");
   for (const path of ["/jobforged", "/jobforged-carreiras", "/empresa-exemplo-sem-rota"]) {
     const response = await worker.fetch(new Request(`http://localhost${path}`), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
@@ -126,5 +126,5 @@ test("unpublished or missing company addresses return real 404 responses", async
   }
   const preview = await worker.fetch(new Request("http://localhost/app/personalizacao/previa"), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });
   assert.equal(preview.status, 200);
-  assert.match(await preview.text(), /Carregando prévia da empresa/);
+  assert.match(await preview.text(), /Abrindo página da empresa/);
 });

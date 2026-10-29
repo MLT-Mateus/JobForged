@@ -89,12 +89,15 @@
 .jf-career-portal .jf-career-jobs article{align-self:start;overflow-wrap:anywhere}
 
 .jf-company-portal{width:100%;min-height:100dvh;background:var(--cp-bg);color:var(--cp-text)}
-.jf-career-portal>header .jf-action{color:inherit}
 
 .jf-career-brand{max-width:100%;flex-wrap:wrap;column-gap:var(--jf-ui-space-4)}
 .jf-career-brand strong{font-size:var(--jf-ui-font-size-sm)}
-.jf-career-portal>header .jf-theme-selector{--jf-ui-text:var(--cp-header-text);--jf-ui-text-muted:var(--cp-header-text);--jf-ui-brand-strong:var(--cp-header-text);--jf-ui-surface:var(--cp-header-bg);--jf-ui-surface-soft:var(--cp-header-bg);--jf-ui-border:color-mix(in srgb,var(--cp-header-text) 25%,transparent);flex-shrink:0}
 .jf-career-portal>header nav{align-items:center;gap:var(--jf-ui-space-4);min-width:0}
 .jf-career-portal>header nav :is(a,span){max-width:240px;overflow-wrap:anywhere}
 .jf-career-theme-float{position:fixed;top:var(--jf-ui-space-4);right:var(--jf-ui-space-4);z-index:20}
 @container(max-width:760px){.jf-career-portal>header .jf-theme-selector{margin-left:auto}.jf-career-portal .jf-career-brand img{width:136px;height:40px}}
+
+.jf-career-header-actions{display:flex;align-items:center;gap:var(--jf-ui-space-2);flex-wrap:wrap;margin-left:auto}
+.jf-career-portal[data-layout="panorama"] .mock-hero__copy{width:min(100%,480px);max-width:480px;justify-self:end;align-self:center;margin-left:auto;padding:clamp(20px,3vw,36px);box-sizing:border-box}
+@container(max-width:760px){.jf-career-portal[data-layout="panorama"] .mock-hero__copy{max-width:100%;margin-left:0}.jf-career-header-actions{max-width:100%}}
+.jf-editor-workbench .custom-grid:has(.jf-rich-text-field){grid-template-columns:minmax(0,1fr)}

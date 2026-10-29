@@ -30,6 +30,7 @@ export function limitsFor(pathname, address, body, secret, method='POST') {
 export function policyPath(path){
  path=path.replace(/\/+$/,'')||'/';
  const aliases={
+  '/api/auth/candidate-sign-up':'/auth/v1/signup','/rest/v1/rpc/create_candidate_signup_intent':'/auth/v1/signup',
   '/api/auth/sign-in':'/auth/v1/token','/api/auth/sign-up':'/auth/v1/signup',
   '/api/auth/invitee-sign-up':'/auth/v1/signup','/api/auth/recover':'/auth/v1/recover',
   '/api/auth/confirmation/resend':'/auth/v1/resend','/api/auth/confirmation/session':'/auth/v1/verify',

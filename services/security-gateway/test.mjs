@@ -27,6 +27,8 @@ test('session hints reject malformed input and confer no verification',()=>{
 });
 test('BFF actions use the same durable budgets, including trailing slashes',()=>{
  assert.equal(policyPath('/api/auth/sign-in/'),'/auth/v1/token');
+ assert.equal(policyPath('/api/auth/candidate-sign-up'),'/auth/v1/signup');
+ assert.equal(policyPath('/rest/v1/rpc/create_candidate_signup_intent'),'/auth/v1/signup');
  assert.equal(policyPath('/api/auth/recover'),'/auth/v1/recover');
  assert.equal(policyPath('/auth/v1/recover/'),'/auth/v1/recover');
 });
