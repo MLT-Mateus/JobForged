@@ -26,6 +26,7 @@ sql < tests/security-foundation.sql
 sql < tests/signup-contracts.sql
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql tests/backoffice-security.sql; } | sql
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/branding-security.sql; } | sql
+{ printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/company-portals-security.sql; } | sql
 sql <<'SQL'
 set role jbfd_security_gateway;
 do $$begin

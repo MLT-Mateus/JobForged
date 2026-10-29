@@ -53,7 +53,7 @@
 
 .jf-editor-workbench{display:grid;grid-template-columns:minmax(0,35fr) minmax(0,65fr);align-items:start;gap:var(--jf-ui-space-3);min-width:0}
 .jf-editor-workbench__form{display:grid;gap:var(--jf-ui-space-3);min-width:0}
-.jf-editor-workbench__preview{align-self:start;min-width:0}
+.jf-editor-workbench__preview{position:sticky;top:var(--jf-ui-space-4);align-self:start;min-width:0}
 .jf-editor-accordion{min-width:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface)}
 .jf-editor-accordion>summary{display:flex;align-items:center;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-5);list-style:none;cursor:pointer;font-family:var(--jf-ui-font-heading);font-weight:700;color:var(--jf-ui-text)}
 .jf-editor-accordion>summary::-webkit-details-marker{display:none}
@@ -65,3 +65,15 @@
 @media(max-width:1000px){.jf-editor-workbench{grid-template-columns:1fr}.jf-editor-workbench__preview{position:static}}
 
 .jf-focus-group--end>.jf-focus-group__panel{left:auto;right:0}
+
+.jf-editor-section{min-width:0;display:grid;gap:var(--jf-ui-space-4)}
+.jf-editor-section+ .jf-editor-section{border-top:1px solid var(--jf-ui-border);padding-top:var(--jf-ui-space-5);margin-top:var(--jf-ui-space-2)}
+.jf-editor-section>header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--jf-ui-space-3)}
+.jf-editor-section h3{margin:0;font:700 var(--jf-ui-font-size-sm)/1.4 var(--jf-ui-font-heading)}
+.jf-editor-section>header p{margin:var(--jf-ui-space-1) 0 0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
+.jf-editor-section__body{display:grid;gap:var(--jf-ui-space-4);min-width:0}
+.jf-viewport-preview{padding:var(--jf-ui-space-4);display:grid;gap:var(--jf-ui-space-3);min-width:0}
+.jf-viewport-preview__scale,.jf-viewport-preview__hint{margin:0;font-size:var(--jf-ui-font-size-xs);color:var(--jf-ui-text-muted)}
+.jf-viewport-preview__available{width:100%;min-width:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);overflow:hidden;background:var(--jf-ui-surface-soft)}
+.jf-viewport-preview__stage{position:relative;overflow:hidden;margin-inline:auto;max-width:100%}
+.jf-viewport-preview iframe{position:absolute;left:0;top:0;max-width:none;border:0;transform-origin:top left;background:var(--jf-ui-surface)}

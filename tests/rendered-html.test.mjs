@@ -116,8 +116,8 @@ test("system state routes preserve their HTTP status and shared actions", async 
   assert.equal(missing.status, 404);
 });
 
-// Removing the static example must also remove the root slug catch-all fallback.
-test("retired career showcase and root company slugs return real 404 responses", async () => {
+// No static platform showcase: unpublished or missing company addresses stay 404.
+test("unpublished or missing company addresses return real 404 responses", async () => {
   const { default: worker } = await import("../dist/server/index.js");
   for (const path of ["/jobforged", "/jobforged-carreiras", "/empresa-exemplo-sem-rota"]) {
     const response = await worker.fetch(new Request(`http://localhost${path}`), { ASSETS: assets }, { waitUntil() {}, passThroughOnException() {} });

@@ -1,6 +1,7 @@
 import {renderRichText,richTextPlain} from '../ui/rich-content.ts';
 import {careerCopy} from './career-copy.ts';
 import {careerDefaults} from './career-defaults.ts';
+import {validPortalPresentation} from './portal-presentation.ts';
 import type { CSSProperties } from 'react';
 import { fontPairs } from '../ui/font-pairs.ts';
 import { defaultCustomization, lightPalette, darkPalette } from './personalization-mocks.ts';
@@ -55,6 +56,7 @@ export function validateBranding(content:unknown):string|null {
   if(richTextPlain(c.portal.headline).length>90)return 'Use até 90 caracteres no título principal.';
   if(c.portal.content&&Object.entries(c.portal.content).some(([key,value])=>!(key in careerCopy)||typeof value!=='string'||value.length>4000))return 'Revise os textos das seções.';
   if(c.portal.footer){const f=c.portal.footer;if(f.links.length>6||f.links.some(link=>typeof link.label!=='string'||link.label.length>4000||!validContentLink(link.href))||!validContentLink(f.phoneUrl)||f.email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email))return 'Revise os contatos e links do rodapé.';}
+  if(c.portal.presentation!==undefined&&!validPortalPresentation(c.portal.presentation))return 'Revise a composição da página e a descrição da imagem.';
   if(c.portal.layout!==undefined&&!['classico','equipe','panorama','vagas','essencial'].includes(c.portal.layout))return 'Escolha um template válido.';
   if(!fontPairs.some(p=>p.id===c.typography.fontPair))return 'Escolha um dos quatro pares tipográficos aprovados.';
   for(const palette of [c.palette,c.theme.light,c.theme.dark])for(const color of Object.values(palette))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return 'Use cores no formato #RRGGBB.';

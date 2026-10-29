@@ -46,7 +46,7 @@
 .history-summary b{font-size:var(--jf-ui-font-size-sm)}
 .history-summary span{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs)}
 
-.appearance-preview-panel{position:sticky;top:88px;min-width:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface);overflow:hidden}
+.appearance-preview-panel{position:relative;top:0;min-width:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface);overflow:hidden}
 .appearance-preview-panel>header{display:flex;align-items:center;justify-content:space-between;padding:var(--jf-ui-space-3) var(--jf-ui-space-3);border-bottom:1px solid var(--jf-ui-border)}
 .appearance-preview-panel>header>div:first-child{display:flex;flex-direction:column}
 .appearance-preview-panel>header b{font-size:var(--jf-ui-font-size-sm)}
@@ -215,7 +215,9 @@
 .banner-list article > header,.banner-list header > div,.appearance-preview-panel > header,.appearance-preview-controls { flex-wrap:wrap; }
 .appearance-preview-controls > .jf-field { flex:1; min-width:160px; }
 
-.jf-external-preview{max-width:1180px;margin:auto;padding:var(--jf-ui-space-6);display:grid;gap:var(--jf-ui-space-4);min-height:100vh}
+.jf-external-preview{width:100%;margin:0;padding:0;min-height:100vh}
+.jf-external-preview__bar{display:flex;align-items:center;flex-wrap:wrap;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-4)}
+.jf-external-preview__bar .jf-inline-notice{flex:1 1 250px}
 
 .jf-external-preview>.preview-stage>*{height:auto;max-height:none;overflow:visible}
 @media(max-width:680px){.jf-external-preview .mock-hero{grid-template-columns:1fr}.jf-external-preview .mock-hero__copy,.jf-external-preview .mock-hero__visual{grid-column:1;grid-row:auto}}
@@ -238,3 +240,8 @@
 .appearance-preview-controls>div[role="group"]{display:flex;align-items:center;gap:var(--jf-ui-space-1)}
 .domain-row{grid-template-columns:minmax(0,1fr);align-items:start}
 @media(max-width:680px){.appearance-preview-controls{grid-template-columns:1fr}.appearance-preview-controls>.jf-field{min-width:0}}
+
+.appearance-address{display:block;padding:var(--jf-ui-space-3);background:var(--jf-ui-surface-soft);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-xs)}
+
+.custom-editor>[data-appearance-group]{display:grid;gap:var(--jf-ui-space-3);min-width:0}
+.custom-editor>[data-appearance-group][hidden]{display:none}

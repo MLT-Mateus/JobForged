@@ -47,3 +47,5 @@ export function EditorAccordion({title,icon,children,defaultOpen=false}:{title:s
 export function EditorWorkbench({editor,preview}:{editor:ReactNode;preview:ReactNode}) {
  return <div className="jf-editor-workbench"><div className="jf-editor-workbench__form">{editor}</div><div className="jf-editor-workbench__preview">{preview}</div></div>;
 }
+
+export function EditorSection({title,description,action,children}:{title:string;description?:string;action?:ReactNode;children:ReactNode}){return <section className="jf-editor-section"><header><div><h3>{title}</h3>{description&&<p>{description}</p>}</div>{action}</header><div className="jf-editor-section__body">{children}</div></section>}
