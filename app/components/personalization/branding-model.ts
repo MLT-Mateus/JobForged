@@ -10,7 +10,7 @@ import type { Customization, Palette } from './personalization-types';
 export const assetKinds=['logoMain','logoAlternative','logoLight','logoDark','favicon','avatar','shareImage'] as const;
 export function brandingDefaults(companyId:string,name:string):Customization {
  const source=structuredClone(defaultCustomization);
- return {...source,organizationId:companyId,displayName:name,shortName:name.slice(0,24),slogan:'',assets:Object.fromEntries(assetKinds.map(key=>[key,null])),banners:[],
+ return {...source,organizationId:companyId,displayName:name,shortName:name.slice(0,24),slogan:'',assets:Object.fromEntries(assetKinds.map(key=>[key,null])),banners:[{id:"default-culture",organizationId:companyId,createdAt:"",updatedAt:"",status:"Ativo",title:"Conheça nosso jeito de trabalhar",description:"Pessoas, ideias e oportunidades para construir o próximo capítulo. Conteúdo de exemplo · mock.",buttonText:"Conheça a JobForged",link:"https://jobforged.com",image:"",startAt:"",endAt:"",placement:"Portal",order:0}],
   portal:{...source.portal,footer:defaultPortalFooter(name),layout:'classico',headline:careerDefaults.headline,introduction:careerDefaults.introduction,about:careerDefaults.about,contactEmail:'',contactPhone:'',socialLinkedin:'',socialInstagram:'',footerText:name,customDomain:'',jobforgedDomain:''},draftUpdatedAt:'',publishedAt:'',publishedBy:'',revision:0};
 }
 export const brandContent=(value:Customization)=>{

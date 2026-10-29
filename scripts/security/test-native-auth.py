@@ -41,6 +41,8 @@ def totp_code(value):
     digest=hmac.new(seed,struct.pack('>Q',int(time.time())//30),hashlib.sha1).digest();offset=digest[-1]&15
     return str((struct.unpack('>I',digest[offset:offset+4])[0]&0x7fffffff)%1000000).zfill(6)
 
+LAST_HTTP_OPERATION=None
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('restore',nargs='?');parser.add_argument('--ci',action='store_true');args=parser.parse_args()
     ci_images={}
@@ -62,6 +64,8 @@ def main():
     def sql(statement):
         return run(['docker','exec','-i',args.restore,'psql','-h',socket,'-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],input=statement)
     def request(base,path,body=None,token=None,method=None,request_headers=None):
+        global LAST_HTTP_OPERATION
+        LAST_HTTP_OPERATION=urllib.parse.urlsplit(path).path
         headers={'Content-Type':'application/json'}
         headers.update(request_headers or {})
         if token:headers['Authorization']='Bearer '+token
@@ -69,6 +73,10 @@ def main():
         try:
             with urllib.request.urlopen(req,timeout=10) as response:
                 data=response.read();return response.status,json.loads(data) if data else None
+        except TimeoutError:
+            diagnostic=sql("select coalesce(jsonb_agg(jsonb_build_object('state',state,'wait_type',wait_event_type,'wait',wait_event)),'[]'::jsonb) from pg_stat_activity where datname='postgres' and pid<>pg_backend_pid() and state='active';")
+            print(json.dumps({'isolated_active_waits':json.loads(diagnostic)}))
+            raise
         except urllib.error.HTTPError as error:
             try:data=json.loads(error.read())
             except ValueError:data=None
@@ -156,6 +164,47 @@ def main():
         assert request(rest,'/rpc/is_platform_admin',{},token)==(200,False),'Signup metadata granted platform role'
         assert sql("select raw_user_meta_data ? 'company_signup_nonce' from auth.users where id='"+first+"';")=='f','Raw signup capability persisted'
         assert request(rest,'/company_members?select=*',token=token)[0] in (401,403),'Direct roster SELECT exposed'
+        # Real Auth + PostgREST candidate identities. No SMTP or real recipients.
+        anonymous=jwt(signing,'anon')
+        status,address=request(rest,'/rpc/read_company_portal',{},token)
+        assert status==200
+        status,requirements=request(rest,'/rpc/registration_requirements',{},anonymous);assert status==200
+        candidate_email='candidate-'+suffix
+        status,candidate_nonce=request(rest,'/rpc/create_candidate_signup_intent',{'email':candidate_email,'full_name':'Candidate fixture','requested_slug':address['slug'],'terms_revision':requirements['termsRevision'],'accepted_terms':True},anonymous)
+        assert status==200,'Candidate intent creation failed'
+        assert request(auth,'/admin/users',{'email':'missing-intent-'+suffix,'password':password,'email_confirm':True,'user_metadata':{'account_type':'candidate'}},admin)[0] not in (200,201),'Candidate bypassed intent'
+        status,candidate_user=request(auth,'/admin/users',{'email':candidate_email,'password':password,'email_confirm':True,'user_metadata':{'account_type':'candidate','candidate_signup_nonce':candidate_nonce,'role':'platform_admin','company_id':context['company_id']}},admin)
+        assert status in (200,201),'Native candidate creation failed'
+        candidate_id=candidate_user['id']
+        assert sql("select count(*) from public.company_members where user_id='"+candidate_id+"';")=='0','Candidate became company member'
+        assert sql("select raw_user_meta_data ? 'candidate_signup_nonce' or raw_user_meta_data ? 'role' from auth.users where id='"+candidate_id+"';")=='f','Candidate retained injected metadata'
+        assert request(auth,'/admin/users',{'email':candidate_email,'password':password,'email_confirm':True,'user_metadata':{'account_type':'candidate','candidate_signup_nonce':candidate_nonce}},admin)[0] not in (200,201),'Candidate intent replayed'
+        status,candidate_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200
+        candidate_token=candidate_session['access_token']
+        status,candidate_profile=request(rest,'/rpc/candidate_context',{},candidate_token)
+        assert status==200 and candidate_profile['fullName']=='Candidate fixture','Candidate profile missing'
+        assert request(rest,'/rpc/read_company_branding',{},candidate_token)[0] in (401,403),'Candidate read company branding'
+        assert request(rest,'/rpc/platform_read',{'section':'overview'},candidate_token)[0] in (401,403),'Candidate read backoffice'
+        assert request(rest,'/candidate_accounts?select=*',token=candidate_token)[0] in (401,403),'Candidate table SELECT bypass'
+        assert request(rest,'/rpc/candidate_account',{'operation':'profile','expected_version':0,'full_name':'Updated Candidate'},candidate_token)[0]==200,'Candidate profile update failed'
+        assert request(rest,'/rpc/candidate_account',{'operation':'profile','expected_version':0,'full_name':'Stale update'},candidate_token)[0]==409,'Candidate concurrent update overwritten'
+        assert request(rest,'/rpc/candidate_account',{},token)[0]==403,'Company acquired candidate identity'
+        # One own alert and one different recipient, in the isolated database only.
+        campaign=sql("insert into public.platform_communications(title,message,audience,channel,state,created_by,dispatched_at) values('Fixture','Private candidate message','candidates','inapp','dispatched','"+first+"',now()) returning id;").splitlines()[0]
+        sql("insert into public.platform_communication_deliveries(communication_id,user_id,email_state) values('"+campaign+"','"+candidate_id+"','none'),('"+campaign+"','"+first+"','none');")
+        status,inbox=request(rest,'/rpc/candidate_account',{},candidate_token)
+        assert status==200 and len(inbox['items'])==1,'Candidate alert isolation failed'
+        delivery=inbox['items'][0]['id']
+        assert request(rest,'/rpc/candidate_account',{'operation':'read-alert','delivery_id':delivery},candidate_token)[1]['items'][0]['read_at'],'Candidate read marker failed'
+        foreign=sql("select id from public.platform_communication_deliveries where communication_id='"+campaign+"' and user_id='"+first+"';")
+        request(rest,'/rpc/candidate_account',{'operation':'read-alert','delivery_id':foreign},candidate_token)
+        assert sql("select read_at is null from public.platform_communication_deliveries where id='"+foreign+"';")=='t','Candidate changed another user alert'
+        sql("update public.candidate_accounts set status='inactive' where user_id='"+candidate_id+"';")
+        assert request(rest,'/rpc/candidate_context',{},candidate_token)==(200,None),'Inactive candidate retained identity'
+        assert request(rest,'/rpc/candidate_account',{},candidate_token)[0]==403,'Inactive candidate retained account'
+        sql("update public.candidate_accounts set status='active' where user_id='"+candidate_id+"';")
+        assert request(auth,'/logout?scope=global',{},candidate_token)[0] in (200,204),'Candidate logout failed'
+        assert request(rest,'/rpc/candidate_context',{},candidate_token)[0]==403,'Revoked candidate JWT accepted'
         assert request(auth,'/signup',{'email':'weak-'+suffix,'password':'abc'})[0] in (400,422),'Weak password not rejected by Auth'
         for index,symbol in enumerate(policy['symbols']):
             assert request(auth,'/admin/users',{'email':'symbol-'+str(index)+'-'+suffix,'password':'Abcdef9'+symbol,'email_confirm':True},admin)[0] in (200,201),'Approved password symbol rejected by Auth'
@@ -438,7 +487,7 @@ def main():
         status,bootstrap_verified=request(gateways[0][1],'/auth/v1/factors/'+bootstrap_factor['id']+'/verify',{'challenge_id':bootstrap_challenge['id'],'code':totp_code(bootstrap_factor['totp']['secret'])},bootstrap_session['access_token']);assert status==200,'Bootstrap MFA verification failed'
         assert request(gateways[0][1],'/rest/v1/rpc/platform_read',{'section':'overview'},bootstrap_verified['access_token'])[0]==200,'Bootstrap administrator denied after fresh MFA'
         assert sql("select count(*) from public.platform_audit_events where actor_user_id='"+bootstrap_id+"' and action='platform.security.bootstrap';")=='1','Bootstrap ownership grant was not audited'
-        print(json.dumps({'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
+        print(json.dumps({'native_candidate_identity_and_isolation':True,'native_candidate_profile_and_alerts':True,'native_candidate_revocation':True,'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
             'password_only_mfa_replacement_denied':True,'native_admin_factor_recovery':True,
@@ -468,5 +517,5 @@ if __name__=='__main__':
     try:main()
     except Exception as error:
         # No provider payloads, generated credentials or request contents.
-        print(json.dumps({'passed':False,'error_type':type(error).__name__,'line':traceback.extract_tb(error.__traceback__)[-1].lineno,'operation':error.cmd[:4] if isinstance(error,subprocess.CalledProcessError) else None,'detail':str(error) if isinstance(error,AssertionError) else 'Inspect private isolated service diagnostics'}))
+        print(json.dumps({'passed':False,'error_type':type(error).__name__,'line':[f.lineno for f in traceback.extract_tb(error.__traceback__) if f.filename.endswith('test-native-auth.py')],'operation':error.cmd[:4] if isinstance(error,subprocess.CalledProcessError) else LAST_HTTP_OPERATION,'detail':str(error) if isinstance(error,AssertionError) else 'Inspect private isolated service diagnostics'}))
         raise SystemExit(1)

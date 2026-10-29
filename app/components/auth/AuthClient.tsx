@@ -76,9 +76,9 @@ export function LoginClient() {
         return;
       }
       setValues(current => ({ ...current, password: "" }));
-      const session = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).catch(() => null) as { platformAdmin?: boolean } | null;
+      const session = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).catch(() => null) as { platformAdmin?: boolean;role?:string;originSlug?:string } | null;
       playStatusSound("success");
-      router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")) ?? (session?.platformAdmin ? "/backoffice" : "/app/home"));
+      router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")) ?? (session?.platformAdmin ? "/backoffice" : session?.role==="candidate"?"/"+session.originSlug:"/app/home"));
     } finally {
       setLoading(false);
     }

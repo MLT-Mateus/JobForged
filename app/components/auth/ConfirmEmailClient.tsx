@@ -12,6 +12,7 @@ import "./auth.css";
 
 export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; type: string }) {
   const [status, setStatus] = useState<"pending" | "loading" | "success" | "invalid">(type === "signup" && tokenHash ? "pending" : "invalid");
+  const [destination,setDestination]=useState("/login");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [messageKind, setMessageKind] = useState<ToastKind>("info");
@@ -20,6 +21,7 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
     const response = await fetch("/api/auth/confirmation/session", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tokenHash, type }) }).catch(() => null);
     if (response?.ok) {
       window.history.replaceState(null, "", "/confirmar-email");
+      const session=await fetch("/api/auth/session",{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null) as {role?:string;originSlug?:string}|null;if(session?.role==="candidate"&&session.originSlug)setDestination("/"+session.originSlug);
       setStatus("success");
       playStatusSound("success");
     } else { window.history.replaceState(null, "", "/confirmar-email"); setStatus("invalid"); }
@@ -39,7 +41,7 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
     <div className="auth-heading"><h1>Confirme seu e-mail</h1><p>O link será usado somente quando você clicar em confirmar.</p></div>
     {status === "pending" && <ActionButton type="button" onClick={confirm}>Confirmar meu e-mail</ActionButton>}
     {status === "loading" && <p role="status">Validando link…</p>}
-    {status === "success" && <><p>E-mail confirmado. Entre na sua conta ou volte ao convite recebido para concluir a associação à empresa.</p><Link href="/login">Ir para o login</Link></>}
+    {status === "success" && <><p>E-mail confirmado. Entre na sua conta ou volte ao convite recebido para concluir a associação à empresa.</p><Link className="jf-action jf-action--primary" href={destination}>{destination==="/login"?"Ir para o login":"Voltar à página da empresa"}</Link></>}
     {status === "invalid" && <><p>Este link expirou, já foi usado ou é inválido. Peça outro e-mail de confirmação.</p>
       <form className="auth-form" noValidate onSubmit={resend}><TextField name="email" label="E-mail do cadastro" type="email" value={email} onChange={event => setEmail(event.target.value)} />
       <ActionButton type="submit">Solicitar novo e-mail</ActionButton></form>{message && <AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Confira a solicitação" : "Confirmação de e-mail",text:message}} onClose={() => setMessage("")}/>}</>}

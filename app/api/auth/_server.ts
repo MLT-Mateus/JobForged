@@ -142,13 +142,11 @@ export async function readSession(request: NextRequest, headers: Headers) {
   if (!user.email_confirmed_at) return null;
   const admin = await requestDatabase("rpc/is_platform_admin", currentAccessToken, {});
   if (admin?.ok && await admin.json() === true) return { id: user.id, email: user.email ?? "", platformAdmin: true, company: null, role: "platform_admin", accessToken: currentAccessToken };
-  try {
-    const membership = await requestDatabase("rpc/session_context_v1", currentAccessToken, {});
-    if (!membership?.ok) throw new Error("Company membership could not be verified");
-    const row = await membership.json() as { company_id: string; role: string; full_name: string; companies: { id: string; name: string } } | null;
-    if (!row) return null;
-    return { id: user.id, email: user.email ?? "", platformAdmin: false, company: row.companies, role: row.role, fullName: row.full_name, accessToken: currentAccessToken };
-  } catch {
-    return null;
-  }
+  const membership = await requestDatabase("rpc/session_context_v1",currentAccessToken,{}).catch(()=>null);
+  if(membership?.ok){const row=await membership.json() as {company_id:string;role:string;full_name:string;companies:{id:string;name:string}}|null;
+    if(row)return {id:user.id,email:user.email??"",platformAdmin:false,company:row.companies,role:row.role,fullName:row.full_name,accessToken:currentAccessToken};}
+  const candidate=await requestDatabase("rpc/candidate_context",currentAccessToken,{}).catch(()=>null);
+  if(candidate?.ok){const profile=await candidate.json() as {fullName:string;slug:string}|null;
+    if(profile)return {id:user.id,email:user.email??"",platformAdmin:false,company:null,role:"candidate",fullName:profile.fullName,originSlug:profile.slug,accessToken:currentAccessToken};}
+  return null;
 }

@@ -1,7 +1,8 @@
 "use client";
+import {PublicPortalAccount} from "../components/personalization/PublicPortalAccount";
 import { Info } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { PreviewDock, EditorSection, EditorAccordion, EditorWorkbench, ActionButton, CheckboxField, StatusBadge, TextField } from "../components/ui";
+import { EditorSection, EditorAccordion, EditorWorkbench, ActionButton, CheckboxField, StatusBadge, TextField } from "../components/ui";
 import { PhoneFrame } from "../components/ui/PhoneFrame";
 import { FocusPopover, WidgetDialog, WidgetDivider, WidgetGroup } from "../components/ui/Widgets";
 import { WidgetsIcon } from "../components/ui/Icons";
@@ -48,7 +49,7 @@ export function WidgetsSection() {
  <Demo number="05" title="Editor com prévia" description="Menus recolhíveis à esquerda e prévia ao lado, com os mesmos componentes da personalização.">
  <EditorWorkbench editor={<><EditorAccordion title="Conteúdo do hero" defaultOpen><EditorSection title="Mensagem de boas-vindas"><TextField label="Título principal" placeholder="Digite o título..." value={editorTitle} onChange={e=>setEditorTitle(e.target.value)}/></EditorSection></EditorAccordion><EditorAccordion title="Imagem e composição"><p>As opções relacionadas ficam dentro do mesmo menu.</p></EditorAccordion></>} preview={<AppearancePreviewPanel data={{...example,portal:{...example.portal,headline:editorTitle}}} theme={previewTheme} onThemeChange={setPreviewTheme}/>}/>
  </Demo>
- <Demo number="06" title="Identificação de prévia" description="Contexto fixo sem ocupar o topo da página. Na aplicação, acompanha a navegação e permite continuar a edição."><PreviewDock floating={false}/></Demo>
+ <Demo number="06" title="Conta e alertas na página pública" description="Acesso pelo cabeçalho, sem um painel separado. Exemplo sem cadastro ou envio de mensagens."><PublicPortalAccount slug="exemplo" demo/></Demo>
  <Demo number="07" title="Balão de informação · tooltip" description="Ajuda contextual junto ao controle, usando o mesmo balão do Rich Text. Abra por clique, toque ou teclado; feche com Escape ou ao sair do grupo.">
  <WidgetGroup variant="outline"><div className="ds-widget-inline"><strong>Orientação no contexto</strong><FocusPopover showCloseAction={false} align="end" label="Como usar o balão de informação" triggerVariant="quiet" triggerContent={<Info size={16}/>}><strong>Ajuda rápida</strong><p>Use este espaço para dicas curtas de preenchimento.</p><p>Feche com Escape ou clique fora.</p></FocusPopover></div><p>O ícone de informação abre uma caixa ancorada ao controle, sem depender de passar o mouse.</p></WidgetGroup>
  </Demo>

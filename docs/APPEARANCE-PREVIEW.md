@@ -1,41 +1,34 @@
-# Personalização empresarial e publicação por endereço
+# Personalização e página pública empresarial
 
-A Personalização em `/app/personalizacao` usa três grupos: Página, Identidade e Endereço. A referência de Aparência foi estudada por leitura: hierarquia curta, cinco composições, conteúdo preservado na troca de template, ações no topo e viewport real na prévia. Não há uma empresa JobForged fictícia ou tratamento especial para `/jobforged`.
+Decisão atual do produto (29/10/2026): cada empresa ativa tem `/<slug>`; salvar aplica diretamente à página pública e à identidade empresarial. Não há publicação separada nem rascunho persistido. Os campos locais continuam editáveis antes de salvar, com aviso de saída e descarte. Domínios personalizados seguem futuros.
 
-## Prévia e publicação
+## Fluxo e composição
 
-- O editor mostra os campos atuais em um iframe sem scripts e sem envio de formulários. Desktop, tablet e celular usam viewports reais escalados, com rolagem interna. Links externos ficam inativos.
-- A prévia externa privada `/app/personalizacao/previa` mostra o último rascunho salvo para titular/administrador; membros veem a identidade publicada. Exige sessão e vínculo empresarial no servidor.
-- Salvar rascunho não publica. Publicar exige confirmação e grava a identidade, histórico e habilitação pública atomicamente, verificando as duas versões concorrentes.
-- `/<slug>` mostra somente a configuração publicada. Slug não é autorização. Páginas inexistentes, suspensas ou retiradas do ar retornam 404. Configurações antigas recebem endereço, mas permanecem privadas até publicação explícita.
-- Alterar endereço mantém a publicação e desativa o link anterior. Retirar do ar mantém identidade, histórico e arquivos privados.
+- Página, Identidade e Endereço preservam os campos existentes. Um botão Salvar alterações no topo, link Abrir página da empresa, histórico, restauração e padrões.
+- Restauração e padrões carregam o editor; somente Salvar altera a versão pública. Não apagam o histórico. Restaurar padrão permanece desabilitado quando a configuração efetiva já é padrão.
+- A prévia embutida demonstra os campos atuais, com dispositivos e vagas mock; não envia formulários nem cria contas. O endereço antigo `/app/personalizacao/previa` é apenas uma ponte autenticada para `/<slug>`, removendo fragmentos antigos. Não representa uma segunda versão.
+- Navegação interna usa IDs estáveis e rolagem sem acrescentar fragmentos à URL. Panorama tem cartão compacto à direita e imagem de fundo ampla. Editor estreito empilha Rich Text; rótulos de menus/links usam TextField, nome obrigatório e endereço opcional.
+- ThemeSelector e useThemePreference são os mesmos da plataforma. A marca é uma imagem, sem nome duplicado ao lado. O rodapé usa SiteFooter da LP.
+- Padrão contém imagem ilustrativa local, banner explicitamente mock e links reais da plataforma. Contatos empresariais não são inventados. Arquivos próprios substituem os padrões sem exclusão de referências antigas. Valores existentes não são sobrescritos por exemplos.
 
-## Componentes e consumidores
+## Persistência e segurança
 
-EditorSection e ViewportPreview são compartilhados e demonstrados em Widgets do Design System. CareerPortalPreview compõe editor, prévia externa e página pública: as faixas ocupam a largura disponível e o conteúdo conserva medidas de leitura. Os cinco templates existentes, quatro pares tipográficos, Rich Text, cores, uploads e histórico são preservados. Há controles aditivos para imagem, texto alternativo, balões, destaques, cultura, convite e cartões/lista.
+Migration0033 substitui as operações de branding por gravação pública atômica com histórico, auditoria, papel empresarial e versão esperada. Mantém colunas e assinaturas legadas para compatibilidade; operações save/publish/reset/restore gravam a mesma configuração corrente. Discard é local/no-op no contrato legado. Unpublish é recusado. Configurações salvas anteriormente são adotadas mantendo histórico e autor. Empresas sem configuração mostram o padrão público, usando apenas nome/slug na projeção inicial.
 
-Na versão pública, não são exibidas vagas fictícias, contagens ou ações de candidatura. Vagas reais dependem da Frente 4. As oportunidades do editor continuam explicitamente mock. Domínios e subdomínios seguem Em breve.
+Controle de concorrência de aplicação usa PT409: evita que o PostgREST trate um conflito previsível como falha SQL serializável e repita a chamada. APIs aceitam também 40001 por compatibilidade. Suspensão continua bloqueando página e imagens. Arquivos públicos são apenas os referenciados na projeção explícita; bucket privado, nomes originais, histórico, autores e fundos internos permanecem protegidos. Nenhum service_role no aplicativo.
 
-## Dados e permissões
+## Conta de candidato no cabeçalho
 
-Migration nova e aditiva `0031_company_portals.sql`: company_portals, alocação única de slug, RPCs privados de edição e projeções públicas explícitas. Nenhuma migration anterior é alterada. O titular e administrador empresarial podem editar/publicar; membro pode consultar; administrador de plataforma não recebe edição empresarial.
+Migration0034 acrescenta candidate_accounts sem vínculo empresarial. Cadastro mínimo: nome (3–120), e-mail (até254), senha da política compartilhada, confirmação e aceite dos documentos vigentes. Origem é a empresa ativa daquele slug; não é permissão para seu painel. Intenção de cadastro é temporária (15min), de uso único, vinculada ao e-mail e à empresa, com limites duráveis (3/e-mail/h,100/empresa/h) e gateway. API Auth direta sem intenção é recusada para account_type candidate. Metadados não conferem papéis; nonces e campos de privilégio são removidos.
 
-A leitura pública exclui rascunho, autores, histórico, nomes originais de arquivos e fundos internos do painel/login. Campos e imagens de seções ocultas são omitidos quando aplicável. Somente imagens referenciadas na projeção pública atual podem ser lidas anonimamente; o bucket permanece privado. A rota pública usa chave anônima, confere escopo, tamanho, assinatura PNG e SHA-256. Suspensão e retirada da publicação revogam novas leituras, com no-store. Imagens que alguém já tenha baixado não podem ser recuperadas remotamente.
+Após confirmação de e-mail, a mesma autenticação HttpOnly permite entrar no menu da página. Alertas usa NotificationPanel; Conta permite alterar o próprio nome com versão esperada, recuperar senha e sair. Identidade inativa, sessão revogada e usuário banido/excluído não obtêm os dados. Tabelas não têm SELECT nem escrita direta para anon/authenticated. RPCs expõem somente os próprios campos/alertas. Não existe painel separado, currículo, candidatura real ou criação de vagas nesta entrega.
 
-O favicon empresarial é limitado ao contexto da empresa; ao sair, o ícone da plataforma retorna. A marca da empresa não altera o editor, backoffice ou Design System.
+Contas empresariais/administrativas existentes podem consultar os próprios alertas no mesmo menu. mark_my_notification marca somente entrega própria elegível; não usa o privilégio administrativo de criar/disparar campanhas. Operações administrativas continuam exigindo MFA recente. Comunicação interna ganha público Candidatos; filtro empresarial usa a origem do cadastro, sem incluir visitantes ou outras empresas. Nenhuma campanha é disparada pela implementação.
 
-## Validação
+## Verificação
 
-Testes versionados: company-portals-security.sql (PostgreSQL real isolado, autorização, concorrência, projeção, suspensão, retirada, RLS de imagem), company-portal-api.test.mjs (BFF com provedor simulado), test-native-auth.py (Auth/Storage reais descartáveis, publicação e revogação de PNG), branding-model e theme-preference. O pipeline executa os testes antes de integrar/publicar. Resultados do deploy e limitações de validação autenticada constam do relatório da entrega.
-
-Publicação somente em Test. Live não é alterado.
-
-## Refinamento de cabeçalho, rodapé e padrão (29/10/2026)
-
-Cabeçalho, cores e links fica em Página, com cinco nomes/endereços (60/2048 caracteres), HTTPS, caminhos internos e âncoras reconhecidas. Links externos abrem outra aba com noopener/noreferrer; na prévia embutida seguem bloqueados. Rodapé usa SiteFooter da LP, marca completa, descrição/direitos/chamada e quatro nomes de links predefinidos sem URLs inventadas. E-mail/telefone ficam vazios até configuração; URLs vazias viram texto, sem âncoras falsas. Contatos: 254/64 caracteres; URLs editáveis até2048; nomes formatados do rodapé até240 na fonte. RichTextField compartilha teto de4000 por padrão e preserva os comandos existentes. Há limites de5/6 links de cabeçalho/rodapé e20 banners; contratos SQL legados continuam válidos.
-
-Cores próprias de cabeçalho/rodapé em claro e escuro são opcionais; sem configuração usam superfícies/textos da paleta empresarial, sem inversão. Servidor e banco verificam HEX e contraste4,5:1. ThemeSelector aprovado funciona na página, preview e publicação, respeitando a permissão de alternância. Imagem padrão retangular sem arco; asset local team-jobforged-v2.webp gerado por IA, otimizado e ilustrativo. Imagens personalizadas permanecem.
-
-Prévia externa tem identificação flutuante PreviewDock e Continuar editando; a faixa superior foi retirada. O widget está demonstrado no DS. Restauração fica desativada se os valores efetivos já forem os padrões da empresa; a API também devolve a versão atual sem gravar revisão/auditoria desnecessária. A comparação ignora metadados, ordem das chaves e diferenças de serialização do Rich Text. Nome de comparação vem do contrato autenticado, não do nome editável ou do mock do shell.
-
-Migration0032 acrescenta validação dos campos opcionais chrome/navigation e sua projeção pública. Não atualiza documentos existentes nem publica clientes. Campos de menus ocultos não são expostos. Fazer backup restaurado/cópia cifrada antes da aplicação, conforme gate do projeto.
+- SQL isolado: autorização, projeção, arquivos, suspensão, histórico, versões, campos e isolamento.
+- Provedores reais isolados: Auth, login, intenção, não promoção de candidato a membro/admin, perfil concorrente, alertas próprios, inativação e revogação. Sem SMTP externo.
+- BFF com provedor simulado: origem, campos, autorização, conflitos e contratos explícitos.
+- DS Widgets demonstra o mesmo menu em mock sem chamadas de autenticação.
+- Resultados do CI, deploy, backup e limites da validação visual são registrados no relatório da entrega. Live não é alterado.
