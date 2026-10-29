@@ -228,7 +228,7 @@ body:has(.admin-shell){overflow:hidden}
 @media(prefers-reduced-motion:reduce) { .admin-shell * { transition:none!important; animation:none!important; scroll-behavior:auto!important; } }
 
 /* Approved complete signature; compact navigation moves the symbol to the header. */
-.admin-brand img.admin-brand__full-logo { width:160px; max-width:100%; height:auto; object-fit:contain; }
+.admin-brand img.admin-brand__full-logo { width:160px; max-width:100%; height:auto; max-height:calc(var(--jf-ui-workspace-header-height) - var(--jf-ui-space-4) - var(--jf-ui-space-4) - 1px); object-fit:contain; }
 .admin-org .admin-org__brand-icon { display:none; flex:0 0 32px; }
 .is-collapsed .admin-org .admin-org__brand-icon { display:flex; }
 @media(max-width:900px) {
