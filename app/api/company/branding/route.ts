@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { readSession, requestDatabase, requireSameOrigin } from '@/app/api/auth/_server';
-import { brandContent, brandingDefaults, validateBranding, normalizeBrandingRichContent } from '@/app/components/personalization/branding-model';
+import { brandContent, brandingDefaults, isDefaultBranding, validateBranding, normalizeBrandingRichContent } from '@/app/components/personalization/branding-model';
 export const runtime='nodejs';
 export async function GET(request:NextRequest){
  const headers=new Headers({'Cache-Control':'no-store',Vary:'Cookie'}),session=await readSession(request,headers);
@@ -23,6 +23,11 @@ export async function POST(request:NextRequest){
   (body.operation==='restore'&&!/^[0-9a-f-]{36}$/i.test(body.historyId||'')))return Response.json({message:'Operação inválida.'},{status:400,headers});
  const configuration=body.operation==='reset'?brandContent(brandingDefaults(session.company.id,session.company.name)):normalizeBrandingRichContent(body.configuration);
  if(['save','publish','reset'].includes(body.operation||'')){const error=validateBranding(configuration);if(error)return Response.json({message:error},{status:400,headers})}
+ if(body.operation==='reset'){
+  const current=await requestDatabase('rpc/read_company_branding',session.accessToken,{}).catch(()=>null);if(!current?.ok)return Response.json({message:'Não foi possível conferir o padrão atual.'},{status:503,headers});
+  const row=await current.json() as {version:number;companyName:string;draft:object|null};if(row.version!==body.version)return Response.json({message:'Outra sessão alterou a identidade. Recarregue antes de restaurar.',conflict:true},{status:409,headers});
+  if(isDefaultBranding({...brandingDefaults(session.company.id,row.companyName),...row.draft},row.companyName))return Response.json({version:row.version,message:'A personalização já está no padrão.'},{headers});
+ }
  const result=await requestDatabase('rpc/write_company_branding',session.accessToken,{operation:body.operation,expected_version:body.version,configuration:configuration||null,history_id:body.historyId||null}).catch(()=>null);
  if(!result?.ok){const error=await result?.json().catch(()=>null) as {code?:string}|null;const conflict=error?.code==='40001';return Response.json({message:conflict?'Outra sessão alterou esta identidade. Recarregue os dados antes de salvar; seus campos foram preservados.':'Revise os campos, URLs, imagens e contraste da identidade.',conflict},{status:conflict?409:400,headers})}
  return Response.json({version:await result.json()},{headers});

@@ -245,3 +245,5 @@
 
 .custom-editor>[data-appearance-group]{display:grid;gap:var(--jf-ui-space-3);min-width:0}
 .custom-editor>[data-appearance-group][hidden]{display:none}
+
+.jf-external-preview{padding-bottom:110px}

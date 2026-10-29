@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, X } from "lucide-react";
-import { ActionButton } from "./AdminPrimitives";
+import { ActionButton, StatusBadge } from "./AdminPrimitives";
 import "./widgets.css";
 
 const workspaceLocks = new WeakMap<HTMLElement, { count: number; previous: string }>();
@@ -49,3 +49,5 @@ export function EditorWorkbench({editor,preview}:{editor:ReactNode;preview:React
 }
 
 export function EditorSection({title,description,action,children}:{title:string;description?:string;action?:ReactNode;children:ReactNode}){return <section className="jf-editor-section"><header><div><h3>{title}</h3>{description&&<p>{description}</p>}</div>{action}</header><div className="jf-editor-section__body">{children}</div></section>}
+
+export function PreviewDock({label='Prévia privada · mock',href='/app/personalizacao',floating=true}:{label?:string;href?:string;floating?:boolean}){return <aside className={`jf-preview-dock ${floating?'is-floating':''}`} aria-label="Contexto da prévia"><StatusBadge>{label}</StatusBadge><a className="jf-action jf-action--secondary" href={href}>Continuar editando</a></aside>}
