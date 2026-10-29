@@ -38,3 +38,5 @@ export {RichContent} from "./RichContent";
 export {DisplayValue,type ValueState} from "./DisplayValue";
 
 export {ViewportPreview} from "./ViewportPreview";
+
+export {PreviewDock} from "./Widgets";

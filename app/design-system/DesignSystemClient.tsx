@@ -427,7 +427,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                 <MultilineInput label="Apresentação" placeholder="Escreva a apresentação..." rows={4}/>
               </ExampleCard>
               <ExampleCard title="Rich Text · parâmetros no texto">
-                <RichTextField textOnly label="Descrição da vaga" placeholder="Escreva a descrição..." value={demoRich} onChange={setDemoRich}/>
+                <RichTextField textOnly label="Descrição da vaga" maxLength={4000} placeholder="Escreva a descrição..." value={demoRich} onChange={setDemoRich}/>
               </ExampleCard>
             </div>
           </section>

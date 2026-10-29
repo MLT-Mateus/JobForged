@@ -32,6 +32,7 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   assert.equal((await request('/api/company/branding',{...mutation,companyId:'38000000-0000-0000-0000-000000000012'})).status,409);
   assert.equal((await request('/api/company/branding',mutation)).status,200);assert.equal(writes.at(-1).expected_version,0);
   conflict=true;const stale=await request('/api/company/branding',mutation);assert.equal(stale.status,409);assert.equal((await stale.json()).conflict,true);conflict=false;
+  const beforeReset=writes.length;assert.equal((await request('/api/company/branding',{...mutation,operation:'reset'})).status,200);assert.equal(writes.length,beforeReset,'Reset on defaults must not write another revision');
   const image=await sharp({create:{width:8,height:8,channels:3,background:'#20B2AA'}}).png().toBuffer();
   const form=new FormData();form.set('file',new File([image],'logo.png',{type:'image/png'}));form.set('kind','logoMain');form.set('companyId',cid);
   const upload=await request('/api/company/branding/assets',form);assert.equal(upload.status,200);const result=await upload.json();assert.match(result.asset.url,/^\/api\/company\/branding\/assets\//);assert.equal(JSON.stringify(result).includes('bucket-only-fixture-token'),false);

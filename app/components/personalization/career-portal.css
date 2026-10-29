@@ -1,9 +1,9 @@
+.jf-career-portal .jf-career-brand img{width:160px;height:48px;max-width:100%;object-fit:contain;object-position:left center}
 
 .jf-career-portal{container-type:inline-size;background:var(--cp-bg);color:var(--cp-text);font-family:var(--jf-ui-font-body);line-height:1.6;overflow-wrap:anywhere}
 .jf-career-portal *{box-sizing:border-box}
 .jf-career-portal>header{padding:var(--jf-ui-space-5) clamp(20px,4cqi,56px);gap:var(--jf-ui-space-5);flex-wrap:wrap}
 .jf-career-brand{display:flex;align-items:center;gap:var(--jf-ui-space-2);font-family:var(--jf-ui-font-heading);font-size:18px}
-.jf-career-brand img{width:32px;height:32px;object-fit:contain}
 .jf-career-portal>header nav{display:flex;gap:var(--jf-ui-space-5);margin-left:auto;flex-wrap:wrap}
 .jf-career-portal a{color:var(--cp-link);text-decoration:none}
 .jf-career-portal a:focus-visible{outline:3px solid var(--jf-ui-focus-ring);outline-offset:3px}
@@ -47,12 +47,12 @@
 
 /* Full-width sections share a readable inner alignment, including embedded previews. */
 .jf-career-portal{--career-gutter:max(24px,calc((100cqi - 1160px)/2))}
-.jf-career-portal>header{padding-inline:var(--career-gutter);background:var(--cp-text);color:var(--cp-bg);min-height:76px;border-bottom:1px solid var(--jf-ui-border)}
+.jf-career-portal>header{padding-inline:var(--career-gutter);background:var(--cp-header-bg);color:var(--cp-header-text);min-height:76px;border-bottom:1px solid var(--jf-ui-border)}
 .jf-career-portal>header a{color:inherit;font-size:13px;font-weight:600}
 .jf-career-portal .jf-career-hero{padding:64px var(--career-gutter);min-height:510px;gap:56px;grid-template-columns:1fr 1fr}
 .jf-career-portal .jf-career-hero h1{font-size:clamp(28px,4cqi,52px);max-width:550px}
-.jf-career-portal .mock-hero__visual{overflow:visible;background:color-mix(in srgb,var(--cp-primary) 12%,var(--cp-bg));border-radius:48% 48% 16px 16px;min-height:360px;padding:16px}
-.jf-career-portal .mock-hero__visual img{border-radius:45% 45% 12px 12px;height:360px;min-height:0;max-height:none}
+.jf-career-portal .mock-hero__visual{overflow:visible;background:color-mix(in srgb,var(--cp-primary) 12%,var(--cp-bg));border-radius:var(--jf-ui-radius-card);min-height:360px;padding:16px}
+.jf-career-portal .mock-hero__visual img{border-radius:var(--jf-ui-control-radius);height:360px;min-height:0;max-height:none}
 .jf-career-photo-note{display:flex;gap:12px;align-items:center;left:-12px;right:auto;bottom:24px;box-shadow:var(--jf-ui-shadow);border:1px solid var(--jf-ui-border);max-width:85%}
 .jf-career-photo-note svg{color:var(--cp-link);flex-shrink:0}
 .jf-career-photo-note strong{display:block;font-size:11px;font-weight:400}
@@ -90,3 +90,11 @@
 
 .jf-company-portal{width:100%;min-height:100dvh;background:var(--cp-bg);color:var(--cp-text)}
 .jf-career-portal>header .jf-action{color:inherit}
+
+.jf-career-brand{max-width:100%;flex-wrap:wrap;column-gap:var(--jf-ui-space-4)}
+.jf-career-brand strong{font-size:var(--jf-ui-font-size-sm)}
+.jf-career-portal>header .jf-theme-selector{--jf-ui-text:var(--cp-header-text);--jf-ui-text-muted:var(--cp-header-text);--jf-ui-brand-strong:var(--cp-header-text);--jf-ui-surface:var(--cp-header-bg);--jf-ui-surface-soft:var(--cp-header-bg);--jf-ui-border:color-mix(in srgb,var(--cp-header-text) 25%,transparent);flex-shrink:0}
+.jf-career-portal>header nav{align-items:center;gap:var(--jf-ui-space-4);min-width:0}
+.jf-career-portal>header nav :is(a,span){max-width:240px;overflow-wrap:anywhere}
+.jf-career-theme-float{position:fixed;top:var(--jf-ui-space-4);right:var(--jf-ui-space-4);z-index:20}
+@container(max-width:760px){.jf-career-portal>header .jf-theme-selector{margin-left:auto}.jf-career-portal .jf-career-brand img{width:136px;height:40px}}

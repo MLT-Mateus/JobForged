@@ -29,3 +29,13 @@ O favicon empresarial é limitado ao contexto da empresa; ao sair, o ícone da p
 Testes versionados: company-portals-security.sql (PostgreSQL real isolado, autorização, concorrência, projeção, suspensão, retirada, RLS de imagem), company-portal-api.test.mjs (BFF com provedor simulado), test-native-auth.py (Auth/Storage reais descartáveis, publicação e revogação de PNG), branding-model e theme-preference. O pipeline executa os testes antes de integrar/publicar. Resultados do deploy e limitações de validação autenticada constam do relatório da entrega.
 
 Publicação somente em Test. Live não é alterado.
+
+## Refinamento de cabeçalho, rodapé e padrão (29/10/2026)
+
+Cabeçalho, cores e links fica em Página, com cinco nomes/endereços (60/2048 caracteres), HTTPS, caminhos internos e âncoras reconhecidas. Links externos abrem outra aba com noopener/noreferrer; na prévia embutida seguem bloqueados. Rodapé usa SiteFooter da LP, marca completa, descrição/direitos/chamada e quatro nomes de links predefinidos sem URLs inventadas. E-mail/telefone ficam vazios até configuração; URLs vazias viram texto, sem âncoras falsas. Contatos: 254/64 caracteres; URLs editáveis até2048; nomes formatados do rodapé até240 na fonte. RichTextField compartilha teto de4000 por padrão e preserva os comandos existentes. Há limites de5/6 links de cabeçalho/rodapé e20 banners; contratos SQL legados continuam válidos.
+
+Cores próprias de cabeçalho/rodapé em claro e escuro são opcionais; sem configuração usam superfícies/textos da paleta empresarial, sem inversão. Servidor e banco verificam HEX e contraste4,5:1. ThemeSelector aprovado funciona na página, preview e publicação, respeitando a permissão de alternância. Imagem padrão retangular sem arco; asset local team-jobforged-v2.webp gerado por IA, otimizado e ilustrativo. Imagens personalizadas permanecem.
+
+Prévia externa tem identificação flutuante PreviewDock e Continuar editando; a faixa superior foi retirada. O widget está demonstrado no DS. Restauração fica desativada se os valores efetivos já forem os padrões da empresa; a API também devolve a versão atual sem gravar revisão/auditoria desnecessária. A comparação ignora metadados, ordem das chaves e diferenças de serialização do Rich Text. Nome de comparação vem do contrato autenticado, não do nome editável ou do mock do shell.
+
+Migration0032 acrescenta validação dos campos opcionais chrome/navigation e sua projeção pública. Não atualiza documentos existentes nem publica clientes. Campos de menus ocultos não são expostos. Fazer backup restaurado/cópia cifrada antes da aplicação, conforme gate do projeto.

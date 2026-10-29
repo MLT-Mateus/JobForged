@@ -65,5 +65,19 @@ do $$declare p jsonb:=public.read_company_portal();begin perform public.write_co
 reset role;set local role anon;
 do $$begin if public.read_public_company_portal('portal-fixture-published') is not null or (select count(*) from storage.objects where bucket_id='company-branding' and name like '31000000-0000-4000-8000-000000000011/%')<>0 then raise exception 'unpublish did not revoke';end if;end$$;
 reset role;
+set local role authenticated;select pg_temp.assume_user('31000000-0000-4000-8000-000000000001');
+do $$declare c jsonb:=current_setting('jbfd.portal_config')::jsonb;v bigint;p jsonb;begin
+ c:=jsonb_set(c,'{portal,chrome}','{"light":{"headerBackground":"#FFFFFF","headerText":"#142321","footerBackground":"#F5FAF9","footerText":"#142321"},"dark":{"headerBackground":"#0E2722","headerText":"#EFF8F6","footerBackground":"#071411","footerText":"#EFF8F6"}}');
+ c:=jsonb_set(c,'{portal,navigation}','[{"label":"Cultura","href":"https://example.invalid/cultura"},{"label":"Em breve","href":""}]');
+ p:=public.read_company_portal();v:=public.write_company_branding('save',(p->>'brandingVersion')::bigint,c);
+ begin perform public.write_company_branding('save',v,jsonb_set(c,'{portal,chrome,light,headerText}','"#FFFFFF"'));raise exception 'chrome contrast bypass';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('save',v,jsonb_set(c,'{portal,navigation,0,href}','"javascript:alert(1)"'));raise exception 'navigation script bypass';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('save',v,jsonb_set(c,'{portal,navigation,0,label}',to_jsonb(repeat('x',61))));raise exception 'navigation length bypass';exception when invalid_parameter_value then null;end;
+ p:=public.read_company_portal();p:=public.write_company_portal('publish',(p->>'version')::bigint,null,(p->>'brandingVersion')::bigint,c);
+ if public.read_public_company_portal('portal-fixture-published')#>>'{configuration,portal,navigation,0,href}'<>'https://example.invalid/cultura' then raise exception 'navigation projection failed';end if;
+ c:=jsonb_set(c,'{structure,showHeader}','false');p:=public.write_company_portal('publish',(p->>'version')::bigint,null,(p->>'brandingVersion')::bigint,c);
+ if (public.read_public_company_portal('portal-fixture-published')#>'{configuration,portal}')?'navigation' then raise exception 'hidden navigation leaked';end if;
+end$$;
+reset role;
 select 'company_portal_security_passed';
 rollback;

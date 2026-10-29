@@ -37,3 +37,15 @@ test('presentation controls are additive, validated and preserve old snapshots',
  for(const slug of ['company-name','jobforged','empresa-2'])assert.equal(validPortalSlug(slug),true);
  for(const slug of ['ab','UPPER','-bad','bad-','company/path','émpresa'])assert.equal(validPortalSlug(slug),false);
 });
+
+test('chrome, navigation and reset defaults are bounded and theme specific',async()=>{
+ const {portalChrome,portalMenu,portalFooter}=await import('../app/components/personalization/portal-chrome.ts');
+ const {isDefaultBranding,normalizeBrandingRichContent}=await import('../app/components/personalization/branding-model.ts');
+ const c=brandingDefaults('fixture','Fixture');assert.equal(isDefaultBranding(c,'Fixture'),true);assert.equal(isDefaultBranding({...c,revision:42,publishedAt:'ignored'},'Fixture'),true);
+ assert.equal(isDefaultBranding({...normalizeBrandingRichContent(c),organizationId:c.organizationId},'Fixture'),true);
+ c.portal.chrome=portalChrome(c);c.portal.navigation=portalMenu(c);assert.equal(isDefaultBranding(c,'Fixture'),true);
+ c.portal.navigation[0].href='https://example.invalid/culture';assert.equal(validateBranding(brandContent(c)),null);assert.equal(isDefaultBranding(c,'Fixture'),false);
+ c.portal.navigation[0].href='javascript:alert(1)';assert.match(validateBranding(brandContent(c)),/cabeçalho/);c.portal.navigation=[];
+ c.portal.chrome.light.headerText=c.portal.chrome.light.headerBackground;assert.match(validateBranding(brandContent(c)),/contraste/);
+ const f=portalFooter(brandingDefaults('fixture','Fixture'));assert.ok(f.description.length>20);assert.ok(f.links.every(link=>link.href===''));assert.equal(f.email,'');assert.equal(f.phone,'');
+});

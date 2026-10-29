@@ -1060,6 +1060,7 @@ export function RadioField({ label, ...inputProps }: ChoiceFieldProps) {
 }
 
 type RichTextFieldProps = {
+  maxLength?:number;
   label: string;
   placeholder?: string;
   initialHtml?: string;
@@ -1069,7 +1070,7 @@ type RichTextFieldProps = {
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escreva o texto...", initialHtml = "", value, textOnly=true, resetKey, onChange }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escreva o texto...", initialHtml = "", value, textOnly=true, resetKey, onChange,maxLength=4000 }: RichTextFieldProps) {
   const placeholder=fieldPlaceholder({label,placeholder:suppliedPlaceholder,multiline:true});
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1080,7 +1081,7 @@ export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escre
   const [source,setSource]=useState(()=>richTextSource(value??initialHtml));
   const sourceEmitted=useRef<string|undefined>(undefined),sourceVersion=useRef(resetKey);
   useEffect(()=>{if(value!==undefined&&(value!==sourceEmitted.current||sourceVersion.current!==resetKey))setSource(richTextSource(value));sourceVersion.current=resetKey},[value,resetKey]);
-  function changeSource(next:string){setSource(next);const html=renderRichText(next.replace(/\n/g,'<br>'));sourceEmitted.current=html;onChange?.(html)}
+  function changeSource(next:string){if(next.length>maxLength)return;setSource(next);const html=renderRichText(next.replace(/\n/g,'<br>'));sourceEmitted.current=html;onChange?.(html)}
   function sourceFormat(tag:string){const editor=sourceRef.current;if(!editor)return;const start=editor.selectionStart,end=editor.selectionEnd;const open=`[${tag}]`,close=`[/${tag}]`;changeSource(source.slice(0,start)+open+source.slice(start,end)+close+source.slice(end));requestAnimationFrame(()=>{editor.focus();editor.setSelectionRange(start+open.length,end+open.length)})}
   const parameterHelp=<FocusPopover showCloseAction={false} label="Parâmetros de formatação" triggerVariant="quiet" triggerContent={<Info size={16}/>}><strong>Formatação rápida</strong><dl className="jf-rich-parameters"><dt>Cor do texto</dt><dd><code>[color=#4169E1]Texto[/color]</code></dd><dt>Estilo</dt><dd><code>[b]negrito[/b] · [i]itálico[/i] · [u]sublinhado[/u]</code></dd><dt>Tamanho</dt><dd><code>[size=24]Texto[/size]</code><span>16, 18, 24 ou 32 px.</span></dd><dt>Atalhos · Ctrl ou ⌘</dt><dd><span>B: negrito · I: itálico · U: sublinhado.</span></dd></dl></FocusPopover>;
   const [imageError, setImageError] = useState("");
@@ -1139,7 +1140,7 @@ export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escre
     };
     reader.readAsDataURL(file);
   }
-  if(textOnly)return <div className="jf-rich-text-field"><label className="jf-field__label" htmlFor={`${errorId}-source`}><b>{label}</b></label><div className="jf-rich-text"><div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto"><button type="button" aria-label="Negrito" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('b')}><Bold size={16}/></button><button type="button" aria-label="Itálico" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('i')}><Italic size={16}/></button><button type="button" aria-label="Sublinhado" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('u')}><Underline size={16}/></button>{parameterHelp}</div><textarea ref={sourceRef} id={`${errorId}-source`} className="jf-rich-text__source" aria-label={label} placeholder={placeholder} value={source} onKeyDown={e=>{if(e.nativeEvent.isComposing||e.altKey||e.shiftKey||!(e.ctrlKey||e.metaKey))return;const tag=({b:'b',i:'i',u:'u'} as Record<string,string>)[e.key.toLowerCase()];if(tag){e.preventDefault();sourceFormat(tag)}}} onChange={e=>changeSource(e.target.value)} rows={4}/></div></div>;
+  if(textOnly)return <div className="jf-rich-text-field"><label className="jf-field__label" htmlFor={`${errorId}-source`}><b>{label}</b></label><div className="jf-rich-text"><div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto"><button type="button" aria-label="Negrito" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('b')}><Bold size={16}/></button><button type="button" aria-label="Itálico" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('i')}><Italic size={16}/></button><button type="button" aria-label="Sublinhado" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('u')}><Underline size={16}/></button>{parameterHelp}</div><textarea ref={sourceRef} id={`${errorId}-source`} className="jf-rich-text__source" maxLength={maxLength} aria-label={label} placeholder={placeholder} value={source} onKeyDown={e=>{if(e.nativeEvent.isComposing||e.altKey||e.shiftKey||!(e.ctrlKey||e.metaKey))return;const tag=({b:'b',i:'i',u:'u'} as Record<string,string>)[e.key.toLowerCase()];if(tag){e.preventDefault();sourceFormat(tag)}}} onChange={e=>changeSource(e.target.value)} rows={4}/></div></div>;
   return <div className="jf-rich-text-field"><span className="jf-field__label"><b>{label}</b></span>
     <div className="jf-rich-text">
       <div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto">
