@@ -22,7 +22,7 @@ export { ActionButton, Panel, MetricCard, DataTable, EmptyState, EmptyStateVisua
 
 export { useThemePreference, setThemePreference } from "./useThemePreference";
 
-export { EditorAccordion, EditorWorkbench, WidgetGroup, WidgetDivider, WidgetDialog, FocusPopover } from "./Widgets";
+export { EditorSection, EditorAccordion, EditorWorkbench, WidgetGroup, WidgetDivider, WidgetDialog, FocusPopover } from "./Widgets";
 export { WorkspaceState, WorkspaceTabs, WorkspaceActionMenu } from "./WorkspacePatterns";
 
 export { NotificationPanel } from "./NotificationPanel";
@@ -36,3 +36,5 @@ export {TextAreaField as MultilineInput} from "./FormControls";
 export {RichContent} from "./RichContent";
 
 export {DisplayValue,type ValueState} from "./DisplayValue";
+
+export {ViewportPreview} from "./ViewportPreview";

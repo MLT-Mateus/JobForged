@@ -82,3 +82,11 @@
 
 .jf-career-portal .jf-career-photo-chip>svg,.jf-career-portal .jf-career-photo-note>svg{width:20px;height:20px;flex-shrink:0}
 .jf-career-portal .mock-hero__copy>.jf-action{margin-right:8px;margin-bottom:8px}
+
+.jf-career-portal[data-image="hidden"] .mock-hero__visual{display:none}
+.jf-career-portal[data-image="hidden"] .jf-career-hero{grid-template-columns:1fr}
+.jf-career-portal[data-jobs-layout="list"] .jf-career-jobs{grid-template-columns:minmax(0,1fr)}
+.jf-career-portal .jf-career-jobs article{align-self:start;overflow-wrap:anywhere}
+
+.jf-company-portal{width:100%;min-height:100dvh;background:var(--cp-bg);color:var(--cp-text)}
+.jf-career-portal>header .jf-action{color:inherit}

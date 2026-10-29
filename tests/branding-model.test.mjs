@@ -25,3 +25,15 @@ test('image pipeline accepts static raster, strips metadata, rejects SVG, mismat
  await assert.rejects(normalizeBrandingImage(Buffer.alloc(5242881),'image/png'));
  const png=await sharp({create:{width:2,height:2,channels:3,background:'#000000'}}).png().toBuffer();await assert.rejects(normalizeBrandingImage(png,'image/jpeg'));await assert.rejects(normalizeBrandingImage(png.subarray(0,12),'image/png'));
 });
+
+test('presentation controls are additive, validated and preserve old snapshots',async()=>{
+ const {defaultPortalPresentation,portalPresentation}=await import('../app/components/personalization/portal-presentation.ts');
+ const {validPortalSlug,reservedPortalSlugs}=await import('../app/lib/company-portal.ts');
+ const config=brandContent(brandingDefaults('fixture','Fixture'));
+ assert.equal(portalPresentation(config.portal).showImage,true);
+ config.portal.presentation={...defaultPortalPresentation,showImage:false,jobsLayout:'list'};assert.equal(validateBranding(config),null);
+ config.portal.presentation.showImage='yes';assert.match(validateBranding(config),/composição/);
+ for(const slug of reservedPortalSlugs)assert.equal(validPortalSlug(slug),false);
+ for(const slug of ['company-name','jobforged','empresa-2'])assert.equal(validPortalSlug(slug),true);
+ for(const slug of ['ab','UPPER','-bad','bad-','company/path','émpresa'])assert.equal(validPortalSlug(slug),false);
+});

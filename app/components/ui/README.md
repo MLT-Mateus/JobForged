@@ -51,3 +51,7 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 - Preserve os ícones, tokens e sons aprovados. O Design System demonstra a mesma implementação, sem temporizador próprio.
 
 - A divisória da marca lateral e a base do menu superior compartilham `--jf-ui-workspace-header-height` (80px). A área da marca desconta o padding superior da sidebar; não definir alturas independentes por página. O mesmo shell atende Design System, Backoffice e painel empresarial, inclusive menu recolhido e drawer móvel.
+
+## Editor e prévia responsiva
+
+`EditorSection` agrupa campos sem cartões aninhados. `ViewportPreview` mantém um iframe sem scripts com viewport real, escala calculada por ResizeObserver e limite de altura; desktop, tablet e celular não dependem da largura do painel administrativo. O documento recebe apenas estilos e componentes React compartilhados; navegação externa é bloqueada na prévia. Os controles, cores e dados do editor permanecem separados da apresentação personalizada. A demonstração real está em Widgets.

@@ -243,6 +243,16 @@ def main():
         unreserved='/object/company-branding/'+own_context['company_id']+'/'+str(uuid.uuid4())+'.png'
         assert binary_request(storage,unreserved,png,own_token)[0] in (400,403),'Native unreserved upload accepted'
         assert request(rest,'/rpc/register_company_brand_asset',{'asset_id':asset,'file_name':'fixture.png','file_size':len(png),'file_sha256':hashlib.sha256(png).hexdigest()},own_token)[0]==200,'Native asset registration failed'
+        # Only this disposable provider fixture opts in to anonymous published-image reads.
+        anonymous=jwt(signing,'anon')
+        assert binary_request(storage,path,None,anonymous)[0] in (400,403,404),'Draft image exposed anonymously'
+        portal_fixture={'assets':{'logoMain':{'id':asset,'url':'/api/company/branding/assets/'+asset}},'banners':[],'portal':{'headline':'Native published fixture'},'backgrounds':{},'theme':{},'palette':{},'typography':{},'structure':{},'displayName':'Native fixture','shortName':'Native','slogan':''}
+        fixture_json=json.dumps(portal_fixture).replace("'","''")
+        sql("insert into public.company_branding(company_id,published) values('"+own_context['company_id']+"','"+fixture_json+"'::jsonb) on conflict(company_id) do update set published=excluded.published;")
+        sql("update public.company_portals set is_public=true where company_id='"+own_context['company_id']+"';")
+        assert binary_request(storage,path,None,anonymous)==(200,png),'Native public projection image read failed'
+        sql("update public.company_portals set is_public=false where company_id='"+own_context['company_id']+"';")
+        assert binary_request(storage,path,None,anonymous)[0] in (400,403,404),'Native unpublication did not revoke image access'
         html_asset=str(uuid.uuid4());html_path='/object/company-branding/'+own_context['company_id']+'/'+html_asset+'.png'
         assert request(rest,'/rpc/reserve_company_image',{'asset_id':html_asset},own_token)[0]==200
         assert binary_request(storage,html_path,b'<html>invalid</html>',own_token,'text/html')[0] in (400,403,415),'Native executable type accepted'
@@ -432,7 +442,7 @@ def main():
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
             'password_only_mfa_replacement_denied':True,'native_admin_factor_recovery':True,
-            'native_storage_upload':True,'native_storage_tenant_isolation':True,'native_storage_requires_reservation':True,'native_asset_registration':True,'native_storage_type_restriction':True,'native_storage_size_limit':True,
+            'native_public_image_projection':True,'native_unpublication_revokes_image':True,'native_storage_upload':True,'native_storage_tenant_isolation':True,'native_storage_requires_reservation':True,'native_asset_registration':True,'native_storage_type_restriction':True,'native_storage_size_limit':True,
             'inactive_member_denied':True,'suspended_company_denied':True,'native_logout_denied_old_jwt':True,
             'gateway_native_forwarding':True,'gateway_shared_rate_state':True,'gateway_rate_state_survives_restart':True,
             'validated_signup_intent':True,'metadata_cannot_grant_platform_role':True,'raw_signup_capability_not_persisted':True,
