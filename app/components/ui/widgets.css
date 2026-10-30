@@ -9,7 +9,7 @@
 .jf-widget-dialog[open] { display:flex; flex-direction:column; animation:jf-widget-enter 180ms ease-out; }
 .jf-widget-dialog::backdrop { background:rgb(0 0 0 / .48); }
 .jf-widget-dialog--modal { position:fixed; inset:0; margin:auto; }
-.jf-widget-dialog--drawer { position:fixed; inset:0 0 0 auto; margin:0; height:var(--widget-viewport,100dvh); width:min(440px,100vw); border-width:0 0 0 1px; border-radius:0; overflow:hidden; }
+.jf-widget-dialog--drawer { position:fixed; inset:0 0 0 auto; margin:0; height:var(--widget-viewport,100dvh); width:min(440px,100%); border-width:0 0 0 1px; border-radius:0; overflow:hidden; }
 .jf-widget-dialog--drawer .jf-widget-dialog__body { flex:1; }
 .jf-widget-dialog--drawer .jf-widget-dialog__header { padding-top:max(var(--jf-ui-space-6),env(safe-area-inset-top)); }
 .jf-widget-dialog--drawer .jf-widget-dialog__footer { padding-bottom:max(var(--jf-ui-space-5),env(safe-area-inset-bottom)); }

@@ -32,3 +32,7 @@ Contas empresariais/administrativas existentes podem consultar os próprios aler
 - BFF com provedor simulado: origem, campos, autorização, conflitos e contratos explícitos.
 - DS Widgets demonstra o mesmo menu em mock sem chamadas de autenticação.
 - Resultados do CI, deploy, backup e limites da validação visual são registrados no relatório da entrega. Live não é alterado.
+
+## Conferência responsiva final
+
+O painel lateral compartilhado mede a largura percentual disponível, sem incluir a faixa reservada à barra de rolagem. Em viewport390, a área útil380 recebe painel380 com esquerda0 (antes:390 e esquerda−10). Panorama usa cartão480, título até40 e grupo flex de ações; na fixture desktop o cartão passou a385px de altura, com foto livre à esquerda. No celular os controles quebram em linhas dentro do cartão, sem rolagem horizontal. Evidências locais são identificadas como mock; a fixture visual temporária não integra o aplicativo publicado.
