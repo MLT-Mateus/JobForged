@@ -4,10 +4,13 @@ services:
     env_file:
       - ${JBFD_ENV_FILE:?Defina o caminho absoluto do arquivo de ambiente}
     environment:
+      JBFD_RETAINED_ASSETS_DIR: /var/jbfd-client-assets
       NODE_ENV: production
       PORT: "3000"
       HOST: 0.0.0.0
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:?Defina APP_PUBLIC_URL}
+    volumes:
+      - client-assets:/var/jbfd-client-assets:ro
     labels:
       - traefik.enable=true
       - traefik.docker.network=${JBFD_DOCKER_NETWORK:?Defina a rede do Traefik}
@@ -59,3 +62,7 @@ networks:
   traefik:
     name: ${JBFD_DOCKER_NETWORK:?Defina a rede do Traefik}
     external: true
+
+volumes:
+  client-assets:
+    name: jbfd-${APP_ENV}-client-assets

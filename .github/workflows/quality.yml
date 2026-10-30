@@ -105,7 +105,7 @@ jobs:
 
       - name: Validar proteção de publicação sem Auth
         run: |
-          bash -n scripts/deploy-vps.sh scripts/supabase-migrate.sh scripts/jbfd-deploy-live-root.sh scripts/jbfd-deploy-test-root.sh scripts/jbfd-supabase-smtp-test-root.sh
+          bash -n scripts/retain-client-assets.sh scripts/deploy-vps.sh scripts/supabase-migrate.sh scripts/jbfd-deploy-live-root.sh scripts/jbfd-deploy-test-root.sh scripts/jbfd-supabase-smtp-test-root.sh
           node --test tests/auth-readiness.test.mjs tests/live-deploy-stdin.test.mjs tests/toast-channel.test.mjs
 
       - name: Testar e validar a publicação
@@ -137,8 +137,17 @@ jobs:
             JBFD_ENV_FILE="$env_file" docker compose --project-name "jbfd-$environment" --env-file "$env_file" -f deploy/compose.yml config --quiet
             JBFD_ENV_FILE="$env_file" docker compose --project-name "jbfd-$environment" --env-file "$env_file" -f deploy/compose.yml up -d --wait --wait-timeout 120
           done
+      - name: Preparar chunks históricos sintéticos nos volumes isolados de CI
+        shell: bash
+        run: |
+          for environment in test live; do
+            docker run --rm --network none --entrypoint node --user 0 --mount "type=volume,src=jbfd-$environment-client-assets,dst=/retained" jbfd:ci -e '
+              const fs=require("node:fs");const folder="/retained/"+"a".repeat(40);
+              fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(folder+"/.complete","1");
+              fs.writeFileSync(folder+"/historical-AbCd1234.js","export const historical=true;");'
+          done
       - name: Validar todas as páginas e assets
-        run: node scripts/test-node-runtime.mjs http://127.0.0.1:3101 http://127.0.0.1:3100
+        run: JBFD_TEST_RETAINED_ASSETS=1 node scripts/test-node-runtime.mjs http://127.0.0.1:3101 http://127.0.0.1:3100
       - name: Diagnóstico e limpeza
         if: always()
         shell: bash
