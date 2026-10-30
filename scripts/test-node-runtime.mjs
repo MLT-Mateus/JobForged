@@ -68,6 +68,15 @@ try {
     targets.push({ base, environment });
   }
   await Promise.all(targets.map(({ base, environment }) => waitForHealth(base, environment)));
+  if(process.env.JBFD_TEST_RETAINED_ASSETS==='1'){
+    for(const {base} of targets){
+      const asset=await fetch(`${base}/assets/historical-AbCd1234.js`);
+      assert.equal(asset.status,200);assert.equal(await asset.text(),'export const historical=true;');
+      assert.equal(asset.headers.get('x-jbfd-asset-source'),'retained');
+      assert.match(asset.headers.get('cache-control'),/immutable/);
+      for(const name of ['missing-AbCd1234.js','debug-AbCd1234.js.map','secret-AbCd1234.env'])assert.equal((await fetch(`${base}/assets/${name}`)).status,404);
+    }
+  }
   const routes = [...new Set([
     ...await pages(),
     "/design-system/fundamentos",
