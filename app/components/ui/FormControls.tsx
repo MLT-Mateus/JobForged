@@ -39,6 +39,7 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import {fieldPlaceholder} from "./field-copy";
+import {useFieldError} from "./FieldFeedback";
 import {FocusPopover} from "./Widgets";
 import {sanitizeRichText,renderRichText,richTextSource} from "./rich-content";
 import { useStatusSoundForMessage } from "./status-sound";
@@ -70,7 +71,7 @@ type TextFieldProps = FieldBaseProps &
 export function TextField({
   label,
   helpText,
-  error,
+  error: suppliedError,
   requiredLabel,
   icon: Icon,
   labelAdornment,
@@ -81,6 +82,8 @@ export function TextField({
   type = "text",
   ...inputProps
 }: TextFieldProps) {
+  const contextualError=useFieldError(inputProps.name);
+  const error=suppliedError??contextualError;
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const messageId = `${inputId}-message`;
@@ -1060,6 +1063,7 @@ export function RadioField({ label, ...inputProps }: ChoiceFieldProps) {
 }
 
 type RichTextFieldProps = {
+  name?:string;error?:string;required?:boolean;
   maxLength?:number;
   label: string;
   placeholder?: string;
@@ -1070,7 +1074,8 @@ type RichTextFieldProps = {
   onChange?: (html: string) => void;
 };
 
-export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escreva o texto...", initialHtml = "", value, textOnly=true, resetKey, onChange,maxLength=4000 }: RichTextFieldProps) {
+export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escreva o texto...", initialHtml = "", value, textOnly=true, resetKey, onChange,maxLength=4000,name,error:suppliedError,required }: RichTextFieldProps) {
+  const contextualError=useFieldError(name);const error=suppliedError??contextualError;
   const placeholder=fieldPlaceholder({label,placeholder:suppliedPlaceholder,multiline:true});
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1140,7 +1145,7 @@ export function RichTextField({ label, placeholder: suppliedPlaceholder = "Escre
     };
     reader.readAsDataURL(file);
   }
-  if(textOnly)return <div className="jf-rich-text-field"><label className="jf-field__label" htmlFor={`${errorId}-source`}><b>{label}</b></label><div className="jf-rich-text"><div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto"><button type="button" aria-label="Negrito" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('b')}><Bold size={16}/></button><button type="button" aria-label="Itálico" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('i')}><Italic size={16}/></button><button type="button" aria-label="Sublinhado" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('u')}><Underline size={16}/></button>{parameterHelp}</div><textarea ref={sourceRef} id={`${errorId}-source`} className="jf-rich-text__source" maxLength={maxLength} aria-label={label} placeholder={placeholder} value={source} onKeyDown={e=>{if(e.nativeEvent.isComposing||e.altKey||e.shiftKey||!(e.ctrlKey||e.metaKey))return;const tag=({b:'b',i:'i',u:'u'} as Record<string,string>)[e.key.toLowerCase()];if(tag){e.preventDefault();sourceFormat(tag)}}} onChange={e=>changeSource(e.target.value)} rows={4}/></div></div>;
+  if(textOnly)return <div className={`jf-rich-text-field jf-field ${error?"is-error":""}`}><label className="jf-field__label" htmlFor={`${errorId}-source`}><b>{label}{required&&<> <RequiredMarker/></>}</b></label><div className="jf-rich-text"><div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto"><button type="button" aria-label="Negrito" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('b')}><Bold size={16}/></button><button type="button" aria-label="Itálico" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('i')}><Italic size={16}/></button><button type="button" aria-label="Sublinhado" onMouseDown={e=>e.preventDefault()} onClick={()=>sourceFormat('u')}><Underline size={16}/></button>{parameterHelp}</div><textarea name={name} required={required} aria-invalid={Boolean(error)} aria-describedby={error?`${errorId}-feedback`:undefined} ref={sourceRef} id={`${errorId}-source`} className="jf-rich-text__source" maxLength={maxLength} aria-label={label} placeholder={placeholder} value={source} onKeyDown={e=>{if(e.nativeEvent.isComposing||e.altKey||e.shiftKey||!(e.ctrlKey||e.metaKey))return;const tag=({b:'b',i:'i',u:'u'} as Record<string,string>)[e.key.toLowerCase()];if(tag){e.preventDefault();sourceFormat(tag)}}} onChange={e=>changeSource(e.target.value)} rows={4}/></div>{error&&<small id={`${errorId}-feedback`}>{error}</small>}</div>;
   return <div className="jf-rich-text-field"><span className="jf-field__label"><b>{label}</b></span>
     <div className="jf-rich-text">
       <div className="jf-rich-text__toolbar" role="toolbar" aria-label="Formatação de texto">

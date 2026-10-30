@@ -49,3 +49,12 @@ test('chrome, navigation and reset defaults are bounded and theme specific',asyn
  c.portal.chrome.light.headerText=c.portal.chrome.light.headerBackground;assert.match(validateBranding(brandContent(c)),/contraste/);
  const f=portalFooter(brandingDefaults('fixture','Fixture'));assert.ok(f.description.length>20);assert.ok(f.links.every(link=>link.href.startsWith('/')||link.href.startsWith('https://')));assert.equal(f.email,'');assert.equal(f.phone,'');
 });
+
+import {brandingIssue} from '../app/components/personalization/branding-model.ts';
+test('validation identifies exact controls in hidden groups and rich content',async()=>{
+ const {portalChrome}=await import('../app/components/personalization/portal-chrome.ts');
+ const d=brandingDefaults('fixture','Example');d.shortName='';assert.equal(brandingIssue(brandContent(d)).path,'shortName');
+ d.shortName='Example';d.portal.headline='x'.repeat(91);assert.equal(brandingIssue(brandContent(d)).path,'portal.headline');
+ d.portal.headline='Example';d.portal.navigation=[{label:'Broken',href:'javascript:alert(1)'}];assert.equal(brandingIssue(brandContent(d)).path,'portal.navigation.0.href');
+ d.portal.navigation=[];d.portal.chrome=portalChrome(d);d.portal.chrome.light.headerText=d.portal.chrome.light.headerBackground;assert.equal(brandingIssue(brandContent(d)).path,'portal.chrome.light.headerText');
+});

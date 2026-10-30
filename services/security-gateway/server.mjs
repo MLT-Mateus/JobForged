@@ -3,7 +3,7 @@ import { lookup } from 'node:dns/promises';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import pg from 'pg';
-import { clientAddress, limitsFor,sessionClaimHints,policyPath,validStaticPng,passwordRules,privilegedCredential } from './policy.mjs';
+import { clientAddress, limitsFor,sessionClaimHints,policyPath,validStaticPng,passwordRules,privilegedCredential,anonymousReadHint } from './policy.mjs';
 
 const secret=process.env.RATE_SCOPE_SECRET;
 const environment=process.env.APP_ENV;
@@ -55,7 +55,9 @@ const server=http.createServer(async(req,res)=>{
     !/^\/storage\/v1\/object\/(?:authenticated\/)?company-branding\/(?:platform|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.png$/.test(canonicalPath)){
    reply(res,403,'Storage operation unavailable');return;
   }
-  if(!application&&canonicalPath.startsWith('/storage/v1/')&&!sessionClaimHints(req.headers.authorization)){
+  // Anonymous GETs still require an upstream verified anon JWT and published-image RLS.
+  const publicImageRead=anonymousReadHint(req.headers.authorization)&&req.method==='GET'&&/^\/storage\/v1\/object\/company-branding\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.png$/.test(canonicalPath);
+  if(!application&&canonicalPath.startsWith('/storage/v1/')&&!publicImageRead&&!sessionClaimHints(req.headers.authorization)){
    reply(res,401,'Session unavailable');return;
   }
   const consumed=new Set();

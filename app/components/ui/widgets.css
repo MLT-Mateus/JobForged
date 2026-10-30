@@ -22,7 +22,7 @@
 .jf-widget-dialog__footer { display:flex; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; gap:var(--jf-ui-space-3); padding:var(--jf-ui-space-5) var(--jf-ui-space-6); border-top:1px solid var(--jf-ui-border); }
 .jf-sheet-handle { width:40px; height:4px; border-radius:4px; margin:12px auto 0; background:var(--jf-ui-border-strong); }
 .jf-focus-group { position:relative; width:fit-content; max-width:100%; }
-.jf-focus-group__panel { position:absolute; z-index:35; top:calc(100% + 8px); left:0; display:grid; gap:var(--jf-ui-space-4); width:min(300px,calc(100vw - 80px)); padding:var(--jf-ui-space-5); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface-raised); box-shadow:var(--jf-ui-shadow); color:var(--jf-ui-text); }
+.jf-focus-group__panel { position:fixed; inset:auto; margin:0; overflow:auto; overscroll-behavior:contain; z-index:35; display:grid; gap:var(--jf-ui-space-4); width:min(300px,calc(100vw - 80px)); padding:var(--jf-ui-space-5); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface-raised); box-shadow:var(--jf-ui-shadow); color:var(--jf-ui-text); }
 @keyframes jf-widget-enter { from {opacity:0;transform:translateY(8px)} to {opacity:1;transform:none} }
 @media(prefers-reduced-motion:reduce) { .jf-widget-dialog[open] {animation:none} }
 /* Mobile overlays keep their own scroll and leave browser safe areas free. */
@@ -64,7 +64,7 @@
 .jf-editor-accordion__body{display:grid;gap:var(--jf-ui-space-5);padding:0 var(--jf-ui-space-5) var(--jf-ui-space-5);min-width:0}
 @media(max-width:1000px){.jf-editor-workbench{grid-template-columns:1fr}.jf-editor-workbench__preview{position:static}}
 
-.jf-focus-group--end>.jf-focus-group__panel{left:auto;right:0}
+.jf-focus-group__panel::backdrop{background:transparent;pointer-events:none}
 
 .jf-editor-section{min-width:0;display:grid;gap:var(--jf-ui-space-4)}
 .jf-editor-section+ .jf-editor-section{border-top:1px solid var(--jf-ui-border);padding-top:var(--jf-ui-space-5);margin-top:var(--jf-ui-space-2)}

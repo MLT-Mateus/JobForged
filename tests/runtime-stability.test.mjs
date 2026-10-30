@@ -26,3 +26,11 @@ test('error categories expose no raw error or credential information',()=>{
  for(const message of ['Failed to fetch dynamically imported module: https://example.invalid/private?token=secret','Loading chunk 19 failed','Importing a module script failed'])assert.equal(clientFailureKind(new Error(message)),'outdated-assets');
  assert.equal(clientFailureKind(new Error('private form data')),'render-failed');assert.equal(clientFailureKind(null),'render-failed');
 });
+
+import {popoverPosition} from '../shared/popover-position.mjs';
+test('popover prioritizes below, flips above and constrains the visual viewport',()=>{
+ const anchor={left:280,right:310,top:100,bottom:130};
+ assert.equal(popoverPosition(anchor,200,{width:390,height:800}).side,'bottom');
+ const above=popoverPosition({...anchor,top:600,bottom:630},200,{width:390,height:700});assert.equal(above.side,'top');assert.ok(above.top>=12);assert.ok(above.left+above.width<=378);
+ const small=popoverPosition(anchor,500,{width:320,height:280,top:10,left:0});assert.ok(small.maxHeight<500);assert.ok(small.left>=12);assert.ok(small.top+Math.min(500,small.maxHeight)<=278);
+});

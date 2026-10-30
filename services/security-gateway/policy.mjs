@@ -91,3 +91,6 @@ export function validStaticPng(bytes){
   return false;
  }catch{return false;}
 }
+
+// Routing hint only. The Storage provider verifies the JWT and enforces RLS.
+export function anonymousReadHint(header){try{const parts=String(header||'').replace(/^Bearer /i,'').split('.');return parts.length===3&&parts.every(Boolean)&&JSON.parse(Buffer.from(parts[1],'base64url').toString('utf8')).role==='anon'}catch{return false}}
