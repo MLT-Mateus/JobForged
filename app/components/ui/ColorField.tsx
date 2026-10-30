@@ -15,7 +15,7 @@ function toHex(h:number,s:number,v:number){
  return `#${f(5)}${f(3)}${f(1)}`.toUpperCase();
 }
 const clamp=(n:number)=>Math.max(0,Math.min(100,n));
-export function ColorField({label,value,previous,onChange}:{label:string;value:string;previous?:string;onChange:(value:string)=>void}){
+export function ColorField({label,value,previous,onChange,name}:{name?:string;label:string;value:string;previous?:string;onChange:(value:string)=>void}){
  const valid=validHex(value),[lastValid,setLastValid]=useState(valid?value:'#20B2AA');
  const commit=(next:string)=>{if(validHex(next))setLastValid(next);else if(valid)setLastValid(value);onChange(next)};
  const color=valid?value:lastValid;
@@ -35,5 +35,5 @@ export function ColorField({label,value,previous,onChange}:{label:string;value:s
   <label className="jf-color-hue"><span>Matiz</span><input type="range" min={0} max={359} step={1} value={Math.round(hsv[0])} aria-label={`Matiz de ${label}`} style={{'--jf-color-hue':`hsl(${hsv[0]} 100% 50%)`} as CSSProperties} onChange={e=>select([Number(e.target.value),hsv[1],hsv[2]])}/></label>
   <div className="jf-color-selection"><span style={{background:color}} aria-hidden="true"/><output aria-label="Cor selecionada">{color.toUpperCase()}</output></div>
  </FocusPopover>;
- return <div className="jf-color-field"><TextField label={label} value={value} placeholder="Digite a cor..." maxLength={7} spellCheck={false} autoComplete="off" onChange={e=>commit(e.target.value.toUpperCase())} error={valid?undefined:"Use seis dígitos no formato #RRGGBB."} startAdornment={panel} endAdornment={<>{previous!==undefined&&<ActionButton type="button" variant="quiet" className="jf-input-action" disabled={value.toUpperCase()===previous.toUpperCase()} icon={<RotateCcw/>} onClick={()=>commit(previous)} aria-label={`Restaurar ${label}`}/>}</>}/></div>;
+ return <div className="jf-color-field"><TextField name={name} label={label} value={value} placeholder="Digite a cor..." maxLength={7} spellCheck={false} autoComplete="off" onChange={e=>commit(e.target.value.toUpperCase())} error={valid?undefined:"Use seis dígitos no formato #RRGGBB."} startAdornment={panel} endAdornment={<>{previous!==undefined&&<ActionButton type="button" variant="quiet" className="jf-input-action" disabled={value.toUpperCase()===previous.toUpperCase()} icon={<RotateCcw/>} onClick={()=>commit(previous)} aria-label={`Restaurar ${label}`}/>}</>}/></div>;
 }

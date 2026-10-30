@@ -194,9 +194,11 @@ def main():
         campaign=sql("insert into public.platform_communications(title,message,audience,channel,state,created_by,dispatched_at) values('Fixture','Private candidate message','candidates','inapp','dispatched','"+first+"',now()) returning id;").splitlines()[0]
         sql("insert into public.platform_communication_deliveries(communication_id,user_id,email_state) values('"+campaign+"','"+candidate_id+"','none'),('"+campaign+"','"+first+"','none');")
         status,inbox=request(rest,'/rpc/candidate_account',{},candidate_token)
-        assert status==200 and len(inbox['items'])==1,'Candidate alert isolation failed'
+        assert status==200 and len(inbox['items'])==1 and inbox['unread']==1,'Candidate alert isolation/count failed'
+        assert request(rest,'/rpc/candidate_account',{'page_number':2},candidate_token)[1]['unread']==1,'Unread count depends on current page'
         delivery=inbox['items'][0]['id']
         assert request(rest,'/rpc/candidate_account',{'operation':'read-alert','delivery_id':delivery},candidate_token)[1]['items'][0]['read_at'],'Candidate read marker failed'
+        assert request(rest,'/rpc/candidate_account',{},candidate_token)[1]['unread']==0,'Read marker did not update unread count'
         foreign=sql("select id from public.platform_communication_deliveries where communication_id='"+campaign+"' and user_id='"+first+"';")
         request(rest,'/rpc/candidate_account',{'operation':'read-alert','delivery_id':foreign},candidate_token)
         assert sql("select read_at is null from public.platform_communication_deliveries where id='"+foreign+"';")=='t','Candidate changed another user alert'
@@ -393,6 +395,21 @@ def main():
             else:raise AssertionError('Isolated security gateway readiness failed')
             gateways.append((name,base))
         assert request(gateways[0][1],'/auth/v1/health')[0]==200,'Gateway Auth forwarding failed'
+        # Exercise the actual public ingress, not only the native Storage provider.
+        public_path='/storage/v1'+path
+        assert binary_request(gateways[0][1],public_path,None,anonymous)[0] in (400,403,404),'Gateway exposed unpublished image'
+        sql("update public.company_portals set is_public=true where company_id='"+own_context['company_id']+"';")
+        assert binary_request(gateways[0][1],public_path,None,anonymous)==(200,png),'Gateway blocked published image'
+        forged=anonymous.split('.');forged[2]=('A' if forged[2][0]!='A' else 'B')+forged[2][1:]
+        assert binary_request(gateways[0][1],public_path,None,'.'.join(forged))[0] in (400,401,403),'Unsigned anonymous hint authorized access'
+        assert binary_request(gateways[0][1],'/storage/v1/object/company-branding/'+worker_name,None,anonymous)[0] in (400,403,404),'Gateway exposed another tenant draft'
+        assert binary_request(gateways[0][1],public_path,png,anonymous)[0]==401,'Anonymous image upload accepted'
+        assert binary_request(gateways[0][1],'/storage/v1/object/company-branding/platform/'+asset+'.png',None,anonymous)[0]==401,'Private platform image accepted anonymously'
+        sql("update public.companies set operational_status='suspended' where id='"+own_context['company_id']+"';")
+        assert binary_request(gateways[0][1],public_path,None,anonymous)[0] in (400,403,404),'Suspended company image exposed'
+        sql("update public.companies set operational_status='active' where id='"+own_context['company_id']+"';update public.company_portals set is_public=false where company_id='"+own_context['company_id']+"';")
+        assert binary_request(gateways[0][1],public_path,None,anonymous)[0] in (400,403,404),'Gateway retained unpublished image'
+
         assert binary_request(gateways[0][1],'/storage/v1/object/company-branding/'+orphan_name,None,maintenance)[0]==401,'Private maintenance capability accepted publicly'
         assert request(gateways[0][1],'/auth/v1/signup',{'email':'unicode-'+suffix,'password':'Ab1!ééé'})[0]==422,'Gateway accepted fewer than eight Unicode characters'
         assert request(gateways[0][1],'/auth/v1/signup',{'email':'long-'+suffix,'password':'Ab1!'+'é'*35})[0]==422,'Gateway accepted more than 72 UTF-8 bytes'

@@ -40,3 +40,6 @@ export {DisplayValue,type ValueState} from "./DisplayValue";
 export {ViewportPreview} from "./ViewportPreview";
 
 export {PreviewDock} from "./Widgets";
+
+export {NotificationTrigger} from "./NotificationTrigger";
+export {FieldFeedback,revealField} from "./FieldFeedback";

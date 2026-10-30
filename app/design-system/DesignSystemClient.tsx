@@ -3,6 +3,7 @@
 
 
 import Link from "next/link";
+import {ValidationDemo} from "./ValidationDemo";
 import { WorkspaceShell } from "../components/ui/WorkspaceShell";
 import { InlineBrandLoader } from "../components/InlineBrandLoader";
 import { WidgetsIcon } from "../components/ui/Icons";
@@ -365,6 +366,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               <ExampleCard title="Placeholder · curto e direto"><div className="ds-modern-stack"><p><strong>Verbo + dado + ...</strong><br/>Use 2–4 palavras. Prefira até 28 caracteres.</p><TextField label="Nome"/><TextField label="E-mail" type="email"/><p>Label sempre visível. Formatos e requisitos ficam na ajuda.</p></div></ExampleCard>
               <ExampleCard title="Valores · mostre o estado"><div className="ds-modern-stack"><p>Campo vazio orienta. Valor ausente informa.</p><dl className="ds-value-examples"><div><dt>Sem dado</dt><dd><DisplayValue value={null}/></dd></div><div><dt>Em carregamento</dt><dd><DisplayValue value={null} state="loading"/></dd></div><div><dt>Indisponível</dt><dd><DisplayValue value={null} state="unavailable"/></dd></div><div><dt>Zero real</dt><dd><DisplayValue value={0}/></dd></div></dl><p>Não preencha com dados fictícios.</p></div></ExampleCard>
             </div>
+            <div className="ds-form-showcase"><ExampleCard title="Validação que orienta" className="ds-form-card--wide"><ValidationDemo/></ExampleCard></div>
             <div className="ds-form-showcase ds-placeholder-guidance" aria-label="Campos obrigatórios">
               <ExampleCard title="Preenchimento obrigatório" className="ds-form-card--wide"><div className="ds-modern-stack"><p>O asterisco vermelho em negrito junto ao título indica um campo obrigatório. Campos sem asterisco são opcionais.</p><p>Mantenha a indicação no título, nunca no placeholder. Informe o que falta na validação.</p><div className="ds-modern-field-grid"><TextField label="Nome completo" required/><TextField label="Complemento"/><MultilineInput label="Motivo" required rows={3}/></div></div></ExampleCard>
             </div>

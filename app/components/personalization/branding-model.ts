@@ -49,24 +49,35 @@ export function brandingStyle(value:Customization,theme:'light'|'dark'):CSSPrope
   '--cp-header-bg':portalChrome(value)[theme].headerBackground,'--cp-header-text':portalChrome(value)[theme].headerText,'--cp-footer-bg':portalChrome(value)[theme].footerBackground,'--cp-footer-text':portalChrome(value)[theme].footerText,'--cp-primary':p.primary,'--cp-secondary':p.secondary,'--cp-accent':p.accent,'--cp-button':p.button,'--cp-button-hover':p.buttonHover,'--cp-sidebar':p.sidebar,'--cp-active':p.activeItem,'--cp-link':p.link,'--cp-bg':p.background,'--cp-surface':p.surface,'--cp-portal':p.portalBackground,'--cp-text':p.text,'--cp-overlay':String(value.backgrounds.opacity/100)} as CSSProperties;
 }
 /** Reject unknown structure and CSS/URL values before sending data to the database. */
-export function validateBranding(content:unknown):string|null {
- if(!content||typeof content!=='object'||Array.isArray(content))return 'Configuração inválida.';
+export type BrandingIssue={path:string;message:string};
+export function brandingIssue(content:unknown):BrandingIssue|null {
+ const issue=(path:string,message:string)=>({path,message});
+ if(!content||typeof content!=='object'||Array.isArray(content))return issue('displayName','Configuração inválida.');
  const c=content as ReturnType<typeof brandContent>;
  try {
-  if(!c.displayName.trim()||c.displayName.length>160||!c.shortName.trim()||c.shortName.length>24||c.slogan.length>110) return 'Revise o nome, nome curto e slogan.';
-  if(richTextPlain(c.portal.headline).length>90)return 'Use até 90 caracteres no título principal.';
-  if(c.portal.content&&Object.entries(c.portal.content).some(([key,value])=>!(key in careerCopy)||typeof value!=='string'||value.length>4000))return 'Revise os textos das seções.';
-  if(c.portal.footer){const f=c.portal.footer;if(f.links.length>6||f.links.some(link=>typeof link.label!=='string'||link.label.length>4000||!validContentLink(link.href))||!validContentLink(f.phoneUrl)||f.email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email))return 'Revise os contatos e links do rodapé.';}
-  if(c.portal.navigation!==undefined&&(!Array.isArray(c.portal.navigation)||c.portal.navigation.length>5||c.portal.navigation.some(link=>typeof link.label!=='string'||!link.label.trim()||link.label.length>60||typeof link.href!=='string'||link.href.length>2048||link.href!==''&&!validPortalMenuLink(link.href))))return 'Revise os links do cabeçalho: até 5 links, nomes de até 60 caracteres e endereços HTTPS.';
-  if(c.portal.chrome!==undefined){const chrome=c.portal.chrome;if(Object.keys(chrome).sort().join(',')!=='dark,light')return 'Revise as cores do cabeçalho e rodapé.';for(const mode of ['light','dark'] as const){const row=chrome[mode];if(!row||Object.keys(row).sort().join(',')!=='footerBackground,footerText,headerBackground,headerText'||Object.values(row).some(color=>typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color)))return 'Revise as cores do cabeçalho e rodapé.';if(contrast(row.headerBackground,row.headerText)<4.5||contrast(row.footerBackground,row.footerText)<4.5)return 'Ajuste o contraste do cabeçalho e rodapé: pelo menos 4,5:1.'}}
-  if(c.portal.presentation!==undefined&&!validPortalPresentation(c.portal.presentation))return 'Revise a composição da página e a descrição da imagem.';
-  if(c.portal.layout!==undefined&&!['classico','equipe','panorama','vagas','essencial'].includes(c.portal.layout))return 'Escolha um template válido.';
-  if(!fontPairs.some(p=>p.id===c.typography.fontPair))return 'Escolha um dos quatro pares tipográficos aprovados.';
-  for(const palette of [c.palette,c.theme.light,c.theme.dark])for(const color of Object.values(palette))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return 'Use cores no formato #RRGGBB.';
-  for(const mode of ['light','dark'] as const){const p=paletteFor({...c} as Customization,mode);if(['surface','background','sidebar','activeItem','portalBackground'].some(field=>contrast(p.text,p[field as keyof Palette])<4.5||contrast(p.link,p[field as keyof Palette])<4.5))return `Ajuste o contraste do tema ${mode==='light'?'claro':'escuro'}. Texto e links precisam de pelo menos 4,5:1 em todas as superfícies. Use texto e links mais escuros no tema claro e mais claros no escuro, ou restaure as paletas padrão.`;}
+  for(const [key,limit] of [['displayName',160],['shortName',24],['slogan',110]] as const)if((key!=='slogan'&&!c[key].trim())||c[key].length>limit)return issue(key,'Revise o nome, nome curto e slogan.');
+  if(richTextPlain(c.portal.headline).length>90)return issue('portal.headline','Use até 90 caracteres no título principal.');
+  if(c.portal.content)for(const [key,value] of Object.entries(c.portal.content))if(!(key in careerCopy)||typeof value!=='string'||value.length>4000)return issue('portal.content.'+key,'Revise os textos das seções.');
+  for(const key of ['socialLinkedin','socialInstagram'] as const)if(c.portal[key]&&!safeBrandingLink(c.portal[key]))return issue(`portal.${key}`,'Use um endereço HTTPS válido.');
+  for(let i=0;i<c.banners.length;i++)if(c.banners[i].link&&!validContentLink(c.banners[i].link))return issue(`banners.${i}.link`,'Use um endereço HTTPS ou um caminho interno.');
+  if(c.portal.footer){const f=c.portal.footer;
+   if(f.links.length>6)return issue('portal.footer.links.0.label','Use até seis links no rodapé.');
+   for(let i=0;i<f.links.length;i++){const link=f.links[i];if(typeof link.label!=='string'||!richTextPlain(link.label).trim()||richTextPlain(link.label).length>60)return issue(`portal.footer.links.${i}.label`,'Informe um nome de até 60 caracteres.');if(!validContentLink(link.href))return issue(`portal.footer.links.${i}.href`,'Use um endereço HTTPS ou um caminho interno.');}
+   if(!validContentLink(f.phoneUrl))return issue('portal.footer.phoneUrl','Revise o link de contato.');
+   if(f.email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email))return issue('portal.footer.email','Revise o e-mail de contato.');
+  }
+  if(c.portal.navigation!==undefined){if(!Array.isArray(c.portal.navigation)||c.portal.navigation.length>5)return issue('portal.navigation.0.label','Use até cinco links no cabeçalho.');for(let i=0;i<c.portal.navigation.length;i++){const link=c.portal.navigation[i];if(typeof link.label!=='string'||!link.label.trim()||link.label.length>60)return issue(`portal.navigation.${i}.label`,'Informe um nome de até 60 caracteres.');if(typeof link.href!=='string'||link.href.length>2048||link.href!==''&&!validPortalMenuLink(link.href))return issue(`portal.navigation.${i}.href`,'Use HTTPS ou um caminho interno válido no cabeçalho.');}}
+  if(c.portal.chrome!==undefined){const chrome=c.portal.chrome;if(Object.keys(chrome).sort().join(',')!=='dark,light')return issue('portal.chrome.light.headerBackground','Revise as cores do cabeçalho e rodapé.');for(const mode of ['light','dark'] as const){const row=chrome[mode];if(!row||Object.keys(row).sort().join(',')!=='footerBackground,footerText,headerBackground,headerText')return issue(`portal.chrome.${mode}.headerBackground`,'Revise as cores do cabeçalho e rodapé.');for(const [key,color] of Object.entries(row))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return issue(`portal.chrome.${mode}.${key}`,'Use cores no formato #RRGGBB.');if(contrast(row.headerBackground,row.headerText)<4.5)return issue(`portal.chrome.${mode}.headerText`,'Ajuste o contraste do cabeçalho e rodapé: pelo menos 4,5:1.');if(contrast(row.footerBackground,row.footerText)<4.5)return issue(`portal.chrome.${mode}.footerText`,'Ajuste o contraste do cabeçalho e rodapé: pelo menos 4,5:1.');}}
+  if(c.portal.presentation!==undefined&&!validPortalPresentation(c.portal.presentation))return issue('portal.presentation.imageAlt','Revise a composição da página e a descrição da imagem.');
+  if(c.portal.layout!==undefined&&!['classico','equipe','panorama','vagas','essencial'].includes(c.portal.layout))return issue('portal.layout','Escolha um template válido.');
+  if(!fontPairs.some(p=>p.id===c.typography.fontPair))return issue('typography.fontPair','Escolha um dos quatro pares tipográficos aprovados.');
+  for(const [prefix,palette] of [['palette',c.palette],['theme.light',c.theme.light],['theme.dark',c.theme.dark]] as const)for(const [key,color] of Object.entries(palette))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return issue(`${prefix}.${key}`,'Use cores no formato #RRGGBB.');
+  for(const mode of ['light','dark'] as const){const p=paletteFor({...c} as Customization,mode);for(const surface of ['surface','background','sidebar','activeItem','portalBackground'] as const)for(const key of ['text','link'] as const)if(contrast(p[key],p[surface])<4.5)return issue(mode==='dark'?`theme.dark.${key}`:key==='text'?'theme.light.text':'palette.link',`Ajuste o contraste do tema ${mode==='light'?'claro':'escuro'}. Texto e links precisam de pelo menos 4,5:1 em todas as superfícies. Use texto e links mais escuros no tema claro e mais claros no escuro, ou restaure as paletas padrão.`);}
   return null;
- }catch{return 'Revise os campos da identidade visual.';}
+ }catch{return issue('displayName','Revise os campos da identidade visual.');}
 }
+export function validateBranding(content:unknown):string|null{return brandingIssue(content)?.message??null}
+
 export {lightPalette,darkPalette};
 
 function validContentLink(value:string){if(value===''||/^\/(?!\/)[a-zA-Z0-9/_#?=.-]*$/.test(value))return true;try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password}catch{return false}}
