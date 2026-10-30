@@ -13,7 +13,7 @@ Decisão atual do produto (29/10/2026): cada empresa ativa tem `/<slug>`; salvar
 
 ## Persistência e segurança
 
-Migration0033 substitui as operações de branding por gravação pública atômica com histórico, auditoria, papel empresarial e versão esperada. Mantém colunas e assinaturas legadas para compatibilidade; operações save/publish/reset/restore gravam a mesma configuração corrente. Discard é local/no-op no contrato legado. Unpublish é recusado. Configurações salvas anteriormente são adotadas mantendo histórico e autor. Empresas sem configuração mostram o padrão público, usando apenas nome/slug na projeção inicial.
+Migration0033 substitui as operações de branding por gravação pública atômica com histórico, auditoria, papel empresarial e versão esperada. Mantém colunas e assinaturas legadas para compatibilidade; operações save_public/publish/reset_public/restore_public gravam a mesma configuração corrente. Discard é local/no-op no contrato legado. Unpublish é recusado. Configurações salvas anteriormente são adotadas mantendo histórico e autor. Empresas sem configuração mostram o padrão público, usando apenas nome/slug na projeção inicial.
 
 Controle de concorrência de aplicação usa PT409: evita que o PostgREST trate um conflito previsível como falha SQL serializável e repita a chamada. APIs aceitam também 40001 por compatibilidade. Suspensão continua bloqueando página e imagens. Arquivos públicos são apenas os referenciados na projeção explícita; bucket privado, nomes originais, histórico, autores e fundos internos permanecem protegidos. Nenhum service_role no aplicativo.
 
@@ -32,3 +32,9 @@ Contas empresariais/administrativas existentes podem consultar os próprios aler
 - BFF com provedor simulado: origem, campos, autorização, conflitos e contratos explícitos.
 - DS Widgets demonstra o mesmo menu em mock sem chamadas de autenticação.
 - Resultados do CI, deploy, backup e limites da validação visual são registrados no relatório da entrega. Live não é alterado.
+
+## Conferência responsiva final
+
+O painel lateral compartilhado mede a largura percentual disponível, sem incluir a faixa reservada à barra de rolagem. Em viewport390, a área útil380 recebe painel380 com esquerda0 (antes:390 e esquerda−10). Panorama usa cartão480, título até40 e grupo flex de ações; na fixture desktop o cartão passou a385px de altura, com foto livre à esquerda. No celular os controles quebram em linhas dentro do cartão, sem rolagem horizontal. Evidências locais são identificadas como mock; a fixture visual temporária não integra o aplicativo publicado.
+
+Migration0035 recusa save/reset/restore de editores antigos com conflito explícito, para que uma aba ainda intitulada Salvar rascunho não publique silenciosamente. O fluxo atual envia save ao contrato de portal, que aplica save_public; Publish explícito legado permanece compatível. Colunas/assinaturas são preservadas, mas um rollback para editor antigo requer manutenção ou orientação de recarga: não oferece rascunhos privados nem deve prometer esse comportamento.

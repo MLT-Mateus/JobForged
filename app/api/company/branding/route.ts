@@ -29,6 +29,6 @@ export async function POST(request:NextRequest){
   if(isDefaultBranding({...brandingDefaults(session.company.id,row.companyName),...row.draft},row.companyName))return Response.json({version:row.version,message:'A personalização já está no padrão.'},{headers});
  }
  const result=await requestDatabase('rpc/write_company_branding',session.accessToken,{operation:body.operation,expected_version:body.version,configuration:configuration||null,history_id:body.historyId||null}).catch(()=>null);
- if(!result?.ok){const error=await result?.json().catch(()=>null) as {code?:string}|null;const conflict=(error?.code==='40001'||error?.code==='PT409');return Response.json({message:conflict?'Outra sessão alterou esta identidade. Recarregue os dados antes de salvar; seus campos foram preservados.':'Revise os campos, URLs, imagens e contraste da identidade.',conflict},{status:conflict?409:400,headers})}
+ if(!result?.ok){const error=await result?.json().catch(()=>null) as {code?:string;details?:string}|null;const conflict=(error?.code==='40001'||error?.code==='PT409');return Response.json({message:error?.details==='editor_contract_retired'?'O editor foi atualizado. Recarregue a página antes de salvar; seus campos foram preservados.':conflict?'Outra sessão alterou esta identidade. Recarregue os dados antes de salvar; seus campos foram preservados.':'Revise os campos, URLs, imagens e contraste da identidade.',conflict},{status:conflict?409:400,headers})}
  return Response.json({version:await result.json()},{headers});
 }

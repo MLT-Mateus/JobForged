@@ -31,10 +31,10 @@ do $$declare c jsonb:=current_setting('jbfd.fixture_config')::jsonb;p jsonb;v bi
  begin perform public.write_company_portal('address',(p->>'version')::bigint,'Bad/Path');raise exception 'bad slug';exception when invalid_parameter_value then null;end;
  p:=public.write_company_portal('address',(p->>'version')::bigint,'portal-fixture-published');
  begin perform public.write_company_portal('address',0,'another-address');raise exception 'portal concurrency';exception when sqlstate 'PT409' then null;end;
- v:=public.write_company_branding('save',0,c);if public.read_public_company_portal('portal-fixture-published') is null then raise exception 'saved page missing';end if;
+ v:=public.write_company_branding('save_public',0,c);if public.read_public_company_portal('portal-fixture-published') is null then raise exception 'saved page missing';end if;
  begin perform public.write_company_portal('publish',(p->>'version')::bigint,null,v,jsonb_set(c,'{portal,presentation,showImage}','"true"'));raise exception 'presentation boolean bypass';exception when invalid_parameter_value then null;end;
  p:=public.write_company_portal('publish',(p->>'version')::bigint,null,v,c);
- perform public.write_company_branding('save',(p->>'brandingVersion')::bigint,jsonb_set(c,'{portal,headline}','"SAVED_PUBLIC_MARKER"'));
+ perform public.write_company_branding('save_public',(p->>'brandingVersion')::bigint,jsonb_set(c,'{portal,headline}','"SAVED_PUBLIC_MARKER"'));
  if public.read_public_company_portal('portal-fixture-published')::text ~ 'SECRET_ORIGINAL_FILENAME|PRIVATE_PANEL_ONLY|31000000-0000-4000-8000-000000000042|publishedBy|actor_id|panelImage": "/api|loginImage": "/api' then raise exception 'public projection leak';end if;
  begin update public.company_portals set is_public=true;raise exception 'direct write bypass';exception when insufficient_privilege then null;end;
 end$$;
@@ -71,10 +71,10 @@ set local role authenticated;select pg_temp.assume_user('31000000-0000-4000-8000
 do $$declare c jsonb:=current_setting('jbfd.portal_config')::jsonb;v bigint;p jsonb;begin
  c:=jsonb_set(c,'{portal,chrome}','{"light":{"headerBackground":"#FFFFFF","headerText":"#142321","footerBackground":"#F5FAF9","footerText":"#142321"},"dark":{"headerBackground":"#0E2722","headerText":"#EFF8F6","footerBackground":"#071411","footerText":"#EFF8F6"}}');
  c:=jsonb_set(c,'{portal,navigation}','[{"label":"Cultura","href":"https://example.invalid/cultura"},{"label":"Em breve","href":""}]');
- p:=public.read_company_portal();v:=public.write_company_branding('save',(p->>'brandingVersion')::bigint,c);
- begin perform public.write_company_branding('save',v,jsonb_set(c,'{portal,chrome,light,headerText}','"#FFFFFF"'));raise exception 'chrome contrast bypass';exception when invalid_parameter_value then null;end;
- begin perform public.write_company_branding('save',v,jsonb_set(c,'{portal,navigation,0,href}','"javascript:alert(1)"'));raise exception 'navigation script bypass';exception when invalid_parameter_value then null;end;
- begin perform public.write_company_branding('save',v,jsonb_set(c,'{portal,navigation,0,label}',to_jsonb(repeat('x',61))));raise exception 'navigation length bypass';exception when invalid_parameter_value then null;end;
+ p:=public.read_company_portal();v:=public.write_company_branding('save_public',(p->>'brandingVersion')::bigint,c);
+ begin perform public.write_company_branding('save_public',v,jsonb_set(c,'{portal,chrome,light,headerText}','"#FFFFFF"'));raise exception 'chrome contrast bypass';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('save_public',v,jsonb_set(c,'{portal,navigation,0,href}','"javascript:alert(1)"'));raise exception 'navigation script bypass';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('save_public',v,jsonb_set(c,'{portal,navigation,0,label}',to_jsonb(repeat('x',61))));raise exception 'navigation length bypass';exception when invalid_parameter_value then null;end;
  p:=public.read_company_portal();p:=public.write_company_portal('publish',(p->>'version')::bigint,null,(p->>'brandingVersion')::bigint,c);
  if public.read_public_company_portal('portal-fixture-published')#>>'{configuration,portal,navigation,0,href}'<>'https://example.invalid/cultura' then raise exception 'navigation projection failed';end if;
  c:=jsonb_set(c,'{structure,showHeader}','false');p:=public.write_company_portal('publish',(p->>'version')::bigint,null,(p->>'brandingVersion')::bigint,c);
