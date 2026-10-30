@@ -17,25 +17,26 @@ select pg_temp.assume_user('38000000-0000-0000-0000-000000000001');
 do $$declare config jsonb:=current_setting('jbfd.fixture_config')::jsonb;v bigint;result jsonb;pair text;
 begin
  if public.read_company_branding()->>'companyId'<>'38000000-0000-0000-0000-000000000011' then raise exception 'wrong company';end if;
- v:=public.write_company_branding('save',0,config);
+ begin perform public.write_company_branding('save',0,config);raise exception 'old draft tab published';exception when sqlstate 'PT409' then null;end;
+ v:=public.write_company_branding('save_public',0,config);
  result:=public.read_company_branding();if result->'published'<>config or result->'draft'<>config then raise exception 'save not public';end if;
  perform public.write_company_branding('publish',v,config);
  result:=public.read_company_branding();if result->'published'<>config or jsonb_array_length(result->'history')<>2 then raise exception 'publication missing';end if;
  perform set_config('jbfd.history_id',result#>>'{history,0,id}',true);
- begin perform public.write_company_branding('save',v,config);raise exception 'stale version accepted';exception when sqlstate 'PT409' then null;end;
+ begin perform public.write_company_branding('save_public',v,config);raise exception 'stale version accepted';exception when sqlstate 'PT409' then null;end;
  foreach pair in array array['jobforged','contemporaneo','objetivo','editorial'] loop
   v:=(public.read_company_branding()->>'version')::bigint;
-  perform public.write_company_branding('save',v,jsonb_set(config,'{typography,fontPair}',to_jsonb(pair)));
+  perform public.write_company_branding('save_public',v,jsonb_set(config,'{typography,fontPair}',to_jsonb(pair)));
  end loop;
  v:=(public.read_company_branding()->>'version')::bigint;
- begin perform public.write_company_branding('save',v,config||'{"publishedBy":"forged"}'::jsonb);raise exception 'forged metadata accepted';exception when invalid_parameter_value then null;end;
- begin perform public.write_company_branding('save',v,jsonb_set(config,'{typography,fontPair}','"injected-font"'));raise exception 'unapproved font accepted';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('save_public',v,config||'{"publishedBy":"forged"}'::jsonb);raise exception 'forged metadata accepted';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('save_public',v,jsonb_set(config,'{typography,fontPair}','"injected-font"'));raise exception 'unapproved font accepted';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_branding('publish',v,jsonb_set(config,'{theme,light,text}',config#>'{theme,light,surface}'));raise exception 'low contrast accepted';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_branding('publish',v,jsonb_set(config,'{theme,dark,portalBackground}',config#>'{theme,dark,text}'));raise exception 'low portal contrast accepted';exception when invalid_parameter_value then null;end;
- begin perform public.write_company_branding('save',v,jsonb_set(config,'{backgrounds,coverImage}','"data:image/svg+xml,evil"'));raise exception 'unsafe image accepted';exception when invalid_parameter_value then null;end;
- begin perform public.write_company_branding('save',v,jsonb_set(config,'{portal,socialLinkedin}','"javascript:alert(1)"'));raise exception 'unsafe URL accepted';exception when invalid_parameter_value then null;end;
- v:=public.write_company_branding('reset',v,config);
- v:=public.write_company_branding('restore',v,null,current_setting('jbfd.history_id')::uuid);
+ begin perform public.write_company_branding('save_public',v,jsonb_set(config,'{backgrounds,coverImage}','"data:image/svg+xml,evil"'));raise exception 'unsafe image accepted';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('save_public',v,jsonb_set(config,'{portal,socialLinkedin}','"javascript:alert(1)"'));raise exception 'unsafe URL accepted';exception when invalid_parameter_value then null;end;
+ v:=public.write_company_branding('reset_public',v,config);
+ v:=public.write_company_branding('restore_public',v,null,current_setting('jbfd.history_id')::uuid);
  v:=public.write_company_branding('discard',v);
  result:=public.read_company_branding();if result->'draft'<>result->'published' or jsonb_array_length(result->'history')<>8 then raise exception 'history lost';end if;
  begin update public.company_branding_history set snapshot='{}';raise exception 'history mutable';exception when insufficient_privilege then null;end;
@@ -45,7 +46,7 @@ select pg_temp.assume_user('38000000-0000-0000-0000-000000000002');
 do $$declare result jsonb;begin
  result:=public.read_company_branding();if result->>'editable'<>'false' or result->'draft'<>'null'::jsonb or result->'history'<>'[]'::jsonb then raise exception 'member draft leak';end if;
  if public.read_company_brand_asset('38000000-0000-0000-0000-000000000041') is not null then raise exception 'member read draft-only asset';end if;
- begin perform public.write_company_branding('save',(result->>'version')::bigint,current_setting('jbfd.fixture_config')::jsonb);raise exception 'member write';exception when insufficient_privilege then null;end;
+ begin perform public.write_company_branding('save_public',(result->>'version')::bigint,current_setting('jbfd.fixture_config')::jsonb);raise exception 'member write';exception when insufficient_privilege then null;end;
 end$$;
 select pg_temp.assume_user('38000000-0000-0000-0000-000000000001');
 do $$declare config jsonb:=current_setting('jbfd.fixture_config')::jsonb;v bigint;begin
@@ -59,7 +60,7 @@ select pg_temp.assume_user('38000000-0000-0000-0000-000000000003');
 do $$begin
  if public.read_company_branding()->'published'<>'{}'::jsonb then raise exception 'cross company read';end if;
  if public.read_company_brand_asset('38000000-0000-0000-0000-000000000041') is not null then raise exception 'cross company asset read';end if;
- begin perform public.write_company_branding('restore',0,null,current_setting('jbfd.history_id')::uuid);raise exception 'cross company restore';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_branding('restore_public',0,null,current_setting('jbfd.history_id')::uuid);raise exception 'cross company restore';exception when invalid_parameter_value then null;end;
 end$$;
 select pg_temp.assume_user(current_setting('jbfd.test_admin')::uuid);
 do $$begin begin perform public.read_company_branding();raise exception 'backoffice got company access';exception when insufficient_privilege then null;end;end$$;

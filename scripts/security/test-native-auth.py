@@ -164,6 +164,7 @@ def main():
         assert request(rest,'/rpc/is_platform_admin',{},token)==(200,False),'Signup metadata granted platform role'
         assert sql("select raw_user_meta_data ? 'company_signup_nonce' from auth.users where id='"+first+"';")=='f','Raw signup capability persisted'
         assert request(rest,'/company_members?select=*',token=token)[0] in (401,403),'Direct roster SELECT exposed'
+        assert request(rest,'/rpc/write_company_branding',{'operation':'save','expected_version':0,'configuration':{}},token)[0]==409,'Old draft editor unexpectedly published'
         # Real Auth + PostgREST candidate identities. No SMTP or real recipients.
         anonymous=jwt(signing,'anon')
         status,address=request(rest,'/rpc/read_company_portal',{},token)

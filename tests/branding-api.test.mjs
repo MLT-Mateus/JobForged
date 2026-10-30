@@ -14,7 +14,7 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   if(address.endsWith('/rpc/session_context_v1'))return Response.json({id:'member',company_id:cid,role,full_name:'Fixture Owner',companies:{id:cid,name:'Fixture Branding'}});
   if(address.endsWith('/rpc/reserve_company_image'))return Response.json({assetId:body.asset_id,expiresIn:300,maxBytes:5242880});
   if(address.endsWith('/rpc/read_company_branding'))return Response.json({companyId:cid,companyName:'Fixture Branding',editable:role!=='member',version:0,draft:role==='member'?null:{},published:{},publishedVersion:0,history:[]});
-  if(address.endsWith('/rpc/write_company_branding')){writes.push(body);return conflict?Response.json({code:'40001'},{status:409}):Response.json(1)}
+  if(address.endsWith('/rpc/write_company_branding')){writes.push(body);return body.operation==='save'?Response.json({code:'PT409',details:'editor_contract_retired'},{status:409}):conflict?Response.json({code:'40001'},{status:409}):Response.json(1)}
   if(address.includes('/storage/v1/object/company-branding/')){assert.equal(init.headers.Authorization,'Bearer fixture');if(init.method==='POST'){assert.equal(init.headers['x-upsert'],'false');stored=Buffer.from(init.body);return Response.json({ok:true})}return new Response(tampered?Buffer.from('tampered'):stored)}
   if(address.endsWith('/rpc/register_company_brand_asset')){asset={id:body.asset_id,path:`${cid}/${body.asset_id}.png`,sha256:body.file_sha256,size:body.file_size};assert.equal(body.file_sha256,createHash('sha256').update(stored).digest('hex'));return Response.json(asset)}
   if(address.endsWith('/rpc/read_company_brand_asset'))return Response.json(body.asset_id===asset?.id?asset:null);
@@ -26,11 +26,12 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   assert.equal((await request('/api/company/branding',null,{cookie:''})).status,403);
   platform=true;assert.equal((await request('/api/company/branding')).status,403);platform=false;
   assert.equal((await request('/api/company/branding')).status,200);
-  const mutation={operation:'save',companyId:cid,version:0,configuration:brandContent(brandingDefaults(cid,'Fixture Branding'))};
+  const mutation={operation:'publish',companyId:cid,version:0,configuration:brandContent(brandingDefaults(cid,'Fixture Branding'))};
   role='member';assert.equal((await request('/api/company/branding',mutation)).status,403);role='owner';
   assert.equal((await request('/api/company/branding',mutation,{origin:'https://outside.invalid'})).status,403);
   assert.equal((await request('/api/company/branding',{...mutation,companyId:'38000000-0000-0000-0000-000000000012'})).status,409);
   assert.equal((await request('/api/company/branding',mutation)).status,200);assert.equal(writes.at(-1).expected_version,0);
+  assert.equal((await request('/api/company/branding',{...mutation,operation:'save'})).status,409);
   conflict=true;const stale=await request('/api/company/branding',mutation);assert.equal(stale.status,409);assert.equal((await stale.json()).conflict,true);conflict=false;
   const beforeReset=writes.length;assert.equal((await request('/api/company/branding',{...mutation,operation:'reset'})).status,200);assert.equal(writes.length,beforeReset,'Reset on defaults must not write another revision');
   const image=await sharp({create:{width:8,height:8,channels:3,background:'#20B2AA'}}).png().toBuffer();
