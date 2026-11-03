@@ -9,3 +9,5 @@ Complementa o PR144 antes de sua integração. Somente Test; LP mantém rotas e 
 - Widgets documenta cabeçalho, navegação lateral e compacta, rodapé, painel contextual, modal, Bottom Sheet, aviso temporário e ajuda contextual. Componentes e tokens aprovados continuam como fonte única.
 
 Não alterar clientes reais nem enviar cadastro/recuperação para produzir evidências. CI, SHA, saúde e limitações são registrados na continuidade após publicação.
+
+CI: o runner passou a selecionar Python sem wheel aprovado para PyYAML6.0.2 e recusou corretamente o pacote-fonte. O job SQL agora fixa Python3.12 via actions/setup-python oficial pinado e exige instalação binária, preservando todos os hashes existentes. O hash cp312/manylinux foi conferido na metadata oficial PyPI; nenhum hash de pacote-fonte foi adicionado.
