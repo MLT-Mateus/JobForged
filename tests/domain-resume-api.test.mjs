@@ -34,6 +34,7 @@ test('candidate resume BFF requires candidate identity, origin/version and serve
  const throughGateway=path=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':'careers.fixture.invalid','x-forwarded-proto':'https',cookie:'jf_auth_access=fixture'}}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
  assert.equal((await throughGateway('/api/portal/resume')).status,200);
  assert.equal((await throughGateway('/backoffice')).status,404);
+ assert.equal((await throughGateway('/recuperar-senha')).status,200);
  assert.equal((await request('/backoffice',null,undefined,'','https://careers.fixture.invalid')).status,404);
  assert.equal((await request('/',null,undefined,'','https://unknown.fixture.invalid')).status,404);
  const page=await request('/',null,undefined,'','https://careers.fixture.invalid');assert.equal(page.status,200);assert.match(await page.text(),/Public Fixture/);
