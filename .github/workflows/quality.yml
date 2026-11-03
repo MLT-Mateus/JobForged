@@ -39,6 +39,10 @@ jobs:
     steps:
       - name: Baixar o código
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configurar Python compatível com os wheels verificados
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
       - name: Configurar Node.js para as fixtures versionadas
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -51,7 +55,7 @@ jobs:
         run: python3 tests/security_gate_test.py
       - name: Validar separação de ambientes e bloqueios de promoção
         run: |
-          python3 -m pip install --disable-pip-version-check --no-deps --require-hashes -r scripts/security/requirements-ci.txt
+          python3 -m pip install --disable-pip-version-check --no-deps --only-binary=:all: --require-hashes -r scripts/security/requirements-ci.txt
           python3 tests/environment_profiles_test.py
           python3 tests/environment_profiles_test.py --compose
           python3 tests/compose_yaml_test.py
