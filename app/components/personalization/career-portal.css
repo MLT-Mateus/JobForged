@@ -135,3 +135,9 @@
 @container(max-width:430px){.jf-public-header-inner{--jf-ui-public-logo-width:142px}}
 
 .jf-career-header-actions .jf-action{min-height:var(--jf-ui-header-control-height);font-size:12px}
+
+@container (min-width:681px) and (max-width:1100px){
+ .jf-career-portal[data-layout="panorama"] .jf-career-hero{display:grid;padding:0;gap:0;min-height:0}
+ .jf-career-portal[data-layout="panorama"] .mock-hero__visual{position:relative;inset:auto;grid-column:1;grid-row:1;width:100%;height:auto;aspect-ratio:3/1;max-width:none}
+ .jf-career-portal[data-layout="panorama"] .mock-hero__copy{grid-column:1;grid-row:2;width:calc(100% - 32px);max-width:none;margin:16px;padding:24px;justify-self:stretch}
+}
