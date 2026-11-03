@@ -865,6 +865,6 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-field-required{color:var(--jf-ui-danger);font-weight:800;font-style:normal}
 
 /* Public chrome uses the LP measurements; internal WorkspaceShell keeps its own approved layout. */
-:root{--jf-ui-public-content-max:1180px;--jf-ui-public-gutter:24px;--jf-ui-public-header-height:78px;--jf-ui-public-logo-width:184px;--jf-ui-public-footer-top:70px;--jf-ui-public-footer-bottom:24px;--jf-ui-public-footer-main-min:198px;--jf-ui-public-footer-logo-width:175px;--jf-ui-public-footer-logo-height:51px}
+:root{--jf-ui-public-content-max:1180px;--jf-ui-public-gutter:24px;--jf-ui-public-header-height:78px;--jf-ui-public-logo-width:184px;--jf-ui-public-footer-top:70px;--jf-ui-public-footer-bottom:24px;--jf-ui-public-footer-main-min:240px;--jf-ui-public-footer-logo-width:175px;--jf-ui-public-footer-logo-height:51px}
 @media(max-width:680px){:root{--jf-ui-public-gutter:16px;--jf-ui-public-header-height:70px;--jf-ui-public-logo-width:155px}}
 @media(max-width:430px){:root{--jf-ui-public-logo-width:142px}}

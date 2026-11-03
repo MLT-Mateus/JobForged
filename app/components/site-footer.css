@@ -15,7 +15,7 @@ footer.site-footer.jf-site-footer .footer-contact__links svg{width:18px;height:1
 footer.site-footer.jf-site-footer .footer-contact__links span{display:flex;min-width:0;flex-direction:column;gap:3px}
 footer.site-footer.jf-site-footer .footer-contact__links small{color:var(--footer-muted,#7b8a87);font:400 12px/1.5 var(--jf-ui-font-body)}
 footer.site-footer.jf-site-footer .footer-contact__links strong{overflow:hidden;font:700 14px/1.5 var(--jf-ui-font-body);text-overflow:ellipsis;white-space:nowrap}
-footer.site-footer.jf-site-footer .footer-navigation{display:flex;align-items:center;justify-content:flex-start;gap:22px;margin-top:36px;padding:18px 0;border-block:1px solid rgba(20,35,33,.08)}
+footer.site-footer.jf-site-footer .footer-navigation{min-height:58px;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:22px;margin-top:36px;padding:18px 0;border-block:1px solid rgba(20,35,33,.08)}
 footer.site-footer.jf-site-footer .footer-navigation nav{display:flex;flex-wrap:wrap;gap:18px}
 footer.site-footer.jf-site-footer .footer-navigation a{color:var(--footer-muted,#687774);font:600 13px/1.5 var(--jf-ui-font-body);text-decoration:none}
 footer.site-footer.jf-site-footer a:hover{color:var(--footer-link,#087A76)}footer.site-footer.jf-site-footer a:focus-visible{outline:2px solid var(--jf-ui-focus);outline-offset:3px}
