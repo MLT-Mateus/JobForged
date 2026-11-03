@@ -30,6 +30,6 @@ CI: mocks BFF para origem/identidade/versão/arquivo; SQL real para RLS/RPC/isol
 
 Referências operacionais: [Traefik TLS](https://doc.traefik.io/traefik/reference/routing-configuration/http/tls/overview/) e [Let's Encrypt HTTP-01/porta80](https://letsencrypt.org/docs/allow-port-80/). O resolvedor ACME existente foi inspecionado por leitura; não foi reconfigurado.
 
-Gateway BFF preserva Host real do pedido, reescreve X-Forwarded-Host a partir dele e não aceita a versão enviada pelo cliente. Isso permite Node/Vinext validar o domínio pelo banco, sem ampliar VINEXT_TRUSTED_HOSTS ou aceitar cabeçalhos arbitrários. Teste nativo verifica Host próprio, cabeçalho falso e PDF privado através do gateway.
+Gateway BFF reescreve X-Forwarded-Host a partir do Host original, descartando qualquer versão enviada pelo cliente. Node Fetch mantém Host interno do upstream; o proxy usa o endereço encaminhado apenas para consultar a prova no banco antes de permitir qualquer rota. Isso dispensa ampliar VINEXT_TRUSTED_HOSTS. Teste nativo verifica origem encaminhada, cabeçalho falso e PDF privado; teste do aplicativo cobre URL interna do BFF com host encaminhado e bloqueio de backoffice.
 
 Panorama usa espaçamento vertical16px no desktop para que o painel de texto não aumente a faixa além do banner3:1 nas larguras habituais; mantém min420px para leitura e pode expandir quando o texto exigir. Não impõe altura que corte conteúdo.
