@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import sharp from 'sharp';
 import { createHash, randomUUID } from 'node:crypto';
 import { normalizeBrandingImage } from '@/app/lib/branding-image';
 import { readSession, requestDatabase, requireSameOrigin } from '@/app/api/auth/_server';
@@ -23,6 +24,7 @@ export async function POST(request:NextRequest){
    return Response.json({message:limited?'Limite de imagens ou de envios atingido. Aguarde e tente novamente.':'Não foi possível autorizar o envio.'},{status:limited?429:503,headers});
   }
   const output=await normalizeBrandingImage(input,file.type);
+  if(form.get('kind')==='panoramaImage'){const m=await sharp(output).metadata();const ratio=(m.width||0)/(m.height||1);if(ratio<2.85||ratio>3.15)return Response.json({message:'O banner panorâmico precisa da proporção 3:1. Exemplo: 2400 × 800 px.'},{status:400,headers})}
   const uploaded=await brandingStorage(path,session.accessToken,output);
   if(!uploaded?.ok)return Response.json({message:'O armazenamento de imagens está indisponível. Tente novamente.'},{status:503,headers});
   const name=file.name.replace(/[^\p{L}\p{N} ._-]/gu,'').slice(0,240)||'imagem.png';

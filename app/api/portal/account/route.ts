@@ -16,7 +16,7 @@ async function handle(request:NextRequest,mutation:boolean){
  if(session.role!=='candidate'&&operation==='profile')return Response.json({message:'Use o perfil da sua conta empresarial.'},{status:403,headers});
  const response=session.role==='candidate'?await requestDatabase('rpc/candidate_account',session.accessToken,{operation,expected_version:b.version??null,full_name:b.fullName??null,delivery_id:b.id??null,page_number:page}):await requestDatabase(operation==='read-alert'?'rpc/mark_my_notification':'rpc/communications_read',session.accessToken,operation==='read-alert'?{delivery_id:b.id}:{section:'inbox',page_number:page});
  if(!response?.ok){const error=await response?.json().catch(()=>null) as {code?:string}|null;return Response.json({message:(error?.code==='40001'||error?.code==='PT409')?'Outra sessão alterou seu perfil. Reabra o menu antes de salvar.':'Não foi possível concluir. Confira sua sessão.'},{status:(error?.code==='40001'||error?.code==='PT409')?409:403,headers})}
- const data=await response.json() as Record<string,unknown>;return Response.json({...data,role:session.role,email:session.email,fullName:'fullName' in session?session.fullName:''},{headers});
+ const data=await response.json() as Record<string,unknown>;let resume:unknown=null;if(session.role==='candidate'){const file=await requestDatabase('rpc/candidate_resume',session.accessToken,{operation:'read'});if(file?.ok)resume=await file.json()}return Response.json({...data,resume,role:session.role,email:session.email,fullName:'fullName' in session?session.fullName:''},{headers});
  }catch{return Response.json({message:'Serviço indisponível. Tente novamente.'},{status:503,headers})}
 }
 export const GET=(request:NextRequest)=>handle(request,false);

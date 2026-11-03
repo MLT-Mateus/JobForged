@@ -295,6 +295,17 @@ def main():
         unreserved='/object/company-branding/'+own_context['company_id']+'/'+str(uuid.uuid4())+'.png'
         assert binary_request(storage,unreserved,png,own_token)[0] in (400,403),'Native unreserved upload accepted'
         assert request(rest,'/rpc/register_company_brand_asset',{'asset_id':asset,'file_name':'fixture.png','file_size':len(png),'file_sha256':hashlib.sha256(png).hexdigest()},own_token)[0]==200,'Native asset registration failed'
+        # Real Auth + Storage + RPC resume lifecycle. Only synthetic candidates in this engine.
+        status,resume_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200
+        resume_token=resume_session['access_token'];resume_id=str(uuid.uuid4());resume_path='/object/candidate-resumes/'+candidate_id+'/'+resume_id+'.pdf'
+        pdf=b'%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\n%%EOF\n'
+        assert request(rest,'/rpc/candidate_resume',{'operation':'reserve','asset_id':resume_id},resume_token)[0]==200,'Candidate resume reservation failed'
+        assert binary_request(storage,resume_path,pdf,resume_token,'application/pdf')[0]==200,'Candidate private PDF upload failed'
+        assert request(rest,'/rpc/candidate_resume',{'operation':'commit','asset_id':resume_id,'file_name':'fixture.pdf','file_size':len(pdf),'file_sha256':hashlib.sha256(pdf).hexdigest(),'expected_version':1},resume_token)[0]==200,'Candidate resume commit failed'
+        assert binary_request(storage,resume_path,None,resume_token)==(200,pdf),'Candidate resume download failed'
+        assert binary_request(storage,resume_path,None,own_token)[0] in (400,403,404),'Employer read candidate PDF'
+        assert binary_request(storage,resume_path,None,jwt(signing,'anon'))[0] in (400,403,404),'Anonymous candidate PDF disclosure'
+        assert request(rest,'/rpc/candidate_resume',{'operation':'commit','asset_id':resume_id,'file_name':'fixture.pdf','file_size':len(pdf),'file_sha256':hashlib.sha256(pdf).hexdigest(),'expected_version':1},resume_token)[0]==409,'Resume concurrent version bypass'
         # Only this disposable provider fixture opts in to anonymous published-image reads.
         anonymous=jwt(signing,'anon')
         assert binary_request(storage,path,None,anonymous)[0] in (400,403,404),'Draft image exposed anonymously'
