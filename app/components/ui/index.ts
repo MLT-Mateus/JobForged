@@ -43,3 +43,5 @@ export {PreviewDock} from "./Widgets";
 
 export {NotificationTrigger} from "./NotificationTrigger";
 export {FieldFeedback,revealField} from "./FieldFeedback";
+
+export {ProportionalImage} from "./ProportionalImage";

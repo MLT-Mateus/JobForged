@@ -229,14 +229,14 @@ main {
 
 .nav-wrap {
   display: flex;
-  min-height: 78px;
+  min-height: var(--jf-ui-public-header-height);
   align-items: center;
   justify-content: space-between;
   gap: 28px;
 }
 
 .brand img {
-  width: 184px;
+  width: var(--jf-ui-public-logo-width);
   height: auto;
 }
 
@@ -2261,7 +2261,7 @@ main {
 
 .legal-header__inner {
   display: flex;
-  min-height: 78px;
+  min-height: var(--jf-ui-public-header-height);
   align-items: center;
   justify-content: space-between;
   gap: 24px;
@@ -2728,11 +2728,11 @@ main {
   }
 
   .nav-wrap {
-    min-height: 70px;
+    min-height: var(--jf-ui-public-header-height);
   }
 
   .brand img {
-    width: 155px;
+    width: var(--jf-ui-public-logo-width);
   }
 
   .mobile-nav {
@@ -2941,7 +2941,7 @@ main {
   .legal-shell { width: min(100% - (var(--layout-gutter-mobile) * 2), var(--layout-content-max)); }
 
   .legal-header__inner {
-    min-height: 70px;
+    min-height: var(--jf-ui-public-header-height);
   }
 
   .legal-brand img {
@@ -4851,7 +4851,7 @@ html[data-theme="dark"] .price-card ul {
 
 @media (max-width: 430px) {
   .brand img {
-    width: 142px;
+    width: var(--jf-ui-public-logo-width);
   }
 
   .nav-wrap {

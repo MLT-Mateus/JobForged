@@ -1,1 +1,3 @@
 .jf-portal-account-form{display:grid;gap:var(--jf-ui-space-4);padding-block:var(--jf-ui-space-4);min-width:0}.jf-portal-account-form .jf-action{justify-self:start}.jf-portal-account-form p{overflow-wrap:anywhere}
+
+.jf-portal-access-links{display:grid;gap:var(--jf-ui-space-3);justify-items:start}.jf-portal-access-links p{margin:0}.jf-text-link{appearance:none;border:0;background:none;padding:0;color:var(--jf-ui-brand-strong);font-family:inherit;font-size:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}.jf-text-link:focus-visible{outline:2px solid var(--jf-ui-focus);outline-offset:4px;border-radius:2px}
