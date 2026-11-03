@@ -18,9 +18,10 @@ export async function proxy(request:NextRequest){
    if(!slug)return new NextResponse('Domínio não verificado ou indisponível.',{status:404,headers});
    headers.set('Cache-Control','private, no-store');
    if(path==='/api/domain-ready')return NextResponse.json({ready:true},{headers});
+   if(path==='/recuperar-senha')return NextResponse.redirect(new URL('/recuperar-senha',process.env.APP_PUBLIC_URL||'https://test.jobforged.com'),303);
    if(path==='/')return NextResponse.rewrite(new URL('/'+slug,request.url),{headers});
    if(path==='/'+slug)return NextResponse.redirect(new URL('/',request.url));
-   const allowed=['/api/auth/session','/api/auth/sign-in','/api/auth/sign-out','/api/auth/candidate-sign-up','/api/auth/recover','/api/portal/account','/api/portal/resume','/recuperar-senha','/termos-servico','/politicas-privacidade'].includes(path)||path.startsWith('/api/portals/'+slug+'/assets/')||/^\/(careers|fonts|brand|assets)\//.test(path);
+   const allowed=['/termos-servico','/politicas-privacidade'].includes(path)||path.startsWith('/api/portals/'+slug+'/assets/')||/^\/(careers|fonts|brand|assets)\//.test(path);
    if(!allowed)return new NextResponse('Página não encontrada.',{status:404,headers});
   }catch{return new NextResponse('Serviço temporariamente indisponível.',{status:503,headers})}
  }

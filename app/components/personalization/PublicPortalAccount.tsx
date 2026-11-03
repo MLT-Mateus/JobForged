@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import {NotificationTrigger} from '../ui/NotificationTrigger';
 import {useCallback,useEffect,useState,type FormEvent} from 'react';
-import {Bell,LogOut,UserRound,FileText,Download,ShieldCheck} from 'lucide-react';
+import {Bell,LogIn,LogOut,UserRound,FileText,Download,ShieldCheck} from 'lucide-react';
 import {ActionButton,AppToast,CheckboxField,NotificationPanel,StatusBadge,FileUploadField,TextField,WidgetDialog,WorkspaceTabs} from '../ui';
 import {passwordRules} from '../auth/auth-validation';
 import type {InboxItem} from '@/app/lib/communication-types';
@@ -10,18 +10,19 @@ import './portal-account.css';
 type Session={role:string;email:string;fullName?:string};
 type Resume={id:string;name:string;size:number;updatedAt:string;version:number};
 type Account={resume?:Resume|null;unread?:number;profile?:{fullName:string;version:number;slug:string};items:InboxItem[];fullName?:string;email?:string};
-export function PublicPortalAccount({slug,demo=false,demoUnread=0,demoSignedIn=true}:{slug:string;demo?:boolean;demoUnread?:number;demoSignedIn?:boolean}){
- const [session,setSession]=useState<Session|null>(demo&&demoSignedIn?{role:'candidate',email:'candidato@example.invalid',fullName:'Pessoa candidata · mock'}:null),[checking,setChecking]=useState(!demo),[open,setOpen]=useState(false),[tab,setTab]=useState('alerts'),[mode,setMode]=useState('login');
+export function PublicPortalAccount({slug,demo=false,demoUnread=0,demoSignedIn=true,externalAccountHref,initialLogin=false}:{externalAccountHref?:string;initialLogin?:boolean;slug:string;demo?:boolean;demoUnread?:number;demoSignedIn?:boolean}){
+ const [session,setSession]=useState<Session|null>(demo&&demoSignedIn?{role:'candidate',email:'candidato@example.invalid',fullName:'Pessoa candidata · mock'}:null),[checking,setChecking]=useState(!demo&&!externalAccountHref),[open,setOpen]=useState(initialLogin),[tab,setTab]=useState('alerts'),[mode,setMode]=useState('login');
  const [account,setAccount]=useState<Account|null>(demo?{items:[],unread:demoUnread,profile:{fullName:'Pessoa candidata · mock',version:0,slug}}:null),[page,setPage]=useState(1),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[danger,setDanger]=useState(false);
  const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[name,setName]=useState(''),[accepted,setAccepted]=useState(false),[profileName,setProfileName]=useState('');
  async function refreshSession(){const r=await fetch('/api/auth/session',{cache:'no-store',credentials:'same-origin'});const s=r.ok?await r.json() as Session:null;setSession(s);return s}
  useEffect(()=>{
-  if(demo)return;let active=true,lastCheck=0;let controller:AbortController|undefined;
+  if(demo||externalAccountHref)return;let active=true,lastCheck=0;let controller:AbortController|undefined;
   const check=()=>{if(document.visibilityState!=='visible'||Date.now()-lastCheck<1000)return;lastCheck=Date.now();controller?.abort();controller=new AbortController();
    void fetch('/api/auth/session',{cache:'no-store',credentials:'same-origin',signal:controller.signal}).then(async r=>r.ok?await r.json() as Session:null).then(s=>{if(!active)return;setSession(previous=>previous?.email===s?.email&&previous?.role===s?.role?previous:s);if(!s)setAccount(null);setChecking(false)}).catch(()=>{if(active)setChecking(false)});
   };check();window.addEventListener('focus',check);window.addEventListener('pageshow',check);document.addEventListener('visibilitychange',check);
   return()=>{active=false;controller?.abort();window.removeEventListener('focus',check);window.removeEventListener('pageshow',check);document.removeEventListener('visibilitychange',check)};
- },[demo]);
+ },[demo,externalAccountHref]);
+ useEffect(()=>{if(!initialLogin)return;const url=new URL(window.location.href);url.searchParams.delete('acesso');window.history.replaceState(window.history.state,'',url.href)},[initialLogin]);
  const load=useCallback(async(next=1)=>{if(demo)return;try{const r=await fetch('/api/portal/account?page='+next,{cache:'no-store',credentials:'same-origin'});const a=await r.json() as Account&{message?:string};if(!r.ok)throw new Error(a.message||'Não foi possível carregar sua conta.');setError('');setAccount(a);setProfileName(a.profile?.fullName||a.fullName||'');setPage(next)}catch(e){setError(e instanceof Error?e.message:'Não foi possível carregar sua conta.')}},[demo]);
  useEffect(()=>{if(!session||demo||open)return;const controller=new AbortController();void fetch('/api/portal/account?page=1',{cache:'no-store',credentials:'same-origin',signal:controller.signal}).then(async r=>{if(!r.ok)throw new Error();return r.json() as Promise<Account>}).then(a=>{if(!controller.signal.aborted)setAccount(a)}).catch(()=>{});const update=()=>{if(document.visibilityState==='visible')void load(1)};window.addEventListener('focus',update);document.addEventListener('visibilitychange',update);return()=>{controller.abort();window.removeEventListener('focus',update);document.removeEventListener('visibilitychange',update)}},[session,demo,load,open]);
  function show(){if(!session){setMode('login');setPassword('');setConfirm('');setNotice('')}setOpen(true);if(session)void load(1)}
@@ -37,6 +38,7 @@ export function PublicPortalAccount({slug,demo=false,demoUnread=0,demoSignedIn=t
   async function uploadResume(file:File|null){if(!file||demo)return;setBusy(true);try{if(file.size>5*1024*1024||!file.name.toLowerCase().endsWith('.pdf'))throw new Error('Use PDF de até 5 MB.');const r=await fetch('/api/portal/resume',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/pdf','x-file-name':encodeURIComponent(file.name),'x-profile-version':String(account?.profile?.version??-1)},body:file});const a=await r.json() as {message?:string};if(!r.ok)throw new Error(a.message||'Não foi possível enviar.');await load(page);setDanger(false);setNotice('Currículo atualizado com segurança.')}catch(e){setDanger(true);setNotice(e instanceof Error?e.message:'Não foi possível enviar.')}finally{setBusy(false)}}
  const fullName=account?.profile?.fullName||account?.fullName||session?.fullName||'Minha conta';
  const resume=demo?{id:'mock',name:'Currículo demonstrativo.pdf',size:0,updatedAt:'',version:0}:account?.resume;
+ if(externalAccountHref)return <a className="jf-action jf-action--secondary" href={externalAccountHref} target="_blank" rel="noopener noreferrer" aria-label="Entrar na JobForged"><LogIn size={16}/>Entrar</a>;
  const unread=Math.max(0,Number(account?.unread)||0);
  return <><NotificationTrigger authenticated={Boolean(session)} userName={fullName==='Minha conta'?undefined:fullName} unread={unread} busy={checking} onClick={show}/>{demo&&<StatusBadge>mock</StatusBadge>}
  <WidgetDialog open={open} onClose={()=>setOpen(false)} kind={session?"drawer":"modal"} title={session?`Olá, ${fullName.split(/\s+/)[0]}`:mode==='signup'?'Crie sua conta':mode==='recovery'?'Recupere sua senha':'Entre na sua conta'} description={demo?'Demonstração · mock':undefined}>
