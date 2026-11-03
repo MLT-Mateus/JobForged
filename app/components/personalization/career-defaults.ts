@@ -1,5 +1,6 @@
 export const careerDefaults={
  image:'/careers/team-jobforged-v2.webp',
+ banner:'/careers/team-jobforged-panorama-v1.webp',
  headline:'Seu próximo capítulo começa aqui.',
  introduction:'Boas ideias ganham vida quando pessoas diferentes constroem juntas. Encontre um lugar para aprender, contribuir e fazer a diferença.',
  about:'Acreditamos em relações de confiança, espaço para boas ideias e aprendizado todos os dias. Queremos construir uma experiência de trabalho em que cada pessoa possa contribuir com o que tem de melhor.'

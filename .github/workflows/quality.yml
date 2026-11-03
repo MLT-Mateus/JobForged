@@ -52,7 +52,9 @@ jobs:
       - name: Testar política de limitação de requisições
         run: node --test services/security-gateway/test.mjs services/security-gateway/maintenance.test.mjs tests/security-contracts.test.mjs
       - name: Testar bloqueios do gate de backup e migrations
-        run: python3 tests/security_gate_test.py
+        run: |
+          python3 tests/security_gate_test.py
+          python3 tests/company-domain-worker.test.py
       - name: Validar separação de ambientes e bloqueios de promoção
         run: |
           python3 -m pip install --disable-pip-version-check --no-deps --only-binary=:all: --require-hashes -r scripts/security/requirements-ci.txt

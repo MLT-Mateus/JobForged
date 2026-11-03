@@ -249,3 +249,5 @@
 .jf-external-preview{min-height:100dvh;background:var(--cp-bg)}
 
 .custom-editor .custom-grid:has(textarea){grid-template-columns:minmax(0,1fr)}
+
+.appearance-domain-actions{display:flex;flex-wrap:wrap;gap:var(--jf-ui-space-3)}.appearance-domain-instructions{display:grid;gap:var(--jf-ui-space-3);min-width:0}.appearance-domain-instructions code{white-space:normal;overflow-wrap:anywhere;padding:var(--jf-ui-space-3);background:var(--jf-ui-surface-soft);border-radius:var(--jf-ui-control-radius)}
