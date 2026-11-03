@@ -29,3 +29,5 @@ Após CI/migrations/deploy de Test: instalar script versionado em `/opt/jbfd/bin
 CI: mocks BFF para origem/identidade/versão/arquivo; SQL real para RLS/RPC/isolamento/projeção/host expirado; Auth+Storage reais em engine isolado para reserva/upload/commit/download e negação empresarial/anon; worker DNS/TLS unitário. Aplicação em Test exige backup+restauração isolada/cópia cifrada antes das migrations. Registrar SHA/healthchecks e limites de validação autenticada na entrega.
 
 Referências operacionais: [Traefik TLS](https://doc.traefik.io/traefik/reference/routing-configuration/http/tls/overview/) e [Let's Encrypt HTTP-01/porta80](https://letsencrypt.org/docs/allow-port-80/). O resolvedor ACME existente foi inspecionado por leitura; não foi reconfigurado.
+
+Gateway BFF preserva Host real do pedido, reescreve X-Forwarded-Host a partir dele e não aceita a versão enviada pelo cliente. Isso permite Node/Vinext validar o domínio pelo banco, sem ampliar VINEXT_TRUSTED_HOSTS ou aceitar cabeçalhos arbitrários. Teste nativo verifica Host próprio, cabeçalho falso e PDF privado através do gateway.

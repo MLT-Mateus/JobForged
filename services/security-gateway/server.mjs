@@ -104,7 +104,7 @@ const server=http.createServer(async(req,res)=>{
   // Request an uncompressed upstream body before stripping transport headers.
   // PNG assets are already compressed; this also avoids redundant processing.
   headers.set('accept-encoding','identity');
-  if(application){headers.set('x-forwarded-host',req.headers.host||'');headers.set('x-forwarded-proto','https');}
+  if(application){headers.set('host',req.headers.host||applicationUpstream.host);headers.set('x-forwarded-host',req.headers.host||'');headers.set('x-forwarded-proto','https');}
   const response=await fetch(url,{method:req.method,headers,...(body.length?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(30000)});
   for(const [key,value]of response.headers){if(!['connection','transfer-encoding','content-length','content-encoding','set-cookie'].includes(key))res.setHeader(key,value);}
   const cookies=response.headers.getSetCookie();if(cookies.length)res.setHeader('set-cookie',cookies);

@@ -383,7 +383,7 @@ def main():
         gateway_password=secrets.token_hex(24);sql("alter role jbfd_security_gateway password '"+gateway_password+"';")
         stub_code="""import http from 'node:http';import * as zlib from 'node:zlib';http.createServer(async(req,res)=>{
           if(req.url==='/api/echo'){
-            const text=JSON.stringify({host:req.headers.host,protocol:req.headers['x-forwarded-proto'],encoding:req.headers['accept-encoding']});
+            const text=JSON.stringify({host:req.headers.host,forwardedHost:req.headers['x-forwarded-host'],protocol:req.headers['x-forwarded-proto'],encoding:req.headers['accept-encoding']});
             res.setHeader('Content-Type','application/json');
             if(req.headers['accept-encoding']?.includes('zstd')){res.setHeader('Content-Encoding','zstd');res.end(zlib.zstdCompressSync(text));}
             else res.end(text);return;
@@ -429,6 +429,12 @@ def main():
         after=int(sql("select coalesce(sum(hits),0) from app_private.request_limits where scope like 'login-account:%';"))
         assert after==before+1,'BFF child counted the same action twice'
         assert request(gateways[0][1],'/api/echo')[1]['protocol']=='https','BFF proxy lost HTTPS origin'
+        status,origin_echo=request(gateways[0][1],'/api/echo',request_headers={'Host':'careers.fixture.invalid','X-Forwarded-Host':'spoof.fixture.invalid'})
+        assert status==200 and origin_echo['host']=='careers.fixture.invalid' and origin_echo['forwardedHost']=='careers.fixture.invalid','Verified custom origin lost or spoofed across gateway'
+        assert binary_request(gateways[0][1],'/storage/v1'+resume_path,None,resume_token)==(200,pdf),'Gateway blocked own private resume'
+        assert binary_request(gateways[0][1],'/storage/v1'+resume_path,None,anonymous)[0]==401,'Gateway allowed anonymous resume'
+        assert binary_request(gateways[0][1],'/storage/v1'+resume_path,b'<html>fake PDF</html>',resume_token,'application/pdf')[0]==415,'Gateway accepted spoofed PDF'
+
         status,browser_response=request(gateways[0][1],'/api/echo',request_headers={'Accept-Encoding':'zstd, br, gzip, deflate'})
         assert status==200 and browser_response['encoding']=='identity','Browser compression corrupted JSON through gateway'
         sql('update app_private.security_settings set admin_mfa_enforced=true where singleton;')
