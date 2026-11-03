@@ -6,7 +6,10 @@ import {validCompanyHostname} from './app/lib/company-domain';
 export async function proxy(request:NextRequest){
  const path=request.nextUrl.pathname;const headers=new Headers();
  if(!searchEnvironment().indexable||!publicSearchPaths.includes(path))headers.set('X-Robots-Tag','noindex, follow');
- const hostname=request.nextUrl.hostname.toLowerCase();
+ // The gateway overwrites this header from the original Host. It is still only
+ // a lookup hint: custom names must pass the database proof before routing.
+ let hostname=request.nextUrl.hostname.toLowerCase();const forwarded=request.headers.get('x-forwarded-host');
+ if(forwarded){try{const origin=new URL('https://'+forwarded);if(origin.username||origin.password||origin.pathname!=='/'||origin.search||origin.hash)throw new Error();hostname=origin.hostname.toLowerCase()}catch{return new NextResponse('Origem inválida.',{status:400,headers})}}
  const primary=new URL(process.env.APP_PUBLIC_URL||'https://test.jobforged.com').hostname;
  const canonical=[primary,primary==='jobforged.com'?'www.jobforged.com':'', 'localhost','127.0.0.1','[::1]'].includes(hostname);
  if(!canonical){

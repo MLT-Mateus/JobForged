@@ -29,3 +29,7 @@ Após CI/migrations/deploy de Test: instalar script versionado em `/opt/jbfd/bin
 CI: mocks BFF para origem/identidade/versão/arquivo; SQL real para RLS/RPC/isolamento/projeção/host expirado; Auth+Storage reais em engine isolado para reserva/upload/commit/download e negação empresarial/anon; worker DNS/TLS unitário. Aplicação em Test exige backup+restauração isolada/cópia cifrada antes das migrations. Registrar SHA/healthchecks e limites de validação autenticada na entrega.
 
 Referências operacionais: [Traefik TLS](https://doc.traefik.io/traefik/reference/routing-configuration/http/tls/overview/) e [Let's Encrypt HTTP-01/porta80](https://letsencrypt.org/docs/allow-port-80/). O resolvedor ACME existente foi inspecionado por leitura; não foi reconfigurado.
+
+Gateway BFF reescreve X-Forwarded-Host a partir do Host original, descartando qualquer versão enviada pelo cliente. Node Fetch mantém Host interno do upstream; o proxy usa o endereço encaminhado apenas para consultar a prova no banco antes de permitir qualquer rota. Isso dispensa ampliar VINEXT_TRUSTED_HOSTS. Teste nativo verifica origem encaminhada, cabeçalho falso e PDF privado; teste do aplicativo cobre URL interna do BFF com host encaminhado e bloqueio de backoffice.
+
+Panorama usa espaçamento vertical16px no desktop para que o painel de texto não aumente a faixa além do banner3:1 nas larguras habituais; mantém min420px para leitura e pode expandir quando o texto exigir. Não impõe altura que corte conteúdo.
