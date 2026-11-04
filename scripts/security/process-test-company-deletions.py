@@ -57,6 +57,11 @@ def main():
  signing=dict(v.split('=',1) for v in provider['Config']['Env'])['AUTH_JWT_SECRET']
  auth_signing=dict(v.split('=',1) for v in auth['Config']['Env'])['GOTRUE_JWT_SECRET']
  processed=0
+ verified={}
+ def verify(folder,at=None):
+  key=str(folder)
+  if key not in verified:verified[key]=verified_backup(Environment('test'),folder,now=at)
+  return verified[key]
  for job in jobs:
   jid=quote(job['id']);cid=quote(job['company_id'])
   try:
@@ -67,14 +72,14 @@ def main():
    elif job['backup_name']:
     candidate=Path('/opt/jbfd/backups/security')/job['backup_name']
     stamp=datetime.datetime.strptime(candidate.name,'test-%Y%m%dT%H%M%SZ').replace(tzinfo=datetime.timezone.utc)
-    backup=verified_backup(Environment('test'),candidate,now=stamp+datetime.timedelta(seconds=1))
+    backup=verify(candidate,stamp+datetime.timedelta(seconds=1))
    else:
     for receipt in sorted(Path('/opt/jbfd/backups/security').glob('test-*/offsite-receipt.json'),reverse=True):
      try:
-      candidate=verified_backup(Environment('test'),receipt.parent)
+      candidate=receipt.parent
       stamp=datetime.datetime.strptime(candidate.name,'test-%Y%m%dT%H%M%SZ').replace(tzinfo=datetime.timezone.utc)
       if stamp<datetime.datetime.fromisoformat(job['requested_at']):continue
-      backup=candidate;break
+      backup=verify(candidate);break
      except (ValueError,OSError,KeyError):continue
    if backup is None:
     sql("update app_private.company_deletion_jobs set error_code='backup_required',updated_at=now() where id="+jid);continue
