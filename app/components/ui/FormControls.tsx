@@ -118,7 +118,7 @@ export function TextField({
           id={inputId}
           type={isPassword && passwordVisible ? "text" : type}
           aria-invalid={Boolean(error)}
-          aria-describedby={helpText || error || uploadError ? messageId : undefined}
+          aria-describedby={helpText || error ? messageId : undefined}
         />
         {isSearch && (
           <button type="button" className="jf-search-clear" aria-label="Limpar busca" onClick={clearSearch}>
@@ -172,7 +172,7 @@ export function TextAreaField({
           placeholder={fieldPlaceholder({label,placeholder:textareaProps.placeholder,multiline:true,disabled:textareaProps.disabled,readOnly:textareaProps.readOnly})}
           id={inputId}
           aria-invalid={Boolean(error)}
-          aria-describedby={helpText || error || uploadError ? messageId : undefined}
+          aria-describedby={helpText || error ? messageId : undefined}
         />
       </span>
       {(error || helpText) && <small id={messageId}>{error ?? helpText}</small>}
