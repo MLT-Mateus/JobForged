@@ -41,6 +41,8 @@ def totp_code(value):
     digest=hmac.new(seed,struct.pack('>Q',int(time.time())//30),hashlib.sha1).digest();offset=digest[-1]&15
     return str((struct.unpack('>I',digest[offset:offset+4])[0]&0x7fffffff)%1000000).zfill(6)
 
+LAST_HTTP_OPERATION=None
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('restore',nargs='?');parser.add_argument('--ci',action='store_true');args=parser.parse_args()
     ci_images={}
@@ -62,6 +64,8 @@ def main():
     def sql(statement):
         return run(['docker','exec','-i',args.restore,'psql','-h',socket,'-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],input=statement)
     def request(base,path,body=None,token=None,method=None,request_headers=None):
+        global LAST_HTTP_OPERATION
+        LAST_HTTP_OPERATION=urllib.parse.urlsplit(path).path
         headers={'Content-Type':'application/json'}
         headers.update(request_headers or {})
         if token:headers['Authorization']='Bearer '+token
@@ -69,6 +73,10 @@ def main():
         try:
             with urllib.request.urlopen(req,timeout=10) as response:
                 data=response.read();return response.status,json.loads(data) if data else None
+        except TimeoutError:
+            diagnostic=sql("select coalesce(jsonb_agg(jsonb_build_object('state',state,'wait_type',wait_event_type,'wait',wait_event)),'[]'::jsonb) from pg_stat_activity where datname='postgres' and pid<>pg_backend_pid() and state='active';")
+            print(json.dumps({'isolated_active_waits':json.loads(diagnostic)}))
+            raise
         except urllib.error.HTTPError as error:
             try:data=json.loads(error.read())
             except ValueError:data=None
@@ -156,6 +164,50 @@ def main():
         assert request(rest,'/rpc/is_platform_admin',{},token)==(200,False),'Signup metadata granted platform role'
         assert sql("select raw_user_meta_data ? 'company_signup_nonce' from auth.users where id='"+first+"';")=='f','Raw signup capability persisted'
         assert request(rest,'/company_members?select=*',token=token)[0] in (401,403),'Direct roster SELECT exposed'
+        assert request(rest,'/rpc/write_company_branding',{'operation':'save','expected_version':0,'configuration':{}},token)[0]==409,'Old draft editor unexpectedly published'
+        # Real Auth + PostgREST candidate identities. No SMTP or real recipients.
+        anonymous=jwt(signing,'anon')
+        status,address=request(rest,'/rpc/read_company_portal',{},token)
+        assert status==200
+        status,requirements=request(rest,'/rpc/registration_requirements',{},anonymous);assert status==200
+        candidate_email='candidate-'+suffix
+        status,candidate_nonce=request(rest,'/rpc/create_candidate_signup_intent',{'email':candidate_email,'full_name':'Candidate fixture','requested_slug':address['slug'],'terms_revision':requirements['termsRevision'],'accepted_terms':True},anonymous)
+        assert status==200,'Candidate intent creation failed'
+        assert request(auth,'/admin/users',{'email':'missing-intent-'+suffix,'password':password,'email_confirm':True,'user_metadata':{'account_type':'candidate'}},admin)[0] not in (200,201),'Candidate bypassed intent'
+        status,candidate_user=request(auth,'/admin/users',{'email':candidate_email,'password':password,'email_confirm':True,'user_metadata':{'account_type':'candidate','candidate_signup_nonce':candidate_nonce,'role':'platform_admin','company_id':context['company_id']}},admin)
+        assert status in (200,201),'Native candidate creation failed'
+        candidate_id=candidate_user['id']
+        assert sql("select count(*) from public.company_members where user_id='"+candidate_id+"';")=='0','Candidate became company member'
+        assert sql("select raw_user_meta_data ? 'candidate_signup_nonce' or raw_user_meta_data ? 'role' from auth.users where id='"+candidate_id+"';")=='f','Candidate retained injected metadata'
+        assert request(auth,'/admin/users',{'email':candidate_email,'password':password,'email_confirm':True,'user_metadata':{'account_type':'candidate','candidate_signup_nonce':candidate_nonce}},admin)[0] not in (200,201),'Candidate intent replayed'
+        status,candidate_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200
+        candidate_token=candidate_session['access_token']
+        status,candidate_profile=request(rest,'/rpc/candidate_context',{},candidate_token)
+        assert status==200 and candidate_profile['fullName']=='Candidate fixture','Candidate profile missing'
+        assert request(rest,'/rpc/read_company_branding',{},candidate_token)[0] in (401,403),'Candidate read company branding'
+        assert request(rest,'/rpc/platform_read',{'section':'overview'},candidate_token)[0] in (401,403),'Candidate read backoffice'
+        assert request(rest,'/candidate_accounts?select=*',token=candidate_token)[0] in (401,403),'Candidate table SELECT bypass'
+        assert request(rest,'/rpc/candidate_account',{'operation':'profile','expected_version':0,'full_name':'Updated Candidate'},candidate_token)[0]==200,'Candidate profile update failed'
+        assert request(rest,'/rpc/candidate_account',{'operation':'profile','expected_version':0,'full_name':'Stale update'},candidate_token)[0]==409,'Candidate concurrent update overwritten'
+        assert request(rest,'/rpc/candidate_account',{},token)[0]==403,'Company acquired candidate identity'
+        # One own alert and one different recipient, in the isolated database only.
+        campaign=sql("insert into public.platform_communications(title,message,audience,channel,state,created_by,dispatched_at) values('Fixture','Private candidate message','candidates','inapp','dispatched','"+first+"',now()) returning id;").splitlines()[0]
+        sql("insert into public.platform_communication_deliveries(communication_id,user_id,email_state) values('"+campaign+"','"+candidate_id+"','none'),('"+campaign+"','"+first+"','none');")
+        status,inbox=request(rest,'/rpc/candidate_account',{},candidate_token)
+        assert status==200 and len(inbox['items'])==1 and inbox['unread']==1,'Candidate alert isolation/count failed'
+        assert request(rest,'/rpc/candidate_account',{'page_number':2},candidate_token)[1]['unread']==1,'Unread count depends on current page'
+        delivery=inbox['items'][0]['id']
+        assert request(rest,'/rpc/candidate_account',{'operation':'read-alert','delivery_id':delivery},candidate_token)[1]['items'][0]['read_at'],'Candidate read marker failed'
+        assert request(rest,'/rpc/candidate_account',{},candidate_token)[1]['unread']==0,'Read marker did not update unread count'
+        foreign=sql("select id from public.platform_communication_deliveries where communication_id='"+campaign+"' and user_id='"+first+"';")
+        request(rest,'/rpc/candidate_account',{'operation':'read-alert','delivery_id':foreign},candidate_token)
+        assert sql("select read_at is null from public.platform_communication_deliveries where id='"+foreign+"';")=='t','Candidate changed another user alert'
+        sql("update public.candidate_accounts set status='inactive' where user_id='"+candidate_id+"';")
+        assert request(rest,'/rpc/candidate_context',{},candidate_token)==(200,None),'Inactive candidate retained identity'
+        assert request(rest,'/rpc/candidate_account',{},candidate_token)[0]==403,'Inactive candidate retained account'
+        sql("update public.candidate_accounts set status='active' where user_id='"+candidate_id+"';")
+        assert request(auth,'/logout?scope=global',{},candidate_token)[0] in (200,204),'Candidate logout failed'
+        assert request(rest,'/rpc/candidate_context',{},candidate_token)[0]==403,'Revoked candidate JWT accepted'
         assert request(auth,'/signup',{'email':'weak-'+suffix,'password':'abc'})[0] in (400,422),'Weak password not rejected by Auth'
         for index,symbol in enumerate(policy['symbols']):
             assert request(auth,'/admin/users',{'email':'symbol-'+str(index)+'-'+suffix,'password':'Abcdef9'+symbol,'email_confirm':True},admin)[0] in (200,201),'Approved password symbol rejected by Auth'
@@ -243,6 +295,27 @@ def main():
         unreserved='/object/company-branding/'+own_context['company_id']+'/'+str(uuid.uuid4())+'.png'
         assert binary_request(storage,unreserved,png,own_token)[0] in (400,403),'Native unreserved upload accepted'
         assert request(rest,'/rpc/register_company_brand_asset',{'asset_id':asset,'file_name':'fixture.png','file_size':len(png),'file_sha256':hashlib.sha256(png).hexdigest()},own_token)[0]==200,'Native asset registration failed'
+        # Real Auth + Storage + RPC resume lifecycle. Only synthetic candidates in this engine.
+        status,resume_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200
+        resume_token=resume_session['access_token'];resume_id=str(uuid.uuid4());resume_path='/object/candidate-resumes/'+candidate_id+'/'+resume_id+'.pdf'
+        pdf=b'%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\n%%EOF\n'
+        assert request(rest,'/rpc/candidate_resume',{'operation':'reserve','asset_id':resume_id},resume_token)[0]==200,'Candidate resume reservation failed'
+        assert binary_request(storage,resume_path,pdf,resume_token,'application/pdf')[0]==200,'Candidate private PDF upload failed'
+        assert request(rest,'/rpc/candidate_resume',{'operation':'commit','asset_id':resume_id,'file_name':'fixture.pdf','file_size':len(pdf),'file_sha256':hashlib.sha256(pdf).hexdigest(),'expected_version':1},resume_token)[0]==200,'Candidate resume commit failed'
+        assert binary_request(storage,resume_path,None,resume_token)==(200,pdf),'Candidate resume download failed'
+        assert binary_request(storage,resume_path,None,own_token)[0] in (400,403,404),'Employer read candidate PDF'
+        assert binary_request(storage,resume_path,None,jwt(signing,'anon'))[0] in (400,403,404),'Anonymous candidate PDF disclosure'
+        assert request(rest,'/rpc/candidate_resume',{'operation':'commit','asset_id':resume_id,'file_name':'fixture.pdf','file_size':len(pdf),'file_sha256':hashlib.sha256(pdf).hexdigest(),'expected_version':1},resume_token)[0]==409,'Resume concurrent version bypass'
+        # Only this disposable provider fixture opts in to anonymous published-image reads.
+        anonymous=jwt(signing,'anon')
+        assert binary_request(storage,path,None,anonymous)[0] in (400,403,404),'Draft image exposed anonymously'
+        portal_fixture={'assets':{'logoMain':{'id':asset,'url':'/api/company/branding/assets/'+asset}},'banners':[],'portal':{'headline':'Native published fixture'},'backgrounds':{},'theme':{},'palette':{},'typography':{},'structure':{},'displayName':'Native fixture','shortName':'Native','slogan':''}
+        fixture_json=json.dumps(portal_fixture).replace("'","''")
+        sql("insert into public.company_branding(company_id,published) values('"+own_context['company_id']+"','"+fixture_json+"'::jsonb) on conflict(company_id) do update set published=excluded.published;")
+        sql("update public.company_portals set is_public=true where company_id='"+own_context['company_id']+"';")
+        assert binary_request(storage,path,None,anonymous)==(200,png),'Native public projection image read failed'
+        sql("update public.company_portals set is_public=false where company_id='"+own_context['company_id']+"';")
+        assert binary_request(storage,path,None,anonymous)[0] in (400,403,404),'Native unpublication did not revoke image access'
         html_asset=str(uuid.uuid4());html_path='/object/company-branding/'+own_context['company_id']+'/'+html_asset+'.png'
         assert request(rest,'/rpc/reserve_company_image',{'asset_id':html_asset},own_token)[0]==200
         assert binary_request(storage,html_path,b'<html>invalid</html>',own_token,'text/html')[0] in (400,403,415),'Native executable type accepted'
@@ -310,7 +383,7 @@ def main():
         gateway_password=secrets.token_hex(24);sql("alter role jbfd_security_gateway password '"+gateway_password+"';")
         stub_code="""import http from 'node:http';import * as zlib from 'node:zlib';http.createServer(async(req,res)=>{
           if(req.url==='/api/echo'){
-            const text=JSON.stringify({host:req.headers.host,protocol:req.headers['x-forwarded-proto'],encoding:req.headers['accept-encoding']});
+            const text=JSON.stringify({host:req.headers.host,forwardedHost:req.headers['x-forwarded-host'],protocol:req.headers['x-forwarded-proto'],encoding:req.headers['accept-encoding']});
             res.setHeader('Content-Type','application/json');
             if(req.headers['accept-encoding']?.includes('zstd')){res.setHeader('Content-Encoding','zstd');res.end(zlib.zstdCompressSync(text));}
             else res.end(text);return;
@@ -333,6 +406,21 @@ def main():
             else:raise AssertionError('Isolated security gateway readiness failed')
             gateways.append((name,base))
         assert request(gateways[0][1],'/auth/v1/health')[0]==200,'Gateway Auth forwarding failed'
+        # Exercise the actual public ingress, not only the native Storage provider.
+        public_path='/storage/v1'+path
+        assert binary_request(gateways[0][1],public_path,None,anonymous)[0] in (400,403,404),'Gateway exposed unpublished image'
+        sql("update public.company_portals set is_public=true where company_id='"+own_context['company_id']+"';")
+        assert binary_request(gateways[0][1],public_path,None,anonymous)==(200,png),'Gateway blocked published image'
+        forged=anonymous.split('.');forged[2]=('A' if forged[2][0]!='A' else 'B')+forged[2][1:]
+        assert binary_request(gateways[0][1],public_path,None,'.'.join(forged))[0] in (400,401,403),'Unsigned anonymous hint authorized access'
+        assert binary_request(gateways[0][1],'/storage/v1/object/company-branding/'+worker_name,None,anonymous)[0] in (400,403,404),'Gateway exposed another tenant draft'
+        assert binary_request(gateways[0][1],public_path,png,anonymous)[0]==401,'Anonymous image upload accepted'
+        assert binary_request(gateways[0][1],'/storage/v1/object/company-branding/platform/'+asset+'.png',None,anonymous)[0]==401,'Private platform image accepted anonymously'
+        sql("update public.companies set operational_status='suspended' where id='"+own_context['company_id']+"';")
+        assert binary_request(gateways[0][1],public_path,None,anonymous)[0] in (400,403,404),'Suspended company image exposed'
+        sql("update public.companies set operational_status='active' where id='"+own_context['company_id']+"';update public.company_portals set is_public=false where company_id='"+own_context['company_id']+"';")
+        assert binary_request(gateways[0][1],public_path,None,anonymous)[0] in (400,403,404),'Gateway retained unpublished image'
+
         assert binary_request(gateways[0][1],'/storage/v1/object/company-branding/'+orphan_name,None,maintenance)[0]==401,'Private maintenance capability accepted publicly'
         assert request(gateways[0][1],'/auth/v1/signup',{'email':'unicode-'+suffix,'password':'Ab1!ééé'})[0]==422,'Gateway accepted fewer than eight Unicode characters'
         assert request(gateways[0][1],'/auth/v1/signup',{'email':'long-'+suffix,'password':'Ab1!'+'é'*35})[0]==422,'Gateway accepted more than 72 UTF-8 bytes'
@@ -341,6 +429,12 @@ def main():
         after=int(sql("select coalesce(sum(hits),0) from app_private.request_limits where scope like 'login-account:%';"))
         assert after==before+1,'BFF child counted the same action twice'
         assert request(gateways[0][1],'/api/echo')[1]['protocol']=='https','BFF proxy lost HTTPS origin'
+        status,origin_echo=request(gateways[0][1],'/api/echo',request_headers={'Host':'careers.fixture.invalid','X-Forwarded-Host':'spoof.fixture.invalid'})
+        assert status==200 and origin_echo['forwardedHost']=='careers.fixture.invalid','Verified custom origin lost or spoofed across gateway'
+        assert binary_request(gateways[0][1],'/storage/v1'+resume_path,None,resume_token)==(200,pdf),'Gateway blocked own private resume'
+        assert binary_request(gateways[0][1],'/storage/v1'+resume_path,None,anonymous)[0]==401,'Gateway allowed anonymous resume'
+        assert binary_request(gateways[0][1],'/storage/v1'+resume_path,b'<html>fake PDF</html>',resume_token,'application/pdf')[0]==415,'Gateway accepted spoofed PDF'
+
         status,browser_response=request(gateways[0][1],'/api/echo',request_headers={'Accept-Encoding':'zstd, br, gzip, deflate'})
         assert status==200 and browser_response['encoding']=='identity','Browser compression corrupted JSON through gateway'
         sql('update app_private.security_settings set admin_mfa_enforced=true where singleton;')
@@ -428,11 +522,11 @@ def main():
         status,bootstrap_verified=request(gateways[0][1],'/auth/v1/factors/'+bootstrap_factor['id']+'/verify',{'challenge_id':bootstrap_challenge['id'],'code':totp_code(bootstrap_factor['totp']['secret'])},bootstrap_session['access_token']);assert status==200,'Bootstrap MFA verification failed'
         assert request(gateways[0][1],'/rest/v1/rpc/platform_read',{'section':'overview'},bootstrap_verified['access_token'])[0]==200,'Bootstrap administrator denied after fresh MFA'
         assert sql("select count(*) from public.platform_audit_events where actor_user_id='"+bootstrap_id+"' and action='platform.security.bootstrap';")=='1','Bootstrap ownership grant was not audited'
-        print(json.dumps({'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
+        print(json.dumps({'native_candidate_identity_and_isolation':True,'native_candidate_profile_and_alerts':True,'native_candidate_revocation':True,'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
             'password_only_mfa_replacement_denied':True,'native_admin_factor_recovery':True,
-            'native_storage_upload':True,'native_storage_tenant_isolation':True,'native_storage_requires_reservation':True,'native_asset_registration':True,'native_storage_type_restriction':True,'native_storage_size_limit':True,
+            'native_public_image_projection':True,'native_unpublication_revokes_image':True,'native_storage_upload':True,'native_storage_tenant_isolation':True,'native_storage_requires_reservation':True,'native_asset_registration':True,'native_storage_type_restriction':True,'native_storage_size_limit':True,
             'inactive_member_denied':True,'suspended_company_denied':True,'native_logout_denied_old_jwt':True,
             'gateway_native_forwarding':True,'gateway_shared_rate_state':True,'gateway_rate_state_survives_restart':True,
             'validated_signup_intent':True,'metadata_cannot_grant_platform_role':True,'raw_signup_capability_not_persisted':True,
@@ -458,5 +552,5 @@ if __name__=='__main__':
     try:main()
     except Exception as error:
         # No provider payloads, generated credentials or request contents.
-        print(json.dumps({'passed':False,'error_type':type(error).__name__,'line':traceback.extract_tb(error.__traceback__)[-1].lineno,'operation':error.cmd[:4] if isinstance(error,subprocess.CalledProcessError) else None,'detail':str(error) if isinstance(error,AssertionError) else 'Inspect private isolated service diagnostics'}))
+        print(json.dumps({'passed':False,'error_type':type(error).__name__,'line':[f.lineno for f in traceback.extract_tb(error.__traceback__) if f.filename.endswith('test-native-auth.py')],'operation':error.cmd[:4] if isinstance(error,subprocess.CalledProcessError) else LAST_HTTP_OPERATION,'detail':str(error) if isinstance(error,AssertionError) else 'Inspect private isolated service diagnostics'}))
         raise SystemExit(1)

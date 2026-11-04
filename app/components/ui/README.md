@@ -42,3 +42,18 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 - `jf-workspace-stack`, `jf-workspace-grid` e `jf-workspace-toolbar` organizam módulos e formulários com a escala oficial; mantenha estilos de domínio apenas para a composição específica.
 - `WorkspaceTabs`, `WorkspaceActionMenu` e `WorkspaceState` são demonstrados no catálogo e usados nas páginas. Estados de erro persistentes emitem um único sinal, sem duplicar um toast.
 - `WidgetDialog` atende confirmações, histórico, prévia ampla e drawer. O tamanho `wide` e janelas sobrepostas preservam foco, Escape e a liberação da rolagem ao fechar a última janela.
+
+## Feedback de ações
+
+- Publique resultados de salvar, enviar, excluir e falhas de ação com `AppToast` e `createToastNotice`. O `AppToastHost` único do layout mantém apenas o alerta mais recente, inclusive sobre `WidgetDialog` e drawers. Não duplique o mesmo resultado com parágrafos ou `InlineNotice`.
+- Sucesso/informação duram 6 segundos; atenção/erro, 10. Hover, foco e aba oculta pausam a leitura. Alertas com link de ação exigida permanecem até fechamento.
+- Validação de campo permanece junto ao campo. Orientações persistentes usam `InlineNotice`; falhas que impedem carregar um módulo usam `WorkspaceState` com nova tentativa.
+- Preserve os ícones, tokens e sons aprovados. O Design System demonstra a mesma implementação, sem temporizador próprio.
+
+- A divisória da marca lateral e a base do menu superior compartilham `--jf-ui-workspace-header-height` (80px). A área da marca desconta o padding superior da sidebar; não definir alturas independentes por página. O mesmo shell atende Design System, Backoffice e painel empresarial, inclusive menu recolhido e drawer móvel.
+
+## Editor e prévia responsiva
+
+`EditorSection` agrupa campos sem cartões aninhados. `ViewportPreview` mantém um iframe sem scripts com viewport real, escala calculada por ResizeObserver e limite de altura; desktop, tablet e celular não dependem da largura do painel administrativo. O documento recebe apenas estilos e componentes React compartilhados; navegação externa é bloqueada na prévia. Os controles, cores e dados do editor permanecem separados da apresentação personalizada. A demonstração real está em Widgets.
+
+`PreviewDock` identifica prévias privadas em posição fixa, com retorno à edição, e é demonstrado em Widgets sem fixação para não encobrir o catálogo. `RichTextField` aceita `maxLength` (padrão 4000), aplicado também a comandos de formatação da fonte.

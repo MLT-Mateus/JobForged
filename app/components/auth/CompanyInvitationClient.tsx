@@ -39,5 +39,5 @@ export function CompanyInvitationClient({ token }: { token: string }) {
         <TextField name="password" label="Senha" type="password" value={password} onChange={event => setPassword(event.target.value)} required /><ActionButton type="submit" disabled={busy}>Entrar</ActionButton></form>
       <form className="auth-form" onSubmit={register}><h2>Criar conta para o convite</h2><p>Use o mesmo e-mail do convite. Depois confirme seu endereço na mensagem recebida.</p>
         <ActionButton type="submit" disabled={busy}>Criar conta com estes dados</ActionButton></form></>}
-    {message && <><p role="status">{message}</p><AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Convite não concluído" : "Convite empresarial",text:message}} onClose={() => setMessage("")}/></>}<p><Link href="/recuperar-senha">Esqueci minha senha</Link></p></section></div></main>;
+    {message && <AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Convite não concluído" : "Convite empresarial",text:message}} onClose={() => setMessage("")}/>}<p><Link href="/recuperar-senha">Esqueci minha senha</Link></p></section></div></main>;
 }

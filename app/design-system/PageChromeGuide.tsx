@@ -1,0 +1,13 @@
+import {ProportionalImage} from '../components/ui/ProportionalImage';
+import {careerDefaults} from '../components/personalization/career-defaults';
+export function PageChromeGuide(){return <div className="ds-modern-stack"><div className="ds-chrome-diagram" aria-label="Estrutura da página"><div>Cabeçalho de navegação</div><div><span>Navegação lateral</span><strong>Conteúdo principal</strong><span>Painel contextual</span></div><div>Rodapé institucional</div></div><div className="ds-chrome-table"><table><thead><tr><th>Elemento</th><th>Medida e uso</th></tr></thead><tbody>{[
+ ['Cabeçalho público','Altura mínima de 78 px; 70 px no celular. Conteúdo até 1180 px e margens de 24/16 px, como na LP. Menus extensos podem aumentar a altura sem cortar informações.'],
+ ['Navegação lateral','WorkspaceShell aprovado: recolhível; no celular, sobreposição fechada após escolher uma página. Nunca reduza artificialmente a área de leitura.'],
+ ['Rodapé institucional','SiteFooter compartilhado: até 1180 px; espaçamento superior 70 px (40 px em telas estreitas), inferior 24 px. Grade principal com mínimo de 240 px; conteúdo pode expandir.'],
+ ['Navegação compacta','Menu de links no cabeçalho em telas estreitas, sem aumentar a altura da faixa. Preserve rótulos acessíveis e feche após navegar.'],
+ ['Aviso temporário','AppToast compartilhado: canto inferior direito, sem bloquear o campo. Respeite som, duração e pausa de leitura do componente.'],
+ ['Painel inferior','Bottom Sheet no celular: até 85% da altura, alça e área segura; use para escolhas e filtros, não para login.'],
+ ['Painel contextual à direita','WidgetDialog drawer: até 440 px, altura da viewport e rolagem interna. Use para notificações e detalhes, não para acesso à conta.'],
+ ['Janela modal','WidgetDialog modal: até 560 px, margem externa de 16 px e altura limitada à tela. Login inicial; cadastro e recuperação por links de texto, sem abas.'],
+ ['Ajuda contextual','FocusPopover: até 300 px; abaixo quando couber, acima quando necessário. Acompanha a rolagem, fecha com Escape ou clique fora.']
+ ].map(([name,description])=><tr key={name}><th scope="row">{name}</th><td>{description}</td></tr>)}</tbody></table></div><p>Sobreposições mantêm foco, fechamento acessível e rolagem interna. Sombras, cores e espaçamentos vêm dos tokens compartilhados.</p><div className="ds-chrome-image"><ProportionalImage src={careerDefaults.banner} alt="Exemplo de imagem inteira com extensão lateral desfocada"/></div><p>Imagem inteira, sem deformar nem recortar. A mesma imagem preenche as bordas com desfoque e uma camada de vidro, sem processamento no servidor ou animação contínua.</p></div>}

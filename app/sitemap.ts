@@ -1,20 +1,8 @@
-import type { MetadataRoute } from "next";
-
-const siteUrl = process.env.APP_PUBLIC_URL || "https://jobforged.com";
-
-export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = [
-    "/",
-    "/design-system",
-    "/termos-servico",
-    "/politicas-privacidade",
-    "/politicas-exclusao",
-  ];
-
-  return routes.map((route) => ({
-    url: new URL(route, siteUrl).toString(),
-    lastModified: new Date(),
-    changeFrequency: route === "/" ? ("weekly" as const) : ("monthly" as const),
-    priority: route === "/" ? 1 : 0.5,
-  }));
+import type {MetadataRoute} from 'next';
+import {publicSearchPaths,searchEnvironment} from './lib/seo';
+export const dynamic='force-dynamic';
+export default function sitemap():MetadataRoute.Sitemap{
+ const {origin,indexable}=searchEnvironment();if(!indexable)return [];
+ // No fabricated lastmod: it must represent a real content update, not request time.
+ return publicSearchPaths.map(path=>({url:new URL(path,origin).href}));
 }

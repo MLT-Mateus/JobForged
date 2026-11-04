@@ -1,0 +1,8 @@
+div.jf-proportional-image{position:relative;isolation:isolate;width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;border-radius:inherit;background:var(--jf-ui-surface-soft)}
+div.jf-proportional-image>picture>img.jf-proportional-image__ambient,div.jf-proportional-image>picture>img.jf-proportional-image__foreground{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;max-height:none;border-radius:0}
+div.jf-proportional-image>picture>img.jf-proportional-image__ambient{object-fit:cover;filter:blur(24px);transform:scale(1.08);opacity:.65;pointer-events:none}
+div.jf-proportional-image>picture>img.jf-proportional-image__foreground{object-fit:contain}
+.jf-proportional-image__glass{position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,color-mix(in srgb,var(--jf-ui-surface) 30%,transparent),transparent 40%,color-mix(in srgb,var(--jf-ui-surface) 24%,transparent));border:1px solid color-mix(in srgb,var(--jf-ui-surface) 22%,transparent)}
+@media(prefers-reduced-transparency:reduce){div.jf-proportional-image>picture>img.jf-proportional-image__ambient{display:none}.jf-proportional-image__glass{display:none}}
+
+.jf-proportional-image>picture{display:contents}

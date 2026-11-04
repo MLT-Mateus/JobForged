@@ -8,7 +8,6 @@ export const systemPages = {
 export type SystemPageCode = keyof typeof systemPages;
 export const pageLinks = [
   { title: "Página inicial", href: "/", keywords: "inicio landing" },
-  { title: "Vagas da JobForged", href: "/jobforged", keywords: "carreiras oportunidades" },
   { title: "Entrar na conta", href: "/login", keywords: "login acesso" },
   { title: "Cadastrar empresa", href: "/cadastro", keywords: "cadastro criar conta" },
   { title: "Perguntas frequentes", href: "/#faq", keywords: "ajuda suporte duvidas" },

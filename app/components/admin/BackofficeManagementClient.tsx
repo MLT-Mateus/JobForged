@@ -3,13 +3,12 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { Megaphone, Building2, Users, Mail, Settings, History, LayoutDashboard, Search, Filter, ShieldCheck } from 'lucide-react';
 import {SecurityClient} from './SecurityClient';
-import {AdministrativeVerificationAction} from './AdministrativeVerificationAction';
+import {AdministrativeVerificationAction,administrativeVerificationToastAction} from './AdministrativeVerificationAction';
 import {adminVerificationMessage} from '@/app/lib/administrative-feedback';
 import { CommunicationsClient } from './CommunicationsClient';
 import { NotificationBell } from './NotificationBell';
 import { WorkspaceShell } from '@/app/components/ui/WorkspaceShell';
 import { ActionButton, AppToast, createToastNotice, DataTable, EmptyState, MetricCard, Panel, PanelHeading, SelectField, StatusBadge, TextAreaField, TextField, WidgetDialog, WorkspacePageHeader, WorkspaceState, type ToastNotice } from '@/app/components/ui';
-import { useStatusSoundForMessage } from '@/app/components/ui/status-sound';
 import { roleLabel, planStatusLabel, auditLabel } from './display-labels';
 import { backofficeSections, defaultPlatformSettings, platformActions, platformStatus, type BackofficeSection, type PlatformSettings, type RecordRow } from './backoffice-model';
 type Result = {total?:number;items?:RecordRow[];company?:RecordRow;members?:RecordRow[];invitations?:RecordRow[]} & Partial<PlatformSettings> & Record<string,unknown>;
@@ -34,7 +33,6 @@ export function BackofficeManagementClient({email,section='overview',companyId}:
    .catch(reason=>{if(!c.signal.aborted)setSnapshot({key,data:null,error:reason instanceof Error?reason.message:'Não foi possível carregar os dados autorizados. Tente novamente.'})});
   return()=>c.abort();
  },[key,section,query,status,page,companyId]);
- useStatusSoundForMessage(saveError,'danger');
  useEffect(()=>{void fetch('/api/platform/settings',{cache:'no-store'}).then(r=>r.ok?r.json() as Promise<PlatformSettings>:null).then(v=>{if(v)setSettings(v)}).catch(()=>{})},[]);
  const open=(value:Edit)=>{setEdit(value);setReason('');setSaveError('')};
  async function save(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!edit||saving)return;setSaving(true);setSaveError('');try{
@@ -63,9 +61,10 @@ export function BackofficeManagementClient({email,section='overview',companyId}:
  {section==='settings'&&<Panel><PanelHeading title="Informações da plataforma" description="Nome e canais exibidos nos painéis. O remetente autenticado de e-mail não é alterado."/><dl className="jf-panel-body jf-workspace-stack">{(['platform_name','support_email','support_url'] as const).map(k=><div key={k}><dt>{labels[k]}</dt><dd>{String(data[k])}</dd></div>)}</dl><div className="jf-panel-body"><ActionButton onClick={()=>open({operation:'settings.update',title:'Editar configurações',description:'Atualiza o nome do backoffice e os canais de suporte disponíveis nos painéis.',values:{platform_name:String(data.platform_name),support_email:String(data.support_email),support_url:String(data.support_url)}})}>Editar configurações</ActionButton></div></Panel>}
  {data.total!==undefined&&<nav className="jf-workspace-toolbar" aria-label="Paginação"><span>{data.total} resultados · Página {page} de {Math.max(1,Math.ceil(data.total/25))}</span><ActionButton variant="secondary" disabled={page===1} onClick={()=>setPage(p=>p-1)}>Anterior</ActionButton><ActionButton variant="secondary" disabled={page*25>=data.total} onClick={()=>setPage(p=>p+1)}>Próxima</ActionButton></nav>}
  </>}</div>
- <WidgetDialog open={!!edit} onClose={()=>{if(!saving)setEdit(null)}} title={edit?.title||''} description={edit?.description}>{edit&&<form className="admin-form-stack" onSubmit={save}>
+ <WidgetDialog open={!!edit} onClose={()=>{if(!saving){setEdit(null);setSaveError('')}}} title={edit?.title||''} description={edit?.description}>{edit&&<form className="admin-form-stack" onSubmit={save}>
  {Object.entries(edit.values).filter(([k])=>!(edit.operation==='company.status'&&k==='status')).map(([k,v])=>k==='role'||k==='status'?<SelectField key={k} label={k==='role'?'Papel na empresa':'Situação do vínculo'} value={v} onValueChange={value=>setEdit({...edit,values:{...edit.values,[k]:value}})} options={(k==='role'?(edit.operation==='member.update'?['owner','admin','member']:['admin','member']):['active','inactive']).map(value=>({value,label:k==='role'?roleLabel(value):platformStatus[value]}))}/>:<TextField key={k} label={labels[k]||k} placeholder={placeholders[k]||`Informe ${labels[k]||k}`} type={k.includes('email')?'email':k==='support_url'?'url':'text'} value={v} required={!['cnpj','phone'].includes(k)} minLength={['name','platform_name'].includes(k)?2:undefined} maxLength={k==='name'?160:k==='platform_name'?80:k==='cnpj'?14:k==='phone'?13:500} onChange={e=>setEdit({...edit,values:{...edit.values,[k]:['cnpj','phone'].includes(k)?e.target.value.replace(/\D/g,''):e.target.value}})}/>)}
- <TextAreaField label="Motivo da alteração" placeholder="Descreva o motivo desta alteração administrativa" value={reason} onChange={e=>setReason(e.target.value)} required minLength={5} maxLength={500}/>{saveError&&<p role="alert">{saveError}</p>}{saveError===adminVerificationMessage&&<AdministrativeVerificationAction/>}<div className="jf-workspace-toolbar"><ActionButton type="submit" variant={edit.operation==='invitation.revoke'||(edit.operation==='company.status'&&edit.values.status==='suspended')?'danger':'primary'} disabled={saving}>{saving?'Salvando…':'Confirmar alteração'}</ActionButton><ActionButton variant="secondary" disabled={saving} onClick={()=>setEdit(null)}>Cancelar</ActionButton></div></form>}</WidgetDialog>
+ <TextAreaField label="Motivo da alteração" placeholder="Descreva o motivo desta alteração administrativa" value={reason} onChange={e=>setReason(e.target.value)} required minLength={5} maxLength={500}/><div className="jf-workspace-toolbar"><ActionButton type="submit" variant={edit.operation==='invitation.revoke'||(edit.operation==='company.status'&&edit.values.status==='suspended')?'danger':'primary'} disabled={saving}>{saving?'Salvando…':'Confirmar alteração'}</ActionButton><ActionButton variant="secondary" disabled={saving} onClick={()=>{setEdit(null);setSaveError('')}}>Cancelar</ActionButton></div></form>}</WidgetDialog>
  <WidgetDialog open={!!auditRow} onClose={()=>setAuditRow(null)} title="Detalhes do evento"><dl className="jf-workspace-stack"><div><dt>Responsável</dt><dd>{auditRow?.actor_email||'Sistema'}<br/>{auditRow?.actor_user_id}</dd></div><div><dt>Alvo</dt><dd>{auditRow?.target_id||'Plataforma'}</dd></div><div><dt>Alterações registradas</dt><dd><pre className="backoffice-audit-data">{JSON.stringify(auditRow?.details,null,2)}</pre></dd></div></dl></WidgetDialog>
+ {saveError&&<AppToast notice={{kind:'danger',title:'Alteração não concluída',text:saveError,action:saveError===adminVerificationMessage?administrativeVerificationToastAction:undefined}} onClose={()=>setSaveError('')}/>}
  {notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}</WorkspaceShell>;
 }
