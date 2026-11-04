@@ -1,4 +1,6 @@
 "use client";
+import {imageUploadOptions} from '@/shared/image-upload';
+import {apiResponse} from '@/app/lib/api-response';
 import { brandingDefaults, brandContent } from './branding-model';
 import type { Customization, HistoryEntry, BrandAsset } from './personalization-types';
 type Stored = {companyId:string;companyName:string;editable:boolean;version:number;draft:object|null;published:object;publishedVersion:number;updatedAt:string;publishedAt:string;publishedBy:string;history:Array<{id:string;version:number;snapshot:object;created_at:string;actor:string}>};
@@ -24,5 +26,5 @@ export const customizationService={
  async resetCustomization(input:Customization){return (await mutate('reset',input)).draft},
  async restoreVersion(entry:HistoryEntry,input:Customization){return (await mutate('restore',input,entry.id)).draft},
  async getHistory(){return (await load()).history},
- async uploadAsset(file:File,kind:string,companyId:string):Promise<BrandAsset>{const form=new FormData();form.set('file',file);form.set('kind',kind);form.set('companyId',companyId);const response=await fetch('/api/company/branding/assets',{method:'POST',credentials:'same-origin',body:form});const result=await response.json() as {asset:BrandAsset;message?:string};if(!response.ok)throw new Error(result.message||'Não foi possível enviar a imagem.');return result.asset}
+ async uploadAsset(file:File,kind:string,companyId:string):Promise<BrandAsset>{const response=await fetch('/api/company/branding/assets',imageUploadOptions(file,{'X-Image-Kind':kind,'X-Company-Id':companyId}));const result=await apiResponse<{asset:BrandAsset}>(response,'Não foi possível enviar a imagem.');if(!result.asset?.url)throw Error('Não foi possível registrar a imagem. Tente novamente.');return result.asset}
 };

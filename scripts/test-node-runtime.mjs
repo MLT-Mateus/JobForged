@@ -90,6 +90,17 @@ try {
       const denied=await fetch(`${base}${path}`,{method:'POST',headers:{Origin:base},signal:AbortSignal.timeout(15000)});
       assert.equal(denied.status,403,`${environment}${path} must reject a visitor`);
     }
+    // Public Origin differs from the upstream Host behind the security gateway.
+    // Binary uploads must reach API authorization instead of multipart Server Action CSRF.
+    for(const path of ['/api/company/branding/assets','/api/backoffice/communications/assets']){
+      const host=environment==='live'?'jobforged.com':'test.jobforged.com';
+      for(const origin of [`https://${host}`,'https://foreign.example']){
+        const denied=await fetch(`${base}${path}`,{method:'POST',headers:{Origin:origin,'X-Forwarded-Host':host,'X-Forwarded-Proto':'https','Content-Type':'image/png','X-Upload-Name':'probe.png'},body:Buffer.from([137,80,78,71,13,10,26,10]),signal:AbortSignal.timeout(15000)});
+        assert.equal(denied.status,403,`${environment}${path} must retain authorization`);
+        assert.match(denied.headers.get('content-type')||'',/application\/json/);
+        assert.equal(typeof (await denied.json()).message,'string');
+      }
+    }
     for (const route of routes) {
       const response = await fetch(`${base}${route}`, { signal: AbortSignal.timeout(15_000) });
       const stateCode = /^\/(401|403|404|500|503)$/.exec(route);

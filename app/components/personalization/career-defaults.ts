@@ -1,4 +1,5 @@
 export const careerDefaults={
+ cultureBanner:'/careers/culture-jobforged-v1.webp',
  image:'/careers/team-jobforged-v2.webp',
  banner:'/careers/team-jobforged-panorama-v1.webp',
  headline:'Seu próximo capítulo começa aqui.',
