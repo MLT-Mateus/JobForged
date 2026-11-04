@@ -62,7 +62,7 @@ def reconcile():
   labels=labels_for(verified,network)
   if not old or old['Config']['Labels'].get('jbfd.domain.digest')!=labels['jbfd.domain.digest']:
    if old:run(['docker','rm','-f',NAME])
-   args=['docker','run','-d','--name',NAME,'--network',network,'--restart','unless-stopped','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges:true','--memory','64m','--cpus','0.1']
+   args=['docker','run','-d','--name',NAME,'--no-healthcheck','--network',network,'--restart','unless-stopped','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges:true','--memory','64m','--cpus','0.1']
    for key,value in labels.items():args+=['--label',key+'='+value]
    run(args+['--entrypoint','node',image,'-e','setInterval(()=>{},3600000)'])
  elif old:run(['docker','rm','-f',NAME])
