@@ -11,3 +11,5 @@ E-mails do catálogo compartilhado, convites empresariais e comunicação em tex
 Cadastro empresarial usa cartão único central, componentes/validações já aprovados e responsividade existente. Anexo de alinhamento citado no pedido não estava disponível; não atribuir correção a outra página sem inspeção.
 
 Validação: suite nativa isolada chama signup real sem SMTP válido e exige access/refresh, contexto empresarial, rejeição de duplicado e senha errada. Mantém testes existentes de recuperação/MFA/isolações. CI do app valida cookies e política de ambientes. Nenhuma mensagem externa é enviada para produzir evidências.
+
+A reconciliação inclui cadastro empresarial legado válido anterior aos nonces: proprietário ativo, e-mail igual ao vínculo, CNPJ válido e aceite registrado na empresa ativa. Exclui administradores de plataforma, contas banidas/excluídas, candidatos e vínculos suspensos. Não exige intenção efêmera, pois ela não existia nos cadastros antigos e expira nos novos. Executada pela API administrativa nativa apenas na VPS, com auditoria, sem emitir mensagens ou mudar senha.
