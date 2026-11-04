@@ -18,7 +18,7 @@ export function ViewportPreview({children,width,height=800,theme,title='Prévia 
  const [doc,setDoc]=useState<Document|null>(null),[scale,setScale]=useState(1);
  const ready=useCallback(()=>{const current=frame.current?.contentDocument;if(current?.getElementById("preview-root"))setDoc(current)},[]);
  useEffect(()=>{ready();const element=frame.current;element?.addEventListener("load",ready);return()=>element?.removeEventListener("load",ready)},[ready]);
- useEffect(()=>{const element=container.current;if(!element)return;const resize=()=>setScale(Math.min(1,Math.max(0,element.clientWidth)/width,Math.max(280,Math.min(640,window.innerHeight-240))/height));resize();const observer=new ResizeObserver(resize);observer.observe(element);window.addEventListener('resize',resize);return()=>{observer.disconnect();window.removeEventListener('resize',resize)}},[width,height]);
+ useEffect(()=>{const element=container.current;if(!element)return;const resize=()=>setScale(Math.min(1,Math.max(0,element.clientWidth)/width));resize();const observer=new ResizeObserver(resize);observer.observe(element);window.addEventListener('resize',resize);return()=>{observer.disconnect();window.removeEventListener('resize',resize)}},[width,height]);
  useEffect(()=>{
   if(!doc)return;
   const copies=new Map<Element,{signature:string;clone:HTMLElement}>();let pending=0;

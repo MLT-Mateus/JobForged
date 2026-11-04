@@ -19,6 +19,7 @@ function OverlayPreview({kind}:{kind:"modal"|"focus"|"drawer"}) {
 }
 export function WidgetsSection() {
  const [previewTheme,setPreviewTheme]=useState<"light"|"dark">("light");
+ const [previewDevice,setPreviewDevice]=useState<"desktop"|"tablet"|"mobile">("desktop");
  const example=brandingDefaults('design-system-preview','Sua empresa');
  const [editorTitle,setEditorTitle]=useState("Faça parte da nossa equipe");
  const [overlay,setOverlay]=useState<"modal"|"drawer"|"sheet"|null>(null),[onlyActive,setOnlyActive]=useState(true),[sheetChoice,setSheetChoice]=useState(true),[preview,setPreview]=useState(true);
@@ -48,7 +49,7 @@ export function WidgetsSection() {
   </div>
  </Demo>
  <Demo number="05" title="Editor com prévia" description="Menus recolhíveis à esquerda e prévia ao lado, com os mesmos componentes da personalização.">
- <EditorWorkbench editor={<><EditorAccordion title="Conteúdo do hero" defaultOpen><EditorSection title="Mensagem de boas-vindas"><TextField label="Título principal" placeholder="Digite o título..." value={editorTitle} onChange={e=>setEditorTitle(e.target.value)}/></EditorSection></EditorAccordion><EditorAccordion title="Imagem e composição"><p>As opções relacionadas ficam dentro do mesmo menu.</p></EditorAccordion></>} preview={<AppearancePreviewPanel data={{...example,portal:{...example.portal,headline:editorTitle}}} theme={previewTheme} onThemeChange={setPreviewTheme}/>}/>
+ <p>O editor mantém pelo menos 340 px. A prévia mantém 430 px e nunca ultrapassa 65% do grupo. No celular ela fica mais estreita; se faltar espaço, os grupos se empilham. A tela simulada mantém seus 390 px, sem mudar o breakpoint.</p><EditorWorkbench previewDevice={previewDevice} editor={<><EditorAccordion title="Conteúdo do hero" defaultOpen><EditorSection title="Mensagem de boas-vindas"><TextField label="Título principal" placeholder="Digite o título..." value={editorTitle} onChange={e=>setEditorTitle(e.target.value)}/></EditorSection></EditorAccordion><EditorAccordion title="Imagem e composição"><p>As opções relacionadas ficam dentro do mesmo menu.</p></EditorAccordion></>} preview={<AppearancePreviewPanel device={previewDevice} onDeviceChange={setPreviewDevice} data={{...example,portal:{...example.portal,headline:editorTitle}}} theme={previewTheme} onThemeChange={setPreviewTheme}/>}/>
  </Demo>
  <Demo number="06" title="Conta e alertas na página pública" description="Acesso pelo cabeçalho, sem um painel separado. Exemplo sem cadastro ou envio de mensagens."><div className="ds-widget-inline"><PublicPortalAccount slug="exemplo" demo demoUnread={3}/><PublicPortalAccount slug="exemplo" demo demoSignedIn={false}/></div></Demo>
  <Demo number="07" title="Balão de informação · tooltip" description="Ajuda contextual junto ao controle, usando o mesmo balão do Rich Text. Abre abaixo quando há espaço; caso contrário, acima. Acompanha a rolagem e mantém o conteúdo acessível.">

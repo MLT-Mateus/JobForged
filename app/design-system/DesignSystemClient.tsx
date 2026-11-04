@@ -214,6 +214,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
   const [selectedBenefits, setSelectedBenefits] = useState(["Vale alimentação"]);
   const [interviewRange, setInterviewRange] = useState<DateRangeValue>({ start: "2026-08-20", end: "" });
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [filledPicture,setFilledPicture]=useState<string|null>('banner-demonstrativo.webp'),[filledFile,setFilledFile]=useState<string|null>('documento-demonstrativo.pdf');
   const [uploadedPicture, setUploadedPicture] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploadedPictures, setUploadedPictures] = useState<File[]>([]);
@@ -418,6 +419,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <FileUploadField maxBytes={5242880} helpText="Arraste um arquivo ou use Selecionar. Mesmo envio e validação nos dois modos. SVG simples: até 1 MB; outros formatos: até 5 MB. HEIF/HEIC e HVIF precisam ser exportados para um formato compatível." label="Imagem do perfil" value={uploadedPicture} accept={imageAccept} emptyHint={`${imageFormats} · até 5 MB`} variant="picture" onFileChange={(file) => setUploadedPicture(file?.name ?? null)} />
                 </div>
               </ExampleCard>
+              <ExampleCard title="Uploads preenchidos · mock" className="ds-form-card--wide"><p>Miniatura, nome e estado ficam juntos. Selecionado indica escolha local; enviado indica persistência confirmada. Não exiba a imagem em um bloco distante do campo.</p><div className="ds-upload-grid"><FileUploadField label="Imagem enviada · demonstração" variant="picture" value={filledPicture} previewUrl={filledPicture==='banner-demonstrativo.webp'?'/careers/culture-jobforged-v1.webp':undefined} stored={filledPicture==='banner-demonstrativo.webp'} onRemove={()=>setFilledPicture(null)} accept={imageAccept} emptyHint={imageFormats} onFileChange={file=>setFilledPicture(file?.name??null)}/><FileUploadField label="Arquivo enviado · demonstração" value={filledFile} stored={filledFile==='documento-demonstrativo.pdf'} onRemove={()=>setFilledFile(null)} accept=".pdf" emptyHint="PDF" onFileChange={file=>setFilledFile(file?.name??null)}/></div></ExampleCard>
               <ExampleCard title="Uploads múltiplos" className="ds-form-card--wide">
                 <div className="ds-upload-grid">
                   <MultiFileUploadField maxBytes={10485760} label="Documentos da candidatura" files={uploadedFiles} accept=".pdf,.doc,.docx" emptyHint="Arraste ou selecione até 6 documentos" maxFiles={6} onFilesChange={setUploadedFiles} helpText="Novos arquivos são adicionados à lista sem substituir os anteriores." />

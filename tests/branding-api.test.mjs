@@ -39,6 +39,7 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   const form=new FormData();form.set('file',new File([image],'logo.png',{type:'image/png'}));form.set('kind','logoMain');form.set('companyId',cid);
   const upload=await request('/api/company/branding/assets',form);assert.equal(upload.status,200);const result=await upload.json();assert.match(result.asset.url,/^\/api\/company\/branding\/assets\//);assert.equal(JSON.stringify(result).includes('bucket-only-fixture-token'),false);
   const read=await request(result.asset.url);assert.equal(read.status,200);assert.equal(read.headers.get('content-type'),'image/png');assert.equal(read.headers.get('x-content-type-options'),'nosniff');
+  const iconRead=await request(result.asset.url+'?icon=1');assert.equal(iconRead.status,200);const iconMeta=await sharp(Buffer.from(await iconRead.arrayBuffer())).metadata();assert.equal(iconMeta.width,64);assert.equal(iconMeta.height,64);
   assert.equal((await request('/api/company/branding/assets/38000000-0000-0000-0000-000000000099')).status,404);
   tampered=true;assert.equal((await request(result.asset.url)).status,503);
   tampered=false;

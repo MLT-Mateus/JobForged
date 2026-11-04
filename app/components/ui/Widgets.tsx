@@ -54,12 +54,12 @@ export function FocusPopover({label,children,triggerContent,triggerVariant="seco
  return <div className={`jf-focus-group jf-focus-group--${align}`} ref={root} onBlur={e=>{if(e.relatedTarget&&'nodeType' in e.relatedTarget&&!e.currentTarget.contains(e.relatedTarget as Node))setOpen(false)}}><button ref={trigger} type="button" className={`jf-action jf-action--${triggerVariant} ${triggerClassName}`} title={label} aria-label={label} aria-expanded={open} aria-controls={id} aria-haspopup="dialog" onClick={()=>setOpen(v=>!v)}>{triggerContent??label}</button>{open&&<div id={id} ref={panel} popover="manual" style={{visibility:"hidden"}} tabIndex={-1} role="dialog" aria-label={label} className="jf-focus-group__panel">{children}{showCloseAction&&<ActionButton variant="quiet" onClick={()=>{setOpen(false);trigger.current?.focus()}}>Concluir</ActionButton>}</div>}</div>;
 }
 
-export function EditorAccordion({title,icon,children,defaultOpen=false}:{title:string;icon?:ReactNode;children:ReactNode;defaultOpen?:boolean}) {
+export function EditorAccordion({title,icon,badge,children,defaultOpen=false}:{title:string;icon?:ReactNode;badge?:ReactNode;children:ReactNode;defaultOpen?:boolean}) {
  const [open,setOpen]=useState(defaultOpen);
- return <details className="jf-editor-accordion" open={open} onToggle={e=>setOpen(e.currentTarget.open)}><summary>{icon}<span>{title}</span><ChevronDown aria-hidden="true"/></summary><div className="jf-editor-accordion__body">{children}</div></details>;
+ return <details className="jf-editor-accordion" open={open} onToggle={e=>setOpen(e.currentTarget.open)}><summary>{icon}<span>{title}</span>{badge}<ChevronDown aria-hidden="true"/></summary><div className="jf-editor-accordion__body">{children}</div></details>;
 }
-export function EditorWorkbench({editor,preview}:{editor:ReactNode;preview:ReactNode}) {
- return <div className="jf-editor-workbench"><div className="jf-editor-workbench__form">{editor}</div><div className="jf-editor-workbench__preview">{preview}</div></div>;
+export function EditorWorkbench({editor,preview,previewDevice="desktop"}:{editor:ReactNode;preview:ReactNode;previewDevice?:"desktop"|"tablet"|"mobile"}) {
+ return <div className="jf-editor-workbench-shell"><div className={`jf-editor-workbench jf-editor-workbench--${previewDevice}`}><div className="jf-editor-workbench__form">{editor}</div><div className="jf-editor-workbench__preview">{preview}</div></div></div>;
 }
 
 export function EditorSection({title,description,action,children}:{title:string;description?:string;action?:ReactNode;children:ReactNode}){return <section className="jf-editor-section"><header><div><h3>{title}</h3>{description&&<p>{description}</p>}</div>{action}</header><div className="jf-editor-section__body">{children}</div></section>}
