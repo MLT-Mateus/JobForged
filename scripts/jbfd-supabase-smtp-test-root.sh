@@ -52,6 +52,7 @@ cat > "$template_candidate" <<'YAML'
 services:
   auth:
     environment:
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
       GOTRUE_MAILER_TEMPLATES_RECOVERY: https://test.jobforged.com/api/auth/email-templates/password-recovery
       GOTRUE_MAILER_SUBJECTS_RECOVERY: Redefina sua senha na JobForged
       GOTRUE_MAILER_TEMPLATES_CONFIRMATION: https://test.jobforged.com/api/auth/email-templates/auth-confirmation
@@ -92,7 +93,7 @@ declare -A smtp_values=(
   [SMTP_SENDER_NAME]=JobForged
   [DISABLE_SIGNUP]=false
   [ENABLE_EMAIL_SIGNUP]=true
-  [ENABLE_EMAIL_AUTOCONFIRM]=false
+  [ENABLE_EMAIL_AUTOCONFIRM]=true
 )
 declare -A smtp_seen=()
 while IFS= read -r line || [[ -n "$line" ]]; do

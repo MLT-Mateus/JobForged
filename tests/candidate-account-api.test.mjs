@@ -10,7 +10,7 @@ test('candidate BFF uses validated intent, same-origin writes and own explicit c
  if(path.endsWith('/rpc/session_context_v1'))return Response.json(null);
  if(path.endsWith('/rpc/candidate_context'))return Response.json({fullName:'Candidate fixture',version:0,slug:'fixture-company'});
  if(path.endsWith('/rpc/create_candidate_signup_intent'))return Response.json('a'.repeat(64));
- if(path==='/auth/v1/signup')return Response.json({id:'35000000-0000-4000-8000-000000000002'});
+ if(path==='/auth/v1/signup')return Response.json({access_token:'fixture-new',refresh_token:'fixture-refresh',expires_in:900,user:{id:'35000000-0000-4000-8000-000000000002'}});
  if(path.endsWith('/rpc/candidate_resume'))return Response.json(null);
  if(path.endsWith('/rpc/candidate_account'))return conflict?Response.json({code:'40001'},{status:409}):Response.json({profile:{fullName:'Candidate fixture',version:0,slug:'fixture-company'},items:[]});
  throw new Error('Unexpected candidate fixture operation');};
@@ -28,7 +28,7 @@ test('candidate BFF uses validated intent, same-origin writes and own explicit c
  const signup={fullName:'Candidate fixture',email:'new@example.invalid',password:'Fixture9!Example',confirmPassword:'Fixture9!Example',acceptedTerms:true,slug:'fixture-company',role:'platform_admin'};
  assert.equal((await request('/api/auth/candidate-sign-up',{...signup,password:'weak'},'')).status,400);
  assert.equal((await request('/api/auth/candidate-sign-up',signup,'','https://foreign.invalid')).status,403);
- assert.equal((await request('/api/auth/candidate-sign-up',signup,'')).status,200);
+ const created=await request('/api/auth/candidate-sign-up',signup,'');assert.equal(created.status,200);assert.equal((await created.json()).requiresConfirmation,false);assert.match(created.headers.get('set-cookie'),/jf_auth_access=fixture-new/);assert.match(created.headers.get('set-cookie'),/HttpOnly/);
  const auth=calls.find(c=>c.path==='/auth/v1/signup');assert.deepEqual(auth.body.data,{account_type:'candidate',candidate_signup_nonce:'a'.repeat(64)});
  }finally{globalThis.fetch=original;if(previous.url===undefined)delete process.env.SUPABASE_INTERNAL_URL;else process.env.SUPABASE_INTERNAL_URL=previous.url;if(previous.key===undefined)delete process.env.SUPABASE_ANON_KEY;else process.env.SUPABASE_ANON_KEY=previous.key}
 });

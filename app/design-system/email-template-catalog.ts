@@ -325,7 +325,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
         </td></tr>
         ${note}
         <tr><td style="padding:20px 32px;border-top:1px solid ${colors.border};">
-          <p style="margin:0 0 6px;color:${colors.muted};font-family:${bodyFont};font-size:12px;line-height:1.5;">Enviado por <strong style="color:${colors.text};font-family:${headingFont};">JobForged &lt;suporte@jobforged.com&gt;</strong></p>
+          <p style="margin:0 0 6px;color:${colors.muted};font-family:${bodyFont};font-size:12px;line-height:1.5;">${process.env.APP_ENV === "test" ? '<strong style="color:inherit;">[TESTE]</strong> · ' : ""}Enviado por <strong style="color:${colors.text};font-family:${headingFont};">JobForged &lt;suporte@jobforged.com&gt;</strong></p>
           <p style="margin:0;color:${colors.muted};font-family:${bodyFont};font-size:12px;line-height:1.5;">Recrutamento organizado para empresas.</p>
         </td></tr>
       </table>

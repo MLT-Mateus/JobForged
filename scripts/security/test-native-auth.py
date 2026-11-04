@@ -114,7 +114,7 @@ def main():
             'GOTRUE_DB_DATABASE_URL':'postgres://supabase_auth_admin:'+auth_password+'@security-db:5432/postgres',
             'GOTRUE_JWT_SECRET':signing,'GOTRUE_JWT_EXP':'900','GOTRUE_JWT_AUD':'authenticated',
             'GOTRUE_JWT_DEFAULT_GROUP_NAME':'authenticated','GOTRUE_JWT_ADMIN_ROLES':'service_role',
-            'GOTRUE_EXTERNAL_EMAIL_ENABLED':'true','GOTRUE_MAILER_AUTOCONFIRM':'false',
+            'GOTRUE_EXTERNAL_EMAIL_ENABLED':'true','GOTRUE_MAILER_AUTOCONFIRM':'true',
             'GOTRUE_SMTP_HOST':'example.invalid','GOTRUE_SMTP_PORT':'25','GOTRUE_SMTP_ADMIN_EMAIL':'no-reply@example.invalid',
             'GOTRUE_PASSWORD_MIN_LENGTH':'8','GOTRUE_PASSWORD_REQUIRED_CHARACTERS':characters,
             'GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED':'true','GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL':'10',
@@ -155,6 +155,19 @@ def main():
             if status not in (200,201):raise AssertionError('Native fixture creation failed')
             return user['id']
         suffix=stamp+'@example.invalid';email='security-a-'+suffix;other='security-b-'+suffix
+        # Test policy: public signup returns a real session without SMTP. The
+        # provider network is internal and the SMTP hostname cannot deliver mail.
+        signup_email='signup-'+suffix
+        status,requirements=request(rest,'/rpc/registration_requirements',{},jwt(signing,'anon'));assert status==200
+        status,nonce=request(rest,'/rpc/create_company_signup_intent',{'email':signup_email,'company_name':'Immediate signup fixture','responsible_name':'Signup fixture','cnpj':'11222333000181','phone':'11999999999','accepted_terms':True,'terms_revision':requirements['termsRevision']},jwt(signing,'anon'));assert status==200
+        signup_body={'email':signup_email,'password':password,'data':{'account_type':'company_admin','company_signup_nonce':nonce}}
+        status,immediate=request(auth,'/signup',signup_body)
+        assert status==200 and immediate.get('access_token') and immediate.get('refresh_token'),'Public signup did not authenticate immediately'
+        assert immediate['user']['email_confirmed_at'],'Test auto-confirm state missing'
+        assert request(rest,'/rpc/session_context_v1',{},immediate['access_token'])[1]['company_id'],'Signup session cannot open company context'
+        assert request(auth,'/signup',signup_body)[0] in (400,422),'Duplicate signup unexpectedly succeeded'
+        assert request(auth,'/token?grant_type=password',{'email':signup_email,'password':password})[0]==200,'Subsequent login failed'
+        assert request(auth,'/token?grant_type=password',{'email':signup_email,'password':'Incorrect9!'})[0] in (400,422),'Incorrect password accepted'
         first=create(email,'Native fixture A');create(other,'Native fixture B')
         status,session=request(auth,'/token?grant_type=password',{'email':email,'password':password})
         assert status==200,'Native password sign-in failed'

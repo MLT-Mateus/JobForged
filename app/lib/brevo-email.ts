@@ -19,7 +19,7 @@ export async function sendCompanyInvitationEmail(email: string, company: string,
       method: "POST", cache: "no-store", signal: AbortSignal.timeout(8000),
       headers: { accept: "application/json", "api-key": apiKey, "content-type": "application/json" },
       body: JSON.stringify({ sender: SENDER, to: [{ email }], subject: "Convite para acessar uma empresa na JobForged",
-        htmlContent: `<html lang="pt-BR"><body style="font-family:Arial,sans-serif;color:#142321;padding:24px"><img src="${origin}/brand/jobforged-logo.png" alt="JobForged" width="164"/><h1>Convite para ${safeCompany}</h1><p>Você recebeu um convite para acessar esta empresa na JobForged. O link expira em 24 horas e só funciona com este e-mail confirmado.</p><p><a href="${url}">Aceitar convite</a></p><p>Se você não esperava este convite, ignore esta mensagem.</p></body></html>` }),
+        htmlContent: `<html lang="pt-BR"><body style="font-family:Arial,sans-serif;color:#142321;padding:24px"><img src="${origin}/brand/jobforged-logo.png" alt="JobForged" width="164"/><h1>Convite para ${safeCompany}</h1><p>Você recebeu um convite para acessar esta empresa na JobForged. O link expira em 24 horas e só funciona com este e-mail confirmado.</p><p><a href="${url}">Aceitar convite</a></p><p>Se você não esperava este convite, ignore esta mensagem.</p><p>${process.env.APP_ENV === "test" ? "[TESTE] · " : ""}Enviado por JobForged</p></body></html>` }),
     });
     return response.ok ? "sent" : "failed";
   } catch { return "failed"; }
