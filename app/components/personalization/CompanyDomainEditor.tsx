@@ -198,7 +198,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
             <strong>Configure em 3 passos</strong>
             <ol>
               <li>Vincule o endereço nesta tela.</li>
-              <li>Na Hostinger, abra <b>Domínios → Gerenciar → DNS / Nameservers</b> e selecione a zona informada abaixo.</li>
+              <li>Na Hostinger, abra <b>Domínios</b>, selecione a zona e entre em <b>DNS / Nameservers</b>.</li>
               <li>Crie os 2 registros da tabela. Depois volte e selecione <b>Testar DNS agora</b>.</li>
             </ol>
           </div>
