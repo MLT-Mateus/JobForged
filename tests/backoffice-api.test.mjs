@@ -65,7 +65,7 @@ test('backoffice APIs enforce session, origin, validation and invitation secrecy
 
 test('logout works without MFA and deletion forwards only confirmed administrator inputs',async()=>{
  const original=globalThis.fetch;const previous={...process.env};let platform=true,deny=true;const calls=[];
- process.env.SUPABASE_INTERNAL_URL='http://deletion-fixture.invalid';process.env.SUPABASE_ANON_KEY='fixture';
+ process.env.APP_ENV='test';process.env.SUPABASE_INTERNAL_URL='http://deletion-fixture.invalid';process.env.SUPABASE_ANON_KEY='fixture';
  globalThis.fetch=async(input,init)=>{const path=new URL(String(input)).pathname;
   if(path==='/auth/v1/user')return Response.json({id:'26000000-0000-0000-0000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
   if(path.endsWith('/rpc/is_platform_admin'))return Response.json(platform);
@@ -88,5 +88,6 @@ test('logout works without MFA and deletion forwards only confirmed administrato
  deny=false;assert.equal((await send('/api/backoffice/company-deletion',{...body,confirmation:''})).status,202); // Exact-name check is authoritative in SQL.
  assert.deepEqual(calls.at(-1),{operation:'request',target_company:body.company,confirmation:'',change_reason:body.reason,remove_accounts:true});
  assert.equal((await send('/api/backoffice/company-deletion',{...body,removeAccounts:'yes'})).status,400);
- }finally{globalThis.fetch=original;for(const key of ['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY']){if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key]}}
+ process.env.APP_ENV='live';assert.equal((await send('/api/backoffice/company-deletion',body)).status,503);
+ }finally{globalThis.fetch=original;for(const key of ['APP_ENV','SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY']){if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key]}}
 });

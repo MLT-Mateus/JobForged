@@ -5,6 +5,7 @@ import {communicationJson} from '@/app/lib/communications-server';
 export const runtime='nodejs';
 async function perform(request:NextRequest,write:boolean){
  const headers=new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'});
+ if(process.env.APP_ENV==='live')return Response.json({message:'Exclusão indisponível em Live. Requer habilitação e validação próprias.'},{status:503,headers});
  if(write&&!requireSameOrigin(request))return Response.json({message:'Origem inválida.'},{status:403,headers});
  const session=await readSession(request,headers);
  if(!session?.platformAdmin)return Response.json({message:'Acesso negado.'},{status:403,headers});

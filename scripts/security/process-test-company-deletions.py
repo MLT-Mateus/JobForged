@@ -96,7 +96,7 @@ def main():
    for user in users:
     exists=sql('select exists(select 1 from auth.users where id='+quote(user)+'::uuid);')=='t'
     if not exists:
-     sql("update app_private.company_deletion_users set state='deleted' where job_id="+jid+' and user_id='+quote(user)+'::uuid;delete from app_private.company_deletion_identity_locks where user_id='+quote(user)+'::uuid;');continue
+     sql("update app_private.company_deletion_users set state='deleted' where job_id="+jid+' and user_id='+quote(user)+'::uuid;delete from app_private.company_signup_intents where user_id='+quote(user)+'::uuid;delete from app_private.recovery_intents where user_id='+quote(user)+'::uuid;delete from app_private.session_revocations where user_id='+quote(user)+'::uuid;delete from app_private.company_deletion_identity_locks where user_id='+quote(user)+'::uuid;');continue
     exclusive=job['remove_accounts'] and sql('select app_private.claim_deletion_identity('+jid+'::uuid,'+quote(user)+'::uuid);')=='t'
     state='preserved'
     if job['remove_accounts'] and exclusive:

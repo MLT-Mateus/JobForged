@@ -25,4 +25,4 @@ scripts/security/company-deletion-backup.ps1 usa o SSH/DPAPI existentes neste co
 ## Validação
 CI executa providers reais isolados para recusa de proprietário, visitante, administrador sem MFA; confirmação errada; logout antes do fator; suspensão/rejeição de reativação; proteção de arquivos até backup; remoção física via Storage, Auth exclusivo, preservação de outra empresa/identidade compartilhada, idempotência e auditoria mínima. BFF mocks verificam origem, sessão, payload, MFA e cookies. Não executar uma exclusão real para produzir evidências.
 
-Live não recebeu migration, worker, tarefa nem deploy. Promoção futura requer aprovação explícita e preparação específica do worker/backup para Live; não copiar dados ou credenciais.
+O botão e o endpoint de exclusão ficam desabilitados em Live, inclusive se a imagem for promovida no futuro sem preparar a operação. Live não recebeu migration, worker, tarefa nem deploy. Promoção futura requer aprovação explícita e preparação específica do worker/backup para Live; não copiar dados ou credenciais.
