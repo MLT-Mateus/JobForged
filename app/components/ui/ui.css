@@ -885,3 +885,5 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-upload-field .is-filled .jf-upload__state{color:var(--jf-ui-success)}
 .jf-upload-field .jf-upload__filename{white-space:normal;overflow-wrap:anywhere;line-height:1.45}
 .jf-upload__remove{justify-self:start;min-height:32px}
+.jf-upload-field .jf-upload__content strong,.jf-multi-upload__content strong{font-size:var(--jf-ui-font-size-sm);line-height:1.4}
+.jf-upload-field .jf-upload__state,.jf-upload-field .jf-upload__filename,.jf-multi-upload__content small{font-size:var(--jf-ui-font-size-xs);line-height:1.5}
