@@ -5,11 +5,26 @@ import {createHash} from 'node:crypto';
 import {validResume} from '../shared/resume-policy.mjs';
 import {validCompanyHostname} from '../app/lib/company-domain.ts';
 import {brandingDefaults} from '../app/components/personalization/branding-model.ts';
+import {diagnoseCompanyDomain} from '../app/lib/company-domain-diagnostics.ts';
 test('PDF envelope rejects executable, encrypted, oversized and fake content; hostnames reject URLs/IPs/internal names',async()=>{
  const pdf=await readFile('public/documents/curriculo-demonstrativo.pdf');assert.ok(validResume(pdf));
  for(const bytes of [Buffer.from('<html>bad</html>'),Buffer.alloc(5242881),Buffer.from('%PDF-1.4 /JavaScript /JS (alert(1)) %%EOF'),Buffer.from('%PDF-1.4 /Encrypt %%EOF')])assert.equal(validResume(bytes),false);
  for(const host of ['https://careers.example.com','127.0.0.1','jobforged.com','bad.jobforged.com','a.local','evil.com/path','a..com','-bad.com'])assert.equal(validCompanyHostname(host),false);
  assert.ok(validCompanyHostname('carreiras.empresa.com.br'));
+});
+test('custom-domain DNS check confirms proof and route without trusting client input',async()=>{
+ const original=globalThis.fetch;const proof='jobforged-verification='+('a'.repeat(64));
+ globalThis.fetch=async input=>{const url=new URL(String(input)),name=url.searchParams.get('name'),type=url.searchParams.get('type');
+  if(type==='TXT')return Response.json({Answer:name==='_jobforged.careers.fixture.invalid'||name==='_jobforged.fixture.invalid'?[{type:16,data:'"'+proof+'"'}]:[]});
+  if(type==='A')return Response.json({Answer:name==='fixture.invalid'?[{type:1,data:'187.77.229.27'}]:[{type:5,data:'test.jobforged.com.'},{type:1,data:'187.77.229.27'}]});
+  if(type==='CNAME')return Response.json({Answer:name==='careers.fixture.invalid'?[{type:5,data:'test.jobforged.com.'}]:[]});
+  return Response.json({Answer:[]});
+ };
+ try{
+  const result=await diagnoseCompanyDomain('careers.fixture.invalid',proof);assert.equal(result.ownershipVerified,true);assert.equal(result.addressVerified,true);assert.equal(result.ready,true);assert.deepEqual(result.cnames,['test.jobforged.com']);assert.equal(JSON.stringify(result).includes(proof),false);
+  const root=await diagnoseCompanyDomain('fixture.invalid',proof);assert.equal(root.ready,true);assert.deepEqual(root.cnames,[]);
+  const mismatch=await diagnoseCompanyDomain('wrong.fixture.invalid','different-proof');assert.equal(mismatch.ownershipVerified,false);assert.equal(mismatch.addressVerified,true);assert.equal(mismatch.ready,false);
+ }finally{globalThis.fetch=original}
 });
 test('candidate resume BFF requires candidate identity, origin/version and serves only private attachments',async()=>{
  const original=globalThis.fetch,previous={url:process.env.SUPABASE_INTERNAL_URL,key:process.env.SUPABASE_ANON_KEY};process.env.SUPABASE_INTERNAL_URL='https://resume.fixture.invalid';process.env.SUPABASE_ANON_KEY='fixture-anon';
