@@ -535,6 +535,41 @@ def main():
         status,bootstrap_verified=request(gateways[0][1],'/auth/v1/factors/'+bootstrap_factor['id']+'/verify',{'challenge_id':bootstrap_challenge['id'],'code':totp_code(bootstrap_factor['totp']['secret'])},bootstrap_session['access_token']);assert status==200,'Bootstrap MFA verification failed'
         assert request(gateways[0][1],'/rest/v1/rpc/platform_read',{'section':'overview'},bootstrap_verified['access_token'])[0]==200,'Bootstrap administrator denied after fresh MFA'
         assert sql("select count(*) from public.platform_audit_events where actor_user_id='"+bootstrap_id+"' and action='platform.security.bootstrap';")=='1','Bootstrap ownership grant was not audited'
+        # Explicit deletion lifecycle uses actual private Storage files and native
+        # Auth identities. No production names, backups, ports or recipients.
+        delete_email='delete-'+suffix;delete_user=create(delete_email,'Deletion fixture')
+        status,delete_session=request(auth,'/token?grant_type=password',{'email':delete_email,'password':password});assert status==200
+        delete_token=delete_session['access_token'];delete_context=request(rest,'/rpc/session_context_v1',{},delete_token)[1];delete_cid=delete_context['company_id']
+        delete_asset=str(uuid.uuid4());delete_path='/object/company-branding/'+delete_cid+'/'+delete_asset+'.png'
+        assert request(rest,'/rpc/reserve_company_image',{'asset_id':delete_asset},delete_token)[0]==200
+        assert binary_request(storage,delete_path,png,delete_token)[0]==200
+        assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},delete_token)[0]==403,'Company owner accessed destructive admin RPC'
+        status,low_admin=request(auth,'/token?grant_type=password',{'email':bootstrap_email,'password':password});assert status==200
+        assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},low_admin['access_token'])[0]==403,'Password-only admin accessed deletion'
+        assert request(rest,'/rpc/revoke_current_session',{},low_admin['access_token'])[0]==200,'Logout incorrectly required MFA'
+        assert request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[0] in (401,403) or request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[1] is None,'Pre-MFA logout did not revoke session'
+        elevated=bootstrap_verified['access_token']
+        assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'wrong','change_reason':'Isolated acceptance','remove_accounts':True},elevated)[0]==400,'Wrong company confirmation accepted'
+        # A genuine shared member must survive deletion of this one company.
+        sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+delete_cid+"','"+first+"','"+email+"','Shared fixture','member','active');")
+        status,job=request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Isolated acceptance','remove_accounts':True},elevated);assert status==200,'Deletion request failed'
+        assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Idempotent retry','remove_accounts':True},elevated)[1]['id']==job['id'],'Deletion retry created another job'
+        assert request(rest,'/rpc/platform_manage',{'operation':'company.status','target_company':delete_cid,'values_json':{'status':'active'},'change_reason':'Attempted reactivation'},elevated)[0]==403,'Queued deletion could be reactivated'
+        assert request(rest,'/rpc/session_context_v1',{},delete_token)[1] is None,'Queued company retained access'
+        assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name like '"+delete_cid+"/%';")=='1','Request deleted files before verified backup'
+        # Scoped worker capability cannot be forged by ordinary signed sessions.
+        assert request(storage,'/object/company-branding',{'prefixes':[delete_path.removeprefix('/object/company-branding/')]},delete_token,method='DELETE')[0] in (200,400,403)
+        assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name like '"+delete_cid+"/%';")=='1','Tenant bypassed deletion worker policy'
+        command=[sys.executable,str(Path(__file__).with_name('process-test-company-deletions.py')),'--isolated-database',args.restore,'--isolated-storage',storage_name,'--isolated-auth',auth_name]
+        deleted=json.loads(run(command));assert deleted['processed']==1,'Deletion worker did not finish'
+        assert json.loads(run(command))['processed']==0,'Deletion worker repeated completed work'
+        assert sql("select exists(select 1 from public.companies where id='"+delete_cid+"');")=='f','Company row survived deletion'
+        assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name like '"+delete_cid+"/%';")=='0','Company files survived deletion'
+        assert sql("select exists(select 1 from auth.users where id='"+delete_user+"');")=='f','Exclusive account survived requested deletion'
+        assert sql("select exists(select 1 from auth.users where id='"+first+"');")=='t','Shared identity was deleted'
+        assert sql("select exists(select 1 from public.companies where id='"+own_context['company_id']+"');")=='t','Another company was deleted'
+        assert sql("select state from app_private.company_deletion_jobs where id='"+job['id']+"';")=='completed'
+        assert sql("select count(*) from public.platform_audit_events where action='platform.company.deletion.completed' and target_id='"+delete_cid+"';")=='1','Minimal deletion audit missing'
         print(json.dumps({'native_candidate_identity_and_isolation':True,'native_candidate_profile_and_alerts':True,'native_candidate_revocation':True,'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,
