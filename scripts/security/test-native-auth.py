@@ -550,8 +550,11 @@ def main():
         assert request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[0] in (401,403) or request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[1] is None,'Pre-MFA logout did not revoke session'
         elevated=bootstrap_verified['access_token']
         assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'wrong','change_reason':'Isolated acceptance','remove_accounts':True},elevated)[0]==400,'Wrong company confirmation accepted'
+        assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},anonymous)[0] in (401,403),'Anonymous accessed deletion'
         # A genuine shared member must survive deletion of this one company.
-        sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+delete_cid+"','"+first+"','"+email+"','Shared fixture','member','active');")
+        try:
+            sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+delete_cid+"','"+first+"','"+email+"','Shared fixture','member','active');")
+        except subprocess.CalledProcessError as error:raise AssertionError("Shared fixture setup: "+(error.stderr or "").splitlines()[0]) from None
         status,job=request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Isolated acceptance','remove_accounts':True},elevated);assert status==200,'Deletion request failed'
         assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Idempotent retry','remove_accounts':True},elevated)[1]['id']==job['id'],'Deletion retry created another job'
         assert request(rest,'/rpc/platform_manage',{'operation':'company.status','target_company':delete_cid,'values_json':{'status':'active'},'change_reason':'Attempted reactivation'},elevated)[0]==403,'Queued deletion could be reactivated'
