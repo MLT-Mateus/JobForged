@@ -553,7 +553,7 @@ def main():
         assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},anonymous)[0] in (401,403),'Anonymous accessed deletion'
         # A genuine shared member must survive deletion of this one company.
         try:
-            sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+delete_cid+"','"+first+"','"+email+"','Shared fixture','member','active');")
+            sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+delete_cid+"','"+first+"','"+email+"','Shared fixture','member','inactive');")
         except subprocess.CalledProcessError as error:raise AssertionError("Shared fixture setup: "+(error.stderr or "").splitlines()[0]) from None
         status,job=request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Isolated acceptance','remove_accounts':True},elevated);assert status==200,'Deletion request failed'
         assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Idempotent retry','remove_accounts':True},elevated)[1]['id']==job['id'],'Deletion retry created another job'
