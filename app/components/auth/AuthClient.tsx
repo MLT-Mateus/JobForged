@@ -15,11 +15,11 @@ import "./auth.css";
 
 type FieldErrors<T> = Partial<Record<keyof T, string>>;
 
-function AuthShell({ children, compact = false }: { children: ReactNode; compact?: boolean }) {
+function AuthShell({ children, compact = false, centered = false }: { children: ReactNode; compact?: boolean; centered?: boolean }) {
   const { theme, changeTheme } = useThemePreference();
 
   return (
-    <main className={`auth-page ${compact ? "auth-page--compact" : ""}`}>
+    <main className={`auth-page ${compact ? "auth-page--compact" : ""} ${centered ? "auth-page--centered" : ""}`}>
       <div className="auth-grid" aria-hidden="true" />
       <header className="site-header auth-official-header">
         <div className="container nav-wrap">
@@ -30,7 +30,7 @@ function AuthShell({ children, compact = false }: { children: ReactNode; compact
         </div>
       </header>
       <div className="auth-layout">
-        <aside className="auth-context">
+        {!centered && <aside className="auth-context">
           <span className="auth-context__icon"><Building2 /></span>
           <p className="auth-eyebrow">Conta empresarial JobForged</p>
           <h2>Recrutamento estruturado desde o primeiro acesso.</h2>
@@ -40,7 +40,7 @@ function AuthShell({ children, compact = false }: { children: ReactNode; compact
             <li><UserRound />Conta vinculada à organização</li>
             <li><LockKeyhole />Autenticação segura pelo Supabase</li>
           </ul>
-        </aside>
+        </aside>}
         <section className="auth-card">{children}</section>
       </div>
     </main>
@@ -198,7 +198,7 @@ export function SignupClient() {
 
   if (created) {
     return (
-      <AuthShell>
+      <AuthShell centered>
         <div className="auth-confirmation">
           <span><Check /></span>
           <p className="auth-eyebrow">Conta empresarial</p>
@@ -220,7 +220,7 @@ export function SignupClient() {
   }
 
   return (
-    <AuthShell>
+    <AuthShell centered>
       <div className="auth-stepper" aria-label="Progresso do cadastro">
         <div className="is-active"><i>1</i><span>Dados cadastrais</span></div>
         <b />

@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import {termsOfServiceHtml} from '@/app/legal-documents';
 import {passwordRules,isEmail} from '@/app/components/auth/auth-validation';
 import {communicationJson} from '@/app/lib/communications-server';
-import {getSupabaseConfig,requestAuth,requestDatabase,requireSameOrigin} from '../_server';
+import {getSupabaseConfig,requestAuth,requestDatabase,requireSameOrigin,setSessionCookies,clearPasswordRecoveryCookie,type SupabaseSessionPayload} from '../_server';
 export const runtime='nodejs';
 export async function POST(request:NextRequest){
  const headers=new Headers({'Cache-Control':'no-store'});
@@ -17,6 +17,8 @@ export async function POST(request:NextRequest){
   if(typeof nonce!=='string')return Response.json({message:response?.status===429?'Limite temporário atingido. Tente mais tarde.':'Não foi possível validar o cadastro. Tente novamente mais tarde.'},{status:response?.status===429?429:400,headers});
   const result=await requestAuth('signup',{email:b.email.trim().toLowerCase(),password:b.password,data:{account_type:'candidate',candidate_signup_nonce:nonce}});
   if(!result.response?.ok)return Response.json({message:'Não foi possível criar a conta. Se já possui cadastro, entre ou recupere sua senha.'},{status:400,headers});
-  return Response.json({ok:true,message:'Confira seu e-mail para confirmar o cadastro. Se já possui conta, use Entrar.'},{headers});
+  const session=result.payload as SupabaseSessionPayload;
+  if(session.access_token){clearPasswordRecoveryCookie(headers);setSessionCookies(headers,session)}
+  return Response.json({ok:true,requiresConfirmation:!session.access_token,message:session.access_token?'Conta criada. Você já está conectado.':'Confira seu e-mail para confirmar o cadastro. Se já possui conta, use Entrar.'},{headers});
  }catch{return Response.json({message:'Serviço indisponível. Tente novamente em instantes.'},{status:503,headers})}
 }

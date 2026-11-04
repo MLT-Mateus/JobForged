@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { onlyDigits, validateSignup, type SignupValues } from "@/app/components/auth/auth-validation";
 import { sendCompanyWelcomeEmail } from "@/app/lib/brevo-email";
 import { resolveEmailTheme } from "@/app/design-system/email-template-catalog";
-import { requireSameOrigin, requestAuth, requestDatabase,getSupabaseConfig,setSessionCookies, type SupabaseSessionPayload } from "../_server";
+import { requireSameOrigin, requestAuth, requestDatabase,getSupabaseConfig,clearPasswordRecoveryCookie,setSessionCookies, type SupabaseSessionPayload } from "../_server";
 import {createHash} from 'node:crypto';
 import {termsOfServiceHtml} from '@/app/legal-documents';
 
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       });
     }
     const headers = new Headers({ "Cache-Control": "no-store" });
-    if (!requiresConfirmation) setSessionCookies(headers, session);
+    if (!requiresConfirmation) { clearPasswordRecoveryCookie(headers); setSessionCookies(headers, session); }
     return Response.json({ ok: true, requiresConfirmation }, { headers });
   } catch {
     return Response.json({ message: "Serviço de autenticação indisponível. Tente novamente." }, { status: 503 });

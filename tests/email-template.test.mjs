@@ -84,3 +84,18 @@ test("Test and Live Auth point recovery emails to the approved Design System tem
   assert.match(liveComposeOverride, /GOTRUE_MAILER_TEMPLATES_RECOVERY:\s*https:\/\/jobforged\.com\/api\/auth\/email-templates\/password-recovery/);
   assert.match(liveComposeOverride, /GOTRUE_MAILER_SUBJECTS_RECOVERY:\s*Redefina sua senha na JobForged/);
 });
+
+
+test("all shared email footers identify Test without labeling Live", () => {
+  const previous=process.env.APP_ENV;
+  try {
+    for (const environment of ["test","live"]) {
+      process.env.APP_ENV=environment;
+      for (const template of emailTemplates) {
+        const html=renderEmailHtml(template.id,"light");
+        assert.match(html,/Enviado por/);
+        assert.equal(html.includes("[TESTE]"),environment==="test");
+      }
+    }
+  } finally { if(previous===undefined) delete process.env.APP_ENV; else process.env.APP_ENV=previous; }
+});
