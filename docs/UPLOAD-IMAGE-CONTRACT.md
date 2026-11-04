@@ -24,3 +24,8 @@ Marca empresarial: até5MB/16MP; logo, favicon e avatar até2MB. Comunicação: 
 Migration0041 adiciona release_company_image(uuid), autorizada por identidade, empresa, papel e sessão. Em falha de conversão, proporção, Storage ou registro, a API expira a reserva no finally. Nenhum arquivo é apagado. O recibo fica no banco para manter o limite durável de cinco tentativas por minuto; a quota de200 imagens/1GB e dois processamentos simultâneos permanece. Se a liberação falhar por indisponibilidade, a expiração de cinco minutos continua como fallback.
 
 Alertas distinguem quota de armazenamento, concorrência e frequência. Retry-After informa60s para frequência e300s para reserva concorrente interrompida. O teste nativo isolado verifica liberação pela sessão correta, negativa entre empresas e conservação do recibo. Teste BFF verifica finally e mensagens específicas. Não executar liberação manual de reservas ativas dos clientes.
+
+
+## Ícone da aba
+
+O campo Ícone da aba (favicon) é exclusivo para imagem quadrada1:1, até2MB (recomendado256×256px). Upload horizontal é recusado com orientação ao campo Logo principal e libera a reserva de processamento pelo mesmofinally. O hook compartilhado confere dimensão da imagem antes de aplicar aURL; ícone legado retangular ou indisponível mantém o símbolo JobForged do tema, sem recorrer à logo. Links de favicon dinâmico declaram image/png; os padrões SVG mantêm image/svg+xml. Saída de contexto restaura o ícone da plataforma, com descarte de carregamentos antigos. Sem migration adicional.

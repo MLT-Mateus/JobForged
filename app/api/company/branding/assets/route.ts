@@ -27,6 +27,7 @@ export async function POST(request:NextRequest){
   }
   reservedId=id;
   const output=await normalizeBrandingImage(file.input,file.mime);
+  if(file.kind==='favicon'){const m=await sharp(output).metadata();if(!m.width||m.width!==m.height)return Response.json({message:'Use um ícone quadrado (1:1), por exemplo 256 × 256 px. A logo horizontal deve ficar no campo Logo principal.'},{status:400,headers})}
   if(file.kind==='panoramaImage'){const m=await sharp(output).metadata();const ratio=(m.width||0)/(m.height||1);if(ratio<2.85||ratio>3.15)return Response.json({message:'O banner panorâmico precisa da proporção 3:1. Exemplo: 2400 × 800 px.'},{status:400,headers})}
   const uploaded=await brandingStorage(path,session.accessToken,output);
   if(!uploaded?.ok)return Response.json({message:'O armazenamento de imagens está indisponível. Tente novamente.'},{status:503,headers});
