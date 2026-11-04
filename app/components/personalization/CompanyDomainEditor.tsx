@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ActionButton, AppToast, EditorSection, StatusBadge, TextField } from '../ui';
+import {apiResponse} from '@/app/lib/api-response';
 import { validCompanyHostname, type CompanyDomain } from '@/app/lib/company-domain';
 
 type DomainKind = 'root' | 'subdomain' | '';
@@ -45,8 +46,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
       credentials: 'same-origin',
       ...(body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}),
     });
-    const result = await response.json() as DomainResponse;
-    if (!response.ok) throw new Error(result.message || 'Não foi possível consultar o domínio.');
+    const result = await apiResponse<DomainResponse>(response,'Não foi possível consultar o domínio.');
     return result;
   }
 
@@ -68,8 +68,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
     const controller = new AbortController();
     fetch('/api/company/domain', { cache: 'no-store', credentials: 'same-origin', signal: controller.signal })
       .then(async response => {
-        const result = await response.json() as DomainResponse;
-        if (!response.ok) throw new Error(result.message || 'Não foi possível carregar o domínio.');
+        const result = await apiResponse<DomainResponse>(response,'Não foi possível carregar o domínio.');
         if (controller.signal.aborted) return;
         setData(result);
         setHostname(result.hostname || '');
@@ -90,18 +89,21 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
     : kind === 'subdomain' && safeHost.endsWith(`.${safeZone}`) && safeHost !== safeZone;
   const proofRelative = relativeName(proofRecord, safeZone);
   const routeRelative = relativeName(safeHost, safeZone);
+  const linkedAddress = data.hostname === safeHost && !['none','disabled'].includes(data.status);
+  const hostnameError = safeHost && !validCompanyHostname(safeHost) ? 'Use apenas o domínio ou subdomínio, sem https://, espaços ou caminhos.' : undefined;
+  const zoneError = kind && safeZone && !zoneMatches ? (kind === 'root' ? 'Use o mesmo domínio informado acima.' : `Use a zona principal do provedor: o endereço deve terminar em .${safeZone}.`) : undefined;
   const canRegister = editable && !busy && kind !== '' && validCompanyHostname(safeHost)
-    && (data.hostname !== safeHost || data.status === 'disabled');
+    && validCompanyHostname(safeZone) && zoneMatches && (data.hostname !== safeHost || data.status === 'disabled');
 
   const records = useMemo(() => {
-    if (!safeHost || !safeZone || !zoneMatches || !kind) return [];
+    if (!safeHost || !safeZone || !zoneMatches || !kind || !linkedAddress) return [];
     return [
       { type: 'TXT', name: proofRelative || proofRecord, value: data.proof || 'Aparece após vincular o domínio', purpose: 'Confirma que o domínio pertence à sua empresa.' },
       kind === 'root'
         ? { type: 'A', name: '@', value: '187.77.229.27', purpose: 'Aponta o domínio principal para a JobForged.' }
         : { type: 'CNAME', name: routeRelative || safeHost, value: data.targetHost || 'test.jobforged.com', purpose: 'Aponta o subdomínio para a JobForged.' },
     ];
-  }, [data.proof, data.targetHost, kind, proofRecord, proofRelative, routeRelative, safeHost, safeZone, zoneMatches]);
+  }, [data.proof, data.targetHost, kind, linkedAddress, proofRecord, proofRelative, routeRelative, safeHost, safeZone, zoneMatches]);
 
   async function perform(body: object, mode: 'save' | 'check' | 'disconnect') {
     setBusy(true);
@@ -145,7 +147,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
   }
 
   const statusText: Record<CompanyDomain['status'], string> = {
-    none: 'Ainda não configurado', pending: 'Aguardando DNS', verified: 'DNS confirmado · HTTPS em preparação',
+    none: 'Ainda não configurado', pending: 'Aguardando DNS', verified: 'Preparando HTTPS',
     active: 'Ativo', disabled: 'Desconectado',
   };
 
@@ -155,6 +157,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
         label="Endereço que será usado"
         placeholder="Digite o domínio..."
         maxLength={253}
+        error={hostnameError}
         value={hostname}
         onChange={event => {
           const value = cleanHostname(event.target.value);
@@ -169,73 +172,59 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
 
       <fieldset className="appearance-domain-kind">
         <legend>Qual endereço você vai conectar?</legend>
-        <label><input type="radio" name="company-domain-kind" checked={kind === 'root'} onChange={() => setDomainKind('root')} disabled={busy} /> Domínio principal (ex.: suaempresa.com.br)</label>
-        <label><input type="radio" name="company-domain-kind" checked={kind === 'subdomain'} onChange={() => setDomainKind('subdomain')} disabled={busy} /> Subdomínio (ex.: vagas.suaempresa.com.br)</label>
+        <label><input type="radio" name="company-domain-kind" checked={kind === 'root'} onChange={() => setDomainKind('root')} disabled={!editable||busy} /> Domínio principal (ex.: suaempresa.com.br)</label>
+        <label><input type="radio" name="company-domain-kind" checked={kind === 'subdomain'} onChange={() => setDomainKind('subdomain')} disabled={!editable||busy} /> Subdomínio (ex.: vagas.suaempresa.com.br)</label>
         <small>Escolha o tipo antes de vincular. Subdomínio é recomendado para manter o site principal.</small>
         {kind === 'root' && <small className="appearance-domain-warning">A raiz aponta o site principal para a JobForged. Se quer preservar seu site atual, escolha um subdomínio.</small>}
       </fieldset>
+
+      {kind && <TextField label="Domínio aberto no provedor DNS" placeholder="Digite o domínio..." maxLength={253} value={zone} error={zoneError} onChange={event=>{setZone(cleanHostname(event.target.value));setDiagnosis(null)}} helpText={kind==='root'?'Use o mesmo endereço acima.':`Para ${safeHost||'vagas.suaempresa.com.br'}, informe o domínio principal (ex.: suaempresa.com.br).`} disabled={!editable||busy}/>}
+      {safeHost && !kind && <p className="appearance-domain-note">Escolha domínio principal ou subdomínio para continuar.</p>}
 
       <div className="appearance-domain-status" aria-live="polite">
         <span>Status do vínculo</span>
         <StatusBadge tone={data.status === 'active' ? 'positive' : 'info'}>{statusText[data.status]}</StatusBadge>
       </div>
 
+      <p className="appearance-domain-next" role="status">{!linkedAddress?'1. Confira o endereço e o tipo. Depois selecione Vincular endereço.':data.status==='active'?'Endereço ativo. Você já pode abrir a página da empresa.':data.status==='verified'?'DNS confirmado. O HTTPS será preparado automaticamente; consulte o status em até 5 minutos.':'2. Cadastre os dois registros abaixo no provedor. Depois selecione Testar DNS agora.'}</p>
       <div className="appearance-domain-actions">
         <ActionButton disabled={!canRegister} onClick={() => void perform({ operation: 'register', hostname: safeHost, version: data.version }, 'save')}>
-          Vincular endereço
+          {linkedAddress?'Endereço vinculado':'Vincular endereço'}
         </ActionButton>
-        <ActionButton variant="secondary" disabled={!editable || busy || data.status === 'none' || data.status === 'disabled'} onClick={() => void perform({ operation: 'check' }, 'check')}>
+        <ActionButton variant="secondary" disabled={!editable || busy || !linkedAddress} onClick={() => void perform({ operation: 'check' }, 'check')}>
           {checking ? 'Testando DNS…' : 'Testar DNS agora'}
         </ActionButton>
         <ActionButton variant="quiet" disabled={busy} onClick={() => void refresh()}>
           Consultar status
         </ActionButton>
+        {linkedAddress&&data.status==='active'&&<a className="jf-action jf-action--secondary" href={`https://${data.hostname}`} target="_blank" rel="noopener noreferrer">Abrir página da empresa</a>}
       </div>
 
-      {data.hostname && data.status !== 'disabled' && (
+      {linkedAddress && (
         <div className="appearance-domain-instructions">
           <div className="appearance-domain-steps">
             <strong>Configure em 3 passos</strong>
             <ol>
               <li>Vincule o endereço nesta tela.</li>
               <li>Na Hostinger, abra <b>Domínios</b>, selecione a zona e entre em <b>DNS / Nameservers</b>.</li>
-              <li>Crie os 2 registros da tabela. Depois volte e selecione <b>Testar DNS agora</b>.</li>
+              <li>Crie os 2 registros abaixo. Depois volte e selecione <b>Testar DNS agora</b>.</li>
             </ol>
           </div>
 
-          <TextField
-            label="Zona DNS aberta no provedor"
-            placeholder="Digite a zona do domínio..."
-            value={zone}
-            onChange={event => { setZone(cleanHostname(event.target.value)); setDiagnosis(null); }}
-            helpText={kind === 'root' ? `Para o domínio principal, use ${safeHost || 'o próprio domínio'}.` : kind === 'subdomain' ? `Para ${safeHost || 'seu subdomínio'}, use o domínio ao qual ele pertence (ex.: suaempresa.com.br).` : 'Escolha acima se o endereço é domínio principal ou subdomínio.'}
-            disabled={busy}
-          />
-
-          {!zoneMatches && safeHost && safeZone && (
-            <p className="appearance-domain-warning" role="alert">
-              {kind === 'root'
-                ? 'A zona precisa ser igual ao domínio principal que você informou.'
-                : 'A zona precisa ser o domínio que termina o endereço do subdomínio. Confira qual domínio está aberto na Hostinger.'}
-            </p>
-          )}
-
-          <div className="appearance-domain-records-wrap">
-            <table className="appearance-domain-records">
-              <thead><tr><th>Tipo</th><th>Nome na Hostinger</th><th>Valor / destino</th><th>Função</th></tr></thead>
-              <tbody>{records.map((record, index) => (
-                <tr key={record.type}>
-                  <td><b>{record.type}</b></td>
-                  <td><code>{record.name}</code><small>Completo: {index === 0 ? proofRecord : safeHost}</small><button type="button" className="appearance-domain-copy" onClick={() => void copy(record.name, `${index}-name`)}>{copied === `${index}-name` ? 'Copiado' : 'Copiar nome'}</button></td>
-                  <td><code>{record.value}</code><button type="button" className="appearance-domain-copy" onClick={() => void copy(record.value, `${index}-value`)}>{copied === `${index}-value` ? 'Copiado' : 'Copiar'}</button></td>
-                  <td>{record.purpose}</td>
-                </tr>
-              ))}</tbody>
-            </table>
+          <div className="appearance-domain-records" aria-label="Registros DNS necessários">
+            {records.map((record,index)=><section className="appearance-domain-record" key={record.type} aria-label={`Registro ${record.type}`}>
+              <header><strong>{index+1}. {record.type==='TXT'?'Confirmar propriedade':'Apontar endereço'}</strong><StatusBadge tone="info">{record.type}</StatusBadge></header>
+              <p>{record.purpose}</p>
+              <div className="appearance-domain-record-field"><strong>Tipo</strong><span>{record.type}</span></div>
+              <div className="appearance-domain-record-field"><strong>Nome no provedor</strong><code>{record.name}</code><ActionButton variant="secondary" onClick={()=>void copy(record.name,`${index}-name`)}>{copied===`${index}-name`?'Nome copiado':'Copiar nome'}</ActionButton><small>Endereço completo: {index===0?proofRecord:safeHost}</small></div>
+              <div className="appearance-domain-record-field"><strong>{record.type==='TXT'?'Valor TXT':'Destino'}</strong><code>{record.value}</code><ActionButton variant="secondary" onClick={()=>void copy(record.value,`${index}-value`)}>{copied===`${index}-value`?'Valor copiado':'Copiar valor'}</ActionButton></div>
+              <small>TTL: mantenha o padrão do provedor.</small>
+            </section>)}
+            {!records.length && <p className="appearance-domain-note">Escolha o tipo de endereço e confira o domínio do provedor acima para ver os dois registros.</p>}
           </div>
 
           <div className="appearance-domain-help">
-            <p><b>Hostinger:</b> em cada linha, copie <b>Tipo</b>, <b>Nome</b> e <b>Valor / destino</b>; deixe o TTL padrão. O Nome curto é relativo à zona selecionada.</p>
+            <p><b>Hostinger:</b> em cada registro, selecione o <b>Tipo</b> e copie <b>Nome</b> e <b>Valor / destino</b>; deixe o TTL padrão. O provedor completa o Nome com o domínio da zona; não cole esse domínio novamente.</p>
             <p><b>São dois registros DNS:</b> o TXT confirma o domínio; A (raiz) ou CNAME (subdomínio) faz o apontamento. O terceiro passo é testar aqui. Se os nameservers apontarem a outro provedor, crie os registros lá.</p>
             <p>Não altere registros do site/e-mail. Edite um registro existente para o mesmo nome; não duplique. Na raiz, o A pode substituir o destino do site principal.</p>
           </div>
@@ -253,7 +242,6 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
               <small>Consulta direta aos DNS públicos em {new Date(diagnosis.checkedAt).toLocaleTimeString('pt-BR')}.</small>
               {diagnosis.ready && data.status !== 'active' && <p>Os registros estão prontos. A JobForged ativará o endereço e o HTTPS automaticamente após a próxima conferência, em até 5 minutos.</p>}
               {diagnosis.ready && <p>Se este teste passar e o endereço ainda não abrir no seu computador, ele pode estar usando uma resposta DNS antiga. Aguarde a propagação (pode levar até 24 horas) e teste novamente.</p>}
-              {data.status === 'active' && <a className="jf-action jf-action--secondary" href={`https://${data.hostname}`} target="_blank" rel="noopener noreferrer">Abrir página da empresa</a>}
             </div>
           )}
 
