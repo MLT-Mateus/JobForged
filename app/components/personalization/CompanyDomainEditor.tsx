@@ -89,6 +89,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
     : kind === 'subdomain' && safeHost.endsWith(`.${safeZone}`) && safeHost !== safeZone;
   const proofRelative = relativeName(proofRecord, safeZone);
   const routeRelative = relativeName(safeHost, safeZone);
+  const shownStatus = data.hostname === safeHost ? data.status : 'none';
   const linkedAddress = data.hostname === safeHost && !['none','disabled'].includes(data.status);
   const hostnameError = safeHost && !validCompanyHostname(safeHost) ? 'Use apenas o domínio ou subdomínio, sem https://, espaços ou caminhos.' : undefined;
   const zoneError = kind && safeZone && !zoneMatches ? (kind === 'root' ? 'Use o mesmo domínio informado acima.' : `Use a zona principal do provedor: o endereço deve terminar em .${safeZone}.`) : undefined;
@@ -183,7 +184,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
 
       <div className="appearance-domain-status" aria-live="polite">
         <span>Status do vínculo</span>
-        <StatusBadge tone={data.status === 'active' ? 'positive' : 'info'}>{statusText[data.status]}</StatusBadge>
+        <StatusBadge tone={shownStatus === 'active' ? 'positive' : 'info'}>{statusText[shownStatus]}</StatusBadge>
       </div>
 
       <p className="appearance-domain-next" role="status">{!linkedAddress?'1. Confira o endereço e o tipo. Depois selecione Vincular endereço.':data.status==='active'?'Endereço ativo. Você já pode abrir a página da empresa.':data.status==='verified'?'DNS confirmado. O HTTPS será preparado automaticamente; consulte o status em até 5 minutos.':'2. Cadastre os dois registros abaixo no provedor. Depois selecione Testar DNS agora.'}</p>
