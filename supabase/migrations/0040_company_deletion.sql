@@ -17,6 +17,8 @@ create table app_private.company_deletion_users(
  state text not null default 'pending' check(state in ('pending','deleted','preserved')),
  primary key(job_id,user_id)
 );
+create table app_private.company_deletion_identity_locks(user_id uuid primary key,job_id uuid not null references app_private.company_deletion_jobs(id));
+revoke all on app_private.company_deletion_identity_locks from public,anon,authenticated,service_role;
 revoke all on app_private.company_deletion_jobs,app_private.company_deletion_objects,app_private.company_deletion_users from public,anon,authenticated,service_role;
 
 create function public.company_deletion(operation text,target_company uuid default null,confirmation text default '',change_reason text default '',remove_accounts boolean default false)
@@ -70,8 +72,13 @@ grant execute on function public.company_deletion(text,uuid,text,text,boolean) t
 -- Freeze dependent writes while the queued deletion is processed. DELETE is
 -- reserved to the private finalizer, and all ordinary direct writes stay denied.
 create function app_private.guard_deleting_company() returns trigger language plpgsql security definer set search_path=pg_catalog as $$
-declare cid uuid;
+declare cid uuid;person uuid;
 begin
+ if tg_table_name in('company_members','candidate_accounts') then
+  person:=(to_jsonb(new)->>'user_id')::uuid;
+  perform pg_advisory_xact_lock(hashtextextended(person::text,8540));
+  if exists(select 1 from app_private.company_deletion_identity_locks where user_id=person) then raise exception 'identity deletion pending' using errcode='42501';end if;
+ end if;
  cid:=(case when tg_table_name='companies' then to_jsonb(new)->>'id' when tg_table_name='candidate_accounts' then to_jsonb(new)->>'origin_company_id' else to_jsonb(new)->>'company_id' end)::uuid;
  if exists(select 1 from app_private.company_deletion_jobs where company_id=cid and state<>'completed') then
   raise exception 'company deletion pending' using errcode='42501';end if;
@@ -133,6 +140,18 @@ begin
  end loop;
  return true;
 end;$$;
+create function app_private.claim_deletion_identity(job uuid,person uuid) returns boolean language plpgsql security definer set search_path=pg_catalog as $$
+begin
+ perform pg_advisory_xact_lock(hashtextextended(person::text,8540));
+ perform 1 from auth.users where id=person;
+ if not found or not exists(select 1 from app_private.company_deletion_jobs j join app_private.company_deletion_users u on u.job_id=j.id where j.id=job and j.state='accounts' and j.remove_accounts and u.user_id=person and u.state='pending') then return false;end if;
+ if not app_private.deletion_identity_exclusive(person) then return false;end if;
+ insert into app_private.company_deletion_identity_locks(user_id,job_id) values(person,job) on conflict do nothing;
+ return exists(select 1 from app_private.company_deletion_identity_locks where user_id=person and job_id=job);
+end;$$;
+revoke all on function app_private.claim_deletion_identity(uuid,uuid) from public,anon,authenticated,service_role;
+alter function app_private.claim_deletion_identity(uuid,uuid) owner to postgres;
+alter table app_private.company_deletion_identity_locks owner to postgres;
 revoke all on function app_private.guard_deleting_company(),app_private.deletion_storage_access(text,text),app_private.finish_company_deletion(uuid),app_private.deletion_identity_exclusive(uuid) from public,anon,authenticated,service_role;
 -- RLS calls this guard with authenticated execution, but it grants no business access.
 grant execute on function app_private.deletion_storage_access(text,text) to authenticated;

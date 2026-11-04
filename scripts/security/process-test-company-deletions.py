@@ -83,18 +83,21 @@ def main():
     # Include safely registered/in-flight objects appearing after the request.
     sql("insert into app_private.company_deletion_objects(job_id,bucket,path) select "+jid+"::uuid,o.bucket_id,o.name from storage.objects o where(o.bucket_id='company-branding' and split_part(o.name,'/',1)="+cid+") or(o.bucket_id='candidate-resumes' and exists(select 1 from public.candidate_accounts a where a.origin_company_id="+cid+"::uuid and a.user_id::text=split_part(o.name,'/',1))) or(o.bucket_id='security-quarantine' and exists(select 1 from app_private.orphan_quarantine q where q.company_id="+cid+"::uuid and o.name=q.id::text||'/image.png')) on conflict do nothing;")
     sql('update app_private.company_deletion_jobs set file_count=(select count(*) from app_private.company_deletion_objects where job_id='+jid+') where id='+jid)
-    objects=json.loads(sql("select coalesce(json_agg(o),'[]') from(select bucket,path from app_private.company_deletion_objects where job_id="+jid+" and removed_at is null limit 500)o;"))
+    objects=json.loads(sql("select coalesce(json_agg(o),'[]') from(select bucket,path from app_private.company_deletion_objects where job_id="+jid+" and removed_at is null limit 20)o;"))
     capability=token(signing,{'sub':'00000000-0000-4000-8000-000000000085','role':'authenticated','aud':'authenticated','maintenance':'company-deletion','job':job['id']})
     for obj in objects:
      request=urllib.request.Request('http://'+storage_ip+':5000/object/'+urllib.parse.quote(obj['bucket'],safe=''),data=json.dumps({'prefixes':[obj['path']]}).encode(),method='DELETE',headers={'Authorization':'Bearer '+capability,'Content-Type':'application/json'})
      with urllib.request.urlopen(request,timeout=20) as response:response.read()
      if sql('select exists(select 1 from storage.objects where bucket_id='+quote(obj['bucket'])+' and name='+quote(obj['path'])+');')!='f':raise RuntimeError('object_removal_not_verified')
      sql('update app_private.company_deletion_objects set removed_at=now() where job_id='+jid+' and bucket='+quote(obj['bucket'])+' and path='+quote(obj['path']))
-    if len(objects)==500:continue
+    if len(objects)==20:continue
     sql('select app_private.finish_company_deletion('+jid+');')
    users=json.loads(sql('select coalesce(json_agg(user_id),\'[]\') from app_private.company_deletion_users where job_id='+jid+" and state='pending';"))
    for user in users:
-    exclusive=sql('select app_private.deletion_identity_exclusive('+quote(user)+'::uuid);')=='t'
+    exists=sql('select exists(select 1 from auth.users where id='+quote(user)+'::uuid);')=='t'
+    if not exists:
+     sql("update app_private.company_deletion_users set state='deleted' where job_id="+jid+' and user_id='+quote(user)+'::uuid;delete from app_private.company_deletion_identity_locks where user_id='+quote(user)+'::uuid;');continue
+    exclusive=job['remove_accounts'] and sql('select app_private.claim_deletion_identity('+jid+'::uuid,'+quote(user)+'::uuid);')=='t'
     state='preserved'
     if job['remove_accounts'] and exclusive:
      # Native Auth manages its own sessions, factors and identity deletion.
@@ -103,6 +106,7 @@ def main():
      with urllib.request.urlopen(request,timeout=20) as response:response.read()
      if sql('select exists(select 1 from auth.users where id='+quote(user)+'::uuid);')!='f':raise RuntimeError('account_removal_not_verified')
      sql('delete from app_private.company_signup_intents where user_id='+quote(user)+'::uuid;delete from app_private.recovery_intents where user_id='+quote(user)+'::uuid;delete from app_private.session_revocations where user_id='+quote(user)+'::uuid;')
+     sql('delete from app_private.company_deletion_identity_locks where user_id='+quote(user)+'::uuid;')
      state='deleted'
     sql('update app_private.company_deletion_users set state='+quote(state)+' where job_id='+jid+' and user_id='+quote(user)+'::uuid;')
    sql("begin;insert into public.platform_audit_events(actor_user_id,action,target_id,reason,details) select requested_by,'platform.company.deletion.completed',company_id,'Exclusão administrativa confirmada',jsonb_build_object('job',id) from app_private.company_deletion_jobs where id="+jid+";update app_private.company_deletion_jobs set deleted_count=(select count(*) from app_private.company_deletion_users where job_id="+jid+" and state='deleted'),preserved_count=(select count(*) from app_private.company_deletion_users where job_id="+jid+" and state='preserved'),state='completed',completed_at=now(),updated_at=now(),error_code=null,reason='Exclusão administrativa confirmada' where id="+jid+";delete from app_private.company_deletion_objects where job_id="+jid+";delete from app_private.company_deletion_users where job_id="+jid+";commit;")

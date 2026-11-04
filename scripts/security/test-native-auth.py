@@ -546,7 +546,7 @@ def main():
         assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},delete_token)[0]==403,'Company owner accessed destructive admin RPC'
         status,low_admin=request(auth,'/token?grant_type=password',{'email':bootstrap_email,'password':password});assert status==200
         assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},low_admin['access_token'])[0]==403,'Password-only admin accessed deletion'
-        assert request(rest,'/rpc/revoke_current_session',{},low_admin['access_token'])[0]==200,'Logout incorrectly required MFA'
+        assert request(rest,'/rpc/revoke_current_session',{},low_admin['access_token'])[0] in (200,204),'Logout incorrectly required MFA'
         assert request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[0] in (401,403) or request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[1] is None,'Pre-MFA logout did not revoke session'
         elevated=bootstrap_verified['access_token']
         assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'wrong','change_reason':'Isolated acceptance','remove_accounts':True},elevated)[0]==400,'Wrong company confirmation accepted'
