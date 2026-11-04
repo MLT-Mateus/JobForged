@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
-import {normalizeBrandingImage} from '../app/lib/branding-image.ts';
+import {normalizeBrandingImage,squareBrandingIcon} from '../app/lib/branding-image.ts';
 import {imageAccept,imageMime,fileMatchesAccept,imageUploadOptions} from '../shared/image-upload.ts';
 import {apiResponse} from '../app/lib/api-response.ts';
 const svg=body=>Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 12">${body}</svg>`);
@@ -50,3 +50,5 @@ test('plain-text and HTML upstream failures never leak JSON parser exceptions',a
  await assert.rejects(apiResponse(Response.json({message:'Quota atingida'},{status:429})),/Quota atingida/);
  assert.deepEqual(await apiResponse(Response.json({asset:{id:'safe'}})),{asset:{id:'safe'}});
 });
+
+test('customer icon rendition is square and preserves the original rectangular image',async()=>{const original=await sharp({create:{width:240,height:80,channels:3,background:'#4169e1'}}).png().toBuffer();const icon=await squareBrandingIcon(original),meta=await sharp(icon).metadata();assert.equal(meta.width,64);assert.equal(meta.height,64);assert.equal(meta.format,'png');assert.equal((await sharp(original).metadata()).width,240);const {data}=await sharp(icon).raw().toBuffer({resolveWithObject:true});assert.equal(data[3],0,'Letterboxing must be transparent rather than stretching or cropping');});

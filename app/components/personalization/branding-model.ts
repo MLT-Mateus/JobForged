@@ -18,7 +18,8 @@ export const brandContent=(value:Customization)=>{
  void organizationId;void draftUpdatedAt;void publishedAt;void publishedBy;void revision;
  return content;
 };
-export const brandingLogo=(value:Customization,theme:'light'|'dark')=>(theme==='dark'?value.assets.logoDark?.url:value.assets.logoLight?.url)||value.assets.logoMain?.url||value.assets.logoAlternative?.url||'/brand/jobforged-symbol.svg';
+export const brandingLogo=(value:Customization,theme:'light'|'dark')=>(theme==='dark'?value.assets.logoDark?.url:value.assets.logoLight?.url)||value.assets.logoLight?.url||value.assets.logoMain?.url||value.assets.logoAlternative?.url||'/brand/jobforged-symbol.svg';
+export const brandingIcon=(value:Customization,theme:'light'|'dark')=>value.assets.favicon?.url||value.assets.avatar?.url||(theme==='dark'?value.assets.logoDark?.url:value.assets.logoLight?.url)||value.assets.logoLight?.url||value.assets.logoMain?.url||value.assets.logoAlternative?.url;
 export function safeBrandingLink(value:string){try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:undefined}catch{return undefined}}
 export function luminance(value:string){const rgb=[1,3,5].map(i=>parseInt(value.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}
 export function contrast(a:string,b:string){const [x,y]=[luminance(a),luminance(b)].sort((m,n)=>n-m);return(x+.05)/(y+.05)}

@@ -1,4 +1,5 @@
 "use client";
+import {ActionButton} from './AdminPrimitives';
 import {fileMatchesAccept} from '@/shared/image-upload';
 
 /* eslint-disable @next/next/no-img-element */
@@ -832,6 +833,10 @@ export function MultiSelectField({
 type FileUploadFieldProps = FieldBaseProps & {
   disabled?: boolean;
   maxBytes?:number;
+  stateLabel?:string;
+  previewUrl?:string;
+  stored?:boolean;
+  onRemove?:()=>void;
   value: string | null;
   accept: string;
   emptyHint: string;
@@ -846,20 +851,21 @@ export function FileUploadField({
   emptyHint,
   variant = "file",
   disabled = false,
-  maxBytes,
+  maxBytes,previewUrl,stored=false,onRemove,stateLabel,
   error,helpText,
   onFileChange,
   className = "",
 }: FileUploadFieldProps) {
   const inputId = useId();
   const [dragActive,setDragActive]=useState(false),[uploadError,setUploadError]=useState('');
+  const [selectedFile,setSelectedFile]=useState<File|null>(null);
   const dragDepth=useRef(0),messageId=inputId+'-message';
   function choose(files:File[]){
     if(disabled||!files.length)return;
     if(files.length!==1){setUploadError('Envie um arquivo por vez.');return}
     if(!fileMatchesAccept(files[0],accept)){setUploadError('Formato não permitido. Confira os formatos indicados.');return}
     if(maxBytes&&files[0].size>maxBytes){setUploadError(`Envie um arquivo de até ${Math.round(maxBytes/1048576)} MB.`);return}
-    setUploadError('');onFileChange(files[0]);
+    setUploadError('');setSelectedFile(files[0]);onFileChange(files[0]);
   }
   const message=error||uploadError||helpText;
   const displayedValue=value?.trim()||null;
@@ -869,7 +875,7 @@ export function FileUploadField({
   const StateIcon = displayedValue ? FilledIcon : EmptyIcon;
 
   return (
-    <div className={`jf-field ${error||uploadError?'is-error':''}`}>
+    <div className={`jf-field jf-upload-field ${error||uploadError?'is-error':''}`}>
     <label className={`jf-upload jf-upload--${variant} ${displayedValue ? "is-filled" : ""} ${dragActive?'is-dragging':''} ${disabled?'is-disabled':''} ${className}`} htmlFor={inputId} aria-disabled={disabled}
       onDragEnter={event=>{event.preventDefault();if(!disabled){dragDepth.current++;setDragActive(true)}}}
       onDragOver={event=>{event.preventDefault();event.dataTransfer.dropEffect=disabled?'none':'copy'}}
@@ -885,16 +891,18 @@ export function FileUploadField({
         aria-invalid={!!(error||uploadError)}
         onChange={(event: ChangeEvent<HTMLInputElement>) => { choose(Array.from(event.target.files??[])); event.target.value = ""; }}
       />
-      <span className="jf-upload__icon"><StateIcon size={21} aria-hidden="true" /></span>
+      <span className="jf-upload__icon">{displayedValue&&variant==='picture'&&(previewUrl||selectedFile)?(previewUrl?<img src={previewUrl} alt="Prévia do arquivo enviado"/>:selectedFile?<UploadImagePreview key={fileKey(selectedFile)} file={selectedFile}/>:null):<StateIcon size={21} aria-hidden="true" />}</span>
       <span className="jf-upload__content">
         <strong>{label}</strong>
-        <small title={displayedValue ?? undefined}>{displayedValue ?? guidance}</small>
+        <small className="jf-upload__state" aria-live="polite">{stateLabel||(displayedValue?(stored?"Arquivo enviado":"Arquivo selecionado"):"Nenhum arquivo selecionado")}</small>
+        <small className="jf-upload__filename" title={displayedValue ?? undefined}>{displayedValue ?? guidance}</small>
       </span>
       <em>
         {displayedValue ? <Check size={15} aria-hidden="true" /> : <UploadCloud size={15} aria-hidden="true" />}
         {displayedValue ? "Trocar" : "Selecionar"}
       </em>
     </label>
+    {displayedValue&&onRemove&&<ActionButton variant="quiet" className="jf-upload__remove" type="button" disabled={disabled} onClick={()=>{setSelectedFile(null);setUploadError('');onRemove()}} aria-label={`Remover ${label}`}>Remover arquivo</ActionButton>}
     {message&&<small id={messageId} className="jf-field__message" role={error||uploadError?'alert':undefined}>{message}</small>}
     </div>
   );

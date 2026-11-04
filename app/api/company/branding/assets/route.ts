@@ -15,7 +15,7 @@ export async function POST(request:NextRequest){
  try{
   const file=await readImageUpload(request,5242880);
   if(file.companyId!==session.company.id)return Response.json({message:'O contexto da conta mudou. Recarregue a identidade antes de enviar imagens.'},{status:409,headers});
-  if(['logoMain','logoDark','favicon','avatar'].includes(file.kind)&&file.input.byteLength>2097152)return Response.json({message:'Envie esta imagem de marca com até 2 MB.'},{status:413,headers});
+  if(['logoMain','logoLight','logoDark','favicon','avatar'].includes(file.kind)&&file.input.byteLength>2097152)return Response.json({message:'Envie esta imagem de marca com até 2 MB.'},{status:413,headers});
   const id=randomUUID(),path=`${session.company.id}/${id}.png`;
   const reservation=await requestDatabase('rpc/reserve_company_image',session.accessToken,{asset_id:id});
   if(!reservation?.ok){

@@ -270,3 +270,10 @@
 .appearance-domain-warning{color:var(--jf-ui-danger);font-weight:600}
 .appearance-domain-diagnosis.is-ready{border-color:var(--jf-ui-success);background:var(--jf-ui-success-soft)}
 .appearance-domain-next{color:var(--jf-ui-text);font-size:var(--jf-ui-font-size-sm);overflow-wrap:anywhere}
+
+.appearance-banner-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:var(--jf-ui-space-2)}
+.appearance-preview-controls{container-type:inline-size}
+@container(max-width:540px){.appearance-preview-controls{grid-template-columns:minmax(0,1fr)}.appearance-preview-controls>div[role="group"]{flex-wrap:wrap}}
+.appearance-asset{gap:var(--jf-ui-space-2)}
+
+.jf-editor-workbench--mobile .appearance-preview-controls{grid-template-columns:minmax(0,1fr)}

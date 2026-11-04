@@ -11,3 +11,6 @@ export async function normalizeBrandingImage(input:Uint8Array,mime:string,limits
  if(output.byteLength>5242880)throw new Error('Output size limit');
  return output;
 }
+
+/** A small square rendition; never crops or overwrites the source asset. */
+export async function squareBrandingIcon(input:Uint8Array){return sharp(input,{limitInputPixels:16777216,failOn:'warning'}).timeout({seconds:3}).resize(64,64,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).png().toBuffer()}

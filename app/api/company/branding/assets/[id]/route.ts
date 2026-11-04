@@ -1,3 +1,4 @@
+import {squareBrandingIcon} from '@/app/lib/branding-image';
 import type { NextRequest } from 'next/server';
 import { createHash } from 'node:crypto';
 import { readSession, requestDatabase } from '@/app/api/auth/_server';
@@ -14,5 +15,7 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{id:strin
  const stored=await brandingStorage(asset.path,session.accessToken);if(!stored?.ok)return new Response(null,{status:503,headers});
  const bytes=Buffer.from(await stored.arrayBuffer());
  if(bytes.byteLength!==asset.size||createHash('sha256').update(bytes).digest('hex')!==asset.sha256)return new Response(null,{status:503,headers});
- headers.set('Content-Type','image/png');return new Response(bytes,{headers});
+ headers.set('Content-Type','image/png');
+ if(new URL(request.url).searchParams.get('icon')==='1'){try{return new Response(await squareBrandingIcon(bytes),{headers})}catch{return new Response(null,{status:503,headers})}}
+ return new Response(bytes,{headers});
 }

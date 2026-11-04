@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import sharp from 'sharp';
-import {brandingDefaults,brandContent,brandingStyle,validateBranding,contrast,foreground} from '../app/components/personalization/branding-model.ts';
+import {brandingIcon,brandingLogo,brandingDefaults,brandContent,brandingStyle,validateBranding,contrast,foreground} from '../app/components/personalization/branding-model.ts';
 import {fontPairs} from '../app/components/ui/font-pairs.ts';
 import {normalizeBrandingImage} from '../app/lib/branding-image.ts';
 test('defaults are company-specific, with no demo assets or local cross-company data',()=>{
@@ -58,3 +58,5 @@ test('validation identifies exact controls in hidden groups and rich content',as
  d.portal.headline='Example';d.portal.navigation=[{label:'Broken',href:'javascript:alert(1)'}];assert.equal(brandingIssue(brandContent(d)).path,'portal.navigation.0.href');
  d.portal.navigation=[];d.portal.chrome=portalChrome(d);d.portal.chrome.light.headerText=d.portal.chrome.light.headerBackground;assert.equal(brandingIssue(brandContent(d)).path,'portal.chrome.light.headerText');
 });
+
+test('customer tab uses its icon or mark and dark wordmark falls back to light',()=>{const c=brandingDefaults('x','X');c.assets.logoLight={url:'/api/company/branding/assets/38000000-0000-0000-0000-000000000041'};assert.equal(brandingLogo(c,'dark'),c.assets.logoLight.url);assert.equal(brandingIcon(c,'dark'),c.assets.logoLight.url);c.assets.favicon={url:'/api/company/branding/assets/38000000-0000-0000-0000-000000000042'};assert.equal(brandingIcon(c,'light'),c.assets.favicon.url);});
