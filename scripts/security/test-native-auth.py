@@ -557,7 +557,7 @@ def main():
         except subprocess.CalledProcessError as error:raise AssertionError("Shared fixture setup: "+(error.stderr or "").splitlines()[0]) from None
         status,job=request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Isolated acceptance','remove_accounts':True},elevated);assert status==200,'Deletion request failed'
         assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Idempotent retry','remove_accounts':True},elevated)[1]['id']==job['id'],'Deletion retry created another job'
-        assert request(rest,'/rpc/platform_manage',{'operation':'company.status','target_company':delete_cid,'values_json':{'status':'active'},'change_reason':'Attempted reactivation'},elevated)[0]==403,'Queued deletion could be reactivated'
+        assert request(rest,'/rpc/platform_manage',{'operation':'company.status','target_company':delete_cid,'target_record':None,'values_json':{'status':'active'},'change_reason':'Attempted reactivation'},elevated)[0]==403,'Queued deletion could be reactivated'
         assert request(rest,'/rpc/session_context_v1',{},delete_token)[1] is None,'Queued company retained access'
         assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name like '"+delete_cid+"/%';")=='1','Request deleted files before verified backup'
         # Scoped worker capability cannot be forged by ordinary signed sessions.

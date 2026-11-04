@@ -34,7 +34,7 @@ def main():
  global database,socket
  parser=argparse.ArgumentParser();parser.add_argument('--isolated-database');parser.add_argument('--isolated-storage');parser.add_argument('--isolated-auth');args=parser.parse_args()
  isolated=any([args.isolated_database,args.isolated_storage,args.isolated_auth])
- if os.geteuid()!=0:raise SystemExit('VPS root required')
+ if not isolated and os.geteuid()!=0:raise SystemExit('VPS root required')
  temporary=None
  if isolated:
   if not all([args.isolated_database,args.isolated_storage,args.isolated_auth]):raise SystemExit('All disposable providers required')
