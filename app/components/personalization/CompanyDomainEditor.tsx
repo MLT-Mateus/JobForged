@@ -252,6 +252,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
               </ul>
               <small>Consulta direta aos DNS públicos em {new Date(diagnosis.checkedAt).toLocaleTimeString('pt-BR')}.</small>
               {diagnosis.ready && data.status !== 'active' && <p>Os registros estão prontos. A JobForged ativará o endereço e o HTTPS automaticamente após a próxima conferência, em até 5 minutos.</p>}
+              {diagnosis.ready && <p>Se este teste passar e o endereço ainda não abrir no seu computador, ele pode estar usando uma resposta DNS antiga. Aguarde a propagação (pode levar até 24 horas) e teste novamente.</p>}
               {data.status === 'active' && <a className="jf-action jf-action--secondary" href={`https://${data.hostname}`} target="_blank" rel="noopener noreferrer">Abrir página da empresa</a>}
             </div>
           )}
