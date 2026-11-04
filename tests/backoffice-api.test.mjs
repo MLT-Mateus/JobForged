@@ -61,3 +61,33 @@ test('backoffice APIs enforce session, origin, validation and invitation secrecy
   const settings=await request('/api/platform/settings',null,{cookie:''});assert.equal(settings.status,200);assert.equal(Object.keys(await settings.json()).length,3);
  } finally {globalThis.fetch=originalFetch;for(const name of names){if(previous[name]===undefined)delete process.env[name];else process.env[name]=previous[name];}}
 });
+
+
+test('logout works without MFA and deletion forwards only confirmed administrator inputs',async()=>{
+ const original=globalThis.fetch;const previous={...process.env};let platform=true,deny=true;const calls=[];
+ process.env.APP_ENV='test';process.env.SUPABASE_INTERNAL_URL='http://deletion-fixture.invalid';process.env.SUPABASE_ANON_KEY='fixture';
+ globalThis.fetch=async(input,init)=>{const path=new URL(String(input)).pathname;
+  if(path==='/auth/v1/user')return Response.json({id:'26000000-0000-0000-0000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
+  if(path.endsWith('/rpc/is_platform_admin'))return Response.json(platform);
+  if(path.endsWith('/rpc/session_context_v1'))return Response.json(null);
+  if(path.endsWith('/rpc/revoke_current_session')){calls.push('revoke');return new Response(null,{status:204})}
+  if(path==='/auth/v1/logout'){calls.push('logout');return new Response(null,{status:204})}
+  if(path.endsWith('/rpc/company_deletion')){calls.push(JSON.parse(init.body));return deny?Response.json({message:'recent MFA required'},{status:403}):Response.json({id:'fixture-job',state:'queued'})}
+  throw Error('Unexpected deletion fixture request');
+ };
+ try{
+ const {default:worker}=await import('../dist/server/index.js');
+ const send=(path,body,origin='http://localhost',cookie='jf_auth_access=fixture')=>worker.fetch(new Request('http://localhost'+path,{method:body?'POST':'GET',headers:{host:'localhost',origin,cookie,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+ assert.equal((await send('/api/auth/sign-out',{},'https://foreign.invalid')).status,403);
+ const logout=await send('/api/auth/sign-out',{});assert.equal(logout.status,200);assert.match(logout.headers.get('set-cookie'),/jf_auth_access=;.*Max-Age=0/);assert.ok(calls.includes('revoke'));assert.ok(calls.includes('logout'));
+ const body={company:'26000000-0000-0000-0000-000000000011',confirmation:'Fixture',reason:'Acceptance fixture',removeAccounts:true,operation:'force',mfa:true};
+ assert.equal((await send('/api/backoffice/company-deletion',body,'https://foreign.invalid')).status,403);
+ assert.equal((await send('/api/backoffice/company-deletion',body,undefined,'')).status,403);
+ platform=false;assert.equal((await send('/api/backoffice/company-deletion',body)).status,403);platform=true;
+ const factor=await send('/api/backoffice/company-deletion',body);assert.equal(factor.status,403);assert.equal((await factor.json()).code,'ADMIN_MFA_REQUIRED');
+ deny=false;assert.equal((await send('/api/backoffice/company-deletion',{...body,confirmation:''})).status,202); // Exact-name check is authoritative in SQL.
+ assert.deepEqual(calls.at(-1),{operation:'request',target_company:body.company,confirmation:'',change_reason:body.reason,remove_accounts:true});
+ assert.equal((await send('/api/backoffice/company-deletion',{...body,removeAccounts:'yes'})).status,400);
+ process.env.APP_ENV='live';assert.equal((await send('/api/backoffice/company-deletion',body)).status,503);
+ }finally{globalThis.fetch=original;for(const key of ['APP_ENV','SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY']){if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key]}}
+});
