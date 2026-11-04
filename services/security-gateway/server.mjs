@@ -1,9 +1,10 @@
 import http from 'node:http';
+import {validResume} from '../../shared/resume-policy.mjs';
 import { lookup } from 'node:dns/promises';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import pg from 'pg';
-import { clientAddress, limitsFor,sessionClaimHints,policyPath,validStaticPng,passwordRules,privilegedCredential } from './policy.mjs';
+import { clientAddress, limitsFor,sessionClaimHints,policyPath,validStaticPng,passwordRules,privilegedCredential,anonymousReadHint } from './policy.mjs';
 
 const secret=process.env.RATE_SCOPE_SECRET;
 const environment=process.env.APP_ENV;
@@ -34,7 +35,7 @@ const server=http.createServer(async(req,res)=>{
   try{await pool.query('select 1');reply(res,200,'healthy');}catch{reply(res,503,'unavailable');}return;
  }
  const rawPath=(req.url||'/').split('?')[0].replace(/\/+$/,'')||'/',application=rawPath.startsWith('/api/');
- const uploading=req.method==='POST'&&(rawPath.startsWith('/storage/v1/object/')||rawPath.endsWith('/assets'));
+ const uploading=req.method==='POST'&&(rawPath.startsWith('/storage/v1/object/')||rawPath.endsWith('/assets')||rawPath==='/api/portal/resume');
  const address=clientAddress(req.socket.remoteAddress,req.headers['x-forwarded-for'],trustedPeers);
  const clientKey=(application?'app:':'native:')+address;
  const bffRequest=!application&&bffPeers.has(req.socket.remoteAddress?.replace(/^::ffff:/,''));
@@ -52,10 +53,12 @@ const server=http.createServer(async(req,res)=>{
   const canonicalPath=url.pathname.replace(/\/+$/,'')||'/';
   if(!application&&(canonicalPath.startsWith('/auth/v1/admin')||privilegedCredential(req.headers.authorization)||privilegedCredential(req.headers.apikey))){reply(res,403,'Private administration required');return;}
   if(!application&&canonicalPath.startsWith('/storage/v1/')&&
-    !/^\/storage\/v1\/object\/(?:authenticated\/)?company-branding\/(?:platform|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.png$/.test(canonicalPath)){
+    !/^\/storage\/v1\/object\/(?:authenticated\/)?company-branding\/(?:platform|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.png$/.test(canonicalPath)&&!/^\/storage\/v1\/object\/(?:authenticated\/)?candidate-resumes\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/.test(canonicalPath)){
    reply(res,403,'Storage operation unavailable');return;
   }
-  if(!application&&canonicalPath.startsWith('/storage/v1/')&&!sessionClaimHints(req.headers.authorization)){
+  // Anonymous GETs still require an upstream verified anon JWT and published-image RLS.
+  const publicImageRead=anonymousReadHint(req.headers.authorization)&&req.method==='GET'&&/^\/storage\/v1\/object\/company-branding\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.png$/.test(canonicalPath);
+  if(!application&&canonicalPath.startsWith('/storage/v1/')&&!publicImageRead&&!sessionClaimHints(req.headers.authorization)){
    reply(res,401,'Session unavailable');return;
   }
   const consumed=new Set();
@@ -80,7 +83,8 @@ const server=http.createServer(async(req,res)=>{
   if(auth&&typeof data?.password==='string'&&policyPath(canonicalPath)!=='/auth/v1/token'&&Object.values(passwordRules(data.password)).some(valid=>!valid)){
    reply(res,422,'Use at least 8 characters, uppercase, lowercase, number and symbol, up to 72 UTF-8 bytes');return;
   }
-  if(!application&&uploading&&!bffRequest&&(req.headers['content-type']!=='image/png'||!validStaticPng(body))){reply(res,415,'Use a valid static PNG image');return;}
+  if(!application&&uploading&&canonicalPath.includes('/candidate-resumes/')&&(req.headers['content-type']!=='application/pdf'||!validResume(body))){reply(res,415,'Use a simple PDF up to 5 MB');return;}
+  if(!application&&uploading&&!bffRequest&&!canonicalPath.includes('/candidate-resumes/')&&(req.headers['content-type']!=='image/png'||!validStaticPng(body))){reply(res,415,'Use a valid static PNG image');return;}
   if(!await budgets(data))return;
   if(canonicalPath==='/auth/v1/user'||canonicalPath==='/auth/v1/factors'||canonicalPath.startsWith('/auth/v1/factors/')){
    const hint=sessionClaimHints(req.headers.authorization);

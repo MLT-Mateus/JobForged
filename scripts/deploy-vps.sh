@@ -106,6 +106,7 @@ case "$command" in
       python3 "$root/scripts/security/configure-test-gateway.py" "$revision" || fail_deploy
       python3 "$root/scripts/security/configure-test-auth.py" || fail_deploy
     fi
+    bash "$root/scripts/retain-client-assets.sh" "$environment" "$current_image" "$image" "$root" || fail_deploy
     "${compose[@]}" config --quiet || fail_deploy
     "${compose[@]}" up -d --wait --wait-timeout 120 || fail_deploy
     "${compose[@]}" exec -T app node --input-type=module < "$root/scripts/verify-auth-readiness.mjs" || fail_deploy

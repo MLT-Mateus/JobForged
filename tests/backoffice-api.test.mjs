@@ -18,7 +18,7 @@ test('administrative TOTP enrollment labels its issuer and protects one-time set
  };
  try{
   const {default:worker}=await import('../dist/server/index.js');
-  const request=body=>worker.fetch(new Request('http://localhost/api/backoffice/security',{method:body?'POST':'GET',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture-token','content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{});
+  const request=body=>worker.fetch(new Request('http://localhost/api/backoffice/security',{method:body?'POST':'GET',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture-token','content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
   const enrolled=await request({operation:'enroll'});assert.equal(enrolled.status,200);assert.match(enrolled.headers.get('cache-control'),/private, no-store/);
   const setup=await enrolled.json();assert.equal(enrollmentBody.issuer,'JobForged Test');assert.equal(setup.issuer,'JobForged Test');assert.equal(setup.manualKey,syntheticKey);assert.match(setup.qr,/^data:image\/svg\+xml;base64,/);
   const status=await(await request()).json();assert.equal(status.manualKey,undefined);assert.equal(status.qr,undefined);
@@ -46,7 +46,7 @@ test('backoffice APIs enforce session, origin, validation and invitation secrecy
  };
  try {
   const {default:worker}=await import('../dist/server/index.js');
-  const request=(path,body,headers={})=>worker.fetch(new Request(`http://localhost${path}`,{method:body?'POST':'GET',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture-token','content-type':'application/json',...headers},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{});
+  const request=(path,body,headers={})=>worker.fetch(new Request(`http://localhost${path}`,{method:body?'POST':'GET',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture-token','content-type':'application/json',...headers},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
   assert.equal((await request('/api/backoffice',null,{cookie:''})).status,403);
   admin=false;assert.equal((await request('/api/backoffice')).status,403);admin=true;
   assert.equal((await request('/api/backoffice?section=companies&page=-1')).status,400);

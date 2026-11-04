@@ -1,13 +1,15 @@
 "use client";
+import {PageChromeGuide} from "./PageChromeGuide";
+import {PublicPortalAccount} from "../components/personalization/PublicPortalAccount";
 import { Info } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { EditorAccordion, EditorWorkbench, ActionButton, CheckboxField, StatusBadge, TextField } from "../components/ui";
+import { EditorSection, EditorAccordion, EditorWorkbench, ActionButton, CheckboxField, StatusBadge, TextField } from "../components/ui";
 import { PhoneFrame } from "../components/ui/PhoneFrame";
 import { FocusPopover, WidgetDialog, WidgetDivider, WidgetGroup } from "../components/ui/Widgets";
 import { WidgetsIcon } from "../components/ui/Icons";
 import "./widgets-section.css";
 import {AppearancePreviewPanel} from "../components/personalization/AppearancePreviewPanel";
-import {jobforgedCareerExample} from "../components/personalization/jobforged-career-example";
+import {brandingDefaults} from "../components/personalization/branding-model";
 
 function Demo({number,title,description,children}:{number:string;title:string;description:string;children:ReactNode}) {
  return <section className="ds-widget-demo"><header><span className="ds-widget-index">{number}</span><div><h2>{title}</h2><p>{description}</p></div></header><div className="ds-widget-demo__stage">{children}</div></section>;
@@ -17,7 +19,7 @@ function OverlayPreview({kind}:{kind:"modal"|"focus"|"drawer"}) {
 }
 export function WidgetsSection() {
  const [previewTheme,setPreviewTheme]=useState<"light"|"dark">("light");
- const example=jobforgedCareerExample();
+ const example=brandingDefaults('design-system-preview','Sua empresa');
  const [editorTitle,setEditorTitle]=useState("Faça parte da nossa equipe");
  const [overlay,setOverlay]=useState<"modal"|"drawer"|"sheet"|null>(null),[onlyActive,setOnlyActive]=useState(true),[sheetChoice,setSheetChoice]=useState(true),[preview,setPreview]=useState(true);
  const close=()=>setOverlay(null);
@@ -46,11 +48,13 @@ export function WidgetsSection() {
   </div>
  </Demo>
  <Demo number="05" title="Editor com prévia" description="Menus recolhíveis à esquerda e prévia ao lado, com os mesmos componentes da personalização.">
- <EditorWorkbench editor={<><EditorAccordion title="Conteúdo do hero" defaultOpen><TextField label="Título principal" placeholder="Faça parte da nossa equipe" value={editorTitle} onChange={e=>setEditorTitle(e.target.value)}/></EditorAccordion><EditorAccordion title="Imagem e composição"><p>As opções relacionadas ficam dentro do mesmo menu.</p></EditorAccordion></>} preview={<AppearancePreviewPanel data={{...example,portal:{...example.portal,headline:editorTitle}}} theme={previewTheme} onThemeChange={setPreviewTheme}/>}/>
+ <EditorWorkbench editor={<><EditorAccordion title="Conteúdo do hero" defaultOpen><EditorSection title="Mensagem de boas-vindas"><TextField label="Título principal" placeholder="Digite o título..." value={editorTitle} onChange={e=>setEditorTitle(e.target.value)}/></EditorSection></EditorAccordion><EditorAccordion title="Imagem e composição"><p>As opções relacionadas ficam dentro do mesmo menu.</p></EditorAccordion></>} preview={<AppearancePreviewPanel data={{...example,portal:{...example.portal,headline:editorTitle}}} theme={previewTheme} onThemeChange={setPreviewTheme}/>}/>
  </Demo>
- <Demo number="06" title="Balão de informação · tooltip" description="Ajuda contextual junto ao controle, usando o mesmo balão do Rich Text. Abra por clique, toque ou teclado; feche com Escape ou ao sair do grupo.">
+ <Demo number="06" title="Conta e alertas na página pública" description="Acesso pelo cabeçalho, sem um painel separado. Exemplo sem cadastro ou envio de mensagens."><div className="ds-widget-inline"><PublicPortalAccount slug="exemplo" demo demoUnread={3}/><PublicPortalAccount slug="exemplo" demo demoSignedIn={false}/></div></Demo>
+ <Demo number="07" title="Balão de informação · tooltip" description="Ajuda contextual junto ao controle, usando o mesmo balão do Rich Text. Abre abaixo quando há espaço; caso contrário, acima. Acompanha a rolagem e mantém o conteúdo acessível.">
  <WidgetGroup variant="outline"><div className="ds-widget-inline"><strong>Orientação no contexto</strong><FocusPopover showCloseAction={false} align="end" label="Como usar o balão de informação" triggerVariant="quiet" triggerContent={<Info size={16}/>}><strong>Ajuda rápida</strong><p>Use este espaço para dicas curtas de preenchimento.</p><p>Feche com Escape ou clique fora.</p></FocusPopover></div><p>O ícone de informação abre uma caixa ancorada ao controle, sem depender de passar o mouse.</p></WidgetGroup>
  </Demo>
+ <Demo number="08" title="Estrutura e camadas da página" description="Nomes, dimensões e comportamento compartilhados entre a LP, as páginas empresariais e os painéis."><PageChromeGuide/></Demo>
  <WidgetDialog open={overlay==='modal'} onClose={close} title="Salvar preferências" description="Uma ação breve sem perder o contexto." footer={<><ActionButton variant="quiet" onClick={close}>Cancelar</ActionButton><ActionButton onClick={close}>Concluir exemplo</ActionButton></>}><TextField label="Nome da visualização" placeholder="Ex.: Vagas do time comercial"/><p className="ds-widget-caption">Demonstração visual. Nenhuma configuração será alterada.</p></WidgetDialog>
  <WidgetDialog open={overlay==='drawer'} onClose={close} kind="drawer" title="Detalhes da vaga" description="Informações adicionais no contexto da lista." footer={<ActionButton variant="secondary" onClick={close}>Fechar detalhes</ActionButton>}><StatusBadge tone="positive">Publicada</StatusBadge><h3>Analista de Customer Success</h3><p>Time de relacionamento · Híbrido</p><WidgetDivider label="Sobre a oportunidade"/><p>Acompanhe a experiência dos clientes, organize demandas e apoie o crescimento das contas.</p><WidgetGroup variant="outline"><strong>Próxima etapa</strong><p>Entrevista com a liderança.</p></WidgetGroup></WidgetDialog>
  <WidgetDialog open={overlay==='sheet'} onClose={close} kind="sheet" title="Visualização da lista" description="Escolha quais vagas deseja visualizar." footer={<ActionButton onClick={close}>Aplicar na demonstração</ActionButton>}><CheckboxField label="Somente vagas ativas" checked={sheetChoice} onChange={e=>setSheetChoice(e.target.checked)}/><p className="ds-widget-sheet-hint">Arraste a alça para baixo para fechar. Esta seleção altera apenas o exemplo.</p></WidgetDialog>

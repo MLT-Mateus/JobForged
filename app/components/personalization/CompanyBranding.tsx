@@ -1,4 +1,5 @@
 "use client";
+import {useBrandingIcon} from '../ui/useBrandingIcon';
 import {createContext,useContext,useEffect,useState,type ReactNode} from 'react';
 import {BrandAsset} from '../BrandAsset';
 import {ChevronLeft,ChevronRight} from 'lucide-react';
@@ -11,11 +12,7 @@ const ThemeContext=createContext<'light'|'dark'>('light');
 const ScopeContext=createContext<{id:string;role:string}>({id:'',role:''});
 export const useCompanyBranding=()=>useContext(Context);
 export function CompanyBrandingProvider({value,theme='light',companyId='',companyRole='',children}:{value:Customization|null;theme?:'light'|'dark';companyId?:string;companyRole?:string;children:ReactNode}){
- useEffect(()=>{
-  const icon=document.querySelector<HTMLLinkElement>('link[rel="icon"]');if(!icon||!value?.assets.favicon)return;
-  const previous=icon.href,previousType=icon.type;icon.href=value.assets.favicon.url;icon.type='image/png';
-  return()=>{icon.href=previous;icon.type=previousType};
- },[value]);
+ useBrandingIcon(value?.assets.favicon?.url);
  return <ScopeContext.Provider value={{id:companyId,role:companyRole}}><ThemeContext.Provider value={theme}><Context.Provider value={value}>{children}</Context.Provider></ThemeContext.Provider></ScopeContext.Provider>;
 }
 export function CompanyBrandingGuard({companyId,editing,children}:{companyId:string;editing:boolean;children:ReactNode}){

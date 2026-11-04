@@ -2,7 +2,7 @@
 import { planLabel, planStatusLabel, auditLabel } from "./display-labels";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ActionButton, AppToast, InlineNotice, Panel, PanelHeading, SelectField, StatusBadge, TextField, WorkspacePageHeader, WorkspaceState, type ToastKind } from "@/app/components/ui";
+import { ActionButton, AppToast, Panel, PanelHeading, SelectField, StatusBadge, TextField, WorkspacePageHeader, WorkspaceState, type ToastKind } from "@/app/components/ui";
 
 type Company = { id: string; name: string; cnpj: string | null; phone: string | null; plan_id: string; plan_status: string; created_at: string };
 type Member = { id: string; email: string; full_name: string; role: "owner" | "admin" | "member"; status: "active" | "inactive"; created_at: string };
@@ -57,7 +57,6 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
   return <><WorkspacePageHeader section={`Painel / ${mode === "settings" ? "Configurações" : "Administradores"}`}
     title={mode === "settings" ? "Dados da empresa" : "Equipe e acessos"}
     description={mode === "settings" ? "Mantenha os dados da sua organização atualizados." : "Usuários vinculados à sua organização."}/>
-    {message && <InlineNotice tone={messageKind === "danger" ? "danger" : messageKind === "success" ? "success" : "info"}>{message}</InlineNotice>}
     {message && <AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Ação não concluída" : "Atualização da empresa",text:message}} onClose={() => setMessage("")}/>}
     {mode === "settings" ? <div className="jf-workspace-grid"><Panel as="section" className="admin-card"><PanelHeading title="Identificação da empresa" description="Dados usados para identificar sua organização"/>
       <form onSubmit={save} className="admin-form-stack jf-panel-body"><TextField label="Nome da empresa" value={name} maxLength={160} onChange={event => setName(event.target.value)} required />

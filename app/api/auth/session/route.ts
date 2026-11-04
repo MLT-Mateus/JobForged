@@ -9,5 +9,5 @@ export async function GET(request: NextRequest) {
   if (!session) return Response.json({ authenticated: false }, { status: 401, headers });
   return Response.json({ authenticated: true, id: session.id, email: session.email,
     platformAdmin: session.platformAdmin, company: session.company, role: session.role,
-    fullName: "fullName" in session ? session.fullName : undefined }, { headers });
+    originSlug:"originSlug" in session?session.originSlug:undefined, fullName: "fullName" in session ? session.fullName : undefined }, { headers });
 }

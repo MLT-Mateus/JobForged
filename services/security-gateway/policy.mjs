@@ -30,6 +30,7 @@ export function limitsFor(pathname, address, body, secret, method='POST') {
 export function policyPath(path){
  path=path.replace(/\/+$/,'')||'/';
  const aliases={
+  '/api/portal/resume':'/storage/v1/object/candidate-resumes','/api/auth/candidate-sign-up':'/auth/v1/signup','/rest/v1/rpc/create_candidate_signup_intent':'/auth/v1/signup',
   '/api/auth/sign-in':'/auth/v1/token','/api/auth/sign-up':'/auth/v1/signup',
   '/api/auth/invitee-sign-up':'/auth/v1/signup','/api/auth/recover':'/auth/v1/recover',
   '/api/auth/confirmation/resend':'/auth/v1/resend','/api/auth/confirmation/session':'/auth/v1/verify',
@@ -90,3 +91,6 @@ export function validStaticPng(bytes){
   return false;
  }catch{return false;}
 }
+
+// Routing hint only. The Storage provider verifies the JWT and enforces RLS.
+export function anonymousReadHint(header){try{const parts=String(header||'').replace(/^Bearer /i,'').split('.');return parts.length===3&&parts.every(Boolean)&&JSON.parse(Buffer.from(parts[1],'base64url').toString('utf8')).role==='anon'}catch{return false}}

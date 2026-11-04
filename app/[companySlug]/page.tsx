@@ -1,3 +1,13 @@
-import {ExternalCompanyPreview} from '../components/personalization/ExternalCompanyPreview';
-export const metadata={title:'Prévia empresarial | JobForged',robots:{index:false,follow:false}};
-export default async function Page({params}:{params:Promise<{companySlug:string}>}){const {companySlug}=await params;return <ExternalCompanyPreview slug={companySlug}/>}
+import {headers} from 'next/headers';
+import {notFound} from 'next/navigation';
+import {loadPublicPortal} from '@/app/lib/public-portal';
+import {PublicCompanyPortal} from '@/app/components/personalization/PublicCompanyPortal';
+export const dynamic='force-dynamic';
+export const metadata={title:'Carreiras | JobForged',robots:{index:false,follow:false}};
+export default async function Page({params,searchParams}:{params:Promise<{companySlug:string}>;searchParams:Promise<Record<string,string|string[]|undefined>>}){
+ const {companySlug}=await params;const data=await loadPublicPortal(companySlug);if(!data)notFound();
+ const canonical=new URL(process.env.APP_PUBLIC_URL||'https://test.jobforged.com');const h=await headers();const raw=h.get('x-forwarded-host')||h.get('host')||canonical.host;
+ let hostname=canonical.hostname;try{hostname=new URL('https://'+raw).hostname}catch{/* Proxy rejects malformed hosts. */}
+ const external=hostname!==canonical.hostname&&!['localhost','127.0.0.1','[::1]'].includes(hostname);
+ return <PublicCompanyPortal data={data} slug={companySlug} externalAccountHref={external?new URL('/'+companySlug+'?acesso=entrar',canonical).href:undefined} initialLogin={!external&&(await searchParams)?.acesso==='entrar'}/>;
+}

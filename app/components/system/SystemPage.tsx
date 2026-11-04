@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Compass, Home, LockKeyhole, Search, ShieldCheck, Wrench, CircleAlert } from "lucide-react";
 import { BrandAsset } from "@/app/components/BrandAsset";
-import { ActionButton, EmptyState, TextField, ThemeSelector, useThemePreference } from "@/app/components/ui";
+import { AppToast, ActionButton, EmptyState, TextField, ThemeSelector, useThemePreference } from "@/app/components/ui";
 import { safeReturnPath } from "./safe-return";
 import { pageLinks, systemPages, type SystemPageCode } from "./system-pages";
 const icons = { 401: LockKeyhole, 403: ShieldCheck, 404: Search, 500: CircleAlert, 503: Wrench };
@@ -57,7 +57,7 @@ export function SystemPage({ code, reset }: { code: SystemPageCode; reset?: () =
       </div>
       {code === 403 && <p className="system-page__help">Solicite ao responsável da sua empresa a revisão do seu vínculo e das permissões. Esta página não concede acesso automaticamente.</p>}
       {code === 503 && <div className="system-page__help"><p>Previsão de retorno: a confirmar.</p><a className="jf-action jf-action--quiet" href="/api/health" target="_blank" rel="noopener noreferrer">Consultar status atual</a></div>}
-      {notice && <p role="alert">{notice}</p>}
+      {notice && <AppToast notice={{kind:"danger",title:"Não foi possível trocar de conta",text:notice}} onClose={()=>setNotice("")}/>}
     </div><div className="not-found-visual" aria-hidden="true"><div className="not-found-window"><div className="window-bar"><div className="window-dots"><span /><span /><span /></div><span className="window-address">JobForged</span><Compass /></div><div className="not-found-window__body"><span><Icon /></span><strong>{copy.label}</strong><small>Seu próximo passo começa por aqui.</small></div></div></div></section>
   </main>;
 }

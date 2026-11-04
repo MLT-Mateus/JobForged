@@ -38,3 +38,5 @@
 .jf-notification-item p{margin:0;white-space:pre-wrap;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);line-height:1.6}
 .jf-notification-item__actions{display:flex;align-items:center;gap:var(--jf-ui-space-2);flex-wrap:wrap}
 .jf-notification-panel__pagination{display:flex;justify-content:space-between;align-items:center;gap:var(--jf-ui-space-2);border-top:1px solid var(--jf-ui-border);padding-top:var(--jf-ui-space-4);font-size:var(--jf-ui-font-size-sm)}
+
+.jf-notification-trigger{position:relative;overflow:visible}.jf-notification-count{position:absolute;inset-block-start:-7px;inset-inline-end:-7px;min-width:20px;height:20px;display:grid;place-items:center;padding-inline:4px;border-radius:999px;background:var(--jf-ui-danger-badge);color:var(--jf-ui-on-danger);font:700 11px/1 var(--jf-ui-font-body);border:2px solid var(--jf-ui-surface);pointer-events:none}
