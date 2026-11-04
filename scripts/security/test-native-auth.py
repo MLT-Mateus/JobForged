@@ -300,6 +300,14 @@ def main():
         status,other_session=request(auth,'/token?grant_type=password',{'email':other,'password':password});assert status==200
         asset=str(uuid.uuid4());path='/object/company-branding/'+own_context['company_id']+'/'+asset+'.png'
         assert request(rest,'/rpc/reserve_company_image',{'asset_id':asset},own_token)[0]==200,'Native upload reservation failed'
+        abandoned=str(uuid.uuid4())
+        assert request(rest,'/rpc/reserve_company_image',{'asset_id':abandoned},own_token)[0]==200
+        assert request(rest,'/rpc/release_company_image',{'asset_id':abandoned},other_session['access_token'])[0] in (200,204)
+        # A foreign company cannot release the owner's reservation.
+        assert sql("select (expires_at>now())::text from app_private.company_upload_reservations where asset_id='"+abandoned+"';").strip()=='true'
+        assert request(rest,'/rpc/release_company_image',{'asset_id':abandoned},own_token)[0] in (200,204)
+        assert sql("select (expires_at<=now())::text from app_private.company_upload_reservations where asset_id='"+abandoned+"';").strip()=='true'
+        assert sql("select count(*) from app_private.company_upload_reservations where asset_id='"+abandoned+"';").strip()=='1','Release deleted the rate-limit receipt'
         def chunk(kind,data):return struct.pack('>I',len(data))+kind+data+struct.pack('>I',zlib.crc32(kind+data))
         png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',1,1,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(b'\0\0\x80\x80\xff'))+chunk(b'IEND',b'')
         assert binary_request(storage,path,png,own_token)[0]==200,'Native reserved upload failed'

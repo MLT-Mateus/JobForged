@@ -6,13 +6,14 @@ import {brandingDefaults,brandContent} from '../app/components/personalization/b
 test('branding API authorizes roles, handles conflicts and processes private image uploads',async()=>{
  const names=['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY','SUPABASE_BRANDING_STORAGE_TOKEN'];const prior=Object.fromEntries(names.map(n=>[n,process.env[n]]));const original=globalThis.fetch;
  Object.assign(process.env,{SUPABASE_INTERNAL_URL:'https://branding.fixture.invalid',SUPABASE_ANON_KEY:'fixture-anon',SUPABASE_BRANDING_STORAGE_TOKEN:'bucket-only-fixture-token'});
- const cid='38000000-0000-0000-0000-000000000011';let role='owner',platform=false,conflict=false,stored=null,asset=null,tampered=false;const writes=[];
+ const cid='38000000-0000-0000-0000-000000000011';let role='owner',platform=false,conflict=false,stored=null,asset=null,tampered=false,releaseCount=0,quotaError=null;const writes=[];
  globalThis.fetch=async(url,init)=>{
   const address=String(url),body=typeof init?.body==='string'?JSON.parse(init.body):null;
   if(address.endsWith('/auth/v1/user'))return Response.json({id:'38000000-0000-0000-0000-000000000001',email:'owner@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
   if(address.endsWith('/rpc/is_platform_admin'))return Response.json(platform);
   if(address.endsWith('/rpc/session_context_v1'))return Response.json({id:'member',company_id:cid,role,full_name:'Fixture Owner',companies:{id:cid,name:'Fixture Branding'}});
-  if(address.endsWith('/rpc/reserve_company_image'))return Response.json({assetId:body.asset_id,expiresIn:300,maxBytes:5242880});
+  if(address.endsWith('/rpc/reserve_company_image'))return quotaError?Response.json(quotaError,{status:400}):Response.json({assetId:body.asset_id,expiresIn:300,maxBytes:5242880});
+  if(address.endsWith('/rpc/release_company_image')){releaseCount++;return Response.json(null)}
   if(address.endsWith('/rpc/read_company_branding'))return Response.json({companyId:cid,companyName:'Fixture Branding',editable:role!=='member',version:0,draft:role==='member'?null:{},published:{},publishedVersion:0,history:[]});
   if(address.endsWith('/rpc/write_company_branding')){writes.push(body);return body.operation==='save'?Response.json({code:'PT409',details:'editor_contract_retired'},{status:409}):conflict?Response.json({code:'40001'},{status:409}):Response.json(1)}
   if(address.includes('/storage/v1/object/company-branding/')){assert.equal(init.headers.Authorization,'Bearer fixture');if(init.method==='POST'){assert.equal(init.headers['x-upsert'],'false');stored=Buffer.from(init.body);return Response.json({ok:true})}return new Response(tampered?Buffer.from('tampered'):stored)}
@@ -49,6 +50,10 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   assert.equal((await binary(image,'drop.png','image/png','other-company')).status,409);
   role='member';assert.equal((await binary(image,'drop.png','image/png')).status,403);role='owner';
   const beforeUnsafe=Buffer.from(stored);assert.equal((await binary(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><script/></svg>'),'bad.svg','image/svg+xml')).status,400);assert.deepEqual(stored,beforeUnsafe);
+  assert.equal(releaseCount,1,'Rejected SVG must release its reservation');
+  quotaError={code:'53300',message:'upload rate exceeded'};const rate=await binary(image,'a.png','image/png');assert.equal(rate.status,429);assert.equal(rate.headers.get('retry-after'),'60');assert.match((await rate.json()).message,/1 minuto/);
+  quotaError={code:'53300',message:'too many concurrent uploads'};assert.match((await (await binary(image,'a.png','image/png')).json()).message,/dois envios/);
+  quotaError={code:'54000',message:'company image quota exceeded'};assert.match((await (await binary(image,'a.png','image/png')).json()).message,/200 imagens ou 1 GB/);quotaError=null;
   const svg=new FormData();svg.set('companyId',cid);svg.set('file',new File(['<svg/>'],'fake.png',{type:'image/png'}));assert.equal((await request('/api/company/branding/assets',svg)).status,400);
  }finally{globalThis.fetch=original;for(const name of names){if(prior[name]===undefined)delete process.env[name];else process.env[name]=prior[name]}}
 });

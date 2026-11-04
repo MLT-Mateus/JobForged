@@ -17,3 +17,10 @@ Marca empresarial: até5MB/16MP; logo, favicon e avatar até2MB. Comunicação: 
 ## Verificações
 
 `tests/image-upload.test.mjs`: cinco formatos, SVG malicioso, MIME falso, arquivo inválido, limites e respostas não JSON. `tests/branding-api.test.mjs`: envio binário autenticado com fixtures, isolamento e papel, SVG/AVIF convertidos, rejeição antes de Storage. `scripts/test-node-runtime.mjs`: HTTP nativo com Host interno e Origin público, visitante e origem externa negados em JSON. Esses testes não equivalem a upload autenticado no navegador nem a uso do Storage real em produção.
+
+
+## Falhas e reservas de processamento
+
+Migration0041 adiciona release_company_image(uuid), autorizada por identidade, empresa, papel e sessão. Em falha de conversão, proporção, Storage ou registro, a API expira a reserva no finally. Nenhum arquivo é apagado. O recibo fica no banco para manter o limite durável de cinco tentativas por minuto; a quota de200 imagens/1GB e dois processamentos simultâneos permanece. Se a liberação falhar por indisponibilidade, a expiração de cinco minutos continua como fallback.
+
+Alertas distinguem quota de armazenamento, concorrência e frequência. Retry-After informa60s para frequência e300s para reserva concorrente interrompida. O teste nativo isolado verifica liberação pela sessão correta, negativa entre empresas e conservação do recibo. Teste BFF verifica finally e mensagens específicas. Não executar liberação manual de reservas ativas dos clientes.
