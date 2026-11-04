@@ -868,3 +868,9 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 :root{--jf-ui-public-content-max:1180px;--jf-ui-public-gutter:24px;--jf-ui-public-header-height:78px;--jf-ui-public-logo-width:184px;--jf-ui-public-footer-top:70px;--jf-ui-public-footer-bottom:24px;--jf-ui-public-footer-main-min:240px;--jf-ui-public-footer-logo-width:175px;--jf-ui-public-footer-logo-height:51px}
 @media(max-width:680px){:root{--jf-ui-public-gutter:16px;--jf-ui-public-header-height:70px;--jf-ui-public-logo-width:155px}}
 @media(max-width:430px){:root{--jf-ui-public-logo-width:142px}}
+
+.jf-upload.is-dragging{border-color:var(--jf-ui-brand);background:var(--jf-ui-brand-soft);box-shadow:0 0 0 3px color-mix(in srgb,var(--jf-ui-brand) 15%,transparent)}
+.jf-upload.is-disabled,.jf-multi-upload.is-disabled{opacity:.6;cursor:not-allowed}
+.jf-field.is-error .jf-upload{border-color:var(--jf-ui-danger)}
+
+.jf-multi-upload__gallery .jf-upload-svg-preview{width:100%;height:100%;padding:24px;color:var(--jf-ui-brand);background:var(--jf-ui-brand-soft)}

@@ -40,6 +40,15 @@ test('branding API authorizes roles, handles conflicts and processes private ima
   const read=await request(result.asset.url);assert.equal(read.status,200);assert.equal(read.headers.get('content-type'),'image/png');assert.equal(read.headers.get('x-content-type-options'),'nosniff');
   assert.equal((await request('/api/company/branding/assets/38000000-0000-0000-0000-000000000099')).status,404);
   tampered=true;assert.equal((await request(result.asset.url)).status,503);
+  tampered=false;
+  const binary=async(bytes,name,mime,company=cid)=>worker.fetch(new Request('http://localhost/api/company/branding/assets',{method:'POST',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture','content-type':mime,'x-upload-name':encodeURIComponent(name),'x-company-id':company,'x-image-kind':'heroImage'},body:bytes}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+  assert.equal((await binary(image,'drop.png','image/png')).status,200);
+  const simpleSvg=Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8"><rect width="16" height="8" fill="#20B2AA"/></svg>');
+  assert.equal((await binary(simpleSvg,'drop.svg','image/svg+xml')).status,200);assert.equal((await sharp(stored).metadata()).format,'png');
+  const avif=await sharp(image).avif().toBuffer();assert.equal((await binary(avif,'drop.avif','image/avif')).status,200);
+  assert.equal((await binary(image,'drop.png','image/png','other-company')).status,409);
+  role='member';assert.equal((await binary(image,'drop.png','image/png')).status,403);role='owner';
+  const beforeUnsafe=Buffer.from(stored);assert.equal((await binary(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><script/></svg>'),'bad.svg','image/svg+xml')).status,400);assert.deepEqual(stored,beforeUnsafe);
   const svg=new FormData();svg.set('companyId',cid);svg.set('file',new File(['<svg/>'],'fake.png',{type:'image/png'}));assert.equal((await request('/api/company/branding/assets',svg)).status,400);
  }finally{globalThis.fetch=original;for(const name of names){if(prior[name]===undefined)delete process.env[name];else process.env[name]=prior[name]}}
 });

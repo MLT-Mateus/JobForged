@@ -1,4 +1,5 @@
 "use client";
+import {imageAccept,imageFormats} from '@/shared/image-upload';
 
 
 
@@ -413,14 +414,14 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
               </ExampleCard>
               <ExampleCard title="Uploads individuais" className="ds-form-card--wide">
                 <div className="ds-upload-grid">
-                  <FileUploadField label="Arquivo do candidato" value={uploadedFile} accept=".pdf,.doc,.docx" emptyHint="PDF, DOC ou DOCX · até 10 MB" onFileChange={(file) => setUploadedFile(file?.name ?? null)} />
-                  <FileUploadField label="Imagem do perfil" value={uploadedPicture} accept="image/png,image/jpeg,image/webp" emptyHint="PNG, JPG ou WEBP · até 5 MB" variant="picture" onFileChange={(file) => setUploadedPicture(file?.name ?? null)} />
+                  <FileUploadField maxBytes={10485760} label="Arquivo do candidato" value={uploadedFile} accept=".pdf,.doc,.docx" emptyHint="PDF, DOC ou DOCX · até 10 MB" onFileChange={(file) => setUploadedFile(file?.name ?? null)} />
+                  <FileUploadField maxBytes={5242880} helpText="Arraste um arquivo ou use Selecionar. Mesmo envio e validação nos dois modos. SVG simples: até 1 MB; outros formatos: até 5 MB. HEIF/HEIC e HVIF precisam ser exportados para um formato compatível." label="Imagem do perfil" value={uploadedPicture} accept={imageAccept} emptyHint={`${imageFormats} · até 5 MB`} variant="picture" onFileChange={(file) => setUploadedPicture(file?.name ?? null)} />
                 </div>
               </ExampleCard>
               <ExampleCard title="Uploads múltiplos" className="ds-form-card--wide">
                 <div className="ds-upload-grid">
-                  <MultiFileUploadField label="Documentos da candidatura" files={uploadedFiles} accept=".pdf,.doc,.docx" emptyHint="Arraste ou selecione até 6 documentos" maxFiles={6} onFilesChange={setUploadedFiles} helpText="Novos arquivos são adicionados à lista sem substituir os anteriores." />
-                  <MultiFileUploadField label="Galeria da empresa" files={uploadedPictures} accept="image/png,image/jpeg,image/webp" emptyHint="Arraste ou selecione até 8 imagens" variant="picture" maxFiles={8} onFilesChange={setUploadedPictures} helpText="As imagens aparecem em miniaturas e podem ser removidas individualmente." />
+                  <MultiFileUploadField maxBytes={10485760} label="Documentos da candidatura" files={uploadedFiles} accept=".pdf,.doc,.docx" emptyHint="Arraste ou selecione até 6 documentos" maxFiles={6} onFilesChange={setUploadedFiles} helpText="Novos arquivos são adicionados à lista sem substituir os anteriores." />
+                  <MultiFileUploadField maxBytes={5242880} label="Galeria da empresa" files={uploadedPictures} accept={imageAccept} emptyHint="Arraste ou selecione até 8 imagens" variant="picture" maxFiles={8} onFilesChange={setUploadedPictures} helpText="Arraste ou selecione imagens. SVG simples é convertido no servidor; SVG com código é recusado." />
                 </div>
               </ExampleCard>
               <ExampleCard title="Range Input · controle de faixa"><TextField label={`Intensidade: ${demoRange}%`} type="range" min={0} max={100} step={1} value={demoRange} onChange={e=>setDemoRange(Number(e.target.value))} helpText="Arraste ou use as setas para ajustar o valor."/></ExampleCard>
