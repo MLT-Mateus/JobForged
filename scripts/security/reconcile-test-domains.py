@@ -12,7 +12,7 @@ def run(args,input=None):
  return r.stdout.strip()
 def sql(statement):return run(['docker','exec','-i','supabase-db','psql','-XqAt','-U','supabase_admin','-d','postgres','-v','ON_ERROR_STOP=1'],statement)
 def records(host,kind):
- text=run(['dig','+time=3','+tries=1','+short',kind,host])
+ text=run(['dig','@1.1.1.1','+time=3','+tries=1','+short',kind,host])
  return [x.strip().replace('" "','').strip('"') for x in text.splitlines()]
 def valid_proof(row):
  host=row['hostname']
