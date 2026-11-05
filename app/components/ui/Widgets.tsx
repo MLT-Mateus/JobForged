@@ -2,7 +2,7 @@
 import { useEffect, useLayoutEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, X } from "lucide-react";
 import { ActionButton, StatusBadge } from "./AdminPrimitives";
-import "./widgets.css";
+
 import {popoverPosition} from "@/shared/popover-position.mjs";
 
 const workspaceLocks = new WeakMap<HTMLElement, { count: number; previous: string }>();
