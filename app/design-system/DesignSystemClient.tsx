@@ -1,4 +1,5 @@
 "use client";
+import {BrandColorsDemo} from '../components/personalization/BrandColorsEditor';
 import {imageAccept,imageFormats} from '@/shared/image-upload';
 
 
@@ -326,7 +327,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
           </section>
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "cores"} aria-label="Cores da marca">
-            <SectionHeading title="Paleta da JobForged" description="Escolha a cor pela sua função. As amostras e os valores acompanham o tema selecionado no cabeçalho." />
+            <SectionHeading title="Personalização de cores da empresa" description="Sete escolhas, dois temas e seis paletas. Estados de interação são derivados para manter contraste e consistência."/><BrandColorsDemo/><SectionHeading title="Paleta da JobForged" description="Escolha a cor pela sua função. As amostras e os valores acompanham o tema selecionado no cabeçalho." />
             <div className="ds-colors-mode"><span>Tema {theme === "dark" ? "escuro" : "claro"}</span><p>Clique em uma amostra para copiar seu valor.</p></div>
             <div className="ds-colors-catalog">
               {[

@@ -19,8 +19,8 @@ export async function POST(request:NextRequest){
  let body:{operation?:string;version?:number;companyId?:string;configuration?:unknown;historyId?:string};
  try{body=JSON.parse(text)}catch{return Response.json({message:'Configuração inválida.'},{status:400,headers})}
  if(body?.companyId!==session.company.id)return Response.json({message:'O contexto da conta mudou. Recarregue os dados antes de continuar; seus campos foram preservados.',conflict:true},{status:409,headers});
- if(!body||!['save','publish','reset','discard','restore'].includes(body.operation||'')||!Number.isSafeInteger(body.version)||Number(body.version)<0||
-  (body.operation==='restore'&&!/^[0-9a-f-]{36}$/i.test(body.historyId||'')))return Response.json({message:'Operação inválida.'},{status:400,headers});
+ if(!body||!['save','publish','reset','discard','restore','restore_public'].includes(body.operation||'')||!Number.isSafeInteger(body.version)||Number(body.version)<0||
+  (['restore','restore_public'].includes(body.operation||'')&&!/^[0-9a-f-]{36}$/i.test(body.historyId||'')))return Response.json({message:'Operação inválida.'},{status:400,headers});
  const configuration=body.operation==='reset'?brandContent(brandingDefaults(session.company.id,session.company.name)):normalizeBrandingRichContent(body.configuration);
  if(['save','publish','reset'].includes(body.operation||'')){const error=validateBranding(configuration);if(error)return Response.json({message:error},{status:400,headers})}
  if(body.operation==='reset'){
