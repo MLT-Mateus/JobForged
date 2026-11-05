@@ -9,6 +9,7 @@ import "@fontsource-variable/manrope";
 import "@fontsource-variable/lora";
 import "./globals.css";
 import "./components/ui/ui.css";
+import "./components/ui/widgets.css";
 import GlobalInteractions from "./components/GlobalInteractions";
 import NavigationLoader from "./components/NavigationLoader";
 import { AppToastHost } from './components/ui/AppToast';

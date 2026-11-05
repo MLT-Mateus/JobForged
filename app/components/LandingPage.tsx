@@ -1,5 +1,6 @@
 "use client";
 
+import {WindowControls} from './ui/WindowControls';
 import { PhoneFrame } from "./ui/PhoneFrame";
 import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
@@ -155,11 +156,7 @@ function ProductMockup() {
       <div className="scene-glow" />
       <div className="product-window">
         <div className="window-bar">
-          <div className="window-dots" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
+          <WindowControls/>
           <span className="window-address">carreiras.suaempresa.com.br</span>
           <ShieldCheck size={16} aria-hidden="true" />
         </div>
@@ -485,7 +482,7 @@ export default function Home() {
             </ViewportMotion>
             <div className="product-window personalization-window brand-studio-window">
               <div className="window-bar">
-                <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
+                <WindowControls/>
                 <span className="window-address">carreiras.suaempresa.com.br</span>
                 <ShieldCheck size={16} aria-hidden="true" />
               </div>

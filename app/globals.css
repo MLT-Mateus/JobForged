@@ -477,15 +477,15 @@ main {
 }
 
 .window-dots span:first-child {
-  background: #ff8e8e;
+  background: #ff5f57;
 }
 
 .window-dots span:nth-child(2) {
-  background: #ffd16f;
+  background: #febc2e;
 }
 
 .window-dots span:last-child {
-  background: #69d5af;
+  background: #28c840;
 }
 
 .window-address {
@@ -3037,7 +3037,7 @@ html[data-theme="dark"] .pipeline-title em {
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.26);
 }
 html[data-theme="dark"] .window-bar { border-bottom-color: var(--app-border); background: #0b1e1b; color: #819c97; }
-html[data-theme="dark"] .window-dots span { background: #2a3d3a; }
+
 html[data-theme="dark"] .window-address { border-color: var(--app-border); background: var(--app-panel-raised); color: #91aaa6; }
 html[data-theme="dark"] .app-shell { background: #091a18; }
 html[data-theme="dark"] .app-sidebar { border-right-color: var(--app-border); background: var(--app-panel); }
@@ -5903,3 +5903,14 @@ html[data-theme="dark"] .app-loader__inline [fill="#4169E1"] { fill:#7E9CFF; }
 .system-state-catalog .jf-panel { padding: var(--jf-ui-space-6); }
 .system-state-catalog p { margin-block: var(--jf-ui-space-4); }
 @media (max-width: 700px) { .system-state-catalog { grid-template-columns: minmax(0,1fr); } .system-page .not-found-visual { display: none; } .system-page .not-found-content { grid-template-columns: minmax(0,1fr); } }
+
+.system-status-page{min-height:100vh;background:var(--jf-ui-surface-soft);color:var(--jf-ui-text)}
+.system-status-content{padding-block:48px;display:grid;gap:var(--jf-ui-space-5)}
+.system-status-summary{display:flex;align-items:flex-start;gap:var(--jf-ui-space-4)}
+.system-status-summary>svg{flex:none;color:var(--jf-ui-brand);width:32px;height:32px}
+.system-status-summary h2,.system-status-services h2{font-size:var(--jf-ui-font-size-lg);margin:0}
+.system-status-services{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:var(--jf-ui-space-4)}
+.system-status-services .jf-panel{display:grid;gap:var(--jf-ui-space-3);justify-items:start}
+.system-status-summary p{margin-block:var(--jf-ui-space-3);line-height:1.6}.system-status-summary small{color:var(--jf-ui-text-muted)}
+
+.system-page__support-actions { display: flex; flex-wrap: wrap; gap: 12px; }

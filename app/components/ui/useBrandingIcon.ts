@@ -3,7 +3,7 @@ import {useEffect} from 'react';
 /** Apply only a verified square rendition of the customer mark; restore on exit. */
 export function useBrandingIcon(url?:string){useEffect(()=>{
  const root=document.documentElement,previous=root.dataset.companyIcon;
- const current=url&&/^\/api\/(?:company\/branding\/assets\/|portals\/[^/]+\/assets\/)[a-f0-9-]+$/i.test(url)?url+'?icon=1':'';
+ const current=url&&/^\/api\/(?:company\/branding\/assets\/|portals\/[^/]+\/assets\/)[a-f0-9-]+$/i.test(url)?url+'?icon=1&v=2':'';
  let cancelled=false;const image=current?new Image():null;
  root.dataset.companyIcon='';
  if(image){image.onload=()=>{if(!cancelled)root.dataset.companyIcon=image.naturalWidth>0&&image.naturalWidth===image.naturalHeight?current:''};image.onerror=()=>{if(!cancelled)root.dataset.companyIcon=''};image.src=current}

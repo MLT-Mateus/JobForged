@@ -13,4 +13,4 @@ export async function normalizeBrandingImage(input:Uint8Array,mime:string,limits
 }
 
 /** A small square rendition; never crops or overwrites the source asset. */
-export async function squareBrandingIcon(input:Uint8Array){return sharp(input,{limitInputPixels:16777216,failOn:'warning'}).timeout({seconds:3}).resize(64,64,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).png().toBuffer()}
+export async function squareBrandingIcon(input:Uint8Array){const image=sharp(input,{limitInputPixels:16777216,failOn:'warning'}).timeout({seconds:3});const meta=await image.metadata();if(!meta.width||meta.width!==meta.height)throw Error('Square icon required');return image.resize(64,64).png().toBuffer()}
