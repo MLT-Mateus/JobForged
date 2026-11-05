@@ -14,6 +14,6 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{slug:str
  const stored=await brandingStorage(asset.path,config.anonKey);if(!stored?.ok)return new Response(null,{status:503,headers});const bytes=Buffer.from(await stored.arrayBuffer());
  if(bytes.length<8||!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))||bytes.length!==asset.size||createHash('sha256').update(bytes).digest('hex')!==asset.sha256)return new Response(null,{status:503,headers});
  headers.set('Content-Type','image/png');
- if(new URL(request.url).searchParams.get('icon')==='1'){try{return new Response(await squareBrandingIcon(bytes),{headers})}catch{return new Response(null,{status:503,headers})}}
+ if(new URL(request.url).searchParams.get('icon')==='1'){try{return new Response(await squareBrandingIcon(bytes),{headers})}catch{headers.delete('Content-Type');headers.set('Location','/favicon.svg');return new Response(null,{status:307,headers})}}
  return new Response(bytes,{headers});
 }
