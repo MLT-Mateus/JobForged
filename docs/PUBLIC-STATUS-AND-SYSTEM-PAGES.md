@@ -18,3 +18,7 @@ Lint, TypeScript e 53 testes de aplicação/contratos; testes de sondas e gate d
 ## Ajuste de dimensionamento dos banners
 
 A seção empresarial usa as mesmas margens laterais do conteúdo de vagas, sem ocupar a largura do hero. O componente compartilhado CommunicationBanner usa ProportionalImage: imagem inteira com contain e extensão decorativa desfocada nas sobras; caixa com proporção fixa e slides posicionados em toda a área. As regras genéricas de miniaturas de marca não limitam a imagem do banner. Originais e arquivos de clientes não são alterados. Exemplo interativo em Widgets do Design System, com duas proporções.
+
+## Favicon legado e inicialização
+
+Somente assets.favicon representa o ícone do cliente; logos horizontais nunca são usadas. A página pública declara o favicon no metadata inicial e compartilha a leitura pública por cache de requisição React. Ícones quadrados viram PNG64; se um arquivo legado retangular estiver salvo como favicon, a rota autorizada redireciona para /favicon.svg, sem retornar erro503 ou deixar o navegador reter um ícone anterior. A sincronização não fixa um MIME incorreto para o fallback SVG. Consulta v3 renova o endereço de leitura; arquivo original e registro não são alterados.
