@@ -14,3 +14,7 @@ Implementação de 05/11/2026, destinada primeiro a Test.
 ## Verificação
 
 Lint, TypeScript e 53 testes de aplicação/contratos; testes de sondas e gate de manutenção. CI acrescenta banco isolado com migrations/RLS, Auth/Storage reais e imagem Node. Verificações simuladas não substituem sondas reais de Test após deploy. Alterações em Live não autorizadas neste trabalho.
+
+## Ajuste de dimensionamento dos banners
+
+A seção empresarial usa as mesmas margens laterais do conteúdo de vagas, sem ocupar a largura do hero. O componente compartilhado CommunicationBanner usa ProportionalImage: imagem inteira com contain e extensão decorativa desfocada nas sobras; caixa com proporção fixa e slides posicionados em toda a área. As regras genéricas de miniaturas de marca não limitam a imagem do banner. Originais e arquivos de clientes não são alterados. Exemplo interativo em Widgets do Design System, com duas proporções.

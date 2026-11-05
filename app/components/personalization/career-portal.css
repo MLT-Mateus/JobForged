@@ -141,3 +141,6 @@
  .jf-career-portal[data-layout="panorama"] .mock-hero__visual{position:relative;inset:auto;grid-column:1;grid-row:1;width:100%;height:auto;aspect-ratio:3/1;max-width:none}
  .jf-career-portal[data-layout="panorama"] .mock-hero__copy{grid-column:1;grid-row:2;width:calc(100% - 32px);max-width:none;margin:16px;padding:24px;justify-self:stretch}
 }
+
+/* Banners follow the readable content width, independently of the full-bleed hero. */
+.jf-career-banner-region{margin:var(--jf-ui-space-6) var(--career-gutter);min-width:0}
