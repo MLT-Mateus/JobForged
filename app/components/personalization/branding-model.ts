@@ -39,9 +39,10 @@ export function brandingScrollbarStyle(value:Customization,theme:'light'|'dark')
 }
 export function brandingStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
  const p=paletteFor(value,theme),pair=fontPairs.find(x=>x.id===value.typography.fontPair)||fontPairs[0];
+ const hoverCandidate=blendColor(p.link,theme==='dark'?'#FFFFFF':'#000000',.15);const linkHover=[p.background,p.surface,p.activeItem].every(s=>contrast(hoverCandidate,s)>=4.5)?hoverCandidate:p.link;
  const image=value.backgrounds.panelImage||value.backgrounds.textureImage;
  return {...brandingScrollbarStyle(value,theme),'--teal':p.primary,'--teal-deep':p.link,'--teal-soft':p.activeItem,'--blue':p.secondary,'--app-bg':p.background,'--app-panel':p.surface,
-  '--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
+  '--jf-ui-action-primary-bg':p.button,'--jf-ui-action-primary-text':foreground(p.button),'--jf-ui-action-primary-hover-bg':p.buttonHover,'--jf-ui-action-primary-hover-text':foreground(p.buttonHover),'--company-link-hover':linkHover,'--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
   '--jf-ui-focus':p.link,'--jf-ui-focus-ring':'color-mix(in srgb,var(--jf-ui-focus) 28%,transparent)','--jf-ui-surface':p.surface,'--jf-ui-surface-soft':p.background,
   '--jf-ui-accent':p.secondary,'--jf-ui-text':p.text,'--jf-ui-text-muted':'color-mix(in srgb,var(--jf-ui-text) 72%,var(--jf-ui-surface))','--jf-ui-text-soft':'var(--jf-ui-text-muted)',
   '--jf-ui-border':'color-mix(in srgb,var(--jf-ui-text) 18%,var(--jf-ui-surface))','--jf-ui-border-strong':'color-mix(in srgb,var(--jf-ui-text) 35%,var(--jf-ui-surface))',
