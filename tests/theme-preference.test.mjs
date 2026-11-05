@@ -48,7 +48,7 @@ test('company favicon ignores horizontal images and stale loads, and restores on
  vm.createContext(context);vm.runInContext(ts.transpileModule(hook,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,context);
  const url='/api/portals/example/assets/38000000-0000-0000-0000-000000000041';
  context.exports.useBrandingIcon(url);images[0].naturalWidth=600;images[0].naturalHeight=200;images[0].onload();assert.equal(root.dataset.companyIcon,'');cleanup();
- context.exports.useBrandingIcon(url);images[1].naturalWidth=256;images[1].naturalHeight=256;images[1].onload();assert.equal(root.dataset.companyIcon,url+'?icon=1');cleanup();assert.equal(root.dataset.companyIcon,undefined);
+ context.exports.useBrandingIcon(url);images[1].naturalWidth=256;images[1].naturalHeight=256;images[1].onload();assert.equal(root.dataset.companyIcon,url+'?icon=1&v=2');cleanup();assert.equal(root.dataset.companyIcon,undefined);
  context.exports.useBrandingIcon(url);const stale=images[2].onload;cleanup();images[2].naturalWidth=256;images[2].naturalHeight=256;stale();assert.equal(root.dataset.companyIcon,undefined);
  context.exports.useBrandingIcon('/brand/horizontal-logo.svg');assert.equal(images.length,3);assert.equal(root.dataset.companyIcon,'');cleanup();
 });

@@ -27,6 +27,8 @@ do $$declare c jsonb:=current_setting('jbfd.fixture_config')::jsonb;p jsonb;v bi
  c:=jsonb_set(c,'{portal,presentation}','{"showImage":false,"imageAlt":"Equipe de exemplo","showPhotoNotes":true,"showHighlights":true,"showCulture":true,"showInvitation":true,"jobsLayout":"list"}');
  perform set_config('jbfd.portal_config',c::text,true);
  p:=public.read_company_portal();if p->>'companyId'<>'31000000-0000-4000-8000-000000000011' then raise exception 'wrong tenant';end if;
+ begin perform public.write_company_portal('address',(p->>'version')::bigint,'status');raise exception 'status reserved';exception when invalid_parameter_value then null;end;
+ begin perform public.write_company_portal('address',(p->>'version')::bigint,'candidato');raise exception 'candidate reserved';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_portal('address',(p->>'version')::bigint,'api');raise exception 'reserved slug';exception when invalid_parameter_value then null;end;
  begin perform public.write_company_portal('address',(p->>'version')::bigint,'Bad/Path');raise exception 'bad slug';exception when invalid_parameter_value then null;end;
  p:=public.write_company_portal('address',(p->>'version')::bigint,'portal-fixture-published');

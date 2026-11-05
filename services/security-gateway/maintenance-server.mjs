@@ -5,7 +5,7 @@
 import http from 'node:http';
 import { pipeline } from 'node:stream';
 
-const reads=new Set(['/login','/backoffice/seguranca','/401','/403','/404','/500','/503','/api/health','/api/auth/session','/api/backoffice/security','/api/platform/settings','/favicon.svg']);
+const reads=new Set(['/login','/backoffice/seguranca','/401','/403','/404','/500','/503','/api/health','/status','/api/auth/session','/api/backoffice/security','/api/platform/settings','/favicon.svg']);
 const writes=new Set(['/api/auth/sign-in','/api/auth/sign-out','/api/backoffice/security']);
 export function maintenanceTarget(method,path){
  if((method==='GET'||method==='HEAD')&&(reads.has(path)||path.startsWith('/assets/')||path.startsWith('/brand/')))return path;
@@ -21,6 +21,7 @@ export function createMaintenanceServer(upstream){
   const url=new URL(req.url,'http://maintenance.internal');
   if(url.pathname.includes('%')){res.writeHead(400);res.end();return;}
   if(url.pathname==='/healthz'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end('{"status":"maintenance"}');return;}
+  if(url.pathname==='/api/status'&&['GET','HEAD'].includes(req.method)){const services=[['platform','Página e painéis'],['access','Acesso às contas'],['data','Informações da plataforma'],['files','Imagens e arquivos']].map(([id,label])=>({id,label,state:'maintenance'}));res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(req.method==='HEAD'?'':JSON.stringify({state:'maintenance',checkedAt:new Date().toISOString(),services}));return;}
   const allowed=maintenanceTarget(req.method,url.pathname);
   if(!allowed&&(url.pathname.startsWith('/api/')||!['GET','HEAD'].includes(req.method))){
    res.writeHead(503,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end('{"message":"Manutenção temporária. Tente novamente em instantes."}');return;

@@ -6,8 +6,8 @@ import {brandContent,brandingDefaults} from '../app/components/personalization/b
 test('portal BFF protects tenant operations and exposes only public image bytes',async()=>{
  const before=Object.fromEntries(['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY'].map(key=>[key,process.env[key]])),original=globalThis.fetch;
  process.env.SUPABASE_INTERNAL_URL='https://portal.fixture.invalid';process.env.SUPABASE_ANON_KEY='public-fixture-key';
- const publicConfig=brandingDefaults('fixture','Public Fixture');publicConfig.banners=[{...publicConfig.banners[0],id:'second',title:'Segundo destaque público',order:1},{...publicConfig.banners[0],id:'first',title:'Primeiro destaque público',order:0},{...publicConfig.banners[0],id:'inactive',title:'Destaque oculto',status:'Inativo',order:2}];
- const cid='31000000-0000-4000-8000-000000000011',asset='31000000-0000-4000-8000-000000000041',bytes=await sharp({create:{width:24,height:8,channels:3,background:'#4169e1'}}).png().toBuffer();let role='owner',code=null,publicImage=true,tampered=false,published=false;const writes=[];
+ const publicConfig=brandingDefaults('fixture','Public Fixture');publicConfig.banners=[{...publicConfig.banners[0],id:'second',image:'/brand/second.png',title:'Segundo destaque público',order:1},{...publicConfig.banners[0],id:'first',image:'/brand/first.png',title:'Primeiro destaque público',order:0},{...publicConfig.banners[0],id:'inactive',title:'Destaque oculto',status:'Inativo',order:2}];
+ const cid='31000000-0000-4000-8000-000000000011',asset='31000000-0000-4000-8000-000000000041',bytes=await sharp({create:{width:8,height:8,channels:3,background:'#4169e1'}}).png().toBuffer();let role='owner',code=null,publicImage=true,tampered=false,published=false;const writes=[];
  globalThis.fetch=async(url,init)=>{const address=String(url),body=typeof init?.body==='string'?JSON.parse(init.body):null;
   if(address.endsWith('/auth/v1/user'))return Response.json({id:'31000000-0000-4000-8000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-29T00:00:00Z'});
   if(address.endsWith('/rpc/is_platform_admin'))return Response.json(false);

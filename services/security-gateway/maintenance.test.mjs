@@ -21,7 +21,7 @@ test('release maintenance blocks business and direct providers without a bypass 
   const security=await fetch(base+'/backoffice/seguranca');assert.equal(security.status,200);
   const code=await fetch(base+'/api/backoffice/security',{method:'POST',body:'fixture'});assert.equal(code.status,200);
   assert.equal((await fetch(base+'/assets/fixture.js')).status,200);
-  assert.equal((await fetch(base+'/healthz')).status,200);
+  assert.equal((await fetch(base+'/healthz')).status,200);const status=await (await fetch(base+'/api/status')).json();assert.equal(status.state,'maintenance');assert.equal(status.services.length,4);assert.ok(Number.isFinite(Date.parse(status.checkedAt)));assert.ok(!JSON.stringify(status).includes('upstream'));
   assert.deepEqual(calls,['/503','/backoffice/seguranca','/api/backoffice/security','/assets/fixture.js']);
  }finally{await Promise.all([new Promise(resolve=>maintenance.close(resolve)),new Promise(resolve=>app.close(resolve))]);}
 });

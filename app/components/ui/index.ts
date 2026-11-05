@@ -45,3 +45,5 @@ export {NotificationTrigger} from "./NotificationTrigger";
 export {FieldFeedback,revealField} from "./FieldFeedback";
 
 export {ProportionalImage} from "./ProportionalImage";
+
+export {WindowControls} from "./WindowControls";

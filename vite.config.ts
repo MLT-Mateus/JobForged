@@ -1,3 +1,4 @@
+import {pageCatalogPlugin} from './build/page-catalog.ts';
 import vinext from "vinext";
 import { defineConfig } from "vite";
 import hostingConfig from "./.openai/hosting.json" with { type: "json" };
@@ -35,7 +36,7 @@ const localBindingConfig = {
 
 export default defineConfig(async () => {
   if (process.env.JBFD_RUNTIME === "node") {
-    return { plugins: [vinext()], ssr: { external: ['sharp'] }, environments: { rsc: { resolve: { external: ['sharp'] } }, ssr: { resolve: { external: ['sharp'] } } } };
+    return { plugins: [pageCatalogPlugin(),vinext()], ssr: { external: ['sharp'] }, environments: { rsc: { resolve: { external: ['sharp'] } }, ssr: { resolve: { external: ['sharp'] } } } };
   }
 
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
@@ -56,6 +57,7 @@ export default defineConfig(async () => {
         : {}),
     },
     plugins: [
+      pageCatalogPlugin(),
       vinext(),
       sites(),
       cloudflare({

@@ -7,8 +7,10 @@ export const systemPages = {
 } as const;
 export type SystemPageCode = keyof typeof systemPages;
 export const pageLinks = [
-  { title: "Página inicial", href: "/", keywords: "inicio landing" },
-  { title: "Entrar na conta", href: "/login", keywords: "login acesso" },
-  { title: "Cadastrar empresa", href: "/cadastro", keywords: "cadastro criar conta" },
-  { title: "Perguntas frequentes", href: "/#faq", keywords: "ajuda suporte duvidas" },
-];
+ {title:'Página inicial',href:'/',keywords:'inicio landing',icon:'home'},
+ {title:'Painel candidato',href:'/candidato',keywords:'perfil curriculo alertas',icon:'candidate'},
+ {title:'Painel empresa',href:'/app/home',keywords:'organizacao empresarial',icon:'company'},
+ {title:'Painel Backoffice',href:'/backoffice',keywords:'administracao',icon:'admin'},
+ {title:'Entrar na conta',href:'/login',keywords:'login acesso',icon:'login'},
+ {title:'Status da plataforma',href:'/status',keywords:'disponibilidade servicos',icon:'status'},
+] as const;

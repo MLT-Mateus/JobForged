@@ -1,4 +1,5 @@
 "use client";
+import {WindowControls} from '../components/ui/WindowControls';
 import {PageChromeGuide} from "./PageChromeGuide";
 import {PublicPortalAccount} from "../components/personalization/PublicPortalAccount";
 import { Info } from "lucide-react";
@@ -15,7 +16,7 @@ function Demo({number,title,description,children}:{number:string;title:string;de
  return <section className="ds-widget-demo"><header><span className="ds-widget-index">{number}</span><div><h2>{title}</h2><p>{description}</p></div></header><div className="ds-widget-demo__stage">{children}</div></section>;
 }
 function OverlayPreview({kind}:{kind:"modal"|"focus"|"drawer"}) {
- return <div className={`ds-overlay-preview ds-overlay-preview--${kind}`} aria-hidden="true"><div className="ds-overlay-preview__nav"><i/><i/><i/></div><div className="ds-overlay-preview__lines"><i/><i/><i/></div><div className="ds-overlay-preview__panel"><i/><i/><b/></div></div>;
+ return <div className={`ds-overlay-preview ds-overlay-preview--${kind}`} aria-hidden="true"><div className="ds-overlay-preview__nav"><WindowControls/></div><div className="ds-overlay-preview__lines"><i/><i/><i/></div><div className="ds-overlay-preview__panel"><i/><i/><b/></div></div>;
 }
 export function WidgetsSection() {
  const [previewTheme,setPreviewTheme]=useState<"light"|"dark">("light");

@@ -1,3 +1,4 @@
+import {probeServices} from './service-status.mjs';
 import http from 'node:http';
 import {validResume} from '../../shared/resume-policy.mjs';
 import { lookup } from 'node:dns/promises';
@@ -27,10 +28,16 @@ async function refreshTrustedPeers(){
 }
 await refreshTrustedPeers();
 const refresh=setInterval(()=>refreshTrustedPeers().catch(()=>{trustedPeers=new Set();}),60000);refresh.unref();
+let statusCache=null,statusPending=null;
 let active=0,activeApplication=0,applicationUploads=0,nativeUploads=0;
 const clientRequests=new Map();
 const reply=(res,status,message)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store',...(status===429?{'Retry-After':'60'}:{})});res.end(JSON.stringify({message}));};
 const server=http.createServer(async(req,res)=>{
+ if(req.url==='/internal/service-status'){
+  if(req.method!=='GET'||!bffPeers.has(req.socket.remoteAddress?.replace(/^::ffff:/,''))){reply(res,403,'Private service');return;}
+  if(!statusCache||Date.now()-statusCache.at>15000){statusPending??=probeServices({upstream,headers:{apikey:req.headers.apikey||'',Authorization:req.headers.authorization||''},query:sql=>pool.query(sql)}).then(services=>{statusCache={at:Date.now(),services}}).finally(()=>{statusPending=null});await statusPending;}
+  res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify({services:statusCache.services}));return;
+ }
  if(req.url==='/healthz'){
   try{await pool.query('select 1');reply(res,200,'healthy');}catch{reply(res,503,'unavailable');}return;
  }
