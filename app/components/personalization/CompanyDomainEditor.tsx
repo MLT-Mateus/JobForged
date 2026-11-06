@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ActionButton, AppToast, EditorSection, StatusBadge, TextField } from '../ui';
-import {apiResponse} from '@/app/lib/api-response';
+import {apiResponse,readApi} from '@/app/lib/api-response';
 import { validCompanyHostname, type CompanyDomain } from '@/app/lib/company-domain';
 
 type DomainKind = 'root' | 'subdomain' | '';
@@ -41,6 +41,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
   const [copied, setCopied] = useState('');
 
   async function request(body?: object) {
+    if(!body)return readApi<DomainResponse>('/api/company/domain','Não foi possível consultar o domínio.');
     const response = await fetch('/api/company/domain', {
       cache: 'no-store',
       credentials: 'same-origin',
@@ -66,9 +67,8 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/company/domain', { cache: 'no-store', credentials: 'same-origin', signal: controller.signal })
-      .then(async response => {
-        const result = await apiResponse<DomainResponse>(response,'Não foi possível carregar o domínio.');
+    readApi<DomainResponse>('/api/company/domain','Não foi possível carregar o domínio.',controller.signal)
+      .then(result => {
         if (controller.signal.aborted) return;
         setData(result);
         setHostname(result.hostname || '');

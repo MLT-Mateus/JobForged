@@ -1,4 +1,5 @@
 "use client";
+import {publicError} from '@/app/lib/api-response';
 import { planLabel, planStatusLabel, auditLabel } from "./display-labels";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
@@ -36,7 +37,8 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
     const response = await fetch("/api/company", { method: "PATCH", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, cnpj, phone }) }).catch(() => null);
-    setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Dados da empresa atualizados." : "Não foi possível salvar. Revise os campos.");
+    const result=await response?.json().catch(()=>null) as {message?:string}|null;
+    setBusy(false); setMessageKind(response?.ok ? "success" : "danger"); setMessage(response?.ok ? "Dados da empresa atualizados." : publicError(result?.message,"Não foi possível salvar. Confira nome, CNPJ e telefone com DDD."));
     if (response?.ok) void load();
   }
   async function invite(event: FormEvent<HTMLFormElement>) {
@@ -60,8 +62,8 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
     {message && <AppToast notice={{kind:messageKind,title:messageKind === "danger" ? "Ação não concluída" : "Atualização da empresa",text:message}} onClose={() => setMessage("")}/>}
     {mode === "settings" ? <div className="jf-workspace-grid"><Panel as="section" className="admin-card"><PanelHeading title="Identificação da empresa" description="Dados usados para identificar sua organização"/>
       <form onSubmit={save} className="admin-form-stack jf-panel-body"><TextField label="Nome da empresa" value={name} maxLength={160} onChange={event => setName(event.target.value)} required />
-        <TextField label="CNPJ" value={cnpj} onChange={event => setCnpj(event.target.value.replace(/\D/g, "").slice(0, 14))} />
-        <TextField label="Telefone" value={phone} onChange={event => setPhone(event.target.value.replace(/\D/g, "").slice(0, 13))} />
+        <TextField format="cnpj" required label="CNPJ" value={cnpj} onChange={event => setCnpj(event.target.value.replace(/\D/g, "").slice(0, 14))} />
+        <TextField format="phone" required label="Telefone" value={phone} onChange={event => setPhone(event.target.value.replace(/\D/g, "").slice(0, 11))} />
         <ActionButton type="submit" disabled={!canManage || busy}>Salvar dados</ActionButton></form></Panel>
       <Panel as="section" className="admin-card"><PanelHeading title="Plano atual" description="Situação da assinatura e histórico da empresa"/><div className="jf-panel-body"><div className="admin-facts"><div><span>Plano</span><strong>{planLabel(data.company.plan_id)}</strong></div><div><span>Situação</span><strong>{planStatusLabel(data.company.plan_status)}</strong></div><div><span>Cadastro</span><strong>{new Date(data.company.created_at).toLocaleDateString("pt-BR")}</strong></div></div><h3 className="admin-subheading">Histórico recente</h3>{data.audit.length ? <ul className="admin-audit-list">{data.audit.map(event => <li key={event.id}><span>{auditLabel(event.action)}</span><time>{new Date(event.created_at).toLocaleString("pt-BR")}</time></li>)}</ul> : <p className="admin-muted">Nenhuma alteração registrada.</p>}</div></Panel></div>
       : <div className="admin-management-stack"><Panel as="section" className="admin-card"><PanelHeading title="Convidar pessoa" description="O convite expira em 24 horas e exige o mesmo e-mail confirmado. Cada conta mantém um vínculo empresarial ativo nesta versão."/>

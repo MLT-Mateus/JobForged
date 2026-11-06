@@ -1,3 +1,5 @@
+import {maskCpf,maskCnpj,maskPhone} from '../ui/input-format';
+export {maskCpf,maskCnpj,maskPhone};
 import {passwordRules} from '../../../shared/password-policy.mjs';
 export {passwordRules};
 export type LoginValues = { identifier: string; password: string };
@@ -7,10 +9,7 @@ export type CardValues = { holder: string; number: string; expiry: string; cvv: 
 export const onlyDigits = (value: string) => value.replace(/\D/g, "");
 export const normalizeText = (value: string) => value.replace(/\s+/g, " ").trimStart();
 export const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-export const maskCpf = (value: string) => onlyDigits(value).slice(0,11).replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-export const maskCnpj = (value: string) => onlyDigits(value).slice(0,14).replace(/(\d{2})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1/$2").replace(/(\d{4})(\d{1,2})$/,"$1-$2");
 export const maskDocument = (value: string) => onlyDigits(value).length <= 11 ? maskCpf(value) : maskCnpj(value);
-export function maskPhone(value:string){const d=onlyDigits(value).slice(0,11);return d.length<=10?d.replace(/(\d{2})(\d)/,"($1) $2").replace(/(\d{4})(\d)/,"$1-$2"):d.replace(/(\d{2})(\d)/,"($1) $2").replace(/(\d{5})(\d)/,"$1-$2")}
 export const maskCard = (value:string) => onlyDigits(value).slice(0,19).replace(/(.{4})/g,"$1 ").trim();
 export const maskExpiry = (value:string) => onlyDigits(value).slice(0,4).replace(/(\d{2})(\d)/,"$1/$2");
 const repeated=(value:string)=>/^(\d)\1+$/.test(value);

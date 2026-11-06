@@ -1,6 +1,6 @@
 "use client";
 import {imageUploadOptions} from '@/shared/image-upload';
-import {apiResponse} from '@/app/lib/api-response';
+import {apiResponse,readApi} from '@/app/lib/api-response';
 import { brandingDefaults, brandContent } from './branding-model';
 import type { Customization, HistoryEntry, BrandAsset } from './personalization-types';
 type Stored = {companyId:string;companyName:string;editable:boolean;version:number;draft:object|null;published:object;publishedVersion:number;updatedAt:string;publishedAt:string;publishedBy:string;history:Array<{id:string;version:number;snapshot:object;created_at:string;actor:string}>};
@@ -10,10 +10,10 @@ function unpack(row:Stored):BrandingSnapshot {
  const hydrate=(value:object|null,version=row.version):Customization=>({...base,...(value&&Object.keys(value).length?value:{}),organizationId:row.companyId,revision:version,draftUpdatedAt:row.updatedAt||'',publishedAt:row.publishedAt||'',publishedBy:row.publishedBy||''});
  return {companyName:row.companyName,draft:hydrate(row.editable?row.draft:row.published),published:hydrate(row.published),editable:row.editable,history:row.history.map(entry=>({id:entry.id,organizationId:row.companyId,createdAt:entry.created_at,actor:entry.actor,type:`Identidade publicada · versão ${entry.version}`,status:'Publicado',snapshot:hydrate(entry.snapshot,entry.version)}))};
 }
-async function load():Promise<BrandingSnapshot>{const response=await fetch('/api/company/branding',{cache:'no-store',credentials:'same-origin'});if(!response.ok)throw new Error('Não foi possível carregar a identidade da sua empresa.');return unpack(await response.json() as Stored)}
+async function load():Promise<BrandingSnapshot>{return unpack(await readApi<Stored>('/api/company/branding','Não foi possível carregar a identidade da sua empresa.'))}
 async function mutate(operation:string,input:Customization,historyId?:string){
  const response=await fetch('/api/company/branding',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({operation,companyId:input.organizationId,version:input.revision,configuration:brandContent(input),historyId})});
- const result=await response.json() as {version?:number;message?:string};if(!response.ok)throw new Error(result.message||'Não foi possível salvar.');
+ const result=await apiResponse<{version?:number;message?:string}>(response,'Não foi possível salvar as alterações.');if(!response.ok)throw new Error(result.message||'Não foi possível salvar.');
  const next=await load();if(next.draft.revision!==result.version)throw new Error('A operação foi registrada, mas outra sessão alterou o rascunho em seguida. Recarregue antes de continuar; seus campos foram preservados.');
  if(operation==='publish')window.dispatchEvent(new CustomEvent('jobforged-customization-published',{detail:{companyId:input.organizationId}}));
  return next;

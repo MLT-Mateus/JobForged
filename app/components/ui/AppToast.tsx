@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import { createPortal } from "react-dom";
 import { CircleAlert, CircleCheck, CircleX, Info } from "lucide-react";
 import { playStatusSound } from "./status-sound";
+import {publicError} from '@/app/lib/api-response';
 import { toastChannel, type ActiveToast } from './toast-channel';
 
 export type ToastKind = "success" | "info" | "warning" | "danger";
@@ -31,7 +32,8 @@ function ToastIcon({ kind }: { kind: ToastKind }) {
 /** Compatibility API: callers publish feedback; the root host renders it once. */
 export function AppToast({ notice, onClose }: { notice: ToastNotice; onClose: () => void }) {
   const owner = useId();
-  const { id, kind, title, text, action } = notice;
+  const { id, kind, title, action } = notice;
+  const text=kind==="danger"?publicError(notice.text):notice.text;
   const actionLabel = action?.label, actionHref = action?.href, newTab = action?.newTab;
   useEffect(() => toastChannel.registerClose(owner, onClose), [owner, onClose]);
   useEffect(() => {

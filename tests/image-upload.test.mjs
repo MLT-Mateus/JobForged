@@ -44,11 +44,33 @@ test('selection, drop accept rules and binary transport share the supported form
  assert.throws(()=>imageUploadOptions(new File([new Uint8Array(1048577)],'a.svg',{type:'image/svg+xml'})),/1 MB/);
 });
 test('plain-text and HTML upstream failures never leak JSON parser exceptions',async()=>{
- await assert.rejects(apiResponse(new Response('Forbidden',{status:403})),/Envio não autorizado/);
- await assert.rejects(apiResponse(new Response('<html>down</html>',{status:503})),/temporariamente indisponível/);
+ await assert.rejects(apiResponse(new Response('Forbidden',{status:403})),/não tem permissão/);
+ await assert.rejects(apiResponse(new Response('<html>down</html>',{status:503})),/temporariamente ocupado/);
  await assert.rejects(apiResponse(new Response('not json')),/Não foi possível concluir/);
  await assert.rejects(apiResponse(Response.json({message:'Quota atingida'},{status:429})),/Quota atingida/);
  assert.deepEqual(await apiResponse(Response.json({asset:{id:'safe'}})),{asset:{id:'safe'}});
 });
 
 test('customer icon accepts square sources and rejects horizontal wordmarks',async()=>{const original=await sharp({create:{width:240,height:80,channels:3,background:'#4169e1'}}).png().toBuffer();await assert.rejects(squareBrandingIcon(original),/Square icon required/);const square=await sharp({create:{width:80,height:80,channels:3,background:'#4169e1'}}).png().toBuffer();const meta=await sharp(await squareBrandingIcon(square)).metadata();assert.equal(meta.width,64);assert.equal(meta.height,64);assert.equal(meta.format,'png');assert.equal((await sharp(original).metadata()).width,240);});
+
+import {publicError,readApi} from '../app/lib/api-response.ts';
+import {formatInput,inputFormatRules} from '../app/components/ui/input-format.ts';
+test('input masks handle raw/pasted/formatted values without accepting excess digits',()=>{
+ for(const [format,raw,expected]of [['cpf','12345678901','123.456.789-01'],['cnpj','12345678000190','12.345.678/0001-90'],['phone','11987654321','(11) 98765-4321'],['phone','1134567890','(11) 3456-7890'],['otp','a123 4567','123456']]){assert.equal(formatInput(raw,format),expected);assert.equal(formatInput(expected,format),expected);assert.match(expected,new RegExp('^(?:'+inputFormatRules[format].pattern+')$','v'));assert.equal(formatInput('',format),'')}
+ assert.equal(formatInput('123456780001901111','cnpj'),'12.345.678/0001-90');
+});
+test('errors translate busy/network/parser failures and preserve actionable Portuguese',async()=>{
+ assert.match(publicError('Service busy'),/muitas solicitações/);assert.match(publicError('Failed to fetch'),/internet/);
+ for(const raw of ['Unexpected token F, Forbidden is not valid JSON','Error at private.server:5432 token=secret','<html>Bad gateway</html>','unreviewed upstream message'])assert.equal(publicError(raw),'Não foi possível concluir. Tente novamente.');
+ assert.equal(publicError('Informe um CNPJ válido com 14 dígitos.'),'Informe um CNPJ válido com 14 dígitos.');
+ await assert.rejects(apiResponse(Response.json({message:'Service busy'},{status:503})),/muitas solicitações/);
+});
+test('safe reads retry once, never replay writes/rate limits, and abort delayed work',async()=>{
+ const original=globalThis.fetch;try{
+ let calls=0;globalThis.fetch=async(_url,options)=>{assert.equal(options.method,undefined);return ++calls===1?Response.json({message:'Service busy'},{status:503}):Response.json({ok:true})};
+ assert.deepEqual(await readApi('/fixture','Falha'),{ok:true});assert.equal(calls,2);
+ calls=0;globalThis.fetch=async()=>{calls++;return new Response('busy',{status:503})};await assert.rejects(readApi('/fixture','Falha'),/ocupado/);assert.equal(calls,2);
+ calls=0;globalThis.fetch=async()=>{calls++;return new Response('rate',{status:429})};await assert.rejects(readApi('/fixture','Falha'),/um minuto/);assert.equal(calls,1);
+ calls=0;const controller=new AbortController();globalThis.fetch=async()=>{calls++;setTimeout(()=>controller.abort(),5);return new Response('busy',{status:503})};await assert.rejects(readApi('/fixture','Falha',controller.signal),{name:'AbortError'});assert.equal(calls,1);
+ }finally{globalThis.fetch=original}
+});

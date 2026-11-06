@@ -1,3 +1,4 @@
+import {upstreamLifetime} from './upstream-lifetime.mjs';
 import {probeServices} from './service-status.mjs';
 import http from 'node:http';
 import {validResume} from '../../shared/resume-policy.mjs';
@@ -31,7 +32,7 @@ const refresh=setInterval(()=>refreshTrustedPeers().catch(()=>{trustedPeers=new 
 let statusCache=null,statusPending=null;
 let active=0,activeApplication=0,applicationUploads=0,nativeUploads=0;
 const clientRequests=new Map();
-const reply=(res,status,message)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store',...(status===429?{'Retry-After':'60'}:{})});res.end(JSON.stringify({message}));};
+const reply=(res,status,message)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store',...(status===429?{'Retry-After':'60'}:status===503?{'Retry-After':'1'}:{})});res.end(JSON.stringify({message}));};
 const server=http.createServer(async(req,res)=>{
  if(req.url==='/internal/service-status'){
   if(req.method!=='GET'||!bffPeers.has(req.socket.remoteAddress?.replace(/^::ffff:/,''))){reply(res,403,'Private service');return;}
@@ -52,6 +53,7 @@ const server=http.createServer(async(req,res)=>{
  if(application)activeApplication++;else active++;
  if(countedUpload){if(application)applicationUploads++;else nativeUploads++;}
  clientRequests.set(clientKey,ownCount+1);
+ const lifetime=upstreamLifetime(res);
  try{
   if((req.url||'/').split('?')[0].match(/[%\\]|\/{2,}/)){reply(res,400,'Invalid API path');return;}
   const destination=application?applicationUpstream:upstream;
@@ -112,15 +114,16 @@ const server=http.createServer(async(req,res)=>{
   // PNG assets are already compressed; this also avoids redundant processing.
   headers.set('accept-encoding','identity');
   if(application){headers.set('x-forwarded-host',req.headers.host||'');headers.set('x-forwarded-proto','https');}
-  const response=await fetch(url,{method:req.method,headers,...(body.length?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(30000)});
+  const response=await fetch(url,{method:req.method,headers,...(body.length?{body}:{}),redirect:'manual',signal:lifetime.signal});
   for(const [key,value]of response.headers){if(!['connection','transfer-encoding','content-length','content-encoding','set-cookie'].includes(key))res.setHeader(key,value);}
   const cookies=response.headers.getSetCookie();if(cookies.length)res.setHeader('set-cookie',cookies);
   res.statusCode=response.status;
   if(response.body)await pipeline(Readable.fromWeb(response.body),res);else res.end();
  }catch{
   // Never emit request bodies, provider errors, credentials or token headers.
-  if(!res.headersSent)reply(res,503,'Security gateway unavailable');else res.destroy();
+  if(!res.destroyed&&!res.headersSent)reply(res,503,'Security gateway unavailable');else res.destroy();
  }finally{
+  lifetime.dispose();
   if(application)activeApplication--;else active--;
   if(countedUpload){if(application)applicationUploads--;else nativeUploads--;}
   const pending=(clientRequests.get(clientKey)||1)-1;if(pending)clientRequests.set(clientKey,pending);else clientRequests.delete(clientKey);

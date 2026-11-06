@@ -1,0 +1,1780 @@
+[
+  {
+    "file": "app/components/admin/AccountManagementClient.tsx",
+    "line": 31,
+    "tag": "TextField",
+    "attributes": {
+      "readOnly": "{session.platformAdmin}",
+      "label": "\"Nome completo\"",
+      "maxLength": "{120}",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/components/admin/AccountManagementClient.tsx",
+    "line": 32,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"E-mail confirmado\"",
+      "type": "\"email\"",
+      "readOnly": "true"
+    }
+  },
+  {
+    "file": "app/components/admin/AdminModuleClient.tsx",
+    "line": 57,
+    "tag": "TextField",
+    "attributes": {
+      "label": "{search}",
+      "type": "\"search\""
+    }
+  },
+  {
+    "file": "app/components/admin/AdminModuleClient.tsx",
+    "line": 69,
+    "tag": "input",
+    "attributes": {
+      "type": "\"color\""
+    }
+  },
+  {
+    "file": "app/components/admin/AdminModuleClient.tsx",
+    "line": 69,
+    "tag": "input",
+    "attributes": {
+      "type": "\"color\""
+    }
+  },
+  {
+    "file": "app/components/admin/AdminModuleClient.tsx",
+    "line": 69,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Nome exibido\""
+    }
+  },
+  {
+    "file": "app/components/admin/AdminModuleClient.tsx",
+    "line": 69,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Domínio do portal\""
+    }
+  },
+  {
+    "file": "app/components/admin/BackofficeManagementClient.tsx",
+    "line": 57,
+    "tag": "TextField",
+    "attributes": {
+      "label": "{section==='audit'?'Buscar por ação, motivo ou empresa':'Buscar'}",
+      "type": "\"search\"",
+      "maxLength": "{160}"
+    }
+  },
+  {
+    "file": "app/components/admin/BackofficeManagementClient.tsx",
+    "line": 57,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Situação\""
+    }
+  },
+  {
+    "file": "app/components/admin/BackofficeManagementClient.tsx",
+    "line": 69,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "{k==='role'?'Papel na empresa':'Situação do vínculo'}"
+    }
+  },
+  {
+    "file": "app/components/admin/BackofficeManagementClient.tsx",
+    "line": 69,
+    "tag": "TextField",
+    "attributes": {
+      "format": "{k==='cnpj'?'cnpj':k==='phone'?'phone':undefined}",
+      "label": "{labels[k]||k}",
+      "type": "{k.includes('email')?'email':k==='support_url'?'url':'text'}",
+      "required": "{!['cnpj','phone'].includes(k)}",
+      "minLength": "{['name','platform_name'].includes(k)?2:undefined}",
+      "maxLength": "{k==='name'?160:k==='platform_name'?80:k==='cnpj'?14:k==='phone'?13:500}"
+    }
+  },
+  {
+    "file": "app/components/admin/BackofficeManagementClient.tsx",
+    "line": 70,
+    "tag": "TextAreaField",
+    "attributes": {
+      "label": "\"Motivo da alteração\"",
+      "required": "true",
+      "minLength": "{5}",
+      "maxLength": "{500}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Título\"",
+      "required": "true",
+      "maxLength": "{100}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextAreaField",
+    "attributes": {
+      "label": "\"Descrição\"",
+      "maxLength": "{240}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "FileUploadField",
+    "attributes": {
+      "maxBytes": "{10485760}",
+      "label": "\"Banner desktop · 820 × 312 pixels\"",
+      "accept": "{imageAccept}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "FileUploadField",
+    "attributes": {
+      "maxBytes": "{10485760}",
+      "label": "\"Banner mobile · 640 × 360 pixels (opcional)\"",
+      "accept": "{imageAccept}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Link HTTPS opcional\"",
+      "type": "\"url\"",
+      "maxLength": "{500}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Ordem de exibição\"",
+      "type": "\"number\"",
+      "required": "true",
+      "min": "{0}",
+      "max": "{99}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Tempo de exibição (segundos)\"",
+      "type": "\"number\"",
+      "required": "true",
+      "min": "{5}",
+      "max": "{120}",
+      "step": "{1}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Título\"",
+      "required": "true",
+      "maxLength": "{100}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextAreaField",
+    "attributes": {
+      "label": "\"Mensagem\"",
+      "required": "true",
+      "maxLength": "{4000}"
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Destinatários\""
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Canal\""
+    }
+  },
+  {
+    "file": "app/components/admin/CommunicationsClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Link HTTPS opcional\"",
+      "type": "\"url\"",
+      "maxLength": "{500}"
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyDeletion.tsx",
+    "line": 14,
+    "tag": "TextField",
+    "attributes": {
+      "label": "{`Digite o nome: ${impact.name}`}",
+      "required": "true",
+      "maxLength": "{160}"
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyDeletion.tsx",
+    "line": 14,
+    "tag": "TextAreaField",
+    "attributes": {
+      "label": "\"Motivo da exclusão\"",
+      "required": "true",
+      "minLength": "{5}",
+      "maxLength": "{500}"
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyManagementClient.tsx",
+    "line": 64,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Nome da empresa\"",
+      "maxLength": "{160}",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyManagementClient.tsx",
+    "line": 65,
+    "tag": "TextField",
+    "attributes": {
+      "format": "\"cnpj\"",
+      "required": "true",
+      "label": "\"CNPJ\""
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyManagementClient.tsx",
+    "line": 66,
+    "tag": "TextField",
+    "attributes": {
+      "format": "\"phone\"",
+      "required": "true",
+      "label": "\"Telefone\""
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyManagementClient.tsx",
+    "line": 70,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"E-mail\"",
+      "type": "\"email\"",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyManagementClient.tsx",
+    "line": 71,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Função\""
+    }
+  },
+  {
+    "file": "app/components/admin/CompanyManagementClient.tsx",
+    "line": 75,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "{`Função de ${member.email}`}"
+    }
+  },
+  {
+    "file": "app/components/admin/SecurityClient.tsx",
+    "line": 19,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Chave privada de configuração\"",
+      "type": "\"password\"",
+      "readOnly": "true"
+    }
+  },
+  {
+    "file": "app/components/admin/SecurityClient.tsx",
+    "line": 20,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Autenticador\""
+    }
+  },
+  {
+    "file": "app/components/admin/SecurityClient.tsx",
+    "line": 21,
+    "tag": "TextField",
+    "attributes": {
+      "format": "\"otp\"",
+      "label": "\"Código de verificação\"",
+      "inputMode": "\"numeric\"",
+      "required": "true",
+      "minLength": "{6}",
+      "maxLength": "{6}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 95,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"email\"",
+      "type": "\"email\"",
+      "label": "\"E-mail\"",
+      "maxLength": "{254}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 110,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"password\"",
+      "label": "\"Senha\"",
+      "type": "\"password\"",
+      "maxLength": "{72}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 235,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"responsible\"",
+      "label": "\"Nome do responsável\"",
+      "maxLength": "{120}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 246,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"company\"",
+      "label": "\"Nome da empresa\"",
+      "maxLength": "{160}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 258,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"cnpj\"",
+      "label": "\"CNPJ\"",
+      "inputMode": "\"numeric\"",
+      "maxLength": "{18}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 269,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"phone\"",
+      "label": "\"Telefone com DDD\"",
+      "inputMode": "\"tel\"",
+      "maxLength": "{16}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 282,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"email\"",
+      "type": "\"email\"",
+      "label": "\"E-mail de acesso\"",
+      "maxLength": "{254}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 294,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"new-password\"",
+      "label": "\"Crie uma senha\"",
+      "type": "\"password\"",
+      "maxLength": "{72}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 319,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"confirm-password\"",
+      "label": "\"Confirme a senha\"",
+      "type": "\"password\"",
+      "maxLength": "{72}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 456,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"email\"",
+      "type": "\"email\"",
+      "label": "\"E-mail da conta\"",
+      "maxLength": "{254}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 483,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"new-password\"",
+      "type": "\"password\"",
+      "label": "\"Nova senha\"",
+      "maxLength": "{72}"
+    }
+  },
+  {
+    "file": "app/components/auth/AuthClient.tsx",
+    "line": 504,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"confirm-password\"",
+      "type": "\"password\"",
+      "label": "\"Confirme a nova senha\"",
+      "maxLength": "{72}"
+    }
+  },
+  {
+    "file": "app/components/auth/CompanyInvitationClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"email\"",
+      "label": "\"E-mail convidado\"",
+      "type": "\"email\"",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/components/auth/CompanyInvitationClient.tsx",
+    "line": 39,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"password\"",
+      "label": "\"Senha\"",
+      "type": "\"password\"",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/components/auth/ConfirmEmailClient.tsx",
+    "line": 46,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"email\"",
+      "label": "\"E-mail do cadastro\"",
+      "type": "\"email\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 29,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Buscar candidatos\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 29,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "{`Etapa de ${c.name}`}"
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 30,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Score mínimo para avançar\"",
+      "type": "\"number\"",
+      "min": "{0}",
+      "max": "{100}",
+      "step": "{1}"
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 30,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Score mínimo para reprovação\"",
+      "type": "\"number\"",
+      "min": "{0}",
+      "max": "{100}",
+      "step": "{1}"
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 30,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Gatilho da regra\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 30,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Valor\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 30,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Ação da regra\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 31,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Valor\"",
+      "readOnly": "true"
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 31,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Limite de candidaturas\"",
+      "type": "\"number\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 31,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Posições disponíveis\"",
+      "type": "\"number\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 31,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Slug da URL\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 31,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Meta descrição\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 31,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Título para compartilhamento\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobDetailClient.tsx",
+    "line": 32,
+    "tag": "TextAreaField",
+    "attributes": {
+      "label": "\"Anotações\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobsListClient.tsx",
+    "line": 22,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Buscar vagas\"",
+      "type": "\"search\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobsListClient.tsx",
+    "line": 22,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Status\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobsListClient.tsx",
+    "line": 22,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Ordenação\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 21,
+    "tag": "SelectField",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 22,
+    "tag": "TextField",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 23,
+    "tag": "TextAreaField",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 26,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Selecionar opção\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 27,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Item da lista\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 27,
+    "tag": "TextField",
+    "attributes": {
+      "label": "{placeholder}"
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 36,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 36,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 36,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 37,
+    "tag": "textarea",
+    "attributes": {
+      "maxLength": "{500}"
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 37,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 37,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 37,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 37,
+    "tag": "input",
+    "attributes": {
+      "type": "\"number\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 37,
+    "tag": "input",
+    "attributes": {
+      "type": "\"number\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Idioma\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 39,
+    "tag": "textarea",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 39,
+    "tag": "textarea",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 40,
+    "tag": "textarea",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 40,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 40,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 40,
+    "tag": "textarea",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 40,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 40,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 41,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Item da lista\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 41,
+    "tag": "input",
+    "attributes": {
+      "type": "\"checkbox\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 41,
+    "tag": "input",
+    "attributes": {
+      "type": "\"checkbox\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 41,
+    "tag": "DateField",
+    "attributes": {
+      "label": "\"Prazo para candidaturas\""
+    }
+  },
+  {
+    "file": "app/components/jobs/JobWizardClient.tsx",
+    "line": 41,
+    "tag": "input",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/personalization/AppearancePreview.tsx",
+    "line": 10,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"E-mail\"",
+      "readOnly": "true"
+    }
+  },
+  {
+    "file": "app/components/personalization/AppearancePreview.tsx",
+    "line": 10,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Senha\"",
+      "type": "\"password\"",
+      "readOnly": "true"
+    }
+  },
+  {
+    "file": "app/components/personalization/AppearancePreviewPanel.tsx",
+    "line": 13,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Página da prévia\""
+    }
+  },
+  {
+    "file": "app/components/personalization/BrandColorsEditor.tsx",
+    "line": 10,
+    "tag": "ColorField",
+    "attributes": {
+      "name": "{name}",
+      "label": "{label}"
+    }
+  },
+  {
+    "file": "app/components/personalization/BrandColorsEditor.tsx",
+    "line": 10,
+    "tag": "ColorField",
+    "attributes": {
+      "name": "\"theme.light.text\"",
+      "label": "\"Texto no modo claro\""
+    }
+  },
+  {
+    "file": "app/components/personalization/BrandColorsEditor.tsx",
+    "line": 10,
+    "tag": "ColorField",
+    "attributes": {
+      "name": "\"theme.light.background\"",
+      "label": "\"Fundo no modo claro\""
+    }
+  },
+  {
+    "file": "app/components/personalization/BrandColorsEditor.tsx",
+    "line": 10,
+    "tag": "ColorField",
+    "attributes": {
+      "name": "\"theme.dark.text\"",
+      "label": "\"Texto no modo escuro\""
+    }
+  },
+  {
+    "file": "app/components/personalization/BrandColorsEditor.tsx",
+    "line": 10,
+    "tag": "ColorField",
+    "attributes": {
+      "name": "\"theme.dark.background\"",
+      "label": "\"Fundo no modo escuro\""
+    }
+  },
+  {
+    "file": "app/components/personalization/BrandingDesignSystemDemo.tsx",
+    "line": 9,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Par tipográfico da demonstração\""
+    }
+  },
+  {
+    "file": "app/components/personalization/CareerPortalPreview.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Buscar oportunidade\"",
+      "type": "\"search\""
+    }
+  },
+  {
+    "file": "app/components/personalization/CareerPortalPreview.tsx",
+    "line": 38,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Área de atuação\""
+    }
+  },
+  {
+    "file": "app/components/personalization/CompanyDomainEditor.tsx",
+    "line": 157,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Endereço que será usado\"",
+      "maxLength": "{253}"
+    }
+  },
+  {
+    "file": "app/components/personalization/CompanyDomainEditor.tsx",
+    "line": 176,
+    "tag": "input",
+    "attributes": {
+      "type": "\"radio\"",
+      "name": "\"company-domain-kind\""
+    }
+  },
+  {
+    "file": "app/components/personalization/CompanyDomainEditor.tsx",
+    "line": 177,
+    "tag": "input",
+    "attributes": {
+      "type": "\"radio\"",
+      "name": "\"company-domain-kind\""
+    }
+  },
+  {
+    "file": "app/components/personalization/CompanyDomainEditor.tsx",
+    "line": 182,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Domínio aberto no provedor DNS\"",
+      "maxLength": "{253}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 33,
+    "tag": "FileUploadField",
+    "attributes": {
+      "maxBytes": "{maxMb*1048576}",
+      "label": "{uploading?`${label} · Enviando…`:label}",
+      "accept": "{imageAccept}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 77,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"portal.presentation.imageAlt\"",
+      "label": "\"Descrição acessível da imagem\"",
+      "maxLength": "{240}",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 77,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Foco da imagem\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 78,
+    "tag": "RichTextField",
+    "attributes": {
+      "name": "\"portal.headline\"",
+      "label": "\"Título principal\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 78,
+    "tag": "RichTextField",
+    "attributes": {
+      "name": "\"portal.introduction\"",
+      "label": "\"Apresentação\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 78,
+    "tag": "RichTextField",
+    "attributes": {
+      "name": "\"portal.buttonText\"",
+      "label": "\"Texto do botão\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 78,
+    "tag": "RichTextField",
+    "attributes": {
+      "name": "{`portal.content.${key}`}",
+      "label": "{careerCopyLabels[key]||(key.startsWith('highlight')?`Pilar ${Number(key[9])+1} · ${key.endsWith('Title')?'título':'descrição'}`:`Valor ${Number(key[5])+1} · ${key.endsWith('Title')?'título':'descrição'}`)}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 79,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"displayName\"",
+      "label": "\"Nome da empresa\"",
+      "required": "true",
+      "maxLength": "{160}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 79,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"shortName\"",
+      "label": "\"Nome curto\"",
+      "required": "true",
+      "maxLength": "{24}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 83,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Tema inicial\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 86,
+    "tag": "TextField",
+    "attributes": {
+      "name": "{`banners.${index}.title`}",
+      "required": "true",
+      "label": "\"Nome do banner (interno)\"",
+      "maxLength": "{100}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 86,
+    "tag": "TextField",
+    "attributes": {
+      "name": "{`banners.${index}.link`}",
+      "label": "\"Endereço do link (opcional)\"",
+      "maxLength": "{2048}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 87,
+    "tag": "RichTextField",
+    "attributes": {
+      "label": "\"Título sem vagas\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 87,
+    "tag": "RichTextField",
+    "attributes": {
+      "label": "\"Descrição sem vagas\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "RichTextField",
+    "attributes": {
+      "label": "\"Informações institucionais\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "RichTextField",
+    "attributes": {
+      "label": "{label}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"portal.footer.email\"",
+      "label": "\"E-mail\"",
+      "maxLength": "{254}",
+      "type": "\"email\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"portal.footer.phone\"",
+      "label": "\"Telefone ou WhatsApp\"",
+      "maxLength": "{64}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"portal.footer.phoneUrl\"",
+      "label": "\"Link do WhatsApp ou contato\"",
+      "maxLength": "{2048}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"portal.socialLinkedin\"",
+      "label": "\"LinkedIn\"",
+      "maxLength": "{2048}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"portal.socialInstagram\"",
+      "label": "\"Instagram\"",
+      "maxLength": "{2048}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "TextField",
+    "attributes": {
+      "required": "true",
+      "name": "{`portal.footer.links.${index}.label`}",
+      "label": "{`Nome do link ${index+1}`}",
+      "maxLength": "{60}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 90,
+    "tag": "TextField",
+    "attributes": {
+      "name": "{`portal.footer.links.${index}.href`}",
+      "label": "{`Endereço do link ${index+1}`}",
+      "maxLength": "{2048}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 94,
+    "tag": "TextField",
+    "attributes": {
+      "name": "{`portal.navigation.${index}.label`}",
+      "label": "{`Nome do menu ${index+1}`}",
+      "required": "true",
+      "maxLength": "{60}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 94,
+    "tag": "TextField",
+    "attributes": {
+      "name": "{`portal.navigation.${index}.href`}",
+      "label": "{`Endereço do menu ${index+1}`}",
+      "maxLength": "{2048}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 95,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"portal.slug\"",
+      "label": "\"Slug da empresa\"",
+      "minLength": "{3}",
+      "maxLength": "{63}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PersonalizationClient.tsx",
+    "line": 113,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Apresentação das vagas\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PublicPortalAccount.tsx",
+    "line": 45,
+    "tag": "TextField",
+    "attributes": {
+      "required": "true",
+      "label": "\"Nome completo\"",
+      "minLength": "{3}",
+      "maxLength": "{120}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PublicPortalAccount.tsx",
+    "line": 45,
+    "tag": "FileUploadField",
+    "attributes": {
+      "maxBytes": "{5242880}",
+      "label": "{resume?'Atualizar currículo':'Adicionar currículo'}",
+      "accept": "\"application/pdf\""
+    }
+  },
+  {
+    "file": "app/components/personalization/PublicPortalAccount.tsx",
+    "line": 46,
+    "tag": "TextField",
+    "attributes": {
+      "required": "true",
+      "label": "\"Nome completo\"",
+      "minLength": "{3}",
+      "maxLength": "{120}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PublicPortalAccount.tsx",
+    "line": 47,
+    "tag": "TextField",
+    "attributes": {
+      "required": "true",
+      "label": "\"E-mail\"",
+      "type": "\"email\"",
+      "maxLength": "{254}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PublicPortalAccount.tsx",
+    "line": 48,
+    "tag": "TextField",
+    "attributes": {
+      "required": "true",
+      "label": "\"Senha\"",
+      "type": "\"password\"",
+      "maxLength": "{72}"
+    }
+  },
+  {
+    "file": "app/components/personalization/PublicPortalAccount.tsx",
+    "line": 49,
+    "tag": "TextField",
+    "attributes": {
+      "required": "true",
+      "label": "\"Confirme a senha\"",
+      "type": "\"password\"",
+      "maxLength": "{72}"
+    }
+  },
+  {
+    "file": "app/components/system/SystemPage.tsx",
+    "line": 55,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Buscar páginas\"",
+      "maxLength": "{80}"
+    }
+  },
+  {
+    "file": "app/components/ui/ColorField.tsx",
+    "line": 35,
+    "tag": "input",
+    "attributes": {
+      "type": "\"range\"",
+      "min": "{0}",
+      "max": "{359}",
+      "step": "{1}"
+    }
+  },
+  {
+    "file": "app/components/ui/ColorField.tsx",
+    "line": 38,
+    "tag": "TextField",
+    "attributes": {
+      "name": "{name}",
+      "label": "{label}",
+      "maxLength": "{7}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 118,
+    "tag": "input",
+    "attributes": {
+      "maxLength": "{format?inputFormatRules[format].maxLength:inputProps.maxLength??(type==='email'?254:type==='url'?2048:undefined)}",
+      "inputMode": "{inputProps.inputMode??(format==='phone'?'tel':format?'numeric':type==='email'?'email':type==='url'?'url':undefined)}",
+      "type": "{isPassword && passwordVisible ? \"text\" : type}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 180,
+    "tag": "textarea",
+    "attributes": {}
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 513,
+    "tag": "input",
+    "attributes": {
+      "type": "\"hidden\"",
+      "name": "{name}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 593,
+    "tag": "input",
+    "attributes": {
+      "type": "\"hidden\"",
+      "name": "{startName}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 594,
+    "tag": "input",
+    "attributes": {
+      "type": "\"hidden\"",
+      "name": "{endName}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 691,
+    "tag": "input",
+    "attributes": {
+      "type": "\"text\""
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 819,
+    "tag": "input",
+    "attributes": {
+      "type": "\"text\""
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 894,
+    "tag": "input",
+    "attributes": {
+      "type": "\"file\"",
+      "accept": "{accept}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 1003,
+    "tag": "input",
+    "attributes": {
+      "type": "\"file\"",
+      "accept": "{accept}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 1087,
+    "tag": "input",
+    "attributes": {
+      "type": "\"checkbox\""
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 1097,
+    "tag": "input",
+    "attributes": {
+      "type": "\"radio\""
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 1187,
+    "tag": "textarea",
+    "attributes": {
+      "name": "{name}",
+      "required": "{required}",
+      "maxLength": "{maxLength}"
+    }
+  },
+  {
+    "file": "app/components/ui/FormControls.tsx",
+    "line": 1202,
+    "tag": "input",
+    "attributes": {
+      "type": "\"file\"",
+      "accept": "\"image/png,image/jpeg,image/webp,image/gif\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemAdditions.tsx",
+    "line": 85,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Pesquisar ícones\"",
+      "type": "\"search\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemAdditions.tsx",
+    "line": 85,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Categoria\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 369,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Nome\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 369,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"E-mail\"",
+      "type": "\"email\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 373,
+    "tag": "TextField",
+    "attributes": {
+      "format": "\"cnpj\"",
+      "label": "\"CNPJ\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 373,
+    "tag": "TextField",
+    "attributes": {
+      "format": "\"phone\"",
+      "label": "\"Telefone com DDD\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 373,
+    "tag": "TextField",
+    "attributes": {
+      "format": "\"otp\"",
+      "label": "\"Código do autenticador\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 375,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Nome completo\"",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 375,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Complemento\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 375,
+    "tag": "MultilineInput",
+    "attributes": {
+      "label": "\"Motivo\"",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 380,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Nome da vaga\"",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 381,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Foco compartilhado\"",
+      "readOnly": "true"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 382,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"E-mail do responsável\"",
+      "type": "\"email\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 383,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Buscar candidato\"",
+      "type": "\"search\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 384,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Senha de acesso\"",
+      "type": "\"password\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 385,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Desabilitado\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 390,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Modelo de trabalho\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 394,
+    "tag": "MultiSelectField",
+    "attributes": {
+      "label": "\"Competências desejadas\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 398,
+    "tag": "DateField",
+    "attributes": {
+      "label": "\"Data da entrevista\"",
+      "min": "\"2026-01-01\"",
+      "max": "\"2030-12-31\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 399,
+    "tag": "DateRangeField",
+    "attributes": {
+      "label": "\"Período de entrevistas\"",
+      "min": "\"2026-01-01\"",
+      "max": "\"2030-12-31\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 404,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Etapa do processo\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 405,
+    "tag": "MultiSelectField",
+    "attributes": {
+      "label": "\"Benefícios da vaga\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 420,
+    "tag": "FileUploadField",
+    "attributes": {
+      "maxBytes": "{10485760}",
+      "label": "\"Arquivo do candidato\"",
+      "accept": "\".pdf,.doc,.docx\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 421,
+    "tag": "FileUploadField",
+    "attributes": {
+      "maxBytes": "{5242880}",
+      "label": "\"Imagem do perfil\"",
+      "accept": "{imageAccept}"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 424,
+    "tag": "FileUploadField",
+    "attributes": {
+      "label": "\"Imagem da empresa · mock\"",
+      "accept": "{imageAccept}"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 424,
+    "tag": "FileUploadField",
+    "attributes": {
+      "label": "\"Documento · mock\"",
+      "accept": "\".pdf\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 427,
+    "tag": "MultiFileUploadField",
+    "attributes": {
+      "maxBytes": "{10485760}",
+      "label": "\"Documentos da candidatura\"",
+      "accept": "\".pdf,.doc,.docx\"",
+      "maxFiles": "{6}"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 428,
+    "tag": "MultiFileUploadField",
+    "attributes": {
+      "maxBytes": "{5242880}",
+      "label": "\"Galeria da empresa\"",
+      "accept": "{imageAccept}",
+      "maxFiles": "{8}"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 431,
+    "tag": "TextField",
+    "attributes": {
+      "label": "{`Intensidade: ${demoRange}%`}",
+      "type": "\"range\"",
+      "min": "{0}",
+      "max": "{100}",
+      "step": "{1}"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 432,
+    "tag": "ColorField",
+    "attributes": {
+      "label": "\"Cor principal\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 434,
+    "tag": "MultilineInput",
+    "attributes": {
+      "label": "\"Apresentação\""
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 437,
+    "tag": "RichTextField",
+    "attributes": {
+      "label": "\"Descrição da vaga\"",
+      "maxLength": "{4000}"
+    }
+  },
+  {
+    "file": "app/design-system/DesignSystemClient.tsx",
+    "line": 450,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Título\""
+    }
+  },
+  {
+    "file": "app/design-system/ValidationDemo.tsx",
+    "line": 10,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Nome da visualização\""
+    }
+  },
+  {
+    "file": "app/design-system/ValidationDemo.tsx",
+    "line": 10,
+    "tag": "TextField",
+    "attributes": {
+      "name": "\"example.email\"",
+      "label": "\"E-mail de contato\"",
+      "type": "\"email\"",
+      "required": "true"
+    }
+  },
+  {
+    "file": "app/design-system/WidgetsSection.tsx",
+    "line": 54,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Título principal\""
+    }
+  },
+  {
+    "file": "app/design-system/WidgetsSection.tsx",
+    "line": 62,
+    "tag": "TextField",
+    "attributes": {
+      "label": "\"Nome da visualização\""
+    }
+  }
+]
