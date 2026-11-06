@@ -1,6 +1,6 @@
 "use client";
 import {BannerOrderControls,BannerVisibility} from '../ui/BannerOrderControls';
-import {moveBannerTo} from './banner-order';
+import {moveBannerTo,normalizeBannerOrder} from './banner-order';
 import {BrandColorsEditor} from './BrandColorsEditor';
 import {imageAccept,imageFormats} from '@/shared/image-upload';
 import {FieldFeedback,revealField} from "../ui/FieldFeedback";
@@ -49,7 +49,7 @@ export default function PersonalizationClient({context}:{context:AwaitedAdminCon
 
  const unsaved=JSON.stringify(brandContent(data))!==savedContent;
  useEffect(()=>{if(!ready||!editable||!unsaved)return;const warn=(event:BeforeUnloadEvent)=>{event.preventDefault()};window.addEventListener("beforeunload",warn);return()=>window.removeEventListener("beforeunload",warn)},[ready,editable,unsaved]);
- const change=<K extends keyof Customization>(key:K,value:Customization[K])=>{setData(x=>({...x,[key]:value}));setSaveState("Alterações não salvas")};
+ const change=<K extends keyof Customization>(key:K,value:Customization[K])=>{setData(x=>({...x,[key]:key==='banners'?normalizeBannerOrder(value as OrganizationBanner[]):value}));setSaveState("Alterações não salvas")};
  const updatePortal=<K extends keyof Customization["portal"]>(key:K,value:Customization["portal"][K])=>change("portal",{...data.portal,[key]:value});
  const presentation=portalPresentation(data.portal);
  const updatePresentation=(next:Partial<typeof presentation>)=>updatePortal('presentation',{...presentation,...next});
