@@ -980,7 +980,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 33,
+    "line": 35,
     "tag": "FileUploadField",
     "attributes": {
       "maxBytes": "{maxMb*1048576}",
@@ -990,7 +990,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 77,
+    "line": 79,
     "tag": "TextField",
     "attributes": {
       "name": "\"portal.presentation.imageAlt\"",
@@ -1001,7 +1001,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 77,
+    "line": 79,
     "tag": "SelectField",
     "attributes": {
       "label": "\"Foco da imagem\""
@@ -1009,7 +1009,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 78,
+    "line": 80,
     "tag": "RichTextField",
     "attributes": {
       "name": "\"portal.headline\"",
@@ -1018,7 +1018,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 78,
+    "line": 80,
     "tag": "RichTextField",
     "attributes": {
       "name": "\"portal.introduction\"",
@@ -1027,7 +1027,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 78,
+    "line": 80,
     "tag": "RichTextField",
     "attributes": {
       "name": "\"portal.buttonText\"",
@@ -1036,7 +1036,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 78,
+    "line": 80,
     "tag": "RichTextField",
     "attributes": {
       "name": "{`portal.content.${key}`}",
@@ -1045,7 +1045,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 79,
+    "line": 81,
     "tag": "TextField",
     "attributes": {
       "name": "\"displayName\"",
@@ -1056,7 +1056,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 79,
+    "line": 81,
     "tag": "TextField",
     "attributes": {
       "name": "\"shortName\"",
@@ -1067,7 +1067,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 83,
+    "line": 85,
     "tag": "SelectField",
     "attributes": {
       "label": "\"Tema inicial\""
@@ -1075,7 +1075,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 86,
+    "line": 88,
     "tag": "TextField",
     "attributes": {
       "name": "{`banners.${index}.title`}",
@@ -1086,7 +1086,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 86,
+    "line": 88,
     "tag": "TextField",
     "attributes": {
       "name": "{`banners.${index}.link`}",
@@ -1096,7 +1096,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 87,
+    "line": 89,
     "tag": "RichTextField",
     "attributes": {
       "label": "\"Título sem vagas\""
@@ -1104,7 +1104,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 87,
+    "line": 89,
     "tag": "RichTextField",
     "attributes": {
       "label": "\"Descrição sem vagas\""
@@ -1112,7 +1112,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "RichTextField",
     "attributes": {
       "label": "\"Informações institucionais\""
@@ -1120,7 +1120,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "RichTextField",
     "attributes": {
       "label": "{label}"
@@ -1128,7 +1128,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "TextField",
     "attributes": {
       "name": "\"portal.footer.email\"",
@@ -1139,7 +1139,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "TextField",
     "attributes": {
       "name": "\"portal.footer.phone\"",
@@ -1149,7 +1149,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "TextField",
     "attributes": {
       "name": "\"portal.footer.phoneUrl\"",
@@ -1159,7 +1159,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "TextField",
     "attributes": {
       "name": "\"portal.socialLinkedin\"",
@@ -1169,7 +1169,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "TextField",
     "attributes": {
       "name": "\"portal.socialInstagram\"",
@@ -1179,7 +1179,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "TextField",
     "attributes": {
       "required": "true",
@@ -1190,7 +1190,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 90,
+    "line": 92,
     "tag": "TextField",
     "attributes": {
       "name": "{`portal.footer.links.${index}.href`}",
@@ -1200,7 +1200,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 94,
+    "line": 96,
     "tag": "TextField",
     "attributes": {
       "name": "{`portal.navigation.${index}.label`}",
@@ -1211,7 +1211,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 94,
+    "line": 96,
     "tag": "TextField",
     "attributes": {
       "name": "{`portal.navigation.${index}.href`}",
@@ -1221,7 +1221,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 95,
+    "line": 97,
     "tag": "TextField",
     "attributes": {
       "name": "\"portal.slug\"",
@@ -1232,7 +1232,7 @@
   },
   {
     "file": "app/components/personalization/PersonalizationClient.tsx",
-    "line": 113,
+    "line": 115,
     "tag": "SelectField",
     "attributes": {
       "label": "\"Apresentação das vagas\""
@@ -1310,6 +1310,14 @@
     "attributes": {
       "label": "\"Buscar páginas\"",
       "maxLength": "{80}"
+    }
+  },
+  {
+    "file": "app/components/ui/BannerOrderControls.tsx",
+    "line": 6,
+    "tag": "SelectField",
+    "attributes": {
+      "label": "\"Posição na sequência\""
     }
   },
   {
@@ -1763,7 +1771,7 @@
   },
   {
     "file": "app/design-system/WidgetsSection.tsx",
-    "line": 54,
+    "line": 55,
     "tag": "TextField",
     "attributes": {
       "label": "\"Título principal\""
@@ -1771,7 +1779,7 @@
   },
   {
     "file": "app/design-system/WidgetsSection.tsx",
-    "line": 62,
+    "line": 64,
     "tag": "TextField",
     "attributes": {
       "label": "\"Nome da visualização\""

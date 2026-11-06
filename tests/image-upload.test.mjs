@@ -74,3 +74,13 @@ test('safe reads retry once, never replay writes/rate limits, and abort delayed 
  calls=0;const controller=new AbortController();globalThis.fetch=async()=>{calls++;setTimeout(()=>controller.abort(),5);return new Response('busy',{status:503})};await assert.rejects(readApi('/fixture','Falha',controller.signal),{name:'AbortError'});assert.equal(calls,1);
  }finally{globalThis.fetch=original}
 });
+
+import {webImage,optimizedImageResponse,acceptsWebp} from '../app/lib/web-image.ts';
+test('web delivery negotiates format, preserves originals/alpha and only keeps smaller derivatives',async()=>{
+ const png=await sharp({create:{width:1600,height:540,channels:4,background:{r:22,g:110,b:120,alpha:.5}}}).composite([{input:Buffer.from('<svg width="1600" height="540"><text x="100" y="200" font-size="90" fill="white">Banner de exemplo</text></svg>')}]).png().toBuffer();
+ const original=Buffer.from(png),result=await webImage(png,'image/avif,image/webp,image/png');assert.equal(result.type,'image/webp');assert.ok(result.bytes.length<png.length);const meta=await sharp(result.bytes).metadata();assert.equal(meta.width,1600);assert.equal(meta.height,540);assert.equal(meta.hasAlpha,true);assert.deepEqual(png,original);
+ assert.deepEqual(await webImage(png,'image/png'),{bytes:png,type:'image/png'});assert.equal(acceptsWebp('image/webp;q=0,image/png'),false);assert.equal(acceptsWebp('*/*'),false);
+ assert.deepEqual((await webImage(png,'image/webp')).bytes,result.bytes);
+ const response=await optimizedImageResponse(png,new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'}),'image/webp');assert.equal(response.headers.get('Content-Type'),'image/webp');assert.equal(response.headers.get('Vary'),'Cookie, Accept');assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+ const tiny=await sharp({create:{width:1,height:1,channels:3,background:'red'}}).png().toBuffer();assert.equal((await webImage(tiny,'image/webp')).type,'image/png');
+});

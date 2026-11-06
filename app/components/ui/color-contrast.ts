@@ -4,3 +4,10 @@ export const foreground=(background:string)=>contrast(background,'#142321')>=7?'
 export const blendColor=(a:string,b:string,t:number)=>'#'+[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,'0')).join('');
 export function readableColor(color:string,surfaces:string[],minimum=4.5){const score=(c:string)=>Math.min(...surfaces.map(s=>contrast(c,s)));const target=score('#000000')>score('#FFFFFF')?'#000000':'#FFFFFF';for(let i=0;i<=100;i++){const c=blendColor(color,target,i/100);if(score(c)>=minimum)return c}return target}
 export function navigationColors(action:string,background:string){const interaction=readableColor(action,[background]),hoverBackground=blendColor(background,interaction,.08);return{interaction:readableColor(interaction,[background,hoverBackground]),hoverBackground}}
+
+/** Gentle section separation without another set of customer color fields. */
+export function sectionColors(background:string,text:string){
+ const target=luminance(background)>.4?'#000000':'#FFFFFF';
+ const tone=(amount:number)=>{const candidate=blendColor(background,target,amount);return contrast(candidate,text)>=4.5?candidate:blendColor(background,target==='#000000'?'#FFFFFF':'#000000',amount)};
+ return {subtle:tone(.04),accent:tone(.07)};
+}

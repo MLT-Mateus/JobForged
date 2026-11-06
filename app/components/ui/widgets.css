@@ -59,7 +59,14 @@
 .jf-editor-accordion>summary{display:flex;align-items:center;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-5);list-style:none;cursor:pointer;font-family:var(--jf-ui-font-heading);font-weight:700;color:var(--jf-ui-text)}
 .jf-editor-accordion>summary::-webkit-details-marker{display:none}
 .jf-editor-accordion>summary>svg{width:18px;height:18px;flex-shrink:0;color:var(--jf-ui-text-muted)}
-.jf-editor-accordion>summary>span{flex:1;min-width:0}
+.jf-editor-accordion>summary>.jf-editor-accordion__title{flex:1;min-width:0}
+.jf-editor-accordion>summary>.jf-editor-accordion__badge{flex:0 0 auto;display:inline-flex}
+.jf-editor-accordion__badge .jf-status{white-space:nowrap;gap:4px}
+.jf-banner-position{flex:0 0 28px;width:28px;height:28px;display:grid;place-items:center;border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted);font-size:12px;font-variant-numeric:tabular-nums}
+.jf-banner-order{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--jf-ui-space-3);align-items:end}
+.jf-banner-order__arrows{display:flex;gap:var(--jf-ui-space-2)}
+.jf-banner-order>.jf-field{grid-template-rows:minmax(20px,auto) minmax(var(--jf-ui-control-height),auto)}
+.jf-banner-order__arrows .jf-action{width:var(--jf-ui-control-height);min-height:var(--jf-ui-control-height);padding:0}
 .jf-editor-accordion[open]>summary>svg:last-child{transform:rotate(180deg)}
 .jf-editor-accordion>summary:focus-visible{outline:3px solid var(--jf-ui-focus-ring);outline-offset:2px;border-radius:var(--jf-ui-radius-card)}
 .jf-editor-accordion__body{display:grid;gap:var(--jf-ui-space-5);padding:0 var(--jf-ui-space-5) var(--jf-ui-space-5);min-width:0}
@@ -86,3 +93,10 @@
 .jf-preview-dock{width:max-content;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface);color:var(--jf-ui-text);box-shadow:var(--jf-ui-shadow);max-width:calc(100vw - 32px)}
 .jf-preview-dock.is-floating{position:fixed;right:var(--jf-ui-space-4);bottom:max(var(--jf-ui-space-4),env(safe-area-inset-bottom));z-index:40}
 .jf-preview-dock .jf-action{white-space:normal}
+
+/* Banner headings stay legible even in the narrow editor column. */
+.jf-editor-accordion:has(.jf-banner-position)>summary{display:grid;grid-template-columns:28px minmax(0,1fr) 18px;column-gap:var(--jf-ui-space-3);row-gap:var(--jf-ui-space-2)}
+.jf-editor-accordion:has(.jf-banner-position)>summary>.jf-banner-position{grid-column:1;grid-row:1/3}
+.jf-editor-accordion:has(.jf-banner-position)>summary>.jf-editor-accordion__title{grid-column:2;grid-row:1}
+.jf-editor-accordion:has(.jf-banner-position)>summary>.jf-editor-accordion__badge{grid-column:2;grid-row:2;justify-self:start}
+.jf-editor-accordion:has(.jf-banner-position)>summary>svg:last-child{grid-column:3;grid-row:1/3}

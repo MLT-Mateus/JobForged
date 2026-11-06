@@ -56,7 +56,7 @@ export function FocusPopover({label,children,triggerContent,triggerVariant="seco
 
 export function EditorAccordion({title,icon,badge,children,defaultOpen=false}:{title:string;icon?:ReactNode;badge?:ReactNode;children:ReactNode;defaultOpen?:boolean}) {
  const [open,setOpen]=useState(defaultOpen);
- return <details className="jf-editor-accordion" open={open} onToggle={e=>setOpen(e.currentTarget.open)}><summary>{icon}<span>{title}</span>{badge}<ChevronDown aria-hidden="true"/></summary><div className="jf-editor-accordion__body">{children}</div></details>;
+ return <details className="jf-editor-accordion" open={open} onToggle={e=>setOpen(e.currentTarget.open)}><summary>{icon}<span className="jf-editor-accordion__title">{title}</span>{badge&&<span className="jf-editor-accordion__badge">{badge}</span>}<ChevronDown aria-hidden="true"/></summary><div className="jf-editor-accordion__body">{children}</div></details>;
 }
 export function EditorWorkbench({editor,preview,previewDevice="desktop"}:{editor:ReactNode;preview:ReactNode;previewDevice?:"desktop"|"tablet"|"mobile"}) {
  return <div className="jf-editor-workbench-shell"><div className={`jf-editor-workbench jf-editor-workbench--${previewDevice}`}><div className="jf-editor-workbench__form">{editor}</div><div className="jf-editor-workbench__preview">{preview}</div></div></div>;
