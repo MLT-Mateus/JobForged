@@ -1,0 +1,6 @@
+export function luminance(value:string){const rgb=[1,3,5].map(i=>parseInt(value.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}
+export function contrast(a:string,b:string){const [x,y]=[luminance(a),luminance(b)].sort((m,n)=>n-m);return(x+.05)/(y+.05)}
+export const foreground=(background:string)=>contrast(background,'#142321')>=7?'#142321':contrast(background,'#000000')>contrast(background,'#FFFFFF')?'#000000':'#FFFFFF';
+export const blendColor=(a:string,b:string,t:number)=>'#'+[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,'0')).join('');
+export function readableColor(color:string,surfaces:string[],minimum=4.5){const score=(c:string)=>Math.min(...surfaces.map(s=>contrast(c,s)));const target=score('#000000')>score('#FFFFFF')?'#000000':'#FFFFFF';for(let i=0;i<=100;i++){const c=blendColor(color,target,i/100);if(score(c)>=minimum)return c}return target}
+export function navigationColors(action:string,background:string){const interaction=readableColor(action,[background]),hoverBackground=blendColor(background,interaction,.08);return{interaction:readableColor(interaction,[background,hoverBackground]),hoverBackground}}

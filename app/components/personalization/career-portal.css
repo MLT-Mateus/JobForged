@@ -5,7 +5,7 @@
 .jf-career-portal>header{padding:var(--jf-ui-space-5) clamp(20px,4cqi,56px);gap:var(--jf-ui-space-5);flex-wrap:wrap}
 .jf-career-brand{display:flex;align-items:center;gap:var(--jf-ui-space-2);font-family:var(--jf-ui-font-heading);font-size:18px}
 .jf-career-portal>header nav{display:flex;gap:var(--jf-ui-space-5);margin-left:auto;flex-wrap:wrap}
-.jf-career-portal a{color:var(--cp-link);text-decoration:none}
+.jf-career-portal a:not(.jf-action){color:var(--cp-link);text-decoration:none}
 .jf-career-portal a:focus-visible{outline:3px solid var(--jf-ui-focus-ring);outline-offset:3px}
 .jf-career-portal>main{padding:0}
 .jf-career-portal .jf-career-hero{padding:clamp(24px,5cqi,64px) clamp(20px,4cqi,56px);gap:clamp(20px,4cqi,48px);border-radius:0;background:linear-gradient(135deg,color-mix(in srgb,var(--cp-primary) 9%,var(--cp-bg)),var(--cp-bg))}
@@ -48,7 +48,7 @@
 /* Full-width sections share a readable inner alignment, including embedded previews. */
 .jf-career-portal{--career-gutter:max(24px,calc((100cqi - 1160px)/2))}
 .jf-career-portal>header{padding-inline:var(--career-gutter);background:var(--cp-header-bg);color:var(--cp-header-text);min-height:76px;border-bottom:1px solid var(--jf-ui-border)}
-.jf-career-portal>header a{color:inherit;font-size:13px;font-weight:600}
+.jf-career-portal>header a{color:var(--jf-nav-link-current,var(--cp-header-text));font-size:13px;font-weight:600}
 .jf-career-portal .jf-career-hero{padding:64px var(--career-gutter);min-height:510px;gap:56px;grid-template-columns:1fr 1fr}
 .jf-career-portal .jf-career-hero h1{font-size:clamp(28px,4cqi,52px);max-width:550px}
 .jf-career-portal .mock-hero__visual{overflow:visible;background:color-mix(in srgb,var(--cp-primary) 12%,var(--cp-bg));border-radius:var(--jf-ui-radius-card);min-height:360px;padding:16px}
@@ -144,3 +144,5 @@
 
 /* Banners follow the readable content width, independently of the full-bleed hero. */
 .jf-career-banner-region{margin:var(--jf-ui-space-6) var(--career-gutter);min-width:0}
+
+.jf-career-portal>header{--jf-ui-brand-strong:var(--cp-header-link-hover);--jf-ui-brand-soft:var(--cp-header-link-hover-bg);--jf-nav-link-interaction:var(--cp-header-link-hover);--jf-nav-link-hover-bg:var(--cp-header-link-hover-bg)}

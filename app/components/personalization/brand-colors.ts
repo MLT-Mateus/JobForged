@@ -1,8 +1,8 @@
-import {contrast} from './branding-model.ts';
+import {blendColor,readableColor} from '../ui/color-contrast.ts';
 import type {Customization,Palette} from './personalization-types';
 export type BrandColors={primary:string;secondary:string;action:string;lightText:string;darkText:string;lightBackground:string;darkBackground:string};
-export const mix=(a:string,b:string,t:number)=>'#'+[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,'0')).join('').toUpperCase();
-export function readableColor(color:string,surfaces:string[],minimum=4.5){const score=(c:string)=>Math.min(...surfaces.map(s=>contrast(c,s)));const target=score('#000000')>score('#FFFFFF')?'#000000':'#FFFFFF';for(let i=0;i<=100;i++){const c=mix(color,target,i/100);if(score(c)>=minimum)return c}return target}
+export const mix=(a:string,b:string,t:number)=>blendColor(a,b,t).toUpperCase();
+export {readableColor} from '../ui/color-contrast.ts';
 export const brandColors=(v:Customization):BrandColors=>({primary:v.palette.primary,secondary:v.palette.secondary,action:v.palette.button,lightText:v.theme.light.text,darkText:v.theme.dark.text,lightBackground:v.theme.light.background,darkBackground:v.theme.dark.background});
 export function applyBrandColors(value:Customization,c:BrandColors):Customization{
  if(Object.values(c).some(v=>!/^#[0-9a-f]{6}$/i.test(v)))return {...value,palette:{...value.palette,primary:c.primary,secondary:c.secondary,button:c.action},theme:{...value.theme,light:{...value.theme.light,text:c.lightText,background:c.lightBackground},dark:{...value.theme.dark,text:c.darkText,background:c.darkBackground}}};

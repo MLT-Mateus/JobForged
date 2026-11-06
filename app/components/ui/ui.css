@@ -715,12 +715,12 @@
 .jf-action:hover:not(:disabled) { transform: translateY(-1px); }
 .jf-action:disabled { cursor: not-allowed; opacity: 0.46; }
 .jf-action--primary {
-  border-color: color-mix(in srgb, var(--jf-ui-brand) 32%, transparent);
+  border-color: var(--jf-ui-action-primary-border,color-mix(in srgb, var(--jf-ui-brand) 32%, transparent));
   background: var(--jf-ui-action-primary-bg,var(--jf-ui-brand-soft));
   color: var(--jf-ui-action-primary-text,var(--jf-ui-brand-strong));
 }
 .jf-action--primary:hover:not(:disabled) {
-  border-color: var(--jf-ui-brand);
+  border-color: var(--jf-ui-action-primary-hover-border,var(--jf-ui-brand));
   background: var(--jf-ui-action-primary-hover-bg,color-mix(in srgb, var(--jf-ui-brand-soft) 70%, var(--jf-ui-brand) 14%));
   color: var(--jf-ui-action-primary-hover-text,var(--jf-ui-action-primary-text,var(--jf-ui-brand-strong)));
   box-shadow: 0 9px 22px color-mix(in srgb, var(--jf-ui-brand) 16%, transparent);
@@ -889,3 +889,10 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-upload__remove{justify-self:start;min-height:32px}
 .jf-upload-field .jf-upload__content strong,.jf-multi-upload__content strong{font-size:var(--jf-ui-font-size-sm);line-height:1.4}
 .jf-upload-field .jf-upload__state,.jf-upload-field .jf-upload__filename,.jf-multi-upload__content small{font-size:var(--jf-ui-font-size-xs);line-height:1.5}
+
+.jf-nav-link{display:inline-flex;align-items:center;min-height:40px;padding:8px 10px;border-radius:var(--jf-ui-control-radius);transition:color 180ms ease,background 180ms ease;text-decoration:none}
+.jf-nav-link:is(:hover,:focus-visible,:active){--jf-nav-link-current:var(--jf-nav-link-interaction,var(--jf-ui-brand-strong));color:var(--jf-nav-link-current);background:var(--jf-nav-link-hover-bg,var(--jf-ui-brand-soft));text-decoration:underline;text-underline-offset:3px}
+.jf-nav-link:focus-visible{outline:3px solid var(--jf-ui-focus-ring);outline-offset:2px}
+
+/* Interactive labels always inherit their accessible foreground, including rich text. */
+.jf-action .jf-rich-content [style*="color"]{color:inherit!important}
