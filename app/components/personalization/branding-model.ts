@@ -1,3 +1,5 @@
+import {contrast,foreground,blendColor,navigationColors,readableColor} from '../ui/color-contrast.ts';
+export {contrast,foreground,luminance} from '../ui/color-contrast.ts';
 import {portalChrome,portalMenu,portalFooter,defaultPortalFooter,validPortalMenuLink} from './portal-chrome.ts';
 import {renderRichText,richTextPlain} from '../ui/rich-content.ts';
 import {careerCopy} from './career-copy.ts';
@@ -21,11 +23,7 @@ export const brandContent=(value:Customization)=>{
 export const brandingLogo=(value:Customization,theme:'light'|'dark')=>(theme==='dark'?value.assets.logoDark?.url:value.assets.logoLight?.url)||value.assets.logoLight?.url||value.assets.logoMain?.url||value.assets.logoAlternative?.url||'/brand/jobforged-symbol.svg';
 export const brandingIcon=(value:Customization,_theme:'light'|'dark')=>{void _theme;return value.assets.favicon?.url};
 export function safeBrandingLink(value:string){try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:undefined}catch{return undefined}}
-export function luminance(value:string){const rgb=[1,3,5].map(i=>parseInt(value.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}
-export function contrast(a:string,b:string){const [x,y]=[luminance(a),luminance(b)].sort((m,n)=>n-m);return(x+.05)/(y+.05)}
-export const foreground=(background:string)=>contrast(background,'#142321')>=4.5?'#142321':contrast(background,'#000000')>=4.5?'#000000':'#FFFFFF';
 export function paletteFor(value:Customization,theme:'light'|'dark'):Palette {return theme==='dark'?value.theme.dark:{...value.palette,background:value.theme.light.background,surface:value.theme.light.surface,text:value.theme.light.text}}
-function blendColor(source:string,target:string,amount:number){return '#'+[1,3,5].map(i=>Math.round(parseInt(source.slice(i,i+2),16)*(1-amount)+parseInt(target.slice(i,i+2),16)*amount).toString(16).padStart(2,'0')).join('')}
 export function brandingScrollbarStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
  const primary=/^#[0-9A-F]{6}$/i.test(value.palette.primary)?value.palette.primary:lightPalette.primary;
  const p=paletteFor(value,theme),surfaces=[p.background,p.surface],score=(color:string)=>Math.min(...surfaces.map(surface=>contrast(color,surface)));
@@ -39,10 +37,11 @@ export function brandingScrollbarStyle(value:Customization,theme:'light'|'dark')
 }
 export function brandingStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
  const p=paletteFor(value,theme),pair=fontPairs.find(x=>x.id===value.typography.fontPair)||fontPairs[0];
+ const chrome=portalChrome(value)[theme],headerNavigation=navigationColors(p.button,chrome.headerBackground),footerNavigation=navigationColors(p.button,chrome.footerBackground);
  const hoverCandidate=blendColor(p.link,theme==='dark'?'#FFFFFF':'#000000',.15);const linkHover=[p.background,p.surface,p.activeItem].every(s=>contrast(hoverCandidate,s)>=4.5)?hoverCandidate:p.link;
  const image=value.backgrounds.panelImage||value.backgrounds.textureImage;
  return {...brandingScrollbarStyle(value,theme),'--teal':p.primary,'--teal-deep':p.link,'--teal-soft':p.activeItem,'--blue':p.secondary,'--app-bg':p.background,'--app-panel':p.surface,
-  '--jf-ui-action-primary-bg':p.button,'--jf-ui-action-primary-text':foreground(p.button),'--jf-ui-action-primary-hover-bg':p.buttonHover,'--jf-ui-action-primary-hover-text':foreground(p.buttonHover),'--company-link-hover':linkHover,'--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
+  '--jf-ui-action-primary-border':readableColor(p.button,[p.surface],3),'--jf-ui-action-primary-hover-border':readableColor(p.buttonHover,[p.surface],3),'--cp-header-link-hover':headerNavigation.interaction,'--cp-header-link-hover-bg':headerNavigation.hoverBackground,'--cp-footer-link-hover':footerNavigation.interaction,'--cp-footer-link-hover-bg':footerNavigation.hoverBackground,'--jf-ui-action-primary-bg':p.button,'--jf-ui-action-primary-text':foreground(p.button),'--jf-ui-action-primary-hover-bg':p.buttonHover,'--jf-ui-action-primary-hover-text':foreground(p.buttonHover),'--company-link-hover':linkHover,'--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
   '--jf-ui-focus':p.link,'--jf-ui-focus-ring':'color-mix(in srgb,var(--jf-ui-focus) 28%,transparent)','--jf-ui-surface':p.surface,'--jf-ui-surface-soft':p.background,
   '--jf-ui-accent':p.secondary,'--jf-ui-text':p.text,'--jf-ui-text-muted':'color-mix(in srgb,var(--jf-ui-text) 72%,var(--jf-ui-surface))','--jf-ui-text-soft':'var(--jf-ui-text-muted)',
   '--jf-ui-border':'color-mix(in srgb,var(--jf-ui-text) 18%,var(--jf-ui-surface))','--jf-ui-border-strong':'color-mix(in srgb,var(--jf-ui-text) 35%,var(--jf-ui-surface))',
