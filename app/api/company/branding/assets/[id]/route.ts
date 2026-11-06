@@ -1,3 +1,4 @@
+import {optimizedImageResponse} from '@/app/lib/web-image';
 import {squareBrandingIcon} from '@/app/lib/branding-image';
 import type { NextRequest } from 'next/server';
 import { createHash } from 'node:crypto';
@@ -17,5 +18,5 @@ export async function GET(request:NextRequest,{params}:{params:Promise<{id:strin
  if(bytes.byteLength!==asset.size||createHash('sha256').update(bytes).digest('hex')!==asset.sha256)return new Response(null,{status:503,headers});
  headers.set('Content-Type','image/png');
  if(new URL(request.url).searchParams.get('icon')==='1'){try{return new Response(await squareBrandingIcon(bytes),{headers})}catch{headers.delete('Content-Type');headers.set('Location','/favicon.svg');return new Response(null,{status:307,headers})}}
- return new Response(bytes,{headers});
+ return optimizedImageResponse(bytes,headers,request.headers.get('accept'));
 }

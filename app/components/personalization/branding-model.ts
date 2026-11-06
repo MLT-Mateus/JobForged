@@ -1,4 +1,4 @@
-import {contrast,foreground,blendColor,navigationColors,readableColor} from '../ui/color-contrast.ts';
+import {contrast,foreground,blendColor,navigationColors,readableColor,sectionColors} from '../ui/color-contrast.ts';
 export {contrast,foreground,luminance} from '../ui/color-contrast.ts';
 import {portalChrome,portalMenu,portalFooter,defaultPortalFooter,validPortalMenuLink} from './portal-chrome.ts';
 import {renderRichText,richTextPlain} from '../ui/rich-content.ts';
@@ -39,6 +39,7 @@ export function brandingStyle(value:Customization,theme:'light'|'dark'):CSSPrope
  const p=paletteFor(value,theme),pair=fontPairs.find(x=>x.id===value.typography.fontPair)||fontPairs[0];
  const chrome=portalChrome(value)[theme],headerNavigation=navigationColors(p.button,chrome.headerBackground),footerNavigation=navigationColors(p.button,chrome.footerBackground);
  const hoverCandidate=blendColor(p.link,theme==='dark'?'#FFFFFF':'#000000',.15);const linkHover=[p.background,p.surface,p.activeItem].every(s=>contrast(hoverCandidate,s)>=4.5)?hoverCandidate:p.link;
+ const sections=sectionColors(p.background,p.text);
  const image=value.backgrounds.panelImage||value.backgrounds.textureImage;
  return {...brandingScrollbarStyle(value,theme),'--teal':p.primary,'--teal-deep':p.link,'--teal-soft':p.activeItem,'--blue':p.secondary,'--app-bg':p.background,'--app-panel':p.surface,
   '--jf-ui-action-primary-border':readableColor(p.button,[p.surface],3),'--jf-ui-action-primary-hover-border':readableColor(p.buttonHover,[p.surface],3),'--cp-header-link-hover':headerNavigation.interaction,'--cp-header-link-hover-bg':headerNavigation.hoverBackground,'--cp-footer-link-hover':footerNavigation.interaction,'--cp-footer-link-hover-bg':footerNavigation.hoverBackground,'--jf-ui-action-primary-bg':p.button,'--jf-ui-action-primary-text':foreground(p.button),'--jf-ui-action-primary-hover-bg':p.buttonHover,'--jf-ui-action-primary-hover-text':foreground(p.buttonHover),'--company-link-hover':linkHover,'--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
@@ -47,7 +48,7 @@ export function brandingStyle(value:Customization,theme:'light'|'dark'):CSSPrope
   '--jf-ui-border':'color-mix(in srgb,var(--jf-ui-text) 18%,var(--jf-ui-surface))','--jf-ui-border-strong':'color-mix(in srgb,var(--jf-ui-text) 35%,var(--jf-ui-surface))',
   '--jf-ui-font-heading':pair.heading,'--jf-ui-font-body':pair.body,'--company-line-height':value.typography.density==='Compacta'?'1.4':value.typography.density==='Ampla'?'1.8':'1.6','--company-sidebar':p.sidebar,'--company-button':p.button,'--company-button-hover':p.buttonHover,'--company-on-button':foreground(p.button),'--company-on-button-hover':foreground(p.buttonHover),
   '--company-panel-image':image?`linear-gradient(color-mix(in srgb,${value.backgrounds.overlay} ${value.backgrounds.opacity}%,transparent),color-mix(in srgb,${value.backgrounds.overlay} ${value.backgrounds.opacity}%,transparent)),url("${image}")`:'none','--company-panel-fit':value.backgrounds.fit,'--company-panel-position':value.backgrounds.position,
-  '--cp-header-bg':portalChrome(value)[theme].headerBackground,'--cp-header-text':portalChrome(value)[theme].headerText,'--cp-footer-bg':portalChrome(value)[theme].footerBackground,'--cp-footer-text':portalChrome(value)[theme].footerText,'--cp-primary':p.primary,'--cp-secondary':p.secondary,'--cp-accent':p.accent,'--cp-button':p.button,'--cp-button-hover':p.buttonHover,'--cp-sidebar':p.sidebar,'--cp-active':p.activeItem,'--cp-link':p.link,'--cp-bg':p.background,'--cp-surface':p.surface,'--cp-portal':p.portalBackground,'--cp-text':p.text,'--cp-overlay':String(value.backgrounds.opacity/100)} as CSSProperties;
+  '--cp-section-subtle':sections.subtle,'--cp-section-accent':sections.accent,'--cp-header-bg':portalChrome(value)[theme].headerBackground,'--cp-header-text':portalChrome(value)[theme].headerText,'--cp-footer-bg':portalChrome(value)[theme].footerBackground,'--cp-footer-text':portalChrome(value)[theme].footerText,'--cp-primary':p.primary,'--cp-secondary':p.secondary,'--cp-accent':p.accent,'--cp-button':p.button,'--cp-button-hover':p.buttonHover,'--cp-sidebar':p.sidebar,'--cp-active':p.activeItem,'--cp-link':p.link,'--cp-bg':p.background,'--cp-surface':p.surface,'--cp-portal':p.portalBackground,'--cp-text':p.text,'--cp-overlay':String(value.backgrounds.opacity/100)} as CSSProperties;
 }
 /** Reject unknown structure and CSS/URL values before sending data to the database. */
 export type BrandingIssue={path:string;message:string};

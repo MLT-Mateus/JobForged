@@ -67,3 +67,14 @@ test('partial hexadecimal editing preserves input without invalid derived NaN co
 
 import {navigationColors} from '../app/components/ui/color-contrast.ts';
 test('extreme action colors keep button text, boundaries and contextual navigation readable',()=>{for(const action of ['#000000','#FFFFFF','#777777','#FFFF00','#00FFFF','#FF00FF','#7C3AED']){const original=brandingDefaults('x','X');original.palette.button=action;for(const mode of ['light','dark']){original.theme[mode].button=action;const style=brandingStyle(original,mode);assert.ok(contrast(style['--jf-ui-action-primary-text'],action)>=4.5);assert.ok(contrast(style['--jf-ui-action-primary-border'],original.theme[mode].surface)>=3)}for(const background of ['#000000','#FFFFFF','#FDE047','#123456']){const n=navigationColors(action,background);assert.ok(contrast(n.interaction,background)>=4.5);assert.ok(contrast(n.interaction,n.hoverBackground)>=4.5)}}});
+
+import {moveBannerTo,normalizeBannerOrder} from '../app/components/personalization/banner-order.ts';
+import {sectionColors} from '../app/components/ui/color-contrast.ts';
+test('banner movement reinserts, preserves every item and normalizes sequence without mutating history',()=>{
+ const items=[{id:'a',order:0,visible:true},{id:'b',order:1,visible:false},{id:'c',order:2,visible:true},{id:'d',order:3,visible:true}],snapshot=structuredClone(items);
+ const next=moveBannerTo(items,0,3);assert.deepEqual(next.map(x=>x.id),['b','c','d','a']);assert.deepEqual(next.map(x=>x.order),[0,1,2,3]);assert.equal(next[0].visible,false);assert.deepEqual(items,snapshot);assert.deepEqual(moveBannerTo(next,3,0),items);assert.equal(moveBannerTo(items,-1,2),items);assert.equal(moveBannerTo(items,1,9),items);const afterRemoval=normalizeBannerOrder(items.filter(x=>x.id!=='a'));const duplicated=normalizeBannerOrder([...afterRemoval,{...afterRemoval[0],id:'copy'}]);assert.deepEqual(duplicated.map(x=>x.order),[0,1,2,3]);assert.equal(duplicated.at(-1).id,'copy');
+});
+test('section tones separate backgrounds and preserve normal text contrast in both themes',()=>{
+ for(const background of ['#FFFFFF','#F5FAF9','#071411','#0E2722','#777777','#FFFF00']){const text=foreground(background),tones=sectionColors(background,text);for(const value of Object.values(tones)){assert.notEqual(value,background);assert.ok(contrast(value,text)>=4.5)}assert.notEqual(tones.subtle,tones.accent)}
+ for(const theme of ['light','dark']){const style=brandingStyle(brandingDefaults('fixture','Fixture'),theme);assert.ok(style['--cp-section-subtle']);assert.notEqual(style['--cp-section-subtle'],style['--cp-bg'])}
+});
