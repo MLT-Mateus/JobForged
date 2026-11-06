@@ -44,3 +44,20 @@ test('direct Storage accepts bounded static PNG and rejects spoofed formats',()=
  assert.equal(validStaticPng(Buffer.concat([signature,chunk('IHDR',header),chunk('acTL',Buffer.alloc(8)),image.subarray(33)])),false);
  header.writeUInt32BE(8192);assert.equal(validStaticPng(Buffer.concat([signature,chunk('IHDR',header),image.subarray(33)])),false);
 });
+
+import http from 'node:http';
+import {upstreamLifetime} from './upstream-lifetime.mjs';
+test('client disconnect aborts pending upstream HTTP and normal completion stays successful',async()=>{
+ let disconnected;const closed=new Promise(resolve=>disconnected=resolve);
+ const upstream=http.createServer((req,res)=>{if(req.url==='/pending')res.on('close',()=>disconnected());if(req.url==='/ok')res.end('ok')});
+ await new Promise(resolve=>upstream.listen(0,'127.0.0.1',resolve));
+ const origin='http://127.0.0.1:'+upstream.address().port;
+ const proxy=http.createServer(async(req,res)=>{const lifetime=upstreamLifetime(res,3000);try{const r=await fetch(origin+req.url,{signal:lifetime.signal});res.end(await r.text())}catch{res.destroy()}finally{lifetime.dispose()}});
+ await new Promise(resolve=>proxy.listen(0,'127.0.0.1',resolve));
+ try{
+ const address='http://127.0.0.1:'+proxy.address().port;
+ assert.equal(await(await fetch(address+'/ok')).text(),'ok');
+ const client=new AbortController();const pending=fetch(address+'/pending',{signal:client.signal});setTimeout(()=>client.abort(),50);await assert.rejects(pending,{name:'AbortError'});
+ await Promise.race([closed,new Promise((_,reject)=>setTimeout(()=>reject(Error('abandoned upstream still running')),1500))]);
+ }finally{proxy.closeAllConnections();upstream.closeAllConnections();await Promise.all([new Promise(r=>proxy.close(r)),new Promise(r=>upstream.close(r))])}
+});

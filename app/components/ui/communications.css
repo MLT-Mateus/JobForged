@@ -1,6 +1,6 @@
 /* Shared platform communications; measures use Design System tokens. */
 .jf-communication-banner{overflow:hidden;min-width:0;padding:0;background:var(--jf-ui-surface);color:var(--jf-ui-text)}
-.jf-communication-banner__image{position:relative;aspect-ratio:820/312;width:100%;overflow:hidden;background:var(--jf-ui-surface-soft)}
+.jf-communication-banner__image{position:relative;aspect-ratio:var(--jf-banner-ratio,820/312);width:100%;overflow:hidden;background:var(--jf-ui-surface-soft)}
 
 /* Controls overlay the image; neither captions nor counters add height. */
 .jf-communication-banner{position:relative}
@@ -22,8 +22,8 @@
 @media(max-width:420px){.jf-metric-grid{grid-template-columns:minmax(0,1fr)}}
 
 
-.jf-communication-banner[data-preview-view="mobile"] .jf-communication-banner__image{aspect-ratio:640/360}
-@media(max-width:680px){.jf-communication-banner:not([data-preview-view="desktop"]) .jf-communication-banner__image{aspect-ratio:640/360}}
+.jf-communication-banner[data-preview-view="mobile"] .jf-communication-banner__image{aspect-ratio:var(--jf-banner-ratio,640/360)}
+@media(max-width:680px){.jf-communication-banner:not([data-preview-view="desktop"]) .jf-communication-banner__image{aspect-ratio:var(--jf-banner-ratio,640/360)}}
 
 /* Shared inbox: same spacing in the application drawer and Design System. */
 .jf-notification-panel{display:flex;flex-direction:column;gap:var(--jf-ui-space-5);min-width:0}

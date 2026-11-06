@@ -60,7 +60,7 @@ export function brandingIssue(content:unknown):BrandingIssue|null {
   if(richTextPlain(c.portal.headline).length>90)return issue('portal.headline','Use até 90 caracteres no título principal.');
   if(c.portal.content)for(const [key,value] of Object.entries(c.portal.content))if(!(key in careerCopy)||typeof value!=='string'||value.length>4000)return issue('portal.content.'+key,'Revise os textos das seções.');
   for(const key of ['socialLinkedin','socialInstagram'] as const)if(c.portal[key]&&!safeBrandingLink(c.portal[key]))return issue(`portal.${key}`,'Use um endereço HTTPS válido.');
-  for(let i=0;i<c.banners.length;i++)if(c.banners[i].link&&!validContentLink(c.banners[i].link))return issue(`banners.${i}.link`,'Use um endereço HTTPS ou um caminho interno.');
+  for(let i=0;i<c.banners.length;i++){const banner=c.banners[i];if(!richTextPlain(banner.title).trim()||richTextPlain(banner.title).length>100)return issue(`banners.${i}.title`,'Informe um nome interno com até 100 caracteres.');if(banner.link&&!validContentLink(banner.link))return issue(`banners.${i}.link`,'Cole um endereço completo começando com https:// ou um caminho interno.');}
   if(c.portal.footer){const f=c.portal.footer;
    if(f.links.length>6)return issue('portal.footer.links.0.label','Use até seis links no rodapé.');
    for(let i=0;i<f.links.length;i++){const link=f.links[i];if(typeof link.label!=='string'||!richTextPlain(link.label).trim()||richTextPlain(link.label).length>60)return issue(`portal.footer.links.${i}.label`,'Informe um nome de até 60 caracteres.');if(!validContentLink(link.href))return issue(`portal.footer.links.${i}.href`,'Use um endereço HTTPS ou um caminho interno.');}
