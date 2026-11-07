@@ -277,3 +277,7 @@
 .appearance-asset{gap:var(--jf-ui-space-2)}
 
 .jf-editor-workbench--mobile .appearance-preview-controls{grid-template-columns:minmax(0,1fr)}
+
+.appearance-domain-stage{display:grid;min-width:0;gap:var(--jf-ui-space-3)}
+.appearance-domain-stage h3,.appearance-domain-steps h3{margin:0;font-size:var(--jf-ui-font-size-md);line-height:1.4}
+.appearance-domain-steps{display:grid;gap:var(--jf-ui-space-3)}

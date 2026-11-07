@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { ActionButton, AppToast, EditorSection, StatusBadge, TextField } from '../ui';
+import { ActionButton, AppToast, EditorSection, StatusBadge, TextField, SelectField } from '../ui';
 import {apiResponse,readApi} from '@/app/lib/api-response';
 import { validCompanyHostname, type CompanyDomain } from '@/app/lib/company-domain';
+
+import {domainProviders} from './domain-providers';
 
 type DomainKind = 'root' | 'subdomain' | '';
 type CheckResult = {
@@ -34,6 +36,8 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
   const [hostname, setHostname] = useState('');
   const [zone, setZone] = useState('');
   const [kind, setKind] = useState<DomainKind>('');
+  const [provider, setProvider] = useState('');
+  const providerGuide = domainProviders.find(item=>item.value===provider);
   const [busy, setBusy] = useState(true);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
@@ -144,7 +148,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
     setDiagnosis(null);
     const host = cleanHostname(hostname);
     if (next === 'root') setZone(host);
-    else if (host.includes('.')) setZone(host.split('.').slice(1).join('.'));
+    else setZone('');
   }
 
   const statusText: Record<CompanyDomain['status'], string> = {
@@ -153,8 +157,16 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
   };
 
   return (
-    <EditorSection title="Domínio próprio" description="Use o endereço da sua empresa. Primeiro vincule-o aqui; depois crie os registros indicados no provedor do domínio.">
-      <TextField
+    <EditorSection title="Domínio próprio" description="Conecte o endereço da página de vagas em quatro etapas. Você informa o endereço aqui, adiciona dois registros no painel DNS e volta para confirmar.">
+      <fieldset className="appearance-domain-kind">
+        <legend>1. Escolha o tipo de endereço</legend>
+        <label><input type="radio" name="company-domain-kind" checked={kind === 'root'} onChange={() => setDomainKind('root')} disabled={!editable||busy} /> Domínio principal (ex.: suaempresa.com.br)</label>
+        <label><input type="radio" name="company-domain-kind" checked={kind === 'subdomain'} onChange={() => setDomainKind('subdomain')} disabled={!editable||busy} /> Subdomínio (ex.: vagas.suaempresa.com.br)</label>
+        <small>Escolha o tipo antes de vincular. Subdomínio é recomendado para manter o site principal.</small>
+        {kind === 'root' && <small className="appearance-domain-warning">A raiz aponta o site principal para a JobForged. Se quer preservar seu site atual, escolha um subdomínio.</small>}
+      </fieldset>
+
+      {kind && <section className="appearance-domain-stage" aria-label="Endereço da página"><h3>2. Informe o endereço</h3>      <TextField
         label="Endereço que será usado"
         placeholder="Digite o domínio..."
         maxLength={253}
@@ -165,53 +177,41 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
           setHostname(value);
           setDiagnosis(null);
           if (kind === 'root') setZone(value);
-          if (kind === 'subdomain' && value.includes('.')) setZone(value.split('.').slice(1).join('.'));
         }}
         helpText="Exemplo: suaempresa.com.br ou vagas.suaempresa.com.br. Não inclua https:// nem caminhos."
         disabled={!editable || busy}
       />
 
-      <fieldset className="appearance-domain-kind">
-        <legend>Qual endereço você vai conectar?</legend>
-        <label><input type="radio" name="company-domain-kind" checked={kind === 'root'} onChange={() => setDomainKind('root')} disabled={!editable||busy} /> Domínio principal (ex.: suaempresa.com.br)</label>
-        <label><input type="radio" name="company-domain-kind" checked={kind === 'subdomain'} onChange={() => setDomainKind('subdomain')} disabled={!editable||busy} /> Subdomínio (ex.: vagas.suaempresa.com.br)</label>
-        <small>Escolha o tipo antes de vincular. Subdomínio é recomendado para manter o site principal.</small>
-        {kind === 'root' && <small className="appearance-domain-warning">A raiz aponta o site principal para a JobForged. Se quer preservar seu site atual, escolha um subdomínio.</small>}
-      </fieldset>
+      {kind === 'subdomain' && <TextField label="Domínio principal no painel DNS" placeholder="Digite o domínio..." maxLength={253} value={zone} error={zoneError} onChange={event=>{setZone(cleanHostname(event.target.value));setDiagnosis(null)}} helpText={`Para ${safeHost||'vagas.suaempresa.com.br'}, informe o domínio principal (ex.: suaempresa.com.br).`} disabled={!editable||busy}/>}
 
-      {kind && <TextField label="Domínio aberto no provedor DNS" placeholder="Digite o domínio..." maxLength={253} value={zone} error={zoneError} onChange={event=>{setZone(cleanHostname(event.target.value));setDiagnosis(null)}} helpText={kind==='root'?'Use o mesmo endereço acima.':`Para ${safeHost||'vagas.suaempresa.com.br'}, informe o domínio principal (ex.: suaempresa.com.br).`} disabled={!editable||busy}/>}
-      {safeHost && !kind && <p className="appearance-domain-note">Escolha domínio principal ou subdomínio para continuar.</p>}
-
+</section>}
       <div className="appearance-domain-status" aria-live="polite">
         <span>Status do vínculo</span>
         <StatusBadge tone={shownStatus === 'active' ? 'positive' : 'info'}>{statusText[shownStatus]}</StatusBadge>
       </div>
 
-      <p className="appearance-domain-next" role="status">{!linkedAddress?'1. Confira o endereço e o tipo. Depois selecione Vincular endereço.':data.status==='active'?'Endereço ativo. Você já pode abrir a página da empresa.':data.status==='verified'?'DNS confirmado. O HTTPS será preparado automaticamente; consulte o status em até 5 minutos.':'2. Cadastre os dois registros abaixo no provedor. Depois selecione Testar DNS agora.'}</p>
+      <p className="appearance-domain-next" role="status">{!linkedAddress?'Confira o endereço e selecione Vincular endereço para gerar os registros.':data.status==='active'?'Endereço ativo. Você já pode abrir a página da empresa.':data.status==='verified'?'DNS confirmado. O HTTPS será preparado automaticamente; consulte o status em até 5 minutos.':'Endereço vinculado. Escolha quem gerencia seu DNS e siga as instruções abaixo.'}</p>
       <div className="appearance-domain-actions">
         <ActionButton disabled={!canRegister} onClick={() => void perform({ operation: 'register', hostname: safeHost, version: data.version }, 'save')}>
           {linkedAddress?'Endereço vinculado':'Vincular endereço'}
         </ActionButton>
-        <ActionButton variant="secondary" disabled={!editable || busy || !linkedAddress} onClick={() => void perform({ operation: 'check' }, 'check')}>
-          {checking ? 'Testando DNS…' : 'Testar DNS agora'}
-        </ActionButton>
+
         <ActionButton variant="quiet" disabled={busy} onClick={() => void refresh()}>
           Consultar status
         </ActionButton>
         {linkedAddress&&data.status==='active'&&<a className="jf-action jf-action--secondary" href={`https://${data.hostname}`} target="_blank" rel="noopener noreferrer">Abrir página da empresa</a>}
       </div>
 
-      {linkedAddress && (
+      {linkedAddress && kind && zoneMatches && (
         <div className="appearance-domain-instructions">
           <div className="appearance-domain-steps">
-            <strong>Configure em 3 passos</strong>
-            <ol>
-              <li>Vincule o endereço nesta tela.</li>
-              <li>Na Hostinger, abra <b>Domínios</b>, selecione a zona e entre em <b>DNS / Nameservers</b>.</li>
-              <li>Crie os 2 registros abaixo. Depois volte e selecione <b>Testar DNS agora</b>.</li>
-            </ol>
+            <h3>3. Adicione os registros no seu DNS</h3>
+            <p>O DNS pode estar em uma empresa diferente daquela onde você comprou o domínio ou hospeda o site. Se ele está na Cloudflare, escolha Cloudflare, mesmo que o domínio tenha sido comprado em outro lugar.</p>
+            <SelectField label="Quem gerencia o DNS deste domínio?" value={provider} placeholder="Selecione o provedor..." onValueChange={setProvider} options={domainProviders.map(item=>({value:item.value,label:item.label}))}/>
+            {providerGuide&&<><p>{providerGuide.steps}</p><p>{providerGuide.note}</p>{providerGuide.url&&<a className="jf-text-link" href={providerGuide.url} target="_blank" rel="noopener noreferrer">Abrir guia oficial de {providerGuide.label}</a>}</>}
           </div>
 
+          {providerGuide&&<>
           <div className="appearance-domain-records" aria-label="Registros DNS necessários">
             {records.map((record,index)=><section className="appearance-domain-record" key={record.type} aria-label={`Registro ${record.type}`}>
               <header><strong>{index+1}. {record.type==='TXT'?'Confirmar propriedade':'Apontar endereço'}</strong><StatusBadge tone="info">{record.type}</StatusBadge></header>
@@ -225,10 +225,15 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
           </div>
 
           <div className="appearance-domain-help">
-            <p><b>Hostinger:</b> em cada registro, selecione o <b>Tipo</b> e copie <b>Nome</b> e <b>Valor / destino</b>; deixe o TTL padrão. O provedor completa o Nome com o domínio da zona; não cole esse domínio novamente.</p>
-            <p><b>São dois registros DNS:</b> o TXT confirma o domínio; A (raiz) ou CNAME (subdomínio) faz o apontamento. O terceiro passo é testar aqui. Se os nameservers apontarem a outro provedor, crie os registros lá.</p>
-            <p>Não altere registros do site/e-mail. Edite um registro existente para o mesmo nome; não duplique. Na raiz, o A pode substituir o destino do site principal.</p>
+            <p><b>Como preencher:</b> copie o Tipo, o Nome e o Valor de cada cartão. Se o painel completa o nome com o domínio principal, use o nome curto mostrado. Se pedir o endereço completo, use o endereço completo do cartão. Para a raiz, use @ ou deixe em branco, conforme o painel indicar.</p>
+            <p>Mantenha o TTL padrão. Salve cada registro. Não altere os registros de e-mail nem outros endereços. Se já existir um apontamento para este mesmo nome, confira-o antes de substituir; não crie destinos conflitantes.</p>
+            <p>Usar o domínio principal muda o destino do site atual. Para manter esse site, conecte um subdomínio, como vagas.suaempresa.com.br.</p>
           </div>
+          <section className="appearance-domain-stage" aria-label="Verificação do domínio">
+            <h3>4. Confirme a configuração</h3>
+            <p>Depois de salvar os dois registros no provedor, volte aqui e teste. Se ainda não forem encontrados, aguarde a atualização do DNS e tente novamente; ela pode levar até 24 horas.</p>
+            <ActionButton variant="secondary" disabled={!editable||busy||!records.length} onClick={()=>void perform({operation:'check'},'check')}>{checking?'Testando DNS…':'Testar DNS agora'}</ActionButton>
+          </section></>}
 
           {diagnosis && (
             <div className={`appearance-domain-diagnosis${diagnosis.ready ? ' is-ready' : ''}`} role="status" aria-live="polite">

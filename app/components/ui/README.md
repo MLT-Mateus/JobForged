@@ -57,3 +57,5 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 `EditorSection` agrupa campos sem cartões aninhados. `ViewportPreview` mantém um iframe sem scripts com viewport real, escala calculada por ResizeObserver e limite de altura; desktop, tablet e celular não dependem da largura do painel administrativo. O documento recebe apenas estilos e componentes React compartilhados; navegação externa é bloqueada na prévia. Os controles, cores e dados do editor permanecem separados da apresentação personalizada. A demonstração real está em Widgets.
 
 `PreviewDock` identifica prévias privadas em posição fixa, com retorno à edição, e é demonstrado em Widgets sem fixação para não encobrir o catálogo. `RichTextField` aceita `maxLength` (padrão 4000), aplicado também a comandos de formatação da fonte.
+
+`AdaptiveNavigation` é a navegação compartilhada do cabeçalho e rodapé. Mede os rótulos e o espaço com ResizeObserver, recolhe links que não cabem e mantém uma lista rolável com textos completos. O estado compacto também funciona por container query. Não duplique breakpoints por página.
