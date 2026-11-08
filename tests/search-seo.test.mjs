@@ -24,6 +24,9 @@ test('rendered metadata, headers, canonicals and sitemaps obey environment at ru
    const response=await get('/');assert.equal(response.status,200);const html=await response.text();
    assert.match(html,/<title>JobForged \| ATS para recrutamento e seleção<\/title>/);
    assert.match(html,/Job Forged/);assert.match(html,/"@type":"WebSite"/);assert.match(html,/"@type":"Organization"/);
+   assert.match(html,/<link(?=[^>]*rel="icon")(?=[^>]*href="[^"]*\/favicon-96x96\.png")(?=[^>]*sizes="96x96")[^>]*>/);
+   assert.match(html,/<link(?=[^>]*rel="shortcut icon")(?=[^>]*href="[^"]*\/favicon\.ico")[^>]*>/);
+   assert.match(html,/<link[^>]*data-jf-browser-icon="true"/);
    const robots=html.match(/<meta[^>]*name="robots"[^>]*>/g)?.join('')||'';
    if(environment==='test'){assert.match(robots,/noindex/);assert.match(response.headers.get('x-robots-tag')||'',/noindex/);assert.doesNotMatch(html,/name="google-site-verification"/)}
    else {assert.doesNotMatch(robots,/noindex/);assert.equal(response.headers.get('x-robots-tag'),null);assert.match(html,/fixture-verification-token/)}
