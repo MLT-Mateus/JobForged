@@ -114,7 +114,6 @@ export function LoginClient() {
           icon={LockKeyhole}
           type="password"
           value={values.password}
-          maxLength={72}
           autoComplete="current-password"
           onChange={event => {
             setValues(current => ({ ...current, password: event.target.value }));
@@ -298,7 +297,6 @@ export function SignupClient() {
           icon={LockKeyhole}
           type="password"
           autoComplete="new-password"
-          maxLength={72}
           value={values.password}
           onChange={event => update("password", event.target.value)}
           error={errors.password}
@@ -309,7 +307,6 @@ export function SignupClient() {
             [rules.upper && rules.lower, "Maiúscula e minúscula"],
             [rules.number, "Um número"],
             [rules.special, "Um símbolo (!@#...)"],
-            [rules.maxBytes, "Até 72 bytes UTF-8"],
           ].map(([valid, label]) => (
             <li className={valid ? "is-valid" : ""} key={String(label)}>
               <Check aria-hidden="true" />{label}
@@ -323,7 +320,6 @@ export function SignupClient() {
           icon={LockKeyhole}
           type="password"
           autoComplete="new-password"
-          maxLength={72}
           value={values.confirmPassword}
           onChange={event => update("confirmPassword", event.target.value)}
           error={errors.confirmPassword}
@@ -411,7 +407,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
   async function saveNewPassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (Object.values(rules).some((valid) => !valid)) {
-      setPasswordError("Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
+      setPasswordError(!rules.maxBytes?"Esta senha é longa demais para o serviço de acesso. Tente uma frase mais curta.":"Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
       setConfirmPasswordError("");
       focusFirstInvalid(event.currentTarget, ["new-password"]);
       return;
@@ -487,7 +483,6 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
           placeholder="Crie uma senha segura"
           icon={LockKeyhole}
           autoComplete="new-password"
-          maxLength={72}
           value={password}
           onChange={event => { setPassword(event.target.value); setPasswordError(""); }}
           error={passwordError}
@@ -498,7 +493,6 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
             [rules.upper && rules.lower, "Maiúscula e minúscula"],
             [rules.number, "Um número"],
             [rules.special, "Um símbolo (!@#...)"],
-            [rules.maxBytes, "Até 72 bytes UTF-8"],
           ].map(([valid, label]) => <li className={valid ? "is-valid" : ""} key={String(label)}><Check aria-hidden="true" />{label}</li>)}
         </ul>
         <TextField
@@ -508,7 +502,6 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
           placeholder="Digite a senha novamente"
           icon={LockKeyhole}
           autoComplete="new-password"
-          maxLength={72}
           value={confirmPassword}
           onChange={event => { setConfirmPassword(event.target.value); setConfirmPasswordError(""); }}
           error={confirmPasswordError}
