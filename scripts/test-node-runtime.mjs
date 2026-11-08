@@ -112,6 +112,11 @@ try {
       if (route === "/") {
         const officialOrigin=environment==='live'?'https://jobforged.com':'https://test.jobforged.com';
         assert.match(html,/<title>JobForged \| ATS para recrutamento e seleção<\/title>/);
+        assert.match(html,/<link(?=[^>]*rel="icon")(?=[^>]*href="[^"]*\/favicon-96x96\.png")(?=[^>]*sizes="96x96")[^>]*>/);
+        for(const [path,type] of [['/favicon-96x96.png','image/png'],['/favicon.ico','image/'],['/apple-touch-icon.png','image/png']]){
+          const icon=await fetch(`${base}${path}`,{headers:{'User-Agent':'Googlebot-Image/1.0'},signal:AbortSignal.timeout(15000)});
+          assert.equal(icon.status,200,`${environment}${path}`);assert.ok(icon.headers.get('content-type')?.startsWith(type));assert.ok((await icon.arrayBuffer()).byteLength>100);
+        }
         assert.ok(html.includes(`href="${officialOrigin}/"`),'Home canonical must use the current environment');
         const robots=html.match(/<meta[^>]*name="robots"[^>]*>/g)?.join('')||'';
         if(environment==='test'){

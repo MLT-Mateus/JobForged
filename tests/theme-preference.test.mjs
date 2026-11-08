@@ -41,6 +41,16 @@ test("company icon is scoped and the platform icon returns when cleared",()=>{
  delete b.root.dataset.companyIcon;vm.runInContext(boot,b.context);assert.equal(icon.value,'/favicon.svg');
  b.root.dataset.companyIcon='https://elsewhere.invalid/icon.svg';vm.runInContext(boot,b.context);assert.equal(icon.value,'/favicon.svg');
 });
+
+test('browser theme and company favicon never rewrite the stable raster search icons',()=>{
+ const b=browser();
+ const makeIcon=attributes=>({attributes:{...attributes},getAttribute(name){return this.attributes[name]},removeAttribute(name){delete this.attributes[name]},setAttribute(name,value){this.attributes[name]=value}});
+ const png=makeIcon({href:'/favicon-96x96.png',type:'image/png',sizes:'96x96'}),ico=makeIcon({href:'/favicon.ico',type:'image/x-icon',sizes:'16x16 32x32 48x48'}),dynamic=makeIcon({href:'/favicon.svg',type:'image/svg+xml',sizes:'any'});
+ b.context.document.querySelectorAll=selector=>selector==='link[data-jf-browser-icon]'?[dynamic]:[png,ico,dynamic];
+ const stable=JSON.stringify([png.attributes,ico.attributes]);
+ b.root.dataset.companyIcon='/api/portals/example/assets/fixture';vm.runInContext(boot,b.context);assert.equal(dynamic.attributes.href,b.root.dataset.companyIcon);assert.equal(JSON.stringify([png.attributes,ico.attributes]),stable);
+ delete b.root.dataset.companyIcon;b.data.set('jobforged-theme','dark');vm.runInContext(boot,b.context);assert.equal(dynamic.attributes.href,'/brand/jobforged-symbol-dark.svg');assert.equal(dynamic.attributes.type,'image/svg+xml');assert.equal(JSON.stringify([png.attributes,ico.attributes]),stable);
+});
 test('company favicon ignores horizontal images and stale loads, and restores on exit',()=>{
  const hook=fs.readFileSync(new URL('../app/components/ui/useBrandingIcon.ts',import.meta.url),'utf8');
  const root={dataset:{}},images=[];let cleanup;
