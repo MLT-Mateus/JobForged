@@ -20,6 +20,8 @@ export class ToastChannel {
     this.emit();
     if (previous && previous.owner !== owner) this.closers.get(previous.owner)?.();
   }
+  /** Feedback that must outlive the form that initiated a navigation. */
+  announce(notice: ToastNotice) { this.publish('page-feedback', notice); }
   release(owner: string) {
     if (this.active?.owner !== owner) return;
     this.active = null; this.emit();

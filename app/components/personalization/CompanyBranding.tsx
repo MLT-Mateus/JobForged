@@ -1,5 +1,6 @@
 "use client";
 import {useBrandingIcon} from '../ui/useBrandingIcon';
+import {useCompanyScrollbar} from './useCompanyScrollbar';
 import {createContext,useContext,useEffect,useState,type ReactNode} from 'react';
 import {BrandAsset} from '../BrandAsset';
 import {ChevronLeft,ChevronRight} from 'lucide-react';
@@ -13,6 +14,7 @@ const ScopeContext=createContext<{id:string;role:string}>({id:'',role:''});
 export const useCompanyBranding=()=>useContext(Context);
 export function CompanyBrandingProvider({value,theme='light',companyId='',companyRole='',children}:{value:Customization|null;theme?:'light'|'dark';companyId?:string;companyRole?:string;children:ReactNode}){
  useBrandingIcon(value?brandingIcon(value,theme):undefined);
+ useCompanyScrollbar(value,theme);
  return <ScopeContext.Provider value={{id:companyId,role:companyRole}}><ThemeContext.Provider value={theme}><Context.Provider value={value}>{children}</Context.Provider></ThemeContext.Provider></ScopeContext.Provider>;
 }
 export function CompanyBrandingGuard({companyId,editing,children}:{companyId:string;editing:boolean;children:ReactNode}){

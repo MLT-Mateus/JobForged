@@ -22,6 +22,11 @@ export function createToastNotice(notice: Omit<ToastNotice, "id">): ToastNotice 
   return { ...notice, id: ++nextNoticeId };
 }
 
+/** Keep the result visible when its initiating page redirects or unmounts. */
+export function showAppToast(notice: Omit<ToastNotice, "id">) {
+  toastChannel.announce(createToastNotice({...notice,text:notice.kind==='danger'?publicError(notice.text):notice.text}));
+}
+
 function ToastIcon({ kind }: { kind: ToastKind }) {
   if (kind === "success") return <CircleCheck size={19} aria-hidden="true" />;
   if (kind === "warning") return <CircleAlert size={19} aria-hidden="true" />;
@@ -69,15 +74,28 @@ function ToastView({ active, target }: { active: ActiveToast; target: HTMLElemen
   const [focused, setFocused] = useState(false);
   const paused = hovered || focused;
   const ref = useRef<HTMLDivElement>(null);
+  const sounded = useRef<number | null>(null);
   // Native dialogs occupy the browser top layer; a body z-index cannot cover
   // them. A manual popover stays fixed to the viewport and inside modal focus.
   useEffect(() => {
     const node = ref.current;
-    if (!node || typeof node.showPopover !== 'function') return;
-    node.showPopover();
-    return () => { if (node.matches(':popover-open')) node.hidePopover(); };
-  }, [target]);
-  useEffect(() => { playStatusSound(notice.kind); }, [notice.kind]);
+    if (!node) return;
+    if (typeof node.showPopover === 'function') {
+      try { node.showPopover(); } catch { node.removeAttribute('popover'); }
+    }
+    const soundWhenVisible = () => {
+      if (document.hidden || !node.isConnected || !node.getClientRects().length || sounded.current===serial) return;
+      sounded.current=serial;
+      playStatusSound(notice.kind,()=>node.isConnected&&!document.hidden&&node.getClientRects().length>0&&toastChannel.getSnapshot()?.serial===serial);
+    };
+    const frame=requestAnimationFrame(soundWhenVisible);
+    document.addEventListener('visibilitychange',soundWhenVisible);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener('visibilitychange',soundWhenVisible);
+      if (typeof node.hidePopover==='function' && node.matches(':popover-open')) node.hidePopover();
+    };
+  }, [target,serial,notice.kind]);
   useEffect(() => {
     if (paused || notice.action) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
