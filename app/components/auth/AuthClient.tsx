@@ -6,11 +6,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, Building2, Check, LockKeyhole, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { BrandAsset } from "@/app/components/BrandAsset";
-import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, createToastNotice, useThemePreference, type ToastNotice } from "@/app/components/ui";
+import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, createToastNotice, showAppToast, useThemePreference, type ToastNotice } from "@/app/components/ui";
 import { maskCnpj, maskPhone, normalizeText, passwordRules, validateLogin, validateSignup, type LoginValues, type SignupValues } from "./auth-validation";
 import { requestPasswordRecovery, signInCompany, signUpCompany, updateRecoveredPassword, verifyPasswordRecovery } from "./auth-service";
 import { focusFirstInvalid } from "./focus-first-invalid";
-import { playStatusSound } from "@/app/components/ui/status-sound";
 import "./auth.css";
 
 type FieldErrors<T> = Partial<Record<keyof T, string>>;
@@ -60,6 +59,7 @@ export function LoginClient() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     const next = validateLogin(values);
     setErrors(next);
     if (Object.keys(next).length) {
@@ -77,7 +77,7 @@ export function LoginClient() {
       }
       setValues(current => ({ ...current, password: "" }));
       const session = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).catch(() => null) as { platformAdmin?: boolean;role?:string;originSlug?:string } | null;
-      playStatusSound("success");
+      showAppToast({kind:"success",title:"Acesso confirmado",text:"Você entrou na sua conta com segurança."});
       router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")) ?? (session?.platformAdmin ? "/backoffice" : session?.role==="candidate"?"/"+session.originSlug:"/app/home"));
     } finally {
       setLoading(false);
@@ -164,6 +164,7 @@ export function SignupClient() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     const next = validateSignup(values);
     setErrors(next);
     if (Object.keys(next).length || !acceptedTerms) {
@@ -188,7 +189,7 @@ export function SignupClient() {
       }
       setRequiresConfirmation(Boolean(result.requiresConfirmation));
       setCreated(true);
-      playStatusSound(result.requiresConfirmation ? "info" : "success");
+      showAppToast({kind:result.requiresConfirmation?"info":"success",title:result.requiresConfirmation?"Cadastro recebido":"Conta criada",text:result.requiresConfirmation?"Se o cadastro puder ser concluído, você receberá as instruções para confirmar seu e-mail.":"Seu acesso está ativo. Abrindo o painel da empresa."});
       if (!result.requiresConfirmation) router.replace("/app/home");
     } finally {
       setLoading(false);
@@ -204,7 +205,7 @@ export function SignupClient() {
           <h1>{requiresConfirmation ? "Confirme seu e-mail" : "Conta Freemium criada"}</h1>
           <p>
             {requiresConfirmation
-              ? `Enviamos as instruções para ${values.email}. Depois de confirmar, entre com seu e-mail e senha.`
+              ? `Se o cadastro puder ser concluído, você receberá as instruções em ${values.email}. Depois de confirmar, entre com seu e-mail e senha.`
               : "Seu acesso inicial está ativo. Você será direcionado ao painel empresarial."}
           </p>
           <div className="auth-selected-plan">
@@ -364,6 +365,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
 
   async function sendRecovery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       focusFirstInvalid(event.currentTarget, ["email"]);
       setNotice(createToastNotice({ kind: "danger", title: "Confira o e-mail", text: "Informe um endereço de e-mail válido." }));
@@ -377,13 +379,14 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
         return;
       }
       setRequestSent(true);
-      playStatusSound("info");
+      setNotice(createToastNotice({kind:"info",title:"Solicitação recebida",text:"Se houver uma conta associada a esse e-mail, enviaremos as instruções para redefinir sua senha."}));
     } finally {
       setLoading(false);
     }
   }
 
   async function verifyRecoveryLink() {
+    setNotice(null);
     setLoading(true);
     try {
       const result = await verifyPasswordRecovery(tokenHash, recoveryType === "invite" ? "invite" : "recovery");
@@ -391,6 +394,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
         window.history.replaceState(null, "", "/redefinir-senha");
         setTokenHash("");
         setRecoveryStatus("ready");
+        setNotice(createToastNotice({kind:"success",title:"Link validado",text:"Agora você pode criar sua nova senha."}));
       } else {
         if ((result.status ?? 500) < 500) {
           window.history.replaceState(null, "", "/redefinir-senha");
@@ -406,15 +410,18 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
 
   async function saveNewPassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     if (Object.values(rules).some((valid) => !valid)) {
       setPasswordError(!rules.maxBytes?"Esta senha é longa demais para o serviço de acesso. Tente uma frase mais curta.":"Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
       setConfirmPasswordError("");
+      setNotice(createToastNotice({kind:"danger",title:"Revise a nova senha",text:!rules.maxBytes?"Esta senha é longa demais para o serviço de acesso. Tente uma frase mais curta.":"Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo."}));
       focusFirstInvalid(event.currentTarget, ["new-password"]);
       return;
     }
     if (password !== confirmPassword) {
       setPasswordError("");
       setConfirmPasswordError("As senhas não coincidem.");
+      setNotice(createToastNotice({kind:"danger",title:"Confira a confirmação",text:"As senhas não coincidem. Digite a mesma senha nos dois campos."}));
       focusFirstInvalid(event.currentTarget, ["confirm-password"]);
       return;
     }
@@ -431,7 +438,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
       setPassword("");
       setConfirmPassword("");
       setRecoveryStatus("done");
-      playStatusSound("success");
+      setNotice(createToastNotice({kind:"success",title:"Senha atualizada",text:"Entre novamente usando sua nova senha. As sessões anteriores foram encerradas."}));
     } finally {
       setLoading(false);
     }

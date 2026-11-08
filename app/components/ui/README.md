@@ -59,3 +59,5 @@ O manual em `/design-system` renderiza estes mesmos componentes. Portanto, qualq
 `PreviewDock` identifica prévias privadas em posição fixa, com retorno à edição, e é demonstrado em Widgets sem fixação para não encobrir o catálogo. `RichTextField` aceita `maxLength` (padrão 4000), aplicado também a comandos de formatação da fonte.
 
 `AdaptiveNavigation` é a navegação compartilhada do cabeçalho e rodapé. Mede os rótulos e o espaço com ResizeObserver, recolhe links que não cabem e mantém uma lista rolável com textos completos. O estado compacto também funciona por container query. Não duplique breakpoints por página.
+
+Resultados de autenticação publicam `AppToast`/`createToastNotice`; use `showAppToast` quando o formulário for desmontado por navegação. Somente o host toca o áudio, depois que o alerta está visível, e cancela o som atrasado se o alerta for fechado ou substituído. Não chame `playStatusSound` diretamente nas telas de autenticação. A preferência de som continua sendo respeitada.

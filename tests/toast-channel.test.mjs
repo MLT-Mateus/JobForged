@@ -2,6 +2,15 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { ToastChannel } from '../app/components/ui/toast-channel.ts';
 const notice = {kind:'info',title:'Atualização',text:'Resultado da ação'};
+
+test('resultado de navegação sobrevive à desmontagem do formulário e aceita nova ação igual',()=>{
+ const channel=new ToastChannel();channel.publish('login-form',notice);
+ channel.announce({...notice,kind:'success'});const first=channel.getSnapshot().serial;
+ channel.release('login-form');assert.equal(channel.getSnapshot().notice.kind,'success');
+ channel.announce({...notice,kind:'success'});assert.ok(channel.getSnapshot().serial>first);
+ channel.dismiss(first);assert.equal(channel.getSnapshot().notice.kind,'success');
+ channel.dismiss(channel.getSnapshot().serial);assert.equal(channel.getSnapshot(),null);
+});
 test('substitui feedback entre produtores e limpa apenas o proprietário anterior',()=>{
  const channel=new ToastChannel();let closedA=0,closedB=0;
  channel.registerClose('a',()=>closedA++);channel.registerClose('b',()=>closedB++);
