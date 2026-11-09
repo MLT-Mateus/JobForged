@@ -8,8 +8,8 @@ export const careerDefaults={
 };
 const stockMasks=new Map([careerDefaults.image,careerDefaults.banner,careerDefaults.cultureBanner].map(photo=>{
  const name=photo.slice('/careers/'.length,-'.webp'.length);
- const sceneryRevision=photo===careerDefaults.cultureBanner?'v3':'v4';
- return [photo,{primary:`/careers/masks/${name}-primary-v3.webp`,secondary:`/careers/masks/${name}-secondary-${sceneryRevision}.webp`}];
+ const primaryRevision=photo===careerDefaults.cultureBanner?'v3':'v4';
+ return [photo,{primary:`/careers/masks/${name}-primary-${primaryRevision}.webp`,secondary:`/careers/masks/${name}-secondary-v3.webp`}];
 }));
 const stockMaskPaths=new Set([...stockMasks.values()].flatMap(pair=>[pair.primary,pair.secondary]));
 export const careerPhotoMasks=(stock:string)=>stockMasks.get(stock);
