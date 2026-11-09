@@ -2,6 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {publicSearchPaths,searchEnvironment} from './app/lib/seo';
 import {getSupabaseConfig,requestDatabase} from './app/api/auth/_server';
 import {validCompanyHostname} from './app/lib/company-domain';
+import {isCareerPhotoMask} from './app/components/personalization/career-defaults';
 /** Custom hosts can render only their verified tenant, never the business/admin panels. */
 export async function proxy(request:NextRequest){
  const path=request.nextUrl.pathname;const headers=new Headers();
@@ -16,7 +17,9 @@ export async function proxy(request:NextRequest){
   if(!validCompanyHostname(hostname))return new NextResponse('Página não encontrada.',{status:404,headers});
   try{const config=getSupabaseConfig();if(!config)throw new Error();const r=await requestDatabase('rpc/resolve_company_domain',config.anonKey,{requested_hostname:hostname});if(!r?.ok)throw new Error();const slug=await r.json() as string|null;
    if(!slug)return new NextResponse('Domínio não verificado ou indisponível.',{status:404,headers});
-   headers.set('Cache-Control','private, no-store');
+   // These exact static masks contain no tenant data or colors. Leave their
+   // asset cache policy intact without changing verified-host routing.
+   if(!(['GET','HEAD'].includes(request.method)&&isCareerPhotoMask(path)))headers.set('Cache-Control','private, no-store');
    if(path==='/api/domain-ready')return NextResponse.json({ready:true},{headers});
    if(path==='/recuperar-senha')return NextResponse.redirect(new URL('/recuperar-senha',process.env.APP_PUBLIC_URL||'https://test.jobforged.com'),303);
    if(path==='/'){const target=new URL(request.url);target.pathname='/'+slug;return NextResponse.rewrite(target,{headers})}

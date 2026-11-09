@@ -46,9 +46,14 @@ test('candidate resume BFF requires candidate identity, origin/version and serve
  assert.equal((await request('/api/portal/resume',pdf)).status,200);
  stale=true;assert.equal((await request('/api/portal/resume',pdf)).status,409);stale=false;
  const download=await request('/api/portal/resume');assert.equal(download.status,200);assert.match(download.headers.get('Content-Disposition'),/attachment/);assert.match(download.headers.get('Cache-Control'),/private, no-store/);assert.deepEqual(Buffer.from(await download.arrayBuffer()),pdf);
- const throughGateway=path=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':'careers.fixture.invalid','x-forwarded-proto':'https',cookie:'jf_auth_access=fixture'}}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+ const maskPath='/careers/masks/team-jobforged-v2-primary.webp';
+ const throughGateway=(path,host='careers.fixture.invalid')=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':host,'x-forwarded-proto':'https',cookie:'jf_auth_access=fixture'}}),{ASSETS:{fetch:asset=>new URL(asset.url).pathname===maskPath?new Response('fixture',{headers:{'Content-Type':'image/webp','Cache-Control':'public, max-age=3600'}}):new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
  assert.equal((await throughGateway('/api/portal/resume')).status,200);
  assert.equal((await throughGateway('/api/auth/session')).status,200);
+ const mask=await throughGateway(maskPath);assert.equal(mask.status,200);
+ assert.match(mask.headers.get('Cache-Control')??'',/public.*max-age=/);
+ assert.doesNotMatch(mask.headers.get('Cache-Control')??'',/private|no-store/);
+ assert.equal((await throughGateway(maskPath,'unknown.fixture.invalid')).status,404);
  assert.equal((await throughGateway('/backoffice')).status,404);assert.equal((await throughGateway('/api/company/branding')).status,404);
  const authRequest=(host,origin,body,path='/api/auth/sign-in')=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{method:'POST',headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':host,'x-forwarded-proto':'https',origin,'Content-Type':'application/json'},body:JSON.stringify(body)}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
  assert.equal((await authRequest('careers.fixture.invalid','https://careers.fixture.invalid',{email:'invalid',password:'x'})).status,400);assert.equal((await authRequest('careers.fixture.invalid','https://foreign.invalid',{email:'invalid',password:'x'})).status,403);assert.equal((await authRequest('unknown.fixture.invalid','https://unknown.fixture.invalid',{email:'invalid',password:'x'})).status,404);
@@ -56,6 +61,6 @@ test('candidate resume BFF requires candidate identity, origin/version and serve
  assert.equal((await throughGateway('/recuperar-senha')).status,303);
  assert.equal((await request('/backoffice',null,undefined,'','https://careers.fixture.invalid')).status,404);
  assert.equal((await request('/',null,undefined,'','https://unknown.fixture.invalid')).status,404);
- const page=await request('/',null,undefined,'','https://careers.fixture.invalid');assert.equal(page.status,200);const html=await page.text();assert.match(html,/Public Fixture/);assert.doesNotMatch(html,/Entrar na JobForged/);assert.match(html,/jf-widget-dialog--modal/);
+ const page=await request('/',null,undefined,'','https://careers.fixture.invalid');assert.equal(page.status,200);assert.match(page.headers.get('Cache-Control')??'',/no-store/);const html=await page.text();assert.match(html,/Public Fixture/);assert.doesNotMatch(html,/Entrar na JobForged/);assert.match(html,/jf-widget-dialog--modal/);
  }finally{globalThis.fetch=original;for(const [name,value] of [['SUPABASE_INTERNAL_URL',previous.url],['SUPABASE_ANON_KEY',previous.key]]){if(value===undefined)delete process.env[name];else process.env[name]=value}}
 });
