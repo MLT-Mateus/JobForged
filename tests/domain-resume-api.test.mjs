@@ -46,7 +46,7 @@ test('candidate resume BFF requires candidate identity, origin/version and serve
  assert.equal((await request('/api/portal/resume',pdf)).status,200);
  stale=true;assert.equal((await request('/api/portal/resume',pdf)).status,409);stale=false;
  const download=await request('/api/portal/resume');assert.equal(download.status,200);assert.match(download.headers.get('Content-Disposition'),/attachment/);assert.match(download.headers.get('Cache-Control'),/private, no-store/);assert.deepEqual(Buffer.from(await download.arrayBuffer()),pdf);
- const maskPath='/careers/masks/team-jobforged-v2-primary-v2.webp';
+ const maskPath='/careers/masks/team-jobforged-v2-primary-v3.webp';
  const throughGateway=(path,host='careers.fixture.invalid')=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':host,'x-forwarded-proto':'https',cookie:'jf_auth_access=fixture'}}),{ASSETS:{fetch:asset=>new URL(asset.url).pathname===maskPath?new Response('fixture',{headers:{'Content-Type':'image/webp','Cache-Control':'public, max-age=3600'}}):new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
  assert.equal((await throughGateway('/api/portal/resume')).status,200);
  assert.equal((await throughGateway('/api/auth/session')).status,200);
