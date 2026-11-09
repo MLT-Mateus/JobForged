@@ -1,6 +1,6 @@
 import {cache} from 'react';
 import {getSupabaseConfig,requestDatabase} from '@/app/api/auth/_server';
-import {brandingDefaults} from '@/app/components/personalization/branding-model';
+import {brandingDefaults,hydrateBranding} from '@/app/components/personalization/branding-model';
 import type {Customization} from '@/app/components/personalization/personalization-types';
 import {validPortalSlug} from './company-portal';
 export const loadPublicPortal=cache(async(slug:string):Promise<Customization|null>=>{
@@ -10,5 +10,5 @@ export const loadPublicPortal=cache(async(slug:string):Promise<Customization|nul
  const result=await response.json() as {version:number;configuration:Partial<Customization>}|null;
  if(!result?.configuration?.displayName)return null;
  const base=brandingDefaults('public',result.configuration.displayName);
- return {...base,...result.configuration,organizationId:'public',revision:result.version,publishedBy:'',publishedAt:'',draftUpdatedAt:''} as Customization;
+ return {...hydrateBranding(base,result.configuration),organizationId:'public',revision:result.version,publishedBy:'',publishedAt:'',draftUpdatedAt:''};
 });

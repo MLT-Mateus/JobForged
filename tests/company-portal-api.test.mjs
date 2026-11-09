@@ -7,14 +7,19 @@ test('portal BFF protects tenant operations and exposes only public image bytes'
  const before=Object.fromEntries(['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY'].map(key=>[key,process.env[key]])),original=globalThis.fetch;
  process.env.SUPABASE_INTERNAL_URL='https://portal.fixture.invalid';process.env.SUPABASE_ANON_KEY='public-fixture-key';
  const publicConfig=brandingDefaults('fixture','Public Fixture');publicConfig.banners=[{...publicConfig.banners[0],id:'second',image:'/brand/second.png',title:'Segundo destaque público',order:1},{...publicConfig.banners[0],id:'first',image:'/brand/first.png',title:'Primeiro destaque público',order:0},{...publicConfig.banners[0],id:'inactive',title:'Destaque oculto',status:'Inativo',order:2}];
+ const stored={...brandingDefaults('saved','Cores salvas'),palette:{primary:'#AA287F',secondary:'#31AA57'}};
+ const partial={...brandingDefaults('partial','Uma cor'),palette:{primary:'#7133BB'},theme:undefined};
+ const legacy={displayName:'Paleta anterior',theme:{light:{primary:'#0891B2',secondary:'#4338CA'}}};
+ const upload={...stored,backgrounds:{...stored.backgrounds,coverImage:'/careers/team-jobforged-v2.webp'},banners:[]};
+ const portals=new Map([['saved-colors',stored],['partial-colors',partial],['legacy-colors',legacy],['uploaded-photo',upload],['default-colors',brandingDefaults('default','Padrão')]]);
  const cid='31000000-0000-4000-8000-000000000011',asset='31000000-0000-4000-8000-000000000041';let bytes=await sharp({create:{width:8,height:8,channels:3,background:'#4169e1'}}).png().toBuffer();let role='owner',code=null,publicImage=true,tampered=false,published=false;const writes=[];publicConfig.assets.favicon={id:asset,kind:'favicon',name:'Icon',url:`/api/portals/fixture-company/assets/${asset}`,format:'PNG',size:bytes.length,updatedAt:''};
  globalThis.fetch=async(url,init)=>{const address=String(url),body=typeof init?.body==='string'?JSON.parse(init.body):null;
   if(address.endsWith('/auth/v1/user'))return Response.json({id:'31000000-0000-4000-8000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-29T00:00:00Z'});
   if(address.endsWith('/rpc/is_platform_admin'))return Response.json(false);
   if(address.endsWith('/rpc/session_context_v1'))return Response.json({id:'member',company_id:cid,role,full_name:'Fixture',companies:{id:cid,name:'Fixture'}});
   if(address.endsWith('/rpc/read_company_portal'))return Response.json({companyId:cid,slug:'fixture-company',version:1,isPublic:false,brandingVersion:0});
-  if(address.endsWith('/rpc/write_company_portal')){writes.push(body);return code?Response.json({code},{status:400}):Response.json({companyId:cid,slug:'fixture-company',version:2,isPublic:true,brandingVersion:1})}
-  if(address.endsWith('/rpc/read_public_company_portal')){assert.equal(init.headers.Authorization,'Bearer public-fixture-key');return Response.json(published&&body.requested_slug==='fixture-company'?{version:3,configuration:brandContent(publicConfig)}:null)}
+  if(address.endsWith('/rpc/write_company_portal')){writes.push(body);if(!code&&body.operation==='save')portals.set('saved-colors',body.configuration);return code?Response.json({code},{status:400}):Response.json({companyId:cid,slug:'fixture-company',version:2,isPublic:true,brandingVersion:1})}
+  if(address.endsWith('/rpc/read_public_company_portal')){assert.equal(init.headers.Authorization,'Bearer public-fixture-key');assert.equal(init.cache,'no-store');const configuration=body.requested_slug==='fixture-company'?(published?brandContent(publicConfig):null):portals.get(body.requested_slug);return Response.json(configuration?{version:3,configuration}:null)}
   if(address.endsWith('/rpc/read_public_portal_asset'))return Response.json(publicImage?{path:`${cid}/${asset}.png`,size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')}:null);
   if(address.includes('/storage/v1/object/')){assert.equal(init.headers.Authorization,'Bearer public-fixture-key');return new Response(tampered?Buffer.from('bad'):bytes)}
   throw new Error('Unexpected isolated request');
@@ -30,6 +35,24 @@ test('portal BFF protects tenant operations and exposes only public image bytes'
   assert.equal((await request('/api/company/portal',{...mutation,companyId:'other'})).status,409);
   assert.equal((await request('/api/company/portal',{...mutation,operation:'address',slug:'api'})).status,400);
   assert.equal((await request('/api/company/portal',mutation)).status,200);assert.equal(writes.at(-1).operation,'publish');
+  const anonymous=async slug=>{const result=await request('/'+slug,null,'');assert.equal(result.status,200);return (await result.text()).replace(/<script[\s\S]*?<\/script>/g,'')};
+  const beforeSave=await anonymous('saved-colors');
+  assert.match(beforeSave,/--jf-photo-primary:#AA287F;--jf-photo-secondary:#31AA57/);
+  assert.match(beforeSave,/team-jobforged-v2-primary\.webp/);
+  assert.match(beforeSave,/culture-jobforged-v1-secondary\.webp/);
+  const partialPage=await anonymous('partial-colors');
+  assert.match(partialPage,/--jf-photo-primary:#7133BB;--jf-photo-secondary:#4169E1/);
+  assert.match(await anonymous('legacy-colors'),/--jf-photo-primary:#0891B2;--jf-photo-secondary:#4338CA/);
+  assert.doesNotMatch(await anonymous('uploaded-photo'),/\/careers\/masks\//);
+  assert.doesNotMatch(await anonymous('default-colors'),/\/careers\/masks\//);
+  const configuration=brandContent(brandingDefaults(cid,'Cores salvas'));
+  configuration.palette.primary='#F57224';
+  configuration.palette.secondary='#A339C4';
+  assert.equal((await request('/api/company/portal',{...mutation,operation:'save',configuration})).status,200);
+  const afterSave=await anonymous('saved-colors');
+  assert.match(afterSave,/--jf-photo-primary:#F57224;--jf-photo-secondary:#A339C4/);
+  assert.doesNotMatch(afterSave,/#AA287F/);
+  assert.doesNotMatch(await anonymous('partial-colors'),/#F57224|#A339C4/);
   for(const error of ['23505','40001']){code=error;assert.equal((await request('/api/company/portal',mutation)).status,409)}code=null;
   const image=await request(`/api/portals/fixture-company/assets/${asset}`,null,'');assert.equal(image.status,200);assert.equal(image.headers.get('Content-Type'),'image/png');assert.deepEqual(Buffer.from(await image.arrayBuffer()),bytes);const icon=await request(`/api/portals/fixture-company/assets/${asset}?icon=1`,null,'');assert.equal(icon.status,200);const meta=await sharp(Buffer.from(await icon.arrayBuffer())).metadata();assert.equal(meta.width,64);assert.equal(meta.height,64);
   const originalBytes=bytes;bytes=await sharp({create:{width:90,height:43,channels:3,background:'#4169e1'}}).png().toBuffer();const legacyIcon=await request(`/api/portals/fixture-company/assets/${asset}?icon=1`,null,'');assert.equal(legacyIcon.status,307);assert.equal(legacyIcon.headers.get('Location'),'/favicon.svg');bytes=originalBytes;

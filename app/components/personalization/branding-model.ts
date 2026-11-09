@@ -4,6 +4,7 @@ import {portalChrome,portalMenu,portalFooter,defaultPortalFooter,validPortalMenu
 import {renderRichText,richTextPlain} from '../ui/rich-content.ts';
 import {careerCopy} from './career-copy.ts';
 import {careerDefaults} from './career-defaults.ts';
+import {careerBrandColors} from './career-brand.ts';
 import {portalPresentation,validPortalPresentation} from './portal-presentation.ts';
 import type { CSSProperties } from 'react';
 import { fontPairs } from '../ui/font-pairs.ts';
@@ -20,6 +21,13 @@ export const brandContent=(value:Customization)=>{
  void organizationId;void draftUpdatedAt;void publishedAt;void publishedBy;void revision;
  return content;
 };
+/** Merge historical partial palettes without replacing a saved choice with a default. */
+export function hydrateBranding(base:Customization,stored:Partial<Customization>):Customization{
+ const {primary,secondary}=careerBrandColors(stored);
+ return {...base,...stored,palette:{...base.palette,...stored.palette,primary,secondary},
+  portal:{...base.portal,...stored.portal},backgrounds:{...base.backgrounds,...stored.backgrounds},
+  theme:{...base.theme,...stored.theme,light:{...base.theme.light,...stored.theme?.light},dark:{...base.theme.dark,...stored.theme?.dark}}};
+}
 export const brandingLogo=(value:Customization,theme:'light'|'dark')=>(theme==='dark'?value.assets.logoDark?.url:value.assets.logoLight?.url)||value.assets.logoLight?.url||value.assets.logoMain?.url||value.assets.logoAlternative?.url||'/brand/jobforged-symbol.svg';
 export const brandingIcon=(value:Customization,_theme:'light'|'dark')=>{void _theme;return value.assets.favicon?.url};
 export function safeBrandingLink(value:string){try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:undefined}catch{return undefined}}

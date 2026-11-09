@@ -2,9 +2,9 @@
 import {useEffect,useRef,useState,useSyncExternalStore,type CSSProperties} from 'react';
 import {ChevronLeft,ChevronRight} from 'lucide-react';
 import {ActionButton,Panel} from './AdminPrimitives';
-import {ProportionalImage} from './ProportionalImage';
+import {ProportionalImage,type PhotoMasks} from './ProportionalImage';
 import './communications.css';
-export type BannerSlide={id:string;title:string;description:string;image:string;mobileImage?:string;link?:string;duration_seconds?:number};
+export type BannerSlide={id:string;title:string;description:string;image:string;mobileImage?:string;link?:string;duration_seconds?:number;masks?:PhotoMasks};
 function subscribePageReady(update:()=>void){window.addEventListener('jobforged-page-ready',update);window.addEventListener('load',update);return()=>{window.removeEventListener('jobforged-page-ready',update);window.removeEventListener('load',update)}}
 function pageIsReady(){return document.readyState==='complete'&&document.documentElement.dataset.pageReady==='true'}
 export function CommunicationBanner({items,view="responsive",label="Comunicados JobForged",format="platform"}:{format?:"platform"|"company";label?:string;items:BannerSlide[];view?:"responsive"|"desktop"|"mobile"}){
@@ -32,7 +32,7 @@ export function CommunicationBanner({items,view="responsive",label="Comunicados 
   return()=>window.clearTimeout(timer);
  },[count,item?.id,selected,duration,available,pageReady,imageReady,item?.image]);
  if(!item)return null;
- const renderImage=(slide:BannerSlide)=><ProportionalImage src={view==='mobile'?(slide.mobileImage||slide.image):slide.image} compactSrc={view==='responsive'?slide.mobileImage:undefined} alt={slide.title} loading={slide.id===items[0]?.id?'eager':'lazy'} onLoad={()=>setLoaded(value=>value.includes(`${slide.id}:${slide.image}`)?value:[...value,`${slide.id}:${slide.image}`])}/>;
+ const renderImage=(slide:BannerSlide)=><ProportionalImage src={view==='mobile'?(slide.mobileImage||slide.image):slide.image} compactSrc={view==='responsive'?slide.mobileImage:undefined} masks={view==='mobile'&&slide.mobileImage?undefined:slide.masks} alt={slide.title} loading={slide.id===items[0]?.id?'eager':'lazy'} onLoad={()=>setLoaded(value=>value.includes(`${slide.id}:${slide.image}`)?value:[...value,`${slide.id}:${slide.image}`])}/>;
  return <Panel className="jf-communication-banner" style={format==="company"?{"--jf-banner-ratio":"1600 / 540"} as CSSProperties:undefined} data-preview-view={view} aria-label={label} aria-roledescription="carrossel">
  <div ref={element=>{root.current=element}} className="jf-communication-banner__image">{items.map((slide,i)=><div key={slide.id} hidden={i!==index} className="jf-communication-banner__slide">{slide.link?<a href={slide.link} target="_blank" rel="noopener noreferrer" aria-label={slide.title}>{renderImage(slide)}</a>:renderImage(slide)}</div>)}</div>
  {count>1&&<nav className="jf-communication-banner__navigation" aria-label="Navegar pelos banners"><span><ActionButton type="button" variant="secondary" aria-label="Banner anterior" onClick={()=>setSelected((index-1+count)%count)}><ChevronLeft aria-hidden="true"/></ActionButton></span><span><ActionButton type="button" variant="secondary" aria-label="Próximo banner" onClick={()=>setSelected((index+1)%count)}><ChevronRight aria-hidden="true"/></ActionButton></span></nav>}
