@@ -1,13 +1,13 @@
 "use client";
 import {imageUploadOptions} from '@/shared/image-upload';
 import {apiResponse,readApi} from '@/app/lib/api-response';
-import { brandingDefaults, brandContent } from './branding-model';
+import { brandingDefaults, brandContent, hydrateBranding } from './branding-model';
 import type { Customization, HistoryEntry, BrandAsset } from './personalization-types';
 type Stored = {companyId:string;companyName:string;editable:boolean;version:number;draft:object|null;published:object;publishedVersion:number;updatedAt:string;publishedAt:string;publishedBy:string;history:Array<{id:string;version:number;snapshot:object;created_at:string;actor:string}>};
 export type BrandingSnapshot={companyName:string;draft:Customization;published:Customization;history:HistoryEntry[];editable:boolean};
 function unpack(row:Stored):BrandingSnapshot {
  const base=brandingDefaults(row.companyId,row.companyName);
- const hydrate=(value:object|null,version=row.version):Customization=>({...base,...(value&&Object.keys(value).length?value:{}),organizationId:row.companyId,revision:version,draftUpdatedAt:row.updatedAt||'',publishedAt:row.publishedAt||'',publishedBy:row.publishedBy||''});
+ const hydrate=(value:object|null,version=row.version):Customization=>({...hydrateBranding(base,value??{}),organizationId:row.companyId,revision:version,draftUpdatedAt:row.updatedAt||'',publishedAt:row.publishedAt||'',publishedBy:row.publishedBy||''});
  return {companyName:row.companyName,draft:hydrate(row.editable?row.draft:row.published),published:hydrate(row.published),editable:row.editable,history:row.history.map(entry=>({id:entry.id,organizationId:row.companyId,createdAt:entry.created_at,actor:entry.actor,type:`Identidade publicada · versão ${entry.version}`,status:'Publicado',snapshot:hydrate(entry.snapshot,entry.version)}))};
 }
 async function load():Promise<BrandingSnapshot>{return unpack(await readApi<Stored>('/api/company/branding','Não foi possível carregar a identidade da sua empresa.'))}

@@ -145,6 +145,8 @@
 .jf-career-invitation{background:var(--cp-bg)}
 
 .jf-career-highlights + .jf-career-opportunities{background:var(--cp-bg)}
+.jf-career-portal[data-photo-brand="custom"] .jf-career-highlights{background:linear-gradient(110deg,color-mix(in srgb,var(--jf-photo-primary) 14%,var(--cp-section-subtle)),color-mix(in srgb,var(--jf-photo-secondary) 14%,var(--cp-section-subtle)))}
+.jf-career-portal[data-photo-brand="custom"] .jf-career-culture{background:color-mix(in srgb,var(--jf-photo-secondary) 12%,var(--cp-section-accent))}
 /* Navigation responds to its available width and actual labels. */
 .jf-career-portal>header .jf-adaptive-nav{position:static}
 .jf-career-portal>header .jf-adaptive-nav nav{order:initial;width:auto;margin:0;gap:var(--jf-ui-space-4);flex-wrap:nowrap}
