@@ -38,8 +38,8 @@ test('portal BFF protects tenant operations and exposes only public image bytes'
   const anonymous=async slug=>{const result=await request('/'+slug,null,'');assert.equal(result.status,200);return (await result.text()).replace(/<script[\s\S]*?<\/script>/g,'')};
   const beforeSave=await anonymous('saved-colors');
   assert.match(beforeSave,/--jf-photo-primary:#AA287F;--jf-photo-secondary:#31AA57/);
-  assert.match(beforeSave,/team-jobforged-v2-primary\.webp/);
-  assert.match(beforeSave,/culture-jobforged-v1-secondary\.webp/);
+  assert.match(beforeSave,/team-jobforged-v2-primary-v2\.webp/);
+  assert.match(beforeSave,/culture-jobforged-v1-secondary-v2\.webp/);
   const partialPage=await anonymous('partial-colors');
   assert.match(partialPage,/--jf-photo-primary:#7133BB;--jf-photo-secondary:#4169E1/);
   assert.match(await anonymous('legacy-colors'),/--jf-photo-primary:#0891B2;--jf-photo-secondary:#4338CA/);
