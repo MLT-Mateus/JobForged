@@ -12,8 +12,8 @@ import {ArrowRight,BriefcaseBusiness,HeartHandshake,Lightbulb,LogIn,MapPin,Spark
 import {EmptyState,TextField,SelectField,StatusBadge,ThemeSelector} from '../ui';
 import {portalMenu,portalFooter,portalWordmark,validPortalMenuLink} from './portal-chrome';
 import {portalPresentation} from './portal-presentation';
-import {careerDefaults,demoCareerJobs} from './career-defaults';
-import {careerBrandColors,careerPhotoMasks} from './career-brand';
+import {careerDefaults,careerPhotoMasks,demoCareerJobs} from './career-defaults';
+import {careerBrandColors} from './career-brand';
 import type {Customization} from './personalization-types';
 import './personalization.css';
 import './career-portal.css';

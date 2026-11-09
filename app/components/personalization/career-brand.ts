@@ -1,4 +1,3 @@
-import {careerDefaults} from './career-defaults.ts';
 import {lightPalette} from './personalization-mocks.ts';
 import type {Customization} from './personalization-types';
 
@@ -15,12 +14,3 @@ export function careerBrandColors(value: {palette?: Partial<Customization['palet
  return {primary,secondary,custom:primary!==lightPalette.primary.toUpperCase()||secondary!==lightPalette.secondary.toUpperCase()};
 }
 
-const stockMasks={
- [careerDefaults.image]:'team-jobforged-v2',
- [careerDefaults.banner]:'team-jobforged-panorama-v1',
- [careerDefaults.cultureBanner]:'culture-jobforged-v1',
-};
-export function careerPhotoMasks(stock:string){
- const name=stockMasks[stock];
- return name?{primary:`/careers/masks/${name}-primary.webp`,secondary:`/careers/masks/${name}-secondary.webp`}:undefined;
-}
