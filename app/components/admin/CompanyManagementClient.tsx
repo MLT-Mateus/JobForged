@@ -61,12 +61,12 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
     if (response?.ok) { void load(); return true; }
     return false;
   }
-  if (!data) return <><WorkspacePageHeader section="Painel / Empresa" title={mode === "settings" ? "Dados da empresa" : "Equipe e acessos"}/><WorkspaceState kind={message ? "error" : "loading"} title={message || "Carregando empresa…"} action={message ? <ActionButton variant="secondary" onClick={() => { setMessage(""); void load(); }}>Tentar novamente</ActionButton> : undefined}/></>;
-  const canManage = data.role === "owner" || data.role === "admin";
-  const filteredMembers=useMemo(()=>data.members.filter(member=>{
+  const filteredMembers=useMemo(()=> (data?.members??[]).filter(member=>{
     const text=`${member.full_name} ${member.email}`.toLocaleLowerCase("pt-BR");
     return (!query.trim()||text.includes(query.trim().toLocaleLowerCase("pt-BR")))&&(roleFilter==="all"||member.role===roleFilter)&&(statusFilter==="all"||member.status===statusFilter);
-  }),[data.members,query,roleFilter,statusFilter]);
+  }),[data?.members,query,roleFilter,statusFilter]);
+  if (!data) return <><WorkspacePageHeader section="Painel / Empresa" title={mode === "settings" ? "Dados da empresa" : "Equipe e acessos"}/><WorkspaceState kind={message ? "error" : "loading"} title={message || "Carregando empresa…"} action={message ? <ActionButton variant="secondary" onClick={() => { setMessage(""); void load(); }}>Tentar novamente</ActionButton> : undefined}/></>;
+  const canManage = data.role === "owner" || data.role === "admin";
   return <><WorkspacePageHeader section={`Painel / ${mode === "settings" ? "Configurações" : "Administradores"}`}
     title={mode === "settings" ? "Dados da empresa" : "Equipe e acessos"}
     description={mode === "settings" ? "Mantenha os dados da sua organização atualizados." : "Usuários vinculados à sua organização."}/>
