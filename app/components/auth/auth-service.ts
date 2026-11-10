@@ -95,7 +95,8 @@ export function useCompanyAuthSession(): AuthSessionState {
     void refresh();
     window.addEventListener('focus',refresh);
     window.addEventListener('pageshow',refresh);
-    return () => { active = false; window.removeEventListener('focus',refresh); window.removeEventListener('pageshow',refresh); };
+    window.addEventListener('jobforged-profile-updated',refresh);
+    return () => { active = false; window.removeEventListener('focus',refresh); window.removeEventListener('pageshow',refresh); window.removeEventListener('jobforged-profile-updated',refresh); };
   }, []);
 
   return state;

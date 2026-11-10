@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { InlineBrandLoader } from "./InlineBrandLoader";
 
 type LoaderTheme = "light" | "dark";
@@ -17,6 +17,7 @@ function routeKey(url: URL) {
 
 export default function NavigationLoader() {
   const pathname = usePathname();
+  const [colors,setColors]=useState<CSSProperties>({});
   const [active, setActive] = useState(true);
   const [phase, setPhase] = useState<LoaderPhase>("initial");
   const [theme, setTheme] = useState<LoaderTheme>("light");
@@ -52,6 +53,8 @@ export default function NavigationLoader() {
     const targetRoute = routeKey(target);
     if (target.origin !== current.origin || targetRoute === routeKey(current)) return;
 
+    const style=getComputedStyle(document.documentElement);
+    setColors(Object.fromEntries(['--jf-loader-primary','--jf-loader-secondary','--jf-loader-surface'].map(key=>[key,style.getPropertyValue(key)])) as CSSProperties);
     pendingRouteRef.current = targetRoute;
     window.clearTimeout(failsafeRef.current);
     window.clearTimeout(finishTimerRef.current);
@@ -113,7 +116,7 @@ export default function NavigationLoader() {
   if (!active) return null;
 
   return (
-    <div className="app-loader app-loader--navigation" data-phase={phase} data-surface-theme={phase === "navigation" ? theme : undefined} role="status" aria-live="polite" aria-label={phase === "initial" ? "Carregando JobForged" : "Carregando próxima página"}>
+    <div style={phase==="navigation"?colors:undefined} className="app-loader app-loader--navigation" data-phase={phase} data-surface-theme={phase === "navigation" ? theme : undefined} role="status" aria-live="polite" aria-label={phase === "initial" ? "Carregando JobForged" : "Carregando próxima página"}>
       { }
       <InlineBrandLoader />
     </div>

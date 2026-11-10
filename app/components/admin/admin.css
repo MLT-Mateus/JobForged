@@ -308,3 +308,8 @@ body:has(.admin-shell){overflow:hidden}
 .jf-authenticator-qr img { display: block; width: 240px; max-width: 100%; height: auto; }
 
 .admin-shell .jf-admin-member-details__scope{grid-column:2;margin:0;color:var(--jf-ui-text-muted)}
+.admin-shell .jf-admin-directory__row{cursor:default;grid-template-columns:auto minmax(0,1fr) auto auto auto;padding-block:var(--jf-ui-space-5)}
+.admin-shell .jf-admin-directory__identity small{font-size:var(--jf-ui-font-size-sm);line-height:1.5}
+.admin-shell .jf-admin-directory__identity small svg{flex-shrink:0}
+.admin-shell .jf-admin-member-details__facts>div>.jf-status-help{grid-column:2}
+@media(max-width:760px){.admin-shell .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr)}.admin-shell .jf-admin-directory__row>.jf-status-help{grid-column:2}.admin-shell .jf-admin-directory__row>.jf-status{grid-column:2}.admin-shell .jf-admin-directory__row>.jf-action{grid-column:2;justify-self:start}}
