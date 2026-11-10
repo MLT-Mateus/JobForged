@@ -127,7 +127,7 @@
 .jf-theme-selector button.is-active { background: var(--jf-ui-surface); box-shadow: 0 3px 12px rgba(6, 47, 44, 0.1); color: var(--jf-ui-text); }
 .jf-theme-selector button:hover { color: var(--jf-ui-brand-strong); }
 .jf-theme-selector button:focus-visible { outline: 3px solid color-mix(in srgb, var(--jf-ui-accent) 28%, transparent); outline-offset: 1px; }
-.jf-status{display:inline-flex;min-height:24px;align-items:center;padding:0 8px;border-radius:999px;background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted);font-size:12px;font-weight:700;white-space:nowrap}.jf-status--positive{background:var(--jf-ui-success-soft);color:var(--jf-ui-success)}.jf-status--warning{background:var(--jf-ui-warning-soft);color:var(--jf-ui-warning)}.jf-status--danger{background:var(--jf-ui-danger-soft);color:var(--jf-ui-danger)}.jf-status--info{background:var(--jf-ui-accent-soft);color:var(--jf-ui-accent)}
+.jf-status{display:inline-flex;align-items:center;gap:var(--jf-ui-space-1);min-height:28px;padding:var(--jf-ui-space-1) var(--jf-ui-space-3);border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:999px;background:var(--jf-ui-surface-soft);color:var(--jf-ui-text-muted);font-family:var(--jf-ui-font-body);font-size:var(--jf-ui-font-size-xs);font-weight:700;line-height:1.4;white-space:nowrap;justify-self:start;width:fit-content}.jf-status--positive{background:var(--jf-ui-success-soft);color:var(--jf-ui-success)}.jf-status--warning{background:var(--jf-ui-warning-soft);color:var(--jf-ui-warning)}.jf-status--danger{background:var(--jf-ui-danger-soft);color:var(--jf-ui-danger)}.jf-status--info{background:var(--jf-ui-accent-soft);color:var(--jf-ui-accent)}
 .jf-table-wrap{width:100%;overflow-x:auto}.jf-table{width:100%;min-width:720px;border-collapse:collapse;color:var(--jf-ui-text);font-family:var(--jf-ui-font-body)}.jf-table th{padding:11px 14px;border-bottom:1px solid var(--jf-ui-border);color:var(--jf-ui-text-soft);font-size:12px;font-weight:700;text-align:left;text-transform:uppercase}.jf-table td{padding:14px;border-bottom:1px solid var(--jf-ui-border);font-size:14px}.jf-table tbody tr:hover{background:color-mix(in srgb,var(--jf-ui-brand-soft) 34%,transparent)}
 .jf-empty{display:grid;min-width:0;min-height:260px;align-content:center;justify-items:center;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-6);color:var(--jf-ui-text-muted);text-align:center}
 .jf-empty__icon{position:relative;display:grid;width:94px;height:94px;place-items:center;border-radius:50%;background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong);flex-shrink:0}
@@ -898,7 +898,6 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-action .jf-rich-content [style*="color"]{color:inherit!important}
 
 /* Shared status geometry and contextual help: hover, focus, touch and Escape. */
-.jf-status { gap:var(--jf-ui-space-1); min-height:28px; padding:var(--jf-ui-space-1) var(--jf-ui-space-3); border:1px solid color-mix(in srgb,currentColor 18%,transparent); font-family:var(--jf-ui-font-body); font-size:var(--jf-ui-font-size-xs); line-height:1.4; justify-self:start; width:fit-content; }
 .jf-status-help { position:relative; display:inline-flex; width:fit-content; max-width:100%; }
 .jf-status-help__trigger { display:inline-flex; border:0; padding:0; background:transparent; font:inherit; cursor:help; border-radius:999px; }
 .jf-status-help__trigger:focus-visible { outline:2px solid var(--jf-ui-focus); outline-offset:3px; }
@@ -909,6 +908,7 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-profile-summary__identity { min-width:0; }
 .jf-profile-summary__identity h2 { margin:0; font:700 var(--jf-ui-font-size-xl)/1.4 var(--jf-ui-font-heading); overflow-wrap:anywhere; }
 .jf-profile-summary__identity p { margin:var(--jf-ui-space-1) 0 var(--jf-ui-space-3); color:var(--jf-ui-text-muted); overflow-wrap:anywhere; }
+.jf-profile-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:var(--jf-ui-space-4); }
 .jf-profile-layout { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr); gap:var(--jf-ui-space-5); align-items:start; }
 .jf-profile-readonly { display:grid; gap:var(--jf-ui-space-2); min-width:0; overflow-wrap:anywhere; }
 .jf-profile-readonly>span,.jf-profile-readonly>small { display:flex; align-items:center; gap:var(--jf-ui-space-2); color:var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); }

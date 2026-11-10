@@ -62,3 +62,11 @@ test('company favicon ignores horizontal images and stale loads, and restores on
  context.exports.useBrandingIcon(url);const stale=images[2].onload;cleanup();images[2].naturalWidth=256;images[2].naturalHeight=256;stale();assert.equal(root.dataset.companyIcon,undefined);
  context.exports.useBrandingIcon('/brand/horizontal-logo.svg');assert.equal(images.length,3);assert.equal(root.dataset.companyIcon,'');cleanup();
 });
+
+test('known company loader colors are restored only inside their route scope',()=>{
+ const b=browser({saved:'light'}),colors={};let cleared=false;
+ b.context.location.pathname='/app/minha-conta';b.root.style.setProperty=(key,value)=>{colors[key]=value};
+ b.context.sessionStorage={getItem:()=>JSON.stringify({scope:'/app/',theme:'dark',allowSwitch:false,palettes:{light:{primary:'#813bff',secondary:'#a42364',surface:'#ffffff'},dark:{primary:'#ae8bff',secondary:'#f09ac5',surface:'#102522'}}}),removeItem:()=>{cleared=true}};
+ vm.runInContext(boot,b.context);assert.equal(colors['--jf-loader-primary'],'#ae8bff');assert.equal(colors['--jf-loader-surface'],'#102522');assert.equal(b.root.dataset.loaderSeed,'true');
+ b.context.location.pathname='/login';for(const key of Object.keys(colors))delete colors[key];vm.runInContext(boot,b.context);assert.equal(cleared,true);assert.deepEqual(colors,{});
+});

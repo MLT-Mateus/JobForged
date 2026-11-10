@@ -16,6 +16,8 @@ export function fieldPlaceholder({label='',type='text',placeholder,multiline=fal
  if(/dominio|subdominio|endereco jobforged/.test(context))return finish('Digite o domínio');
  if(type==='url'||/link|url|linkedin|instagram|endereco do link/.test(context))return finish('Informe o link');
  if(type==='tel'||/telefone|whatsapp|celular/.test(context))return finish('Digite o telefone');
+ if(/\bcpf\b/.test(context))return finish('Digite o CPF');
+ if(/\bcnpj\b/.test(context))return finish('Digite o CNPJ');
  if(/codigo|token/.test(context))return finish('Digite o código');
  if(/cor principal|cor secundaria|cor de |cor do |paleta|hex/.test(context))return finish('Digite a cor');
  if(type==='number'||/salario|valor|preco|peso/.test(context))return finish('Informe o valor');
