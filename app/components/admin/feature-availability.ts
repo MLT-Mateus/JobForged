@@ -2,7 +2,7 @@ import type { AdminModuleId } from "./admin-data";
 
 export type WorkspaceModule = AdminModuleId | "home";
 export type FeatureAvailability = {
-  status: "beta" | "soon";
+  status: "beta" | "soon" | "available";
   description: string;
 };
 
@@ -34,7 +34,7 @@ export const featureAvailability: Record<WorkspaceModule, FeatureAvailability> =
     description: "Rascunhos, publicações e histórico são salvos por empresa. O painel recebe a identidade publicada; o portal público permanece em breve.",
   },
   administradores: {
-    status: "beta",
+    status: "available",
     description: "Equipe real da empresa: titulares e administradores podem convidar, alterar e suspender acessos. Convites expiram em 24 horas.",
   },
   financeiro: {

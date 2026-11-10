@@ -257,12 +257,8 @@ body:has(.admin-shell){overflow:hidden}
 .admin-shell .admin-team-list{display:grid}
 .admin-shell .admin-team-list article{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) auto minmax(150px,.8fr) auto;align-items:center;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-4) var(--jf-ui-space-6);border-bottom:1px solid var(--jf-ui-border)}
 .admin-shell .admin-team-list article:last-child{border-bottom:0}
-.admin-shell .jf-admin-directory{min-width:0}
-.admin-shell .jf-admin-directory__panel{overflow:hidden}
+.admin-shell .jf-admin-directory{display:grid;gap:var(--jf-ui-space-5);min-width:0}
 .admin-shell .jf-admin-directory__filters{display:grid;grid-template-columns:minmax(220px,1fr) minmax(160px,.32fr) minmax(160px,.32fr);align-items:end;gap:var(--jf-ui-space-3);padding:var(--jf-ui-space-5) var(--jf-ui-space-6);border-bottom:1px solid var(--jf-ui-border)}
-.admin-shell .jf-admin-directory__search{display:flex;min-width:0;min-height:var(--jf-ui-control-height);align-items:center;gap:var(--jf-ui-space-2);padding-inline:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface);color:var(--jf-ui-text-muted)}
-.admin-shell .jf-admin-directory__search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--jf-ui-text);font:inherit}
-.admin-shell .jf-admin-directory__search input::placeholder{color:var(--jf-ui-text-muted)}
 .admin-shell .jf-admin-directory__summary{display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--jf-ui-space-2);padding:var(--jf-ui-space-3) var(--jf-ui-space-6);color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
 .admin-shell .jf-admin-directory__summary span{display:flex;align-items:center;gap:var(--jf-ui-space-2)}
 .admin-shell .jf-admin-directory__list{display:grid}
@@ -284,8 +280,8 @@ body:has(.admin-shell){overflow:hidden}
 .admin-shell .jf-admin-member-details__facts>div strong{grid-column:2}
 .admin-shell .jf-admin-member-details__facts>div span{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
 .admin-shell .jf-admin-member-details__actions{display:grid;gap:var(--jf-ui-space-4);padding-top:var(--jf-ui-space-4);border-top:1px solid var(--jf-ui-border)}
-@media(max-width:760px){.admin-shell .jf-admin-directory__filters{grid-template-columns:1fr 1fr;padding-inline:var(--jf-ui-space-4)}.admin-shell .jf-admin-directory__search{grid-column:1/-1}.admin-shell .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr) auto;padding-inline:var(--jf-ui-space-4)}.admin-shell .jf-admin-directory__role{display:none}.admin-shell .jf-admin-directory__open{grid-column:2/-1}}
-@media(max-width:440px){.admin-shell .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr)}.admin-shell .jf-admin-directory__row>.jf-status{grid-column:2}.admin-shell .jf-admin-directory__open{grid-column:2}}
+@media(max-width:760px){.admin-shell .jf-admin-directory__filters{grid-template-columns:1fr 1fr;padding-inline:var(--jf-ui-space-4)}.admin-shell .jf-admin-directory__search{grid-column:1/-1}.admin-shell .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr) auto;padding-inline:var(--jf-ui-space-4)}.admin-shell .jf-admin-directory__role{display:none}.admin-shell .jf-admin-directory__row>.jf-action{grid-column:2/-1}}
+@media(max-width:440px){.admin-shell .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr)}.admin-shell .jf-admin-directory__row>.jf-status{grid-column:2}.admin-shell .jf-admin-directory__row>.jf-action{grid-column:2}}
 .admin-shell .admin-team-list :is(strong,small){min-width:0;overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}
 .admin-shell .admin-team-list small{color:var(--jf-ui-text-muted)}
 .admin-shell .admin-team-list select{min-width:0;width:100%;min-height:var(--jf-ui-control-height);padding-inline:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface);color:var(--jf-ui-text)}
@@ -310,3 +306,5 @@ body:has(.admin-shell){overflow:hidden}
 .admin-main dt { color:var(--jf-ui-text-muted); font-size:var(--jf-ui-font-size-sm); }
 .jf-authenticator-qr { width: fit-content; max-width: 100%; padding: var(--jf-ui-space-5); border-radius: var(--jf-ui-radius-card); background: #fff; }
 .jf-authenticator-qr img { display: block; width: 240px; max-width: 100%; height: auto; }
+
+.admin-shell .jf-admin-member-details__scope{grid-column:2;margin:0;color:var(--jf-ui-text-muted)}
