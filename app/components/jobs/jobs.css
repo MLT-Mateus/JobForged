@@ -1,6 +1,6 @@
 
 .jobs-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--jf-ui-space-3);margin-bottom:var(--jf-ui-space-5)}
-.jobs-toolbar{display:grid;grid-template-columns:minmax(220px,2fr) minmax(150px,1fr) minmax(170px,1fr) auto;align-items:end;gap:var(--jf-ui-space-4)}
+.jobs-toolbar{display:grid;grid-template-columns:minmax(220px,2fr) minmax(150px,1fr) minmax(170px,1fr);align-items:end;gap:var(--jf-ui-space-4)}
 .jobs-view{display:flex;padding:var(--jf-ui-space-1);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface)}
 .jobs-view button,.device-switch button{display:grid;place-items:center;width:34px;height:34px}
 .jobs-view .is-active,.device-switch .is-active{background:var(--jf-ui-brand-soft);color:var(--jf-ui-brand-strong)}
