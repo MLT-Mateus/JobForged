@@ -82,16 +82,25 @@ do $$declare result jsonb;begin
  begin perform public.update_company_profile('17000000-0000-4000-8000-000000000011','Fixture','11111111111111',null);raise exception 'invalid CNPJ accepted';exception when check_violation then null;end;
  begin perform public.begin_password_recovery('recovery');raise exception 'password session minted recovery';exception when insufficient_privilege then null;end;
  if public.update_my_member_profile('Fixture owner changed') ? 'security_fixture_secret' then raise exception 'profile projection leak';end if;
+ begin perform public.update_my_member_identity_v1('Fixture owner changed','11111111111',null);raise exception 'invalid CPF accepted';exception when invalid_parameter_value then null;end;
+ result:=public.update_my_member_identity_v1('Fixture owner changed','52998224725','11987654321');
+ if result->>'cpf'<>'52998224725' then raise exception 'identity save failed';end if;
+ if public.account_read_v1()->>'phone'<>'11987654321' then raise exception 'identity read failed';end if;
+ if not exists(select 1 from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'cpf'='52998224725') then raise exception 'authorized roster identity missing';end if;
+ perform public.update_my_member_profile('Fixture owner renamed');
+ if public.account_read_v1()->>'cpf'<>'52998224725' then raise exception 'legacy update cleared identity';end if;
 end$$;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
 do $$declare result jsonb;begin
  result:=public.company_read_v1();
- if exists(select 1 from jsonb_array_elements(result->'members') m where m ? 'email' or m ? 'security_fixture_secret') then raise exception 'member roster projection leak';end if;
+ if exists(select 1 from jsonb_array_elements(result->'members') m where m ? 'email' or m ? 'cpf' or m ? 'phone' or m ? 'security_fixture_secret') then raise exception 'member roster projection leak';end if;
+ if public.account_read_v1()->>'cpf' is not null then raise exception 'other account CPF leaked';end if;
  if public.read_company_branding()->>'publishedBy' is not null then raise exception 'member received colleague email';end if;
 end$$;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000003","session_id":"17000000-0000-4000-8000-000000000103","aal":"aal1","role":"authenticated"}',true);
 do $$begin
  if app_private.company_role('17000000-0000-4000-8000-000000000011')<>'' then raise exception 'unlinked authorized';end if;
+ begin perform public.account_read_v1();raise exception 'unlinked profile read';exception when insufficient_privilege then null;end;
  begin perform public.company_read_v1();raise exception 'unlinked read';exception when insufficient_privilege then null;end;
 end$$;
 reset role;

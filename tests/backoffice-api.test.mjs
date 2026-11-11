@@ -91,3 +91,31 @@ test('logout works without MFA and deletion forwards only confirmed administrato
  process.env.APP_ENV='live';assert.equal((await send('/api/backoffice/company-deletion',body)).status,503);
  }finally{globalThis.fetch=original;for(const key of ['APP_ENV','SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY']){if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key]}}
 });
+
+test('account identity validates CPF and phone, preserves old clients and uses only the session identity',async()=>{
+ const names=['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY','APP_ENV'];const previous=Object.fromEntries(names.map(k=>[k,process.env[k]]));const originalFetch=globalThis.fetch;let rpcCall;
+ Object.assign(process.env,{SUPABASE_INTERNAL_URL:'https://supabase.fixture.invalid',SUPABASE_ANON_KEY:'fixture-anon',APP_ENV:'test'});
+ globalThis.fetch=async(input,init)=>{
+  const url=String(input);
+  if(url.endsWith('/auth/v1/user'))return Response.json({id:'fixture-owner',email:'owner@example.invalid',email_confirmed_at:'2026-11-10T00:00:00Z'});
+  if(url.endsWith('/rpc/is_platform_admin'))return Response.json(false);
+  if(url.endsWith('/rpc/session_context_v1'))return Response.json({company_id:'fixture-company',role:'owner',full_name:'Fixture Owner',companies:{id:'fixture-company',name:'Fixture'}});
+  if(url.endsWith('/rpc/account_read_v1'))return Response.json({fullName:'Fixture Owner',cpf:null,phone:null});
+  if(url.endsWith('/rpc/update_my_member_identity_v1')){rpcCall=JSON.parse(init.body);return Response.json({fullName:rpcCall.new_full_name,cpf:rpcCall.new_cpf,phone:rpcCall.new_phone});}
+  if(url.endsWith('/rpc/update_my_member_profile')){rpcCall=JSON.parse(init.body);return Response.json({full_name:rpcCall.new_full_name});}
+  throw Error('Unexpected account fixture request');
+ };
+ try{
+  const {default:worker}=await import('../dist/server/index.js');
+  const request=(body,origin='http://localhost')=>worker.fetch(new Request('http://localhost/api/account',{method:body?'PATCH':'GET',headers:{host:'localhost',origin,cookie:'jf_auth_access=fixture-token','content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+  const read=await request();assert.equal(read.status,200);assert.equal((await read.json()).cpf,null);
+  assert.equal((await request({fullName:'Fixture Owner',cpf:'11111111111',phone:''})).status,400);
+  assert.equal((await request({fullName:'Fixture Owner',cpf:'52998224725',phone:'12'})).status,400);
+  assert.equal((await request({fullName:'Fixture Owner',cpf:'52998224725'})).status,400);
+  assert.equal((await request({fullName:'Fixture Owner'},'https://elsewhere.invalid')).status,403);
+  const saved=await request({fullName:'Fixture Updated',cpf:'529.982.247-25',phone:'(11) 98765-4321',userId:'other-account'});assert.equal(saved.status,200);
+  assert.deepEqual(rpcCall,{new_full_name:'Fixture Updated',new_cpf:'52998224725',new_phone:'11987654321'});
+  assert.equal((await saved.json()).cpf,'52998224725');
+  assert.equal((await request({fullName:'Fixture Legacy'})).status,200);assert.deepEqual(rpcCall,{new_full_name:'Fixture Legacy'});
+ }finally{globalThis.fetch=originalFetch;for(const [key,value]of Object.entries(previous)){if(value===undefined)delete process.env[key];else process.env[key]=value}}
+});

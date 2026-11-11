@@ -78,3 +78,14 @@ test('section tones separate backgrounds and preserve normal text contrast in bo
  for(const background of ['#FFFFFF','#F5FAF9','#071411','#0E2722','#777777','#FFFF00']){const text=foreground(background),tones=sectionColors(background,text);for(const value of Object.values(tones)){assert.notEqual(value,background);assert.ok(contrast(value,text)>=4.5)}assert.notEqual(tones.subtle,tones.accent)}
  for(const theme of ['light','dark']){const style=brandingStyle(brandingDefaults('fixture','Fixture'),theme);assert.ok(style['--cp-section-subtle']);assert.notEqual(style['--cp-section-subtle'],style['--cp-bg'])}
 });
+
+test('branded floating surfaces, semantic badges and loaders follow the selected company theme',()=>{
+ const c=brandingDefaults('fixture','Fixture');c.palette.primary='#843bff';c.palette.secondary='#c42765';
+ for(const mode of ['light','dark']){
+  const s=brandingStyle(c,mode);
+  assert.equal(s['--jf-ui-surface-raised'],s['--jf-ui-surface']);
+  for(const tone of ['success','warning','danger','accent'])assert.ok(contrast(s[`--jf-ui-${tone}`],s[`--jf-ui-${tone}-soft`])>=4.5,`${mode} ${tone}`);
+  assert.equal(s['--jf-loader-primary'],mode==='light'?c.palette.primary:c.theme.dark.primary);
+  assert.equal(s['--jf-loader-surface'],s['--jf-ui-surface-soft']);
+ }
+});
