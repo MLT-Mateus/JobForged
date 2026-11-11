@@ -116,7 +116,9 @@ do $$declare result jsonb;mid uuid;photo text:=encode(convert_to('RIFF1234WEBPfi
  if public.member_photo_read_v1(mid,true)<>photo then raise exception 'thumbnail read failed';end if;
  if public.account_read_v1()->>'photoVersion'<>'1' then raise exception 'profile photo projection missing';end if;
  if not exists(select 1 from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'id'=mid::text and m->>'photo_version'='1') then raise exception 'roster photo missing';end if;
- if public.member_photo_read_v1('17000000-0000-4000-8000-000000000012',true) is not null then raise exception 'foreign photo read';end if;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000002","session_id":"17000000-0000-4000-8000-000000000102","aal":"aal1","role":"authenticated"}',true);
+ if public.member_photo_read_v1(mid,true) is not null then raise exception 'cross-tenant photo leak';end if;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
  begin perform public.member_photo_write_v1('invalid','invalid');raise exception 'invalid photo accepted';exception when invalid_parameter_value then null;end;
  perform public.member_photo_write_v1(null,null);
  if public.member_photo_read_v1(mid,true) is not null or public.account_read_v1()->>'photoVersion'<>'0' then raise exception 'photo removal failed';end if;

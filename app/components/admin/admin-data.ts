@@ -36,7 +36,7 @@ export const invoices = [
 
 export const moduleCopy: Record<AdminModuleId,{title:string;description:string}> = {
   dashboards:{title:"Dashboards",description:"Indicadores que ajudam sua equipe a entender desempenho, conversão e ritmo de contratação."},
-  vagas:{title:"Vagas",description:"Crie, publique e acompanhe todas as oportunidades da organização."},
+  vagas:{title:"Vagas",description:"Organize as vagas e prepare as próximas oportunidades da empresa."},
   candidaturas:{title:"Candidaturas",description:"Centralize candidatos, avaliações e movimentações do processo seletivo."},
   agenda:{title:"Agenda",description:"Organize entrevistas, testes e compromissos do time de recrutamento."},
   personalizacao:{title:"Personalização",description:"Aplique a identidade da sua organização em toda a experiência de recrutamento."},
