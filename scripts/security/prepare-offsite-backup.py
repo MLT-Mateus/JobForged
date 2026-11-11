@@ -62,6 +62,9 @@ def build(environment: str, revision: str | None, scheduled: bool) -> dict:
     backup = Path(evidence.get('backup', ''))
     if backup.parent != BACKUP_ROOT or not re.fullmatch(environment + r'-[0-9]{8}T[0-9]{6}Z', backup.name):
         raise ValueError('Recovery drill returned an unexpected backup path')
+    backup_info = backup.lstat()
+    if not stat.S_ISDIR(backup_info.st_mode) or backup_info.st_uid != 0 or backup_info.st_mode & 0o077:
+        raise ValueError('Root-owned private backup directory required')
     stamp = datetime.datetime.strptime(backup.name, environment + '-%Y%m%dT%H%M%SZ').replace(tzinfo=datetime.timezone.utc)
     now = datetime.datetime.now(datetime.timezone.utc)
     if not datetime.timedelta(0) <= now - stamp <= datetime.timedelta(minutes=5):
