@@ -95,7 +95,7 @@ insert into public.company_audit_events(company_id,actor_user_id,action,details)
 select '17000000-0000-4000-8000-000000000011','17000000-0000-4000-8000-000000000001','domain.register','{"private":"DO_NOT_EXPOSE"}' from generate_series(1,25);
 insert into public.company_audit_events(company_id,action) values('17000000-0000-4000-8000-000000000012','domain.register');
 set local role authenticated;
-do $declare first_page jsonb;second_page jsonb;mid uuid;begin
+do $$declare first_page jsonb;second_page jsonb;mid uuid;begin
  first_page:=public.company_activity_v1(1,'domain');second_page:=public.company_activity_v1(2,'domain');
  if (first_page->>'total')::integer<>25 or jsonb_array_length(first_page->'items')<>10 or jsonb_array_length(public.company_activity_v1(3,'domain')->'items')<>5 then raise exception 'pagination or tenant isolation failed';end if;
  if exists(select 1 from jsonb_array_elements(first_page->'items') a join jsonb_array_elements(second_page->'items') b on a->>'id'=b->>'id') then raise exception 'pagination overlaps';end if;
@@ -109,7 +109,7 @@ do $declare first_page jsonb;second_page jsonb;mid uuid;begin
  begin perform public.update_company_member_identity_v1('17000000-0000-4000-8000-000000000012','Fixture foreign',null,null);raise exception 'foreign identity write accepted';exception when insufficient_privilege then null;end;
  -- Restore the earlier fixture expectation, without clearing the owner's identity.
  perform public.update_company_member_identity_v1(mid,'Fixture Member',null,null);
-end$;
+end$$;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
 do $$declare result jsonb;begin
  begin perform public.company_activity_v1();raise exception 'member read audit';exception when insufficient_privilege then null;end;

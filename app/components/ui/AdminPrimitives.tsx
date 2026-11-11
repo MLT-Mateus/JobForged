@@ -41,7 +41,7 @@ export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HT
 }
 
 export function WorkspacePageHeader({ section, title, description, action, back, meta }: { section: string; title: string; description?: string; action?: ReactNode; back?: { href: string; label: string }; meta?: ReactNode }) {
-  return <header className="jf-page-head"><div>{back && <Link className="jf-page-head__back" href={back.href}><ArrowLeft size={16}/>{back.label}</Link>}<span className="jf-page-head__section">{section}</span>{meta && <div className="jf-page-head__meta">{meta}</div>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action && <div className="jf-page-head__actions">{action}</div>}</header>;
+  return <header className="jf-page-head"><div>{back && <Link className="jf-page-head__back" href={back.href}><ArrowLeft size={16}/>{back.label}</Link>}{section&&<span className="jf-page-head__section">{section}</span>}{meta && <div className="jf-page-head__meta">{meta}</div>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action && <div className="jf-page-head__actions">{action}</div>}</header>;
 }
 
 export function PanelHeading({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
