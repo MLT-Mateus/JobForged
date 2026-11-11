@@ -313,3 +313,7 @@ body:has(.admin-shell){overflow:hidden}
 
 .admin-shell .jf-company-activity .jf-table td{padding-block:var(--jf-ui-space-3)}
 .admin-shell .jf-company-activity>.jf-panel-body{padding-block:var(--jf-ui-space-3)}
+
+.admin-user>a{padding:var(--jf-ui-space-2);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);text-decoration:none}
+.admin-user>a:is(:hover,:focus-visible){text-decoration:none;color:var(--jf-ui-brand-strong);background:var(--jf-ui-brand-soft);border-color:currentColor}
+.admin-user>a :is(strong,small){text-decoration:none}

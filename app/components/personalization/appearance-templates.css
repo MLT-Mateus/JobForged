@@ -1,4 +1,4 @@
-.jf-appearance-templates{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:var(--jf-ui-space-3);min-width:0}
+.jf-appearance-templates{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,135px),1fr));gap:var(--jf-ui-space-3);min-width:0}
 .jf-appearance-templates>.jf-action{display:flex;flex-direction:column;align-items:stretch;text-align:left;white-space:normal;padding:var(--jf-ui-space-3);gap:var(--jf-ui-space-2)}
 .jf-appearance-templates strong{font-size:var(--jf-ui-font-size-sm)}
 .jf-appearance-templates small{font-weight:400;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-xs);line-height:1.5}

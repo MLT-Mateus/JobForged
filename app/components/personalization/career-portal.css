@@ -159,3 +159,33 @@
 .jf-career-portal .jf-career-brand{flex:0 1 var(--jf-ui-public-logo-width);min-width:64px}
 @container(max-width:680px){.jf-career-portal>header .jf-adaptive-nav>.jf-adaptive-nav__inline{display:none}.jf-career-portal>header .jf-adaptive-nav{flex:0 0 auto;order:3}.jf-career-portal .jf-career-brand{margin-right:auto}.jf-career-portal>header .jf-adaptive-nav__menu>summary span{display:none}}
 .jf-career-portal>header .jf-adaptive-nav__menu{width:100%}
+
+/* Keep customer copy in flow across both the editor preview and public portal. */
+.jf-career-portal .jf-career-hero { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.jf-career-portal[data-image="hidden"] .jf-career-hero,
+.jf-career-portal[data-layout="vagas"] .jf-career-hero,
+.jf-career-portal[data-layout="essencial"] .jf-career-hero,
+.jf-career-portal[data-layout="panorama"] .jf-career-hero { grid-template-columns:minmax(0,1fr); }
+.jf-career-portal[data-layout="equipe"] .mock-hero__copy { grid-row:1; }
+.jf-career-portal[data-layout="equipe"][data-image="hidden"] .mock-hero__copy { grid-column:1; }
+.jf-career-portal[data-layout="essencial"] .jf-career-hero-actions { justify-content:center; }
+.jf-career-portal :is(.jf-career-hero-actions,.jf-career-invitation,.jf-career-jobs) .jf-action {
+ min-width:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; height:auto;
+}
+.jf-career-portal .jf-career-section-head > * { min-width:0; }
+.jf-career-photo-chip { max-width:90%; }
+@container (max-width:760px) {
+ .jf-career-portal .jf-career-hero { grid-template-columns:minmax(0,1fr); }
+ .jf-career-portal[data-layout="equipe"] .mock-hero__visual { grid-column:1; grid-row:1; }
+ .jf-career-portal[data-layout="equipe"] .mock-hero__copy { grid-column:1; grid-row:2; }
+ .jf-career-portal[data-layout="equipe"][data-image="hidden"] .mock-hero__copy { grid-row:1; }
+ .jf-career-portal :is(.jf-career-photo-chip,.jf-career-photo-note) {
+  position:static; width:100%; max-width:none;
+ }
+ .jf-career-portal:not([data-layout="panorama"]) .mock-hero__visual { height:auto; gap:var(--jf-ui-space-2); }
+}
+@container (max-width:420px) {
+ .jf-public-header-inner { flex-wrap:wrap; padding-block:var(--jf-ui-space-2); }
+ .jf-career-header-actions { flex-wrap:wrap; flex-shrink:1; }
+ .jf-career-highlights { grid-template-columns:minmax(0,1fr); }
+}

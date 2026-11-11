@@ -1,5 +1,4 @@
 "use client";
-import { CompanyHomeBrand } from "@/app/components/personalization/CompanyBranding";
 import { PlatformHomeBanners } from "@/app/components/admin/PlatformHomeBanners";
 import { MetricGrid } from "@/app/components/ui/MetricGrid";
 import { AccountSetup } from "./AccountSetup";
@@ -37,7 +36,7 @@ export default function HomeClient({ initialContext }: { initialContext: HomeCon
   return (
     <AdminShell module="home" context={{ organization, user: {name:user.name, role:user.role, initials:user.avatarInitials} }}>
         <div className="home-content">
-          <WorkspacePageHeader section="Painel / Home" title="Bem-vindo à sua Home" description="Acompanhe as principais informações da sua empresa e continue de onde parou." action={<CompanyHomeBrand/>}/>
+          <WorkspacePageHeader section="Painel / Home" title="Bem-vindo à sua Home" description="Acompanhe as principais informações da sua empresa e continue de onde parou."/>
 
           <PlatformHomeBanners/>
 
