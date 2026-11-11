@@ -1,6 +1,39 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+test('company activity, managed identity and page redirect enforce session and validation',async()=>{
+ const names=['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY','APP_ENV'];const previous=Object.fromEntries(names.map(k=>[k,process.env[k]]));const original=globalThis.fetch;
+ let role='owner',domainStatus='active',domainFailure=false;const calls=[];
+ Object.assign(process.env,{SUPABASE_INTERNAL_URL:'https://supabase.fixture.invalid',SUPABASE_ANON_KEY:'fixture-anon',APP_ENV:'test'});
+ globalThis.fetch=async(input,init)=>{
+  const url=String(input),body=init?.body?JSON.parse(init.body):null;
+  if(url.endsWith('/auth/v1/user'))return Response.json({id:'fixture-owner',email:'owner@example.invalid',email_confirmed_at:'2026-11-10T00:00:00Z'});
+  if(url.endsWith('/rpc/is_platform_admin'))return Response.json(false);
+  if(url.endsWith('/rpc/session_context_v1'))return Response.json({company_id:'fixture-company',role,full_name:'Fixture Owner',companies:{id:'fixture-company',name:'Fixture'}});
+  if(url.endsWith('/rpc/company_activity_v1')){calls.push(body);return Response.json({items:[],page:body.requested_page,pageSize:10,total:0})}
+  if(url.endsWith('/rpc/update_company_member_identity_v1')){calls.push(body);return Response.json({id:body.target_member_id,full_name:body.new_full_name,cpf:body.new_cpf,phone:body.new_phone})}
+  if(url.endsWith('/rpc/read_company_portal'))return Response.json({slug:'fixture-company',isPublic:true});
+  if(url.endsWith('/rpc/company_domain'))return domainFailure?new Response('',{status:503}):Response.json({status:domainStatus,hostname:'careers.fixture.invalid',checkedAt:new Date().toISOString(),version:1});
+  throw Error('Unexpected company fixture operation');
+ };
+ try{
+  const {default:worker}=await import('../dist/server/index.js');
+  const request=(path,body,origin='http://localhost',cookie='jf_auth_access=fixture-token')=>worker.fetch(new Request('http://localhost'+path,{method:body?'PATCH':'GET',headers:{host:'localhost',origin,cookie,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+  assert.equal((await request('/api/company/activity?page=0')).status,400);
+  assert.equal((await request('/api/company/activity?category=unknown')).status,400);
+  assert.equal((await request('/api/company/activity?page=2&category=member')).status,200);assert.deepEqual(calls.pop(),{requested_page:2,category:'member'});
+  const identity={id:'17000000-0000-4000-8000-000000000001',fullName:'Fixture Updated',cpf:'529.982.247-25',phone:'(11) 98765-4321'};
+  assert.equal((await request('/api/company/members/identity',identity,'https://foreign.invalid')).status,403);
+  assert.equal((await request('/api/company/members/identity',{...identity,cpf:'11111111111'})).status,400);
+  assert.equal((await request('/api/company/members/identity',identity)).status,200);assert.deepEqual(calls.pop(),{target_member_id:identity.id,new_full_name:'Fixture Updated',new_cpf:'52998224725',new_phone:'11987654321'});
+  role='member';assert.equal((await request('/api/company/activity')).status,403);assert.equal((await request('/api/company/members/identity',identity)).status,403);
+  role='owner';let opened=await request('/api/company/portal/open');assert.equal(opened.status,302);assert.equal(opened.headers.get('location'),'https://careers.fixture.invalid');assert.match(opened.headers.get('cache-control'),/no-store/);
+  domainStatus='pending';assert.equal((await request('/api/company/portal/open')).headers.get('location'),'/fixture-company');
+  domainFailure=true;assert.equal((await request('/api/company/portal/open')).headers.get('location'),'/fixture-company');
+  assert.equal((await request('/api/company/portal/open',null,undefined,'')).status,403);
+ }finally{globalThis.fetch=original;for(const [key,value]of Object.entries(previous)){if(value===undefined)delete process.env[key];else process.env[key]=value}}
+});
+
 test('administrative TOTP enrollment labels its issuer and protects one-time setup material', async () => {
  const previous={SUPABASE_INTERNAL_URL:process.env.SUPABASE_INTERNAL_URL,SUPABASE_ANON_KEY:process.env.SUPABASE_ANON_KEY,APP_ENV:process.env.APP_ENV};
  const originalFetch=globalThis.fetch;let invalid=true,enrollmentBody;

@@ -310,3 +310,6 @@ body:has(.admin-shell){overflow:hidden}
 .admin-shell .jf-admin-directory__identity small{font-size:var(--jf-ui-font-size-sm);line-height:1.5}
 .admin-shell .jf-admin-directory__identity small svg{flex-shrink:0}
 .admin-shell .jf-admin-member-details__facts>div>.jf-status-help{grid-column:2}
+
+.admin-shell .jf-company-activity .jf-table td{padding-block:var(--jf-ui-space-3)}
+.admin-shell .jf-company-activity>.jf-panel-body{padding-block:var(--jf-ui-space-3)}

@@ -3,9 +3,18 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {validResume} from '../shared/resume-policy.mjs';
-import {validCompanyHostname} from '../app/lib/company-domain.ts';
+import {validCompanyHostname,companyPageHref} from '../app/lib/company-domain.ts';
 import {brandingDefaults} from '../app/components/personalization/branding-model.ts';
 import {diagnoseCompanyDomain} from '../app/lib/company-domain-diagnostics.ts';
+
+test('open page prefers only an active, recently verified domain and safely falls back',()=>{
+ const now=Date.now(),active={status:'active',version:1,hostname:'careers.fixture.invalid',checkedAt:new Date(now-1000).toISOString()};
+ assert.equal(companyPageHref('fixture',active,now),'https://careers.fixture.invalid');
+ for(const status of ['none','pending','verified','disabled'])assert.equal(companyPageHref('fixture',{...active,status},now),'/fixture');
+ for(const checkedAt of [null,'invalid',new Date(now-1200000).toISOString(),new Date(now+1000).toISOString()])assert.equal(companyPageHref('fixture',{...active,checkedAt},now),'/fixture');
+ assert.equal(companyPageHref('fixture',{...active,hostname:'javascript:alert(1)'},now),'/fixture');
+ assert.equal(companyPageHref('fixture',null,now),'/fixture');
+});
 test('PDF envelope rejects executable, encrypted, oversized and fake content; hostnames reject URLs/IPs/internal names',async()=>{
  const pdf=await readFile('public/documents/curriculo-demonstrativo.pdf');assert.ok(validResume(pdf));
  for(const bytes of [Buffer.from('<html>bad</html>'),Buffer.alloc(5242881),Buffer.from('%PDF-1.4 /JavaScript /JS (alert(1)) %%EOF'),Buffer.from('%PDF-1.4 /Encrypt %%EOF')])assert.equal(validResume(bytes),false);
