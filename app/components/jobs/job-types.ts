@@ -17,9 +17,9 @@ export type Candidate = { id:string; organizationId:string; jobId:string; create
 export type AutomationRule = { id:string; name:string; trigger:string; condition:string; action:string; active:boolean };
 export type JobSettings = { aiScreening:boolean; advanceScore:number; rejectScore:number; highFitNotification:boolean; visibility:"Pública"|"Restrita"; acceptApplications:boolean; resumeRequired:boolean; coverLetter:boolean; anonymous:boolean; applicationLimit:number; positions:number; autoClose:boolean; notifications:string[]; slug:string; metaDescription:string; shareTitle:string; questions:{id:string;label:string;type:string;required:boolean}[]; rules:AutomationRule[] };
 
-export const emptyJob = (organizationId="org_jobforged_demo"):Job => ({
+export const emptyJob = (organizationId=""):Job => ({
   id:"",organizationId,createdAt:"",updatedAt:"",status:"Rascunho",title:"",area:"",level:"",contractType:"",modality:"",country:"Brasil",state:"",city:"",
   summary:"",responsibilities:[],requirements:[],experience:"",weeklyHours:"",schedule:"",salaryMin:"",salaryMax:"",currency:"BRL",salaryConfidential:false,
   softSkills:[],differentiators:[],certifications:[],education:"",languages:[],benefits:[],additionalBenefits:"",careerPlan:"",performanceReviews:false,promotionPossible:false,
-  teamDescription:"",reportsTo:"",teamSize:"",tools:[],methodology:"",challenges:"",openingReason:"",autonomy:"",hierarchy:"",stages:[{id:"triagem",name:"Triagem",required:true},{id:"entrevista",name:"Entrevista",required:true}],technicalTest:false,interviewTypes:[],applicationDeadline:"",responseSla:"",lgpd:false,responsibleId:"usr-mateus",currentStep:0,applicationsCount:0
+  teamDescription:"",reportsTo:"",teamSize:"",tools:[],methodology:"",challenges:"",openingReason:"",autonomy:"",hierarchy:"",stages:[{id:"triagem",name:"Triagem",required:true},{id:"entrevista",name:"Entrevista",required:true}],technicalTest:false,interviewTypes:[],applicationDeadline:"",responseSla:"",lgpd:false,responsibleId:"",currentStep:0,applicationsCount:0
 });
