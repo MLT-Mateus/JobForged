@@ -928,3 +928,5 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-profile-photo{display:flex;align-items:flex-start;gap:var(--jf-ui-space-4);padding-bottom:var(--jf-ui-space-5);border-bottom:1px solid var(--jf-ui-border)}
 .jf-profile-photo>div{flex:1;min-width:0}
 @media(max-width:540px){.jf-profile-photo{flex-direction:column}}
+
+.jf-profile-actions { justify-content:end; }

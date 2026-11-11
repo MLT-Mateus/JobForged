@@ -235,5 +235,15 @@ do $$begin
  if app_private.company_role('17000000-0000-4000-8000-000000000012')<>'' then raise exception 'banned identity accepted';end if;
 end$$;
 reset role;
+update auth.users set email='changed-company@example.invalid'
+where id='17000000-0000-4000-8000-000000000001';
+do $$
+begin
+ if not exists (
+  select 1 from public.company_members
+  where user_id='17000000-0000-4000-8000-000000000001' and email='changed-company@example.invalid'
+ ) then raise exception 'confirmed auth email did not synchronize to company membership'; end if;
+end;
+$$;
 rollback;
 select 'security_foundation_passed';
