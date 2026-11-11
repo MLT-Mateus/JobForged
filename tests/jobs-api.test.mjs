@@ -6,6 +6,7 @@ test('job BFF enforces session, origin, organization and preserves RPC concurren
  const cid='31000000-0000-4000-8000-000000000011',id='31000000-0000-4000-8000-000000000041';let role='owner',code=null;const calls=[];
  globalThis.fetch=async(url,init)=>{const address=String(url),body=init?.body?JSON.parse(init.body):null;
   if(address.endsWith('/auth/v1/user'))return Response.json({id:'31000000-0000-4000-8000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-29T00:00:00Z'});
+  if(address.endsWith('/rpc/resolve_company_domain'))return Response.json('fixture-company');
   if(address.endsWith('/rpc/is_platform_admin'))return Response.json(false);
   if(address.endsWith('/rpc/session_context_v1'))return Response.json({company_id:cid,role,companies:{id:cid,name:'Fixture'}});
   if(address.endsWith('/rpc/company_jobs_v1')){calls.push(body);return code?Response.json({code},{status:400}):Response.json(body.operation==='list'?[]:{id,version:2})}
@@ -13,7 +14,7 @@ test('job BFF enforces session, origin, organization and preserves RPC concurren
   throw Error('Unexpected isolated request');
  };
  try{const {default:worker}=await import('../dist/server/index.js');
- const request=(path,body,cookie='jf_auth_access=fixture',origin='http://localhost')=>worker.fetch(new Request('http://localhost'+path,{method:body?'POST':'GET',headers:{host:'localhost',origin,cookie,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+ const request=(path,body,cookie='jf_auth_access=fixture',origin='http://localhost',host='localhost')=>worker.fetch(new Request('http://'+host+path,{method:body?'POST':'GET',headers:{host,origin,cookie,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
  assert.equal((await request('/api/company/jobs',null,'')).status,403);
  const mutation={operation:'save',companyId:cid,id,version:1,status:'Publicada',document:{title:'Fixture'}};
  assert.equal((await request('/api/company/jobs',mutation,undefined,'https://other.invalid')).status,403);
@@ -24,5 +25,8 @@ test('job BFF enforces session, origin, organization and preserves RPC concurren
  assert.equal((await request('/api/company/jobs',{...mutation,document:{title:'x'.repeat(71000)}})).status,413);
  assert.equal((await request('/api/company/jobs?id=invalid')).status,400);
  const pub=await request('/api/portals/fixture-company/jobs',null,'');assert.equal(pub.status,200);assert.equal(pub.headers.get('Cache-Control'),'no-store');assert.equal((await pub.json())[0].title,'Published fixture');
+ assert.equal((await request('/api/portals/fixture-company/jobs',null,'',undefined,'careers.fixture.invalid')).status,200);
+ assert.equal((await request('/api/portals/other-company/jobs',null,'',undefined,'careers.fixture.invalid')).status,404);
+ assert.equal((await request('/api/company/jobs',null,'',undefined,'careers.fixture.invalid')).status,404);
  }finally{globalThis.fetch=original;for(const [k,v] of Object.entries(previous)){if(v===undefined)delete process.env[k];else process.env[k]=v}}
 });
