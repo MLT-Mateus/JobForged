@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
  if (!requireSameOrigin(request)) return reply("Origem inválida.", 403);
  try {
   const session = await readSession(request, headers);
-  if (!session || (!session.company && !session.platformAdmin)) return reply("Entre novamente para continuar.", 401);
+  if (!session || !session.company || session.platformAdmin) return reply("Entre novamente para continuar.", 401);
   const input = await request.json().catch(() => null) as {operation?: unknown; password?: unknown; email?: unknown; confirmation?: unknown} | null;
   if (input?.operation === "password") {
    const password = typeof input.password === "string" ? input.password : "";
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
    clearSessionCookies(headers);
    return Response.json({ok:true}, {headers});
   }
-  if (input?.operation === "email" && session.company && !session.platformAdmin) {
+  if (input?.operation === "email") {
    const email = typeof input.email === "string" ? input.email.trim().toLowerCase() : "";
    if (email.length > 254 || !isEmail(email) || email === session.email.toLowerCase())
     return reply("Informe um novo e-mail válido.", 400);

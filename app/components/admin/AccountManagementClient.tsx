@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Building2, KeyRound, Mail, LogOut, Save, ShieldCheck } from "lucide-react";
 import { ActionButton, AppToast, DisplayValue, Panel, PanelHeading, StatusBadge, TextField, WorkspacePageHeader, WorkspaceState, type ToastKind } from "@/app/components/ui";
-import { signOutCompany, useCompanyAuthSession, type AuthSessionState } from "@/app/components/auth/auth-service";
+import { requestPasswordRecovery, signOutCompany, useCompanyAuthSession, type AuthSessionState } from "@/app/components/auth/auth-service";
 import { isValidCpf } from "@/app/components/auth/auth-validation";
 import {ProfilePhoto} from './ProfilePhoto';
 import { memberRoles } from "./member-roles";
@@ -48,6 +48,13 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
   }catch(error){setNotice({kind:'danger',title:'Perfil não salvo',text:error instanceof Error?error.message:'Não foi possível salvar. Tente novamente.'});}
   finally{setBusy(null);}
  }
+ async function recoverPlatformPassword() {
+  if (!session.email) return;
+  setBusy('password');
+  const result = await requestPasswordRecovery(session.email);
+  setBusy(null);
+  setNotice({kind:result.ok?'success':'danger',title:result.ok?'Confira seu e-mail':'Solicitação não concluída',text:result.ok?'Enviamos as instruções para você criar uma nova senha.':result.message??'Tente novamente.'});
+ }
  function openCredential(value: typeof credential) {
   setCredential(value);
   setCredentialValue("");
@@ -84,7 +91,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
     </form></Panel>
     <div className="jf-workspace-stack"><Panel><PanelHeading title="Vínculo e permissões"/><div className="jf-panel-body jf-workspace-stack"><div className="jf-profile-readonly"><span><Building2 size={16}/> Organização</span><strong><DisplayValue value={session.platformAdmin?'JobForged':session.company?.name}/></strong></div><div className="jf-profile-readonly"><span><ShieldCheck size={16}/> Sua função</span><StatusBadge tone="info" description={role?.description}>{session.platformAdmin?'Administrador da plataforma':role?.label??'Não informado'}</StatusBadge></div><div className="jf-profile-readonly"><span>Na equipe desde</span><strong><DisplayValue value={saved.createdAt?new Date(saved.createdAt).toLocaleDateString('pt-BR'):null}/></strong></div></div></Panel>
      <Panel><PanelHeading title="Segurança da conta" description="Proteja seu acesso e gerencie sua sessão."/><div className="jf-panel-body jf-workspace-stack"><div className="jf-workspace-toolbar">
-      <ActionButton type="button" variant="secondary" icon={<KeyRound size={16}/>} disabled={!!busy} onClick={()=>openCredential('password')}>Alterar senha</ActionButton>
+      <ActionButton type="button" variant="secondary" icon={<KeyRound size={16}/>} disabled={!!busy} onClick={()=>session.platformAdmin?void recoverPlatformPassword():openCredential('password')}>Alterar senha</ActionButton>
       {!session.platformAdmin&&<ActionButton type="button" variant="secondary" icon={<Mail size={16}/>} disabled={!!busy} onClick={()=>openCredential('email')}>Alterar e-mail</ActionButton>}
      </div>
      {credential&&<form key={credential} className="jf-workspace-stack" onSubmit={saveCredential}>
