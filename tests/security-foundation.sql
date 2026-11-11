@@ -110,6 +110,17 @@ do $$declare first_page jsonb;second_page jsonb;mid uuid;begin
  -- Restore the earlier fixture expectation, without clearing the owner's identity.
  perform public.update_company_member_identity_v1(mid,'Fixture Member',null,null);
 end$$;
+do $$declare result jsonb;mid uuid;photo text:=encode(convert_to('RIFF1234WEBPfixture','UTF8'),'base64');begin
+ result:=public.member_photo_write_v1(photo,photo);mid:=(result->>'memberId')::uuid;
+ if result->>'photoVersion'<>'1' then raise exception 'photo version missing';end if;
+ if public.member_photo_read_v1(mid,true)<>photo then raise exception 'thumbnail read failed';end if;
+ if public.account_read_v1()->>'photoVersion'<>'1' then raise exception 'profile photo projection missing';end if;
+ if not exists(select 1 from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'id'=mid::text and m->>'photo_version'='1') then raise exception 'roster photo missing';end if;
+ if public.member_photo_read_v1('17000000-0000-4000-8000-000000000012',true) is not null then raise exception 'foreign photo read';end if;
+ begin perform public.member_photo_write_v1('invalid','invalid');raise exception 'invalid photo accepted';exception when invalid_parameter_value then null;end;
+ perform public.member_photo_write_v1(null,null);
+ if public.member_photo_read_v1(mid,true) is not null or public.account_read_v1()->>'photoVersion'<>'0' then raise exception 'photo removal failed';end if;
+end$$;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
 do $$declare result jsonb;begin
  begin perform public.company_activity_v1();raise exception 'member read audit';exception when insufficient_privilege then null;end;
