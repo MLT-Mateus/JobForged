@@ -2,7 +2,7 @@ export type JobStatus = "Rascunho" | "Publicada" | "Pausada" | "Encerrada" | "Ar
 export type ProcessStage = { id: string; name: string; required: boolean };
 export type Language = { language: string; level: string };
 export type Job = {
-  id: string; organizationId: string; createdAt: string; updatedAt: string; status: JobStatus;
+  version?: number; id: string; organizationId: string; createdAt: string; updatedAt: string; status: JobStatus;
   title: string; area: string; level: string; contractType: string; modality: string; country: string; state: string; city: string;
   summary: string; responsibilities: string[]; requirements: string[]; experience: string; weeklyHours: string; schedule: string;
   salaryMin: string; salaryMax: string; currency: string; salaryConfidential: boolean;

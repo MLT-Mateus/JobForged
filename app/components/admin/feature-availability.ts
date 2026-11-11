@@ -17,10 +17,7 @@ export const featureAvailability: Record<WorkspaceModule, FeatureAvailability> =
     status: "soon",
     description: "Os números e gráficos são uma prévia. Indicadores reais ainda não estão disponíveis.",
   },
-  vagas: {
-    status: "beta",
-    description: "Você pode experimentar a criação e edição, mas as vagas ficam apenas neste navegador. O estado “Publicada” ainda não coloca uma vaga no ar.",
-  },
+  vagas: {status: "available", description: "Vagas salvas por empresa e publicadas na página de carreiras."},
   candidaturas: {
     status: "soon",
     description: "Os candidatos exibidos são exemplos. A gestão real de candidaturas ainda não está disponível.",

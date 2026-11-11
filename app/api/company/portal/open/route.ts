@@ -15,6 +15,7 @@ export async function GET(request:NextRequest){
  if(!validPortalSlug(portal.slug))return Response.json({message:'Endereço indisponível.'},{status:503,headers});
  const domainResponse=await requestDatabase('rpc/company_domain',session.accessToken,{operation:'read'}).catch(()=>null);
  const domain=domainResponse?.ok?await domainResponse.json() as CompanyDomain:null;
- headers.set('Location',companyPageHref(portal.slug,portal.isPublic?domain:null));
+ const job=new URL(request.url).searchParams.get('job');
+ headers.set('Location',companyPageHref(portal.slug,portal.isPublic?domain:null)+(job&&/^[0-9a-f-]{36}$/i.test(job)?'#vaga-'+job:''));
  return new Response(null,{status:302,headers});
 }

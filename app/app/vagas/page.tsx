@@ -1,1 +1,3 @@
-import type { Metadata } from "next"; import JobsListClient from "@/app/components/jobs/JobsListClient"; import { activeOrganization,getAdminContext } from "@/app/components/admin/admin-data"; export const metadata:Metadata={title:"JobForged | Vagas"}; export default async function Page(){const context=await getAdminContext(activeOrganization.id);return context?<JobsListClient context={context}/>:null}
+import JobsWorkspace from '@/app/components/jobs/JobsWorkspace';
+export const metadata={title:'JobForged | Vagas'};
+export default function Page(){return <JobsWorkspace view="list" />}
