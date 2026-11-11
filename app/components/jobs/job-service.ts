@@ -1,27 +1,26 @@
 "use client";
-import { defaultSettings, seedCandidates, seedJobs } from "./job-mocks";
-import { emptyJob, type Candidate, type Job, type JobSettings, type JobStatus } from "./job-types";
-const JOBS="jobforged.jobs.v1", CANDIDATES="jobforged.candidates.v1", SETTINGS="jobforged.job-settings.v1", DRAFT="jobforged.job-draft.v1";
-const read=<T,>(key:string,fallback:T):T=>{if(typeof window==="undefined")return fallback;try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}};
-const write=(key:string,value:unknown)=>{if(typeof window!=="undefined")localStorage.setItem(key,JSON.stringify(value))};
-const ensure=()=>{if(typeof window==="undefined")return;if(!localStorage.getItem(JOBS))write(JOBS,seedJobs);if(!localStorage.getItem(CANDIDATES))write(CANDIDATES,seedCandidates)};
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { defaultSettings } from "./job-mocks";
+import { type Candidate, type Job, type JobSettings, type JobStatus } from "./job-types";
+async function request<T>(id?:string,body?:unknown):Promise<T>{const r=await fetch('/api/company/jobs'+(id?'?id='+encodeURIComponent(id):''),{method:body?'POST':'GET',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await r.json() as T & {message?:string};if(!r.ok)throw new Error(data.message||'Não foi possível salvar a vaga.');return data}
+function document(job:Job){const {id,organizationId,createdAt,updatedAt,status,applicationsCount,version,...fields}=job;void id;void organizationId;void createdAt;void updatedAt;void status;void applicationsCount;void version;return fields}
 export const jobService={
- async listJobs(organizationId:string){ensure();return read<Job[]>(JOBS,seedJobs).filter(x=>x.organizationId===organizationId)},
- async getJobById(id:string){ensure();return read<Job[]>(JOBS,seedJobs).find(x=>x.id===id)||null},
- async createJob(input:Job){ensure();const all=read<Job[]>(JOBS,seedJobs),time=new Date().toISOString();const job={...input,id:input.id||`job-${Date.now()}`,createdAt:input.createdAt||time,updatedAt:time};write(JOBS,[job,...all.filter(x=>x.id!==job.id)]);return job},
- async updateJob(id:string,patch:Partial<Job>){const all=read<Job[]>(JOBS,seedJobs);const current=all.find(x=>x.id===id);if(!current)throw new Error("Vaga não encontrada");const job={...current,...patch,updatedAt:new Date().toISOString()};write(JOBS,all.map(x=>x.id===id?job:x));return job},
- async duplicateJob(id:string){const source=await this.getJobById(id);if(!source)throw new Error("Vaga não encontrada");return this.createJob({...source,id:"",title:`Cópia de ${source.title}`,status:"Rascunho",applicationsCount:0})},
- async changeJobStatus(id:string,status:JobStatus){return this.updateJob(id,{status})},
- async archiveJob(id:string){return this.changeJobStatus(id,"Arquivada")},
- async deleteJob(id:string){write(JOBS,read<Job[]>(JOBS,seedJobs).filter(x=>x.id!==id))},
- async getJobApplications(jobId:string){ensure();return read<Candidate[]>(CANDIDATES,seedCandidates).filter(x=>x.jobId===jobId)},
- async moveCandidate(id:string,stage:string){const all=read<Candidate[]>(CANDIDATES,seedCandidates);write(CANDIDATES,all.map(x=>x.id===id?{...x,stage,updatedAt:new Date().toISOString(),history:[...x.history,`Movido para ${stage}`]}:x))},
- async saveCandidateNotes(id:string,notes:string){const all=read<Candidate[]>(CANDIDATES,seedCandidates);write(CANDIDATES,all.map(x=>x.id===id?{...x,notes,updatedAt:new Date().toISOString()}:x))},
- async getJobSettings(id:string){return read<Record<string,JobSettings>>(SETTINGS,{})[id]||{...defaultSettings,slug:id}},
- async saveJobAutomation(id:string,settings:JobSettings){const all=read<Record<string,JobSettings>>(SETTINGS,{});write(SETTINGS,{...all,[id]:settings});return settings},
- async saveJobSettings(id:string,settings:JobSettings){return this.saveJobAutomation(id,settings)},
- async isSlugAvailable(slug:string,jobId:string){const all=read<Record<string,JobSettings>>(SETTINGS,{});return !Object.entries(all).some(([id,x])=>id!==jobId&&x.slug===slug)},
- saveDraft(job:Job){write(DRAFT,job)}, getDraft(){return read<Job>(DRAFT,emptyJob())}, clearDraft(){if(typeof window!=="undefined")localStorage.removeItem(DRAFT)}
+ async listJobs(organizationId:string){return (await request<Job[]>()).filter(j=>j.organizationId===organizationId)},
+ async getJobById(id:string){return request<Job|null>(id)},
+ async createJob(input:Job){return request<Job>(undefined,{operation:'save',companyId:input.organizationId,document:document(input),status:input.status})},
+ async updateJob(id:string,patch:Partial<Job>){const current=await this.getJobById(id);if(!current)throw new Error('Vaga não encontrada.');const job={...current,...patch};return request<Job>(undefined,{operation:'save',id,companyId:job.organizationId,version:job.version,document:document(job),status:job.status})},
+ async duplicateJob(id:string){const source=await this.getJobById(id);if(!source)throw new Error('Vaga não encontrada.');return this.createJob({...source,id:'',title:'Cópia de '+source.title,status:'Rascunho'})},
+ async changeJobStatus(id:string,status:JobStatus){const current=await this.getJobById(id);if(!current)throw new Error('Vaga não encontrada.');return request<Job>(undefined,{operation:'status',id,companyId:current.organizationId,version:current.version,status})},
+ async archiveJob(id:string){return this.changeJobStatus(id,'Arquivada')},
+ async deleteJob(id:string){const current=await this.getJobById(id);if(!current)throw new Error('Vaga não encontrada.');await request(undefined,{operation:'delete',id,companyId:current.organizationId,version:current.version})},
+ async getJobApplications(_jobId:string):Promise<Candidate[]>{return []},
+ async moveCandidate(_id:string,_stage:string){throw new Error('Candidaturas ainda não disponíveis.')},
+ async saveCandidateNotes(_id:string,_notes:string){throw new Error('Candidaturas ainda não disponíveis.')},
+ async getJobSettings(id:string){return {...defaultSettings,slug:id}},
+ async saveJobAutomation(_id:string,_settings:JobSettings):Promise<JobSettings>{throw new Error('Automações ainda não disponíveis.')},
+ async saveJobSettings(_id:string,_settings:JobSettings):Promise<JobSettings>{throw new Error('Configurações adicionais ainda não disponíveis.')},
+ async isSlugAvailable(_slug:string,_jobId:string){return false},
+
 };
 
 export function getCompletion(job:Job){

@@ -123,6 +123,51 @@ do $$declare result jsonb;mid uuid;photo text:=encode(convert_to('RIFF1234WEBPfi
  perform public.member_photo_write_v1(null,null);
  if public.member_photo_read_v1(mid,true) is not null or public.account_read_v1()->>'photoVersion'<>'0' then raise exception 'photo removal failed';end if;
 end$$;
+
+-- Persistent publication, tenant isolation, authorization and public projection.
+do $$begin
+ begin perform count(*) from app_private.company_jobs;raise exception 'private jobs table exposed';exception when insufficient_privilege then null;end;
+end;$$;
+reset role;
+insert into public.company_portals(company_id,slug,is_public) values('17000000-0000-4000-8000-000000000011','security-jobs-fixture',false) on conflict(company_id) do update set slug=excluded.slug,is_public=false;
+update public.company_branding set published='{"fixture":true}' where company_id='17000000-0000-4000-8000-000000000011';
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+do $$declare d jsonb:='{"title":"Public job fixture","area":"Engineering","level":"Senior","contractType":"CLT","modality":"Remoto","country":"Brasil","state":"SP","city":"São Paulo","summary":"Public description","responsibilities":["One","Two","Three"],"requirements":["One","Two","Three"],"experience":"","weeklyHours":"","schedule":"","salaryMin":"12345","salaryMax":"67890","currency":"BRL","salaryConfidential":true,"softSkills":[],"differentiators":[],"certifications":[],"education":"","languages":[],"benefits":[],"additionalBenefits":"","careerPlan":"","performanceReviews":false,"promotionPossible":false,"teamDescription":"","reportsTo":"","teamSize":"","tools":[],"methodology":"","challenges":"","openingReason":"","autonomy":"","hierarchy":"","stages":[{"id":"triagem","name":"Triagem","required":true},{"id":"entrevista","name":"Entrevista","required":true}],"technicalTest":false,"interviewTypes":[],"applicationDeadline":"","responseSla":"","lgpd":true,"responsibleId":"PRIVATE_FIXTURE","currentStep":0}';j jsonb;uid uuid;begin
+ j:=public.company_jobs_v1('save',null,d,'Rascunho');uid:=(j->>'id')::uuid;
+ if public.company_jobs_v1('get',uid)->>'title'<>'Public job fixture' then raise exception 'job not persisted';end if;
+ if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'draft exposed';end if;
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'unpublished portal accepted';exception when sqlstate 'PT422' then null;end;
+ begin perform public.company_jobs_v1('save',uid,d||'{"unknown":"secret"}',null,1);raise exception 'unknown field accepted';exception when invalid_parameter_value then null;end;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000002","session_id":"17000000-0000-4000-8000-000000000102","aal":"aal1","role":"authenticated"}',true);
+ if public.company_jobs_v1('list')<>'[]'::jsonb then raise exception 'cross tenant list leak';end if;
+ begin perform public.company_jobs_v1('get',uid);raise exception 'cross tenant get leak';exception when no_data_found then null;end;
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'cross tenant write';exception when no_data_found then null;end;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'member published';exception when insufficient_privilege then null;end;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+end;$$;
+reset role;
+update public.company_portals set is_public=true where slug='security-jobs-fixture';
+set local role authenticated;
+do $$declare j jsonb;uid uuid;public_result jsonb;begin
+ j:=public.company_jobs_v1('list')->0;uid:=(j->>'id')::uuid;
+ begin perform public.company_jobs_v1('save',uid,(j-'id'-'organizationId'-'status'-'version'-'createdAt'-'updatedAt'-'applicationsCount')||'{"title":""}', 'Publicada',1);raise exception 'incomplete job published';exception when invalid_parameter_value then null;end;
+ j:=public.company_jobs_v1('status',uid,null,'Publicada',1);
+ public_result:=public.public_jobs_v1('security-jobs-fixture');
+ if jsonb_array_length(public_result)<>1 then raise exception 'published job absent';end if;
+ if public_result::text like '%PRIVATE_FIXTURE%' or public_result::text like '%12345%' or public_result::text like '%67890%' or public_result->0 ? 'organizationId' then raise exception 'public job secret leak';end if;
+ begin perform public.company_jobs_v1('status',uid,null,'Pausada',1);raise exception 'stale version accepted';exception when serialization_failure then null;end;
+ j:=public.company_jobs_v1('status',uid,null,'Pausada',2);
+ if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'paused job exposed';end if;
+ j:=public.company_jobs_v1('status',uid,null,'Publicada',3);
+ perform public.company_jobs_v1('delete',uid,null,null,4);
+ if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb or public.company_jobs_v1('list')<>'[]'::jsonb then raise exception 'deleted job exposed';end if;
+end;$$;
+reset role;
+update public.company_portals set is_public=false where slug='security-jobs-fixture';
+update public.company_branding set published='{}' where company_id='17000000-0000-4000-8000-000000000011';
+set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
 do $$declare result jsonb;begin
  begin perform public.company_activity_v1();raise exception 'member read audit';exception when insufficient_privilege then null;end;
