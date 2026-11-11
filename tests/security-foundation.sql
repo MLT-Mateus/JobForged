@@ -125,9 +125,9 @@ do $$declare result jsonb;mid uuid;photo text:=encode(convert_to('RIFF1234WEBPfi
 end$$;
 
 -- Persistent publication, tenant isolation, authorization and public projection.
-do $begin
+do $$begin
  begin perform count(*) from app_private.company_jobs;raise exception 'private jobs table exposed';exception when insufficient_privilege then null;end;
-end;$;
+end;$$;
 reset role;
 insert into public.company_portals(company_id,slug,is_public) values('17000000-0000-4000-8000-000000000011','security-jobs-fixture',false) on conflict(company_id) do update set slug=excluded.slug,is_public=false;
 update public.company_branding set published='{"fixture":true}' where company_id='17000000-0000-4000-8000-000000000011';
