@@ -1,0 +1,15 @@
+"use client";
+import {useEffect,useState} from 'react';
+import {History} from 'lucide-react';
+import {ActionButton,DataTable,EmptyState,Panel,PanelHeading,SelectField,WorkspacePagination,WorkspaceState} from '../ui';
+import {auditLabel} from './display-labels';
+type Activity={items:{id:number;action:string;created_at:string;actor_name:string;target_name:string|null}[];page:number;pageSize:number;total:number};
+export function CompanyActivity(){
+ const [page,setPage]=useState(1),[category,setCategory]=useState('all'),[revision,setRevision]=useState(0);
+ const [result,setResult]=useState<{key:string;data?:Activity;error?:boolean}|null>(null);
+ const key=`${page}:${category}:${revision}`,current=result?.key===key?result:null;
+ useEffect(()=>{const controller=new AbortController();void fetch(`/api/company/activity?page=${page}&category=${category}`,{cache:'no-store',credentials:'same-origin',signal:controller.signal}).then(async response=>{if(!response.ok)throw Error();return response.json() as Promise<Activity>}).then(data=>{if(!controller.signal.aborted)setResult({key,data})}).catch(()=>{if(!controller.signal.aborted)setResult({key,error:true})});return()=>controller.abort()},[page,category,revision,key]);
+ return <Panel><PanelHeading title="Histórico de atividades" description="Ações registradas na sua empresa, da mais recente à mais antiga." action={<ActionButton variant="secondary" onClick={()=>{setPage(1);setRevision(x=>x+1)}}>Atualizar</ActionButton>}/><div className="jf-panel-body"><SelectField label="Tipo de atividade" value={category} onValueChange={value=>{setPage(1);setCategory(value)}} options={[{value:'all',label:'Todas as atividades'},{value:'company',label:'Dados da empresa'},{value:'member',label:'Equipe e acessos'},{value:'branding',label:'Identidade visual'},{value:'portal',label:'Página de carreiras'},{value:'domain',label:'Domínio próprio'}]}/></div>
+ {!current?<WorkspaceState title="Carregando atividades..."/>:current.error?<WorkspaceState kind="error" title="Não foi possível carregar as atividades" action={<ActionButton onClick={()=>setRevision(x=>x+1)}>Tentar novamente</ActionButton>}/>:current.data&&<>{current.data.items.length?<DataTable label="Atividades da empresa" headers={['Atividade','Responsável','Data e hora']}>{current.data.items.map(event=><tr key={event.id}><td><strong>{auditLabel(event.action)}</strong>{event.target_name&&<div className="admin-muted">{event.target_name}</div>}</td><td>{event.actor_name}</td><td><time dateTime={event.created_at}>{new Date(event.created_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</time></td></tr>)}</DataTable>:<EmptyState variant="compact" icon={History} title="Nenhuma atividade encontrada" description="As ações registradas aparecerão aqui. Experimente outro filtro."/>}<WorkspacePagination page={current.data.page} pageSize={current.data.pageSize} total={current.data.total} onPage={setPage} label="Paginação das atividades"/></>}
+ </Panel>;
+}

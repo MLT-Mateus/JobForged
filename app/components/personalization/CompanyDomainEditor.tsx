@@ -199,7 +199,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
         <ActionButton variant="quiet" disabled={busy} onClick={() => void refresh()}>
           Consultar status
         </ActionButton>
-        {linkedAddress&&data.status==='active'&&<a className="jf-action jf-action--secondary" href={`https://${data.hostname}`} target="_blank" rel="noopener noreferrer">Abrir página da empresa</a>}
+        {linkedAddress&&data.status==='active'&&<a className="jf-action jf-action--secondary" href="/api/company/portal/open" target="_blank" rel="noopener noreferrer">Abrir página da empresa</a>}
       </div>
 
       {linkedAddress && kind && zoneMatches && (

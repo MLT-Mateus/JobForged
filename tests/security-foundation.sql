@@ -90,8 +90,30 @@ do $$declare result jsonb;begin
  perform public.update_my_member_profile('Fixture owner renamed');
  if public.account_read_v1()->>'cpf'<>'52998224725' then raise exception 'legacy update cleared identity';end if;
 end$$;
+reset role;
+insert into public.company_audit_events(company_id,actor_user_id,action,details)
+select '17000000-0000-4000-8000-000000000011','17000000-0000-4000-8000-000000000001','domain.register','{"private":"DO_NOT_EXPOSE"}' from generate_series(1,25);
+insert into public.company_audit_events(company_id,action) values('17000000-0000-4000-8000-000000000012','domain.register');
+set local role authenticated;
+do $declare first_page jsonb;second_page jsonb;mid uuid;begin
+ first_page:=public.company_activity_v1(1,'domain');second_page:=public.company_activity_v1(2,'domain');
+ if (first_page->>'total')::integer<>25 or jsonb_array_length(first_page->'items')<>10 or jsonb_array_length(public.company_activity_v1(3,'domain')->'items')<>5 then raise exception 'pagination or tenant isolation failed';end if;
+ if exists(select 1 from jsonb_array_elements(first_page->'items') a join jsonb_array_elements(second_page->'items') b on a->>'id'=b->>'id') then raise exception 'pagination overlaps';end if;
+ if first_page::text like '%DO_NOT_EXPOSE%' or first_page::text like '%52998224725%' then raise exception 'audit payload leaked';end if;
+ if public.company_activity_v1(99,'domain')->>'page'<>'3' then raise exception 'page clamping failed';end if;
+ begin perform public.company_activity_v1(0,'all');raise exception 'invalid page accepted';exception when invalid_parameter_value then null;end;
+ select (m->>'id')::uuid into mid from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'role'='member';
+ perform public.update_company_member_identity_v1(mid,'Fixture identity completed','52998224725','11987654321');
+ if not exists(select 1 from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'id'=mid::text and m->>'full_name'='Fixture identity completed' and m->>'cpf'='52998224725') then raise exception 'manager identity not persisted';end if;
+ begin perform public.update_company_member_identity_v1(mid,'Fixture invalid','11111111111',null);raise exception 'manager accepted invalid CPF';exception when invalid_parameter_value then null;end;
+ begin perform public.update_company_member_identity_v1('17000000-0000-4000-8000-000000000012','Fixture foreign',null,null);raise exception 'foreign identity write accepted';exception when insufficient_privilege then null;end;
+ -- Restore the earlier fixture expectation, without clearing the owner's identity.
+ perform public.update_company_member_identity_v1(mid,'Fixture Member',null,null);
+end$;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
 do $$declare result jsonb;begin
+ begin perform public.company_activity_v1();raise exception 'member read audit';exception when insufficient_privilege then null;end;
+ begin perform public.update_company_member_identity_v1('17000000-0000-4000-8000-000000000012','Denied write',null,null);raise exception 'member wrote identity';exception when insufficient_privilege then null;end;
  result:=public.company_read_v1();
  if exists(select 1 from jsonb_array_elements(result->'members') m where m ? 'email' or m ? 'cpf' or m ? 'phone' or m ? 'security_fixture_secret') then raise exception 'member roster projection leak';end if;
  if public.account_read_v1()->>'cpf' is not null then raise exception 'other account CPF leaked';end if;

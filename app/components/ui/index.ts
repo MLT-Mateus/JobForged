@@ -47,3 +47,4 @@ export {FieldFeedback,revealField} from "./FieldFeedback";
 export {ProportionalImage} from "./ProportionalImage";
 
 export {WindowControls} from "./WindowControls";
+export {WorkspacePagination} from "./WorkspacePagination";
