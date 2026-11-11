@@ -20,7 +20,7 @@ jobs:
   deploy-live:
     if: vars.JBFD_LIVE_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     environment: jbfd-live
     steps:
       - name: Baixar o histórico de main
@@ -53,6 +53,13 @@ jobs:
             echo "O SHA informado não é a versão atualmente saudável em Test." >&2
             exit 1
           }
+
+      - name: Criar backup Live cifrado após aprovação do ambiente
+        env:
+          BACKUP_REPOSITORY_TOKEN: ${{ secrets.BACKUP_WORKFLOW_TOKEN }}
+          REVISION: ${{ inputs.commit_sha }}
+          REQUEST_ID: ${{ github.run_id }}-${{ github.run_attempt }}-live
+        run: bash scripts/security/request-offsite-backup.sh live "$REVISION" "$REQUEST_ID"
 
       - name: Confirmar secrets e protocolo seguro de Brevo Live
         env:
