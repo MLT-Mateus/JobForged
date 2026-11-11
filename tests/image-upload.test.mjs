@@ -4,6 +4,42 @@ import sharp from 'sharp';
 import {normalizeBrandingImage,squareBrandingIcon} from '../app/lib/branding-image.ts';
 import {imageAccept,imageMime,fileMatchesAccept,imageUploadOptions} from '../shared/image-upload.ts';
 import {apiResponse} from '../app/lib/api-response.ts';
+import {normalizeMemberPhoto} from '../app/lib/member-photo.ts';
+test('profile photo API scopes writes to session and protects image reads',async()=>{
+ const names=['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY','APP_ENV'],previous=Object.fromEntries(names.map(k=>[k,process.env[k]])),original=globalThis.fetch;let written;
+ Object.assign(process.env,{SUPABASE_INTERNAL_URL:'https://supabase.fixture.invalid',SUPABASE_ANON_KEY:'fixture-anon',APP_ENV:'test'});
+ globalThis.fetch=async(input,init)=>{const url=String(input),body=init?.body?JSON.parse(init.body):null;
+  if(url.endsWith('/auth/v1/user'))return Response.json({id:'fixture-owner',email:'owner@example.invalid',email_confirmed_at:'2026-11-10T00:00:00Z'});
+  if(url.endsWith('/rpc/is_platform_admin'))return Response.json(false);
+  if(url.endsWith('/rpc/session_context_v1'))return Response.json({company_id:'fixture-company',role:'member',full_name:'Fixture',companies:{id:'fixture-company',name:'Fixture'}});
+  if(url.endsWith('/rpc/member_photo_write_v1')){written=body;return Response.json({memberId:'17000000-0000-4000-8000-000000000001',photoVersion:body.photo?1:0})}
+  if(url.endsWith('/rpc/member_photo_read_v1'))return Response.json(written?.thumbnail??null);
+  throw Error('Unexpected photo fixture request');
+ };
+ try{const {default:worker}=await import('../dist/server/index.js');
+  const request=(method,body,origin='http://localhost',cookie='jf_auth_access=fixture-token',query='')=>worker.fetch(new Request('http://localhost/api/account/photo'+query,{method,headers:{host:'localhost',origin,cookie,'content-type':'image/png','x-upload-name':'photo.png'},...(body?{body}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+  const png=await sharp({create:{width:30,height:20,channels:3,background:'#176c9a'}}).png().toBuffer();
+  assert.equal((await request('POST',png,'https://foreign.invalid')).status,403);
+  assert.equal((await request('POST',png,undefined,'')).status,403);
+  assert.equal((await request('POST',Buffer.from('invalid'))).status,400);
+  assert.equal((await request('POST',png)).status,200);assert.deepEqual(Object.keys(written).sort(),['photo','thumbnail']);
+  const read=await request('GET',null,undefined,undefined,'?member=17000000-0000-4000-8000-000000000001');assert.equal(read.status,200);assert.equal(read.headers.get('content-type'),'image/webp');assert.match(read.headers.get('cache-control'),/private, no-store/);
+  assert.equal((await request('DELETE')).status,200);assert.deepEqual(written,{photo:null,thumbnail:null});
+ }finally{globalThis.fetch=original;for(const [key,value]of Object.entries(previous)){if(value===undefined)delete process.env[key];else process.env[key]=value}}
+});
+test('member photos produce bounded private WebP renditions without metadata',async()=>{
+ for(const format of ['png','jpeg','webp','avif']){
+  const input=await sharp({create:{width:500,height:300,channels:3,background:'#176c9a'}}).withMetadata().toFormat(format).toBuffer();
+  const output=await normalizeMemberPhoto(input,`image/${format}`);
+  for(const [key,size,limit] of [['photo',256,65536],['thumbnail',64,16384]]){
+   const bytes=Buffer.from(output[key],'base64'),metadata=await sharp(bytes).metadata();
+   assert.equal(metadata.format,'webp');assert.equal(metadata.width,size);assert.equal(metadata.height,size);assert.ok(bytes.length<=limit);assert.equal(metadata.exif,undefined);
+  }
+ }
+ await assert.rejects(normalizeMemberPhoto(Buffer.from('<svg/>'),'image/svg+xml'));
+ await assert.rejects(normalizeMemberPhoto(Buffer.alloc(2097153),'image/png'));
+ await assert.rejects(normalizeMemberPhoto(Buffer.from('fake PNG'),'image/png'));
+});
 const svg=body=>Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 12">${body}</svg>`);
 test('five supported image formats normalize to static PNG',async()=>{
  for(const [format,mime] of [['png','image/png'],['jpeg','image/jpeg'],['webp','image/webp'],['avif','image/avif']]){
