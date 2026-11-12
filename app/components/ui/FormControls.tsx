@@ -33,6 +33,7 @@ import {
 import {
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ChangeEvent,
@@ -43,6 +44,7 @@ import {
 } from "react";
 import {fieldPlaceholder} from "./field-copy";
 import {useFieldError} from "./FieldFeedback";
+import {popoverPosition} from "@/shared/popover-position.mjs";
 import {FocusPopover} from "./Widgets";
 import {sanitizeRichText,renderRichText,richTextSource} from "./rich-content";
 import { useStatusSoundForMessage } from "./status-sound";
@@ -216,6 +218,44 @@ export function FieldControl({
 
 function useFloatingMenu(open: boolean, onClose: () => void) {
   const rootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const root = rootRef.current;
+    const anchor = root?.querySelector<HTMLElement>(".jf-floating-field");
+    const panel = anchor?.querySelector<HTMLElement>(":scope > :is(.jf-select__menu,.jf-multiselect__menu,.jf-calendar)");
+    const view = panel?.ownerDocument.defaultView;
+    if (!anchor || !panel || !view) return;
+    const place = () => {
+      const vp = view.visualViewport;
+      const bounds = anchor.getBoundingClientRect();
+      const placement = popoverPosition(bounds, panel.scrollHeight + 2, {
+        width: vp?.width ?? view.innerWidth,
+        height: vp?.height ?? view.innerHeight,
+        top: vp?.offsetTop ?? 0,
+      });
+      panel.dataset.side = placement.side;
+      panel.style.maxHeight = `${placement.maxHeight}px`;
+    };
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(anchor);
+    observer.observe(panel);
+    const mutations = new MutationObserver(place);
+    mutations.observe(panel, {childList:true, subtree:true});
+    view.addEventListener("resize", place);
+    view.addEventListener("scroll", place, true);
+    view.visualViewport?.addEventListener("resize", place);
+    view.visualViewport?.addEventListener("scroll", place);
+    return () => {
+      observer.disconnect();
+      mutations.disconnect();
+      view.removeEventListener("resize", place);
+      view.removeEventListener("scroll", place, true);
+      view.visualViewport?.removeEventListener("resize", place);
+      view.visualViewport?.removeEventListener("scroll", place);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
