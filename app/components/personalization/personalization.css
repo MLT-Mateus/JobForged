@@ -255,7 +255,6 @@
 .appearance-domain-kind{display:grid;gap:var(--jf-ui-space-2);min-width:0;padding:var(--jf-ui-space-3);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card)}
 .appearance-domain-kind legend{padding:0 var(--jf-ui-space-2);font-weight:700}
 .appearance-domain-kind label{overflow-wrap:anywhere;display:flex;align-items:flex-start;gap:var(--jf-ui-space-2);min-width:0;cursor:pointer}
-.appearance-domain-kind input{flex:none;margin-top:.3em}
 .appearance-domain-kind small,.appearance-domain-record small,.appearance-domain-diagnosis small,.appearance-domain-note{display:block;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
 .appearance-domain-status{display:grid;justify-items:start;gap:var(--jf-ui-space-2);min-width:0}
 .appearance-domain-status .jf-status{max-width:100%;white-space:normal;overflow-wrap:anywhere}

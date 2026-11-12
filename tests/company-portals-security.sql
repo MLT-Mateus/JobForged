@@ -86,7 +86,9 @@ reset role;
 -- Verified custom domains: no browser/RPC claim may activate routing.
 set local role authenticated;select pg_temp.assume_user('31000000-0000-4000-8000-000000000001');
 do $$declare d jsonb;begin
- d:=public.company_domain('register','careers.fixture.invalid',0);
+ d:=public.company_domain_with_preferences('register','careers.fixture.invalid',0,'subdomain','fixture.invalid');
+ if d->>'kind' is distinct from 'subdomain' or d->>'zone' is distinct from 'fixture.invalid' then raise exception 'domain preferences missing';end if;
+ if public.company_domain_with_preferences('read',null,null,null,null)->>'kind' is distinct from 'subdomain' then raise exception 'domain preferences did not persist';end if;
  if d->>'status'<>'pending' or length(d->>'proof')<>87 then raise exception 'domain proof missing';end if;
  begin perform public.company_domain('activate',null,(d->>'version')::bigint);raise exception 'direct domain activation';exception when invalid_parameter_value then null;end;
  begin update public.company_domains set status='active';raise exception 'direct domain write';exception when insufficient_privilege then null;end;

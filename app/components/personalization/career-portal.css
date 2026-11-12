@@ -185,11 +185,24 @@
  .jf-career-portal:not([data-layout="panorama"]) .mock-hero__visual { height:auto; gap:var(--jf-ui-space-2); }
 }
 @container (max-width:420px) {
- .jf-public-header-inner { flex-wrap:wrap; padding-block:var(--jf-ui-space-2); }
- .jf-career-header-actions { flex-wrap:wrap; flex-shrink:1; }
  .jf-career-highlights { grid-template-columns:minmax(0,1fr); }
 }
 
 .jf-career-portal>header[data-position="static"]{position:relative}
 .jf-career-portal>header a.jf-nav-link{color:var(--cp-header-link-hover)}
 .jf-career-portal footer.site-footer.jf-site-footer a[href]{color:var(--footer-link)}
+
+.jf-career-inline-account{display:contents}
+.jf-career-menu-account{display:none}
+.jf-career-menu-account>.jf-action{width:100%;justify-content:flex-start}
+@container (max-width:760px){
+ .jf-career-portal:is([data-layout="classico"],[data-layout="equipe"]) .mock-hero__visual>.jf-proportional-image{height:auto;aspect-ratio:3/2}
+}
+@container (max-width:680px){
+ .jf-public-header-inner:has(.jf-career-inline-account [data-authenticated="true"]) .jf-career-inline-account>.jf-action{display:none}
+ .jf-public-header-inner:has(.jf-career-inline-account [data-authenticated="true"]) .jf-career-menu-account{display:block}
+}
+@container (max-width:400px){
+ .jf-career-inline-account>.jf-action{display:none}
+ .jf-career-menu-account{display:block}
+}

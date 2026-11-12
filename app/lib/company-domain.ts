@@ -1,4 +1,4 @@
-export type CompanyDomain={hostname?:string;targetHost?:string;version:number;status:'none'|'pending'|'verified'|'active'|'disabled';record?:string;proof?:string;checkedAt?:string|null};
+export type CompanyDomain={hostname?:string;kind?:'root'|'subdomain';zone?:string;targetHost?:string;version:number;status:'none'|'pending'|'verified'|'active'|'disabled';record?:string;proof?:string;checkedAt?:string|null};
 export function companyPageHref(slug:string,domain:CompanyDomain|null,now=Date.now()){
  const checked=domain?.checkedAt?Date.parse(domain.checkedAt):NaN;
  return domain?.status==='active'&&validCompanyHostname(domain.hostname)&&checked<=now&&now-checked<20*60*1000

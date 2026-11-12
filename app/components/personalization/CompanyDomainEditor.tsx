@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { ActionButton, AppToast, EditorSection, StatusBadge, TextField, SelectField } from '../ui';
+import { ActionButton, AppToast, EditorSection, StatusBadge, RadioField, TextField, SelectField } from '../ui';
 import {apiResponse,readApi} from '@/app/lib/api-response';
 import { validCompanyHostname, type CompanyDomain } from '@/app/lib/company-domain';
 
@@ -31,7 +31,8 @@ function relativeName(name: string, zone: string) {
   return name.endsWith(`.${zone}`) ? name.slice(0, -(zone.length + 1)) : null;
 }
 
-export function CompanyDomainEditor({ editable }: { editable: boolean }) {
+export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;companyId:string }) {
+  const storageKey='jbfd-domain-kind:'+companyId;
   const [data, setData] = useState<CompanyDomain>({ status: 'none', version: 0 });
   const [hostname, setHostname] = useState('');
   const [zone, setZone] = useState('');
@@ -62,6 +63,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
       const result = await request();
       setData(result);
       if (result.hostname) setHostname(result.hostname);
+      if(result.kind&&result.zone){setKind(result.kind);setZone(result.zone);}
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Não foi possível carregar o domínio.');
     } finally {
@@ -76,13 +78,18 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
         if (controller.signal.aborted) return;
         setData(result);
         setHostname(result.hostname || '');
+        let remembered: string|null=null;
+        try { remembered=window.localStorage.getItem(storageKey); } catch { /* storage can be disabled */ }
+        const selected=result.kind??(remembered==='root'||remembered==='subdomain'?remembered:'');
+        setKind(selected);
+        setZone(result.zone??(selected==='root'?result.hostname||'':''));
       })
       .catch(cause => {
         if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : 'Não foi possível carregar o domínio.');
       })
       .finally(() => { if (!controller.signal.aborted) setBusy(false); });
     return () => controller.abort();
-  }, []);
+  }, [storageKey]);
 
   const safeHost = cleanHostname(hostname);
   const safeZone = cleanHostname(zone);
@@ -123,6 +130,11 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
       } else {
         setData(result);
         setHostname(result.hostname || '');
+        let remembered: string|null=null;
+        try { remembered=window.localStorage.getItem(storageKey); } catch { /* storage can be disabled */ }
+        const selected=result.kind??(remembered==='root'||remembered==='subdomain'?remembered:'');
+        setKind(selected);
+        setZone(result.zone??(selected==='root'?result.hostname||'':''));
         setDiagnosis(null);
       }
     } catch (cause) {
@@ -145,6 +157,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
 
   function setDomainKind(next: DomainKind) {
     setKind(next);
+    try { window.localStorage.setItem(storageKey,next); } catch { /* storage can be disabled */ }
     setDiagnosis(null);
     const host = cleanHostname(hostname);
     if (next === 'root') setZone(host);
@@ -160,8 +173,8 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
     <EditorSection title="Domínio próprio" description="Conecte o endereço da página de vagas em quatro etapas. Você informa o endereço aqui, adiciona dois registros no painel DNS e volta para confirmar.">
       <fieldset className="appearance-domain-kind">
         <legend>1. Escolha o tipo de endereço</legend>
-        <label><input type="radio" name="company-domain-kind" checked={kind === 'root'} onChange={() => setDomainKind('root')} disabled={!editable||busy} /> Domínio principal (ex.: suaempresa.com.br)</label>
-        <label><input type="radio" name="company-domain-kind" checked={kind === 'subdomain'} onChange={() => setDomainKind('subdomain')} disabled={!editable||busy} /> Subdomínio (ex.: vagas.suaempresa.com.br)</label>
+        <RadioField name="company-domain-kind" label="Domínio principal (ex.: suaempresa.com.br)" checked={kind==='root'} onChange={()=>setDomainKind('root')} disabled={!editable||busy}/>
+        <RadioField name="company-domain-kind" label="Subdomínio (ex.: vagas.suaempresa.com.br)" checked={kind==='subdomain'} onChange={()=>setDomainKind('subdomain')} disabled={!editable||busy}/>
         <small>Escolha o tipo antes de vincular. Subdomínio é recomendado para manter o site principal.</small>
         {kind === 'root' && <small className="appearance-domain-warning">A raiz aponta o site principal para a JobForged. Se quer preservar seu site atual, escolha um subdomínio.</small>}
       </fieldset>
@@ -192,7 +205,7 @@ export function CompanyDomainEditor({ editable }: { editable: boolean }) {
 
       <p className="appearance-domain-next" role="status">{!linkedAddress?'Confira o endereço e selecione Vincular endereço para gerar os registros.':data.status==='active'?'Endereço ativo. Você já pode abrir a página da empresa.':data.status==='verified'?'DNS confirmado. O HTTPS será preparado automaticamente; consulte o status em até 5 minutos.':'Endereço vinculado. Escolha quem gerencia seu DNS e siga as instruções abaixo.'}</p>
       <div className="appearance-domain-actions">
-        <ActionButton disabled={!canRegister} onClick={() => void perform({ operation: 'register', hostname: safeHost, version: data.version }, 'save')}>
+        <ActionButton disabled={!canRegister} onClick={() => void perform({ operation: 'register', hostname: safeHost, kind, zone: safeZone, version: data.version }, 'save')}>
           {linkedAddress?'Endereço vinculado':'Vincular endereço'}
         </ActionButton>
 
