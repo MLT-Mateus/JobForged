@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActionButton, AppToast, EditorSection, StatusBadge, RadioField, TextField, SelectField } from '../ui';
 import {apiResponse,readApi} from '@/app/lib/api-response';
-import { validCompanyHostname, type CompanyDomain } from '@/app/lib/company-domain';
+import { validCompanyHostname, type CompanyDomain,type DomainReplacement } from '@/app/lib/company-domain';
 
 import {domainProviders} from './domain-providers';
 
@@ -31,7 +31,9 @@ function relativeName(name: string, zone: string) {
   return name.endsWith(`.${zone}`) ? name.slice(0, -(zone.length + 1)) : null;
 }
 
-export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;companyId:string }) {
+export function CompanyDomainEditor({ editable,companyId,onPending }: { editable: boolean;companyId:string;onPending:(dirty:boolean,domain:DomainReplacement|null)=>void }) {
+  const [replacing,setReplacing]=useState(false);
+  const [kindTouched,setKindTouched]=useState(false);
   const storageKey='jbfd-domain-kind:'+companyId;
   const [data, setData] = useState<CompanyDomain>({ status: 'none', version: 0 });
   const [hostname, setHostname] = useState('');
@@ -93,7 +95,7 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
 
   const safeHost = cleanHostname(hostname);
   const safeZone = cleanHostname(zone);
-  const proofRecord = data.record || (data.hostname ? `_jobforged.${data.hostname}` : '');
+  const proofRecord = replacing && safeHost ? '_jobforged.'+safeHost : data.record || (data.hostname ? `_jobforged.${data.hostname}` : '');
   const rootRelative = safeHost === safeZone;
   const zoneMatches = kind === 'root'
     ? rootRelative
@@ -102,20 +104,25 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
   const routeRelative = relativeName(safeHost, safeZone);
   const shownStatus = data.hostname === safeHost ? data.status : 'none';
   const linkedAddress = data.hostname === safeHost && !['none','disabled'].includes(data.status);
+  const candidateReady=replacing && !!diagnosis?.ready && zoneMatches && kind!=='' && safeHost!==data.hostname;
+  useEffect(()=>{
+    const candidate=candidateReady&&kind?{hostname:safeHost,zone:safeZone,kind,version:data.version}:null;
+    onPending(replacing?!!(kind||safeHost||safeZone):safeHost!==(data.hostname||'')||(!data.hostname&&(!!safeZone||kindTouched)),candidate);
+  },[candidateReady,data.hostname,data.version,kind,kindTouched,onPending,replacing,safeHost,safeZone]);
   const hostnameError = safeHost && !validCompanyHostname(safeHost) ? 'Use apenas o domínio ou subdomínio, sem https://, espaços ou caminhos.' : undefined;
   const zoneError = kind && safeZone && !zoneMatches ? (kind === 'root' ? 'Use o mesmo domínio informado acima.' : `Use a zona principal do provedor: o endereço deve terminar em .${safeZone}.`) : undefined;
-  const canRegister = editable && !busy && kind !== '' && validCompanyHostname(safeHost)
+  const canRegister = editable && !busy && !replacing && data.status!=='active' && kind !== '' && validCompanyHostname(safeHost)
     && validCompanyHostname(safeZone) && zoneMatches && (data.hostname !== safeHost || data.status === 'disabled');
 
   const records = useMemo(() => {
-    if (!safeHost || !safeZone || !zoneMatches || !kind || !linkedAddress) return [];
+    if (!safeHost || !safeZone || !zoneMatches || !kind || !(linkedAddress||replacing)) return [];
     return [
       { type: 'TXT', name: proofRelative || proofRecord, value: data.proof || 'Aparece após vincular o domínio', purpose: 'Confirma que o domínio pertence à sua empresa.' },
       kind === 'root'
         ? { type: 'A', name: '@', value: '187.77.229.27', purpose: 'Aponta o domínio principal para a JobForged.' }
         : { type: 'CNAME', name: routeRelative || safeHost, value: data.targetHost || 'test.jobforged.com', purpose: 'Aponta o subdomínio para a JobForged.' },
     ];
-  }, [data.proof, data.targetHost, kind, linkedAddress, proofRecord, proofRelative, routeRelative, safeHost, safeZone, zoneMatches]);
+  }, [data.proof, data.targetHost, kind, linkedAddress, replacing, proofRecord, proofRelative, routeRelative, safeHost, safeZone, zoneMatches]);
 
   async function perform(body: object, mode: 'save' | 'check' | 'disconnect') {
     setBusy(true);
@@ -125,7 +132,7 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
     try {
       const result = await request(body);
       if (mode === 'check') {
-        if (result.domain) setData(result.domain);
+        if (result.domain&&!replacing) setData(result.domain);
         setDiagnosis(result.diagnosis || null);
       } else {
         setData(result);
@@ -157,7 +164,8 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
 
   function setDomainKind(next: DomainKind) {
     setKind(next);
-    try { window.localStorage.setItem(storageKey,next); } catch { /* storage can be disabled */ }
+    setKindTouched(true);
+    try { if(!replacing)window.localStorage.setItem(storageKey,next); } catch { /* storage can be disabled */ }
     setDiagnosis(null);
     const host = cleanHostname(hostname);
     if (next === 'root') setZone(host);
@@ -169,8 +177,18 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
     active: 'Ativo', disabled: 'Desconectado',
   };
 
+  if(data.status==='active'&&!replacing)return <EditorSection title="Domínio próprio" description="Endereço publicado da página de vagas.">
+    <StatusBadge tone="positive">Ativo</StatusBadge>
+    <code className="appearance-address">{data.hostname}</code>
+    <div className="appearance-domain-actions">
+      <a className="jf-action jf-action--secondary" href="/api/company/portal/open" target="_blank" rel="noopener noreferrer">Abrir página</a>
+      <ActionButton disabled={!editable||busy} onClick={()=>{setReplacing(true);setHostname('');setZone('');setKind('');setDiagnosis(null);setProvider('')}}>Alterar endereço de domínio</ActionButton>
+    </div>
+  </EditorSection>;
+
   return (
     <EditorSection title="Domínio próprio" description="Conecte o endereço da página de vagas em quatro etapas. Você informa o endereço aqui, adiciona dois registros no painel DNS e volta para confirmar.">
+      {replacing&&<p>O endereço {data.hostname} continua em uso enquanto você prepara o novo. Teste o DNS e use Salvar para incluir a troca na versão da página.</p>}
       <fieldset className="appearance-domain-kind">
         <legend>1. Escolha o tipo de endereço</legend>
         <RadioField name="company-domain-kind" label="Domínio principal (ex.: suaempresa.com.br)" checked={kind==='root'} onChange={()=>setDomainKind('root')} disabled={!editable||busy}/>
@@ -198,7 +216,7 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
       {kind === 'subdomain' && <TextField label="Domínio principal no painel DNS" placeholder="Digite o domínio..." maxLength={253} value={zone} error={zoneError} onChange={event=>{setZone(cleanHostname(event.target.value));setDiagnosis(null)}} helpText={`Para ${safeHost||'vagas.suaempresa.com.br'}, informe o domínio principal (ex.: suaempresa.com.br).`} disabled={!editable||busy}/>}
 
 </section>}
-      <div className="appearance-domain-status" aria-live="polite">
+      {!replacing&&<><div className="appearance-domain-status" aria-live="polite">
         <span>Status do vínculo</span>
         <StatusBadge tone={shownStatus === 'active' ? 'positive' : 'info'}>{statusText[shownStatus]}</StatusBadge>
       </div>
@@ -215,7 +233,9 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
         {linkedAddress&&data.status==='active'&&<a className="jf-action jf-action--secondary" href="/api/company/portal/open" target="_blank" rel="noopener noreferrer">Abrir página da empresa</a>}
       </div>
 
-      {linkedAddress && kind && zoneMatches && (
+      </>}
+      {replacing&&<ActionButton variant="secondary" onClick={()=>{setReplacing(false);setHostname(data.hostname||'');setKind(data.kind||'');setZone(data.zone||'');setDiagnosis(null)}}>Cancelar troca</ActionButton>}
+      {(linkedAddress||replacing) && kind && zoneMatches && safeHost!=='' && (!replacing||safeHost!==data.hostname&&validCompanyHostname(safeHost)) && (
         <div className="appearance-domain-instructions">
           <div className="appearance-domain-steps">
             <h3>3. Adicione os registros no seu DNS</h3>
@@ -245,7 +265,7 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
           <section className="appearance-domain-stage" aria-label="Verificação do domínio">
             <h3>4. Confirme a configuração</h3>
             <p>Depois de salvar os dois registros no provedor, volte aqui e teste. Se ainda não forem encontrados, aguarde a atualização do DNS e tente novamente; ela pode levar até 24 horas.</p>
-            <ActionButton variant="secondary" disabled={!editable||busy||!records.length} onClick={()=>void perform({operation:'check'},'check')}>{checking?'Testando DNS…':'Testar DNS agora'}</ActionButton>
+            <ActionButton variant="secondary" disabled={!editable||busy||!records.length} onClick={()=>void perform(replacing?{operation:'check-replacement',hostname:safeHost}:{operation:'check'},'check')}>{checking?'Testando DNS…':'Testar DNS agora'}</ActionButton>
           </section></>}
 
           {diagnosis && (
@@ -259,13 +279,14 @@ export function CompanyDomainEditor({ editable,companyId }: { editable: boolean;
                 {diagnosis.cnames.length > 0 && <li>CNAME encontrado: {diagnosis.cnames.join(', ')}</li>}
               </ul>
               <small>Consulta direta aos DNS públicos em {new Date(diagnosis.checkedAt).toLocaleTimeString('pt-BR')}.</small>
-              {diagnosis.ready && data.status !== 'active' && <p>Os registros estão prontos. A JobForged ativará o endereço e o HTTPS automaticamente após a próxima conferência, em até 5 minutos.</p>}
+              {candidateReady&&<p>DNS confirmado. Salve a página para publicar a nova versão e iniciar a ativação HTTPS.</p>}
+              {diagnosis.ready && !replacing && data.status !== 'active' && <p>Os registros estão prontos. A JobForged ativará o endereço e o HTTPS automaticamente após a próxima conferência, em até 5 minutos.</p>}
               {diagnosis.ready && <p>Se este teste passar e o endereço ainda não abrir no seu computador, ele pode estar usando uma resposta DNS antiga. Aguarde a propagação (pode levar até 24 horas) e teste novamente.</p>}
             </div>
           )}
 
           <p className="appearance-domain-note">A verificação automática também ocorre a cada 5 minutos. O endereço público abre somente a página da empresa; login e dados de conta permanecem protegidos na JobForged.</p>
-          <ActionButton variant="danger" disabled={!editable || busy} onClick={() => void perform({ operation: 'disconnect', version: data.version }, 'disconnect')}>Desconectar domínio</ActionButton>
+          {!replacing&&<ActionButton variant="danger" disabled={!editable || busy} onClick={() => void perform({ operation: 'disconnect', version: data.version }, 'disconnect')}>Desconectar domínio</ActionButton>}
         </div>
       )}
 

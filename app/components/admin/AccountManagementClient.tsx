@@ -5,6 +5,7 @@ import { Building2, KeyRound, Mail, LogOut, Save, ShieldCheck } from "lucide-rea
 import { ActionButton, AppToast, DisplayValue, Panel, PanelHeading, StatusBadge, TextField, WorkspacePageHeader, WorkspaceState, type ToastKind } from "@/app/components/ui";
 import { requestPasswordRecovery, signOutCompany, useCompanyAuthSession, type AuthSessionState } from "@/app/components/auth/auth-service";
 import { isValidCpf } from "@/app/components/auth/auth-validation";
+import {usePendingChanges} from '../ui/PendingChanges';
 import {ProfilePhoto} from './ProfilePhoto';
 import { memberRoles } from "./member-roles";
 
@@ -28,10 +29,10 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
  },[]);
  useEffect(()=>{if(session.platformAdmin)return;let active=true;void load().then(value=>{if(active){setSaved(value);setDraft(value)}}).catch(()=>{if(active)setLoadError(true)});return()=>{active=false}},[load,session.platformAdmin]);
  const dirty=!!saved&&(draft.fullName!==saved.fullName||digits(draft.cpf??'')!==(saved.cpf??'')||digits(draft.phone??'')!==(saved.phone??''));
- useEffect(()=>{if(!dirty)return;const warn=(event:BeforeUnloadEvent)=>event.preventDefault();window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn)},[dirty]);
  const [credential,setCredential]=useState<"password"|"email"|null>(null);
  const [credentialValue,setCredentialValue]=useState("");
  const [credentialConfirmation,setCredentialConfirmation]=useState("");
+ const {dialog:pendingChanges}=usePendingChanges(dirty||!!credentialValue||!!credentialConfirmation);
  const role=memberRoles[session.role as keyof typeof memberRoles];
  async function save(event:FormEvent<HTMLFormElement>){
   event.preventDefault();const next:Record<string,string>={};
@@ -78,7 +79,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
    setNotice({kind:'danger',title:'Alteração não concluída',text:error instanceof Error?error.message:'Tente novamente.'});
   }finally{setBusy(null);}
  }
- return <>{!embedded&&<WorkspacePageHeader section="Painel / Minha conta" title="Seu perfil" description="Seus dados pessoais, vínculo com a empresa e segurança em um só lugar."/>}
+ return <>{pendingChanges}{!embedded&&<WorkspacePageHeader section="Painel / Minha conta" title="Seu perfil" description="Seus dados pessoais, vínculo com a empresa e segurança em um só lugar."/>}
   {notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}
   {!saved?<WorkspaceState kind={loadError?'error':'loading'} title={loadError?'Não foi possível carregar seu perfil':'Carregando seus dados...'} action={loadError?<ActionButton variant="secondary" onClick={()=>{setLoadError(false);void load().then(value=>{setSaved(value);setDraft(value)}).catch(()=>setLoadError(true))}}>Tentar novamente</ActionButton>:undefined}/>:<div className="jf-workspace-stack">
    <div className="jf-profile-layout"><Panel><PanelHeading title="Dados pessoais" description="Mantenha sua identificação e contato atualizados."/>
