@@ -189,3 +189,7 @@
  .jf-career-header-actions { flex-wrap:wrap; flex-shrink:1; }
  .jf-career-highlights { grid-template-columns:minmax(0,1fr); }
 }
+
+.jf-career-portal>header[data-position="static"]{position:relative}
+.jf-career-portal>header a.jf-nav-link{color:var(--cp-header-link-hover)}
+.jf-career-portal footer.site-footer.jf-site-footer a[href]{color:var(--footer-link)}

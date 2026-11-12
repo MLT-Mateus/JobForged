@@ -795,13 +795,11 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-workspace-tabs .jf-status { font-size:var(--jf-ui-font-size-xs); }
 @media(max-width:680px) { .jf-page-head__actions { width:100%; } .jf-workspace-stack,.jf-workspace-grid { gap:var(--jf-ui-space-4); } .jf-workspace-toolbar > .jf-field { flex-basis:100%; } .jf-workspace-tabs > .jf-action { justify-content:flex-start; flex:1 1 140px; } .jf-page-head__actions .jf-action { flex:1 1 auto; white-space:normal; } }
 
-.jf-action-menu { position:relative; flex:0 0 auto; }
 .jf-action-menu > .jf-action { min-width:40px; padding-inline:var(--jf-ui-space-2); }
-.jf-action-menu__panel { position:absolute; z-index:35; inset:calc(100% + 4px) 0 auto auto; display:grid; width:min(270px,calc(100vw - 48px)); gap:var(--jf-ui-space-1); padding:var(--jf-ui-space-2); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-control-radius); background:var(--jf-ui-surface-raised); box-shadow:var(--jf-ui-shadow); }
-.jf-action-menu__panel > :is(a,button) { display:flex; width:100%; height:auto; min-height:40px; align-items:center; justify-content:flex-start; gap:var(--jf-ui-space-2); padding:var(--jf-ui-space-2); border-radius:var(--jf-ui-control-radius); color:var(--jf-ui-text); font:600 var(--jf-ui-font-size-sm)/1.5 var(--jf-ui-font-body); text-align:left; white-space:normal; }
-.jf-action-menu__panel > :is(a,button):hover { background:var(--jf-ui-surface-soft); transform:none; }
-.jf-action-menu__panel svg { flex:0 0 17px; width:17px; height:17px; }
-.jf-action-menu__panel > .danger { color:var(--jf-ui-danger); }
+.jf-action-menu__items > :is(a,button) { display:flex; width:100%; height:auto; min-height:40px; align-items:center; justify-content:flex-start; gap:var(--jf-ui-space-2); padding:var(--jf-ui-space-2); border-radius:var(--jf-ui-control-radius); color:var(--jf-ui-text); font:600 var(--jf-ui-font-size-sm)/1.5 var(--jf-ui-font-body); text-align:left; white-space:normal; }
+.jf-action-menu__items > :is(a,button):hover { background:var(--jf-ui-surface-soft); transform:none; }
+.jf-action-menu__items svg { flex:0 0 17px; width:17px; height:17px; }
+.jf-action-menu__items > .danger { color:var(--jf-ui-danger); }
 
 /* The field shell owns the border and focus ring; the editing surface has none. */
 .jf-control > textarea,
@@ -930,3 +928,8 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 @media(max-width:540px){.jf-profile-photo{flex-direction:column}}
 
 .jf-profile-actions { justify-content:end; }
+
+.jf-floating-field > :is(.jf-select__menu,.jf-multiselect__menu,.jf-calendar){overflow-y:auto;overscroll-behavior:contain}
+.jf-floating-field > [data-side="top"]{top:auto;bottom:calc(100% + 8px)}
+.jf-focus-group__panel:has(>.jf-action-menu__items){padding:var(--jf-ui-space-2)}
+.jf-action-menu__items{display:grid;gap:var(--jf-ui-space-1)}
