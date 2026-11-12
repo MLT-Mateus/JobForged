@@ -31,7 +31,7 @@ class MigrationGateTests(unittest.TestCase):
     def tearDown(self):self.temp.cleanup()
     def write_receipt(self):
         recovery=self.folder/'recovery.json';recovery.write_text(json.dumps(self.evidence))
-        (self.folder/'offsite-receipt.json').write_text(json.dumps({'backup':self.folder.name,'recovery_sha256':hashlib.sha256(recovery.read_bytes()).hexdigest(),'encrypted_sha256':'a'*64,'artifact_id':'12345','artifact_repository':'MLT-Mateus/jobforged-backups'}))
+        (self.folder/'offsite-receipt.json').write_text(json.dumps({'backup':self.folder.name,'recovery_sha256':hashlib.sha256(recovery.read_bytes()).hexdigest(),'encrypted_sha256':'a'*64}))
     def execute(self):
         def path(value):
             if str(value)=='/opt/jbfd/backups/security':return self.root/'backups'

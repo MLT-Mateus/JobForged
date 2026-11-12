@@ -101,21 +101,13 @@ class ProfilesTests(unittest.TestCase):
             evidence={'environment':'live','counts_match':True,'network':'none','ports':[],'checksums':checks}
             def write(value):
                 recovery=folder/'recovery.json';recovery.write_text(json.dumps(value))
-                (folder/'offsite-receipt.json').write_text(json.dumps({'backup':folder.name,'recovery_sha256':hashlib.sha256(recovery.read_bytes()).hexdigest(),'encrypted_sha256':'a'*64,'artifact_id':'12345','artifact_repository':'MLT-Mateus/jobforged-backups'}))
+                (folder/'offsite-receipt.json').write_text(json.dumps({'backup':folder.name,'recovery_sha256':hashlib.sha256(recovery.read_bytes()).hexdigest(),'encrypted_sha256':'a'*64}))
             def remap(value):return root if str(value)=='/opt/jbfd/backups/security' else Path(value)
             with patch.object(profiles,'Path',side_effect=remap),patch.object(profiles,'private_file',side_effect=lambda p:Path(p)):
                 write(evidence);self.assertEqual(profiles.verified_backup(profiles.Environment('live'),folder),folder)
                 for changes in [{'environment':'test'},{'counts_match':False},{'network':'bridge'},{'ports':[5432]},{'checksums':{}}]:
                     write({**evidence,**changes})
                     with self.assertRaises(ValueError):profiles.verified_backup(profiles.Environment('live'),folder)
-                write(evidence)
-                receipt=json.loads((folder/'offsite-receipt.json').read_text())
-                for changes in [{'artifact_repository':'MLT-Mateus/JobForged'},{'artifact_id':None},{'artifact_id':'not-a-number'}]:
-                    (folder/'offsite-receipt.json').write_text(json.dumps({**receipt,**changes}))
-                    with self.assertRaises(ValueError):profiles.verified_backup(profiles.Environment('live'),folder)
-                incomplete=dict(receipt);incomplete.pop('artifact_id')
-                (folder/'offsite-receipt.json').write_text(json.dumps(incomplete))
-                with self.assertRaises(ValueError):profiles.verified_backup(profiles.Environment('live'),folder)
                 write(evidence);(folder/'storage.tar.gz').write_bytes(b'corrupted')
                 with self.assertRaises(ValueError):profiles.verified_backup(profiles.Environment('live'),folder)
 

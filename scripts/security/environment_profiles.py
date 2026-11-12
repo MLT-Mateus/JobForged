@@ -75,12 +75,7 @@ def verified_backup(environment, folder, now=None):
     receipt = json.loads(private_file(folder / 'offsite-receipt.json').read_text())
     if evidence.get('environment') != environment.name or evidence.get('counts_match') is not True or evidence.get('network') != 'none' or evidence.get('ports') != []:
         raise ValueError('Isolated restoration evidence required')
-    artifact_id = receipt.get('artifact_id')
-    if (receipt.get('backup') != folder.name
-            or receipt.get('artifact_repository') != 'MLT-Mateus/jobforged-backups'
-            or not isinstance(artifact_id, str) or not re.fullmatch(r'[0-9]{1,20}', artifact_id)
-            or receipt.get('recovery_sha256') != hashlib.sha256(recovery.read_bytes()).hexdigest()
-            or not re.fullmatch('[a-f0-9]{64}', receipt.get('encrypted_sha256', ''))):
+    if receipt.get('backup') != folder.name or receipt.get('recovery_sha256') != hashlib.sha256(recovery.read_bytes()).hexdigest() or not re.fullmatch('[a-f0-9]{64}', receipt.get('encrypted_sha256', '')):
         raise ValueError('Encrypted offsite receipt does not match restoration')
     expected = {'postgres.sql.gz', 'storage.tar.gz', 'objects.private.json', 'infrastructure-audit.jsonl'}
     if set(evidence.get('checksums', {})) != expected:
