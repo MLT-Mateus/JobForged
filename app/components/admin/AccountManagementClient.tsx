@@ -31,8 +31,9 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
  const dirty=!!saved&&(draft.fullName!==saved.fullName||digits(draft.cpf??'')!==(saved.cpf??'')||digits(draft.phone??'')!==(saved.phone??''));
  const [credential,setCredential]=useState<"password"|"email"|null>(null);
  const [credentialValue,setCredentialValue]=useState("");
+ const [currentPassword,setCurrentPassword]=useState('');
  const [credentialConfirmation,setCredentialConfirmation]=useState("");
- const {dialog:pendingChanges}=usePendingChanges(dirty||!!credentialValue||!!credentialConfirmation);
+ const {dialog:pendingChanges}=usePendingChanges(dirty||!!credentialValue||!!credentialConfirmation||!!currentPassword);
  const role=memberRoles[session.role as keyof typeof memberRoles];
  async function save(event:FormEvent<HTMLFormElement>){
   event.preventDefault();const next:Record<string,string>={};
@@ -58,7 +59,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
  }
  function openCredential(value: typeof credential) {
   setCredential(value);
-  setCredentialValue("");
+  setCredentialValue("");setCurrentPassword('');
   setCredentialConfirmation("");
  }
  async function saveCredential(event:FormEvent<HTMLFormElement>) {
@@ -68,13 +69,13 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
   try {
    const response=await fetch('/api/account/credentials',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({operation:credential,[credential]:credentialValue,confirmation:credentialConfirmation})
+    body:JSON.stringify({operation:credential,[credential]:credentialValue,confirmation:credentialConfirmation,currentPassword:credential==='email'?currentPassword:undefined})
    });
    const result=await response.json() as {message?:string};
    if(!response.ok)throw new Error(result.message||'Não foi possível salvar.');
    openCredential(null);
    if(credential==='password'){location.replace('/login');return;}
-   setNotice({kind:'success',title:'Confirme a troca de e-mail',text:'Siga as instruções enviadas aos seus endereços de e-mail.'});
+   setNotice({kind:'success',title:'Confirme a troca de e-mail',text:'Abra o link de confirmação enviado ao novo endereço. Depois de confirmar, use o novo e-mail para entrar.'});
   }catch(error){
    setNotice({kind:'danger',title:'Alteração não concluída',text:error instanceof Error?error.message:'Tente novamente.'});
   }finally{setBusy(null);}
@@ -96,6 +97,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
       {!session.platformAdmin&&<ActionButton type="button" variant="secondary" icon={<Mail size={16}/>} disabled={!!busy} onClick={()=>openCredential('email')}>Alterar e-mail</ActionButton>}
      </div>
      {credential&&<form key={credential} className="jf-workspace-stack" onSubmit={saveCredential}>
+      {credential==='email'&&<TextField type="password" label="Senha atual" autoComplete="current-password" value={currentPassword} onChange={event=>setCurrentPassword(event.target.value)} required disabled={!!busy} maxLength={72}/>}
       <TextField type={credential} label={credential==='password'?'Nova senha':'Novo e-mail'} autoComplete={credential==='password'?'new-password':'email'} value={credentialValue} onChange={event=>setCredentialValue(event.target.value)} required disabled={!!busy} maxLength={credential==='password'?72:254} helpText={credential==='password'?'Use pelo menos 8 caracteres, com maiúscula, minúscula, número e símbolo.':'A troca depende da confirmação por e-mail.'}/>
       <TextField type={credential} label={credential==='password'?'Confirme a nova senha':'Confirme o novo e-mail'} autoComplete={credential==='password'?'new-password':'off'} value={credentialConfirmation} onChange={event=>setCredentialConfirmation(event.target.value)} required disabled={!!busy} maxLength={credential==='password'?72:254}/>
       <div className="jf-profile-actions jf-workspace-toolbar">

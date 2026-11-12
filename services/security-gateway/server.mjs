@@ -95,6 +95,7 @@ const server=http.createServer(async(req,res)=>{
   if(!application&&uploading&&canonicalPath.includes('/candidate-resumes/')&&(req.headers['content-type']!=='application/pdf'||!validResume(body))){reply(res,415,'Use a simple PDF up to 5 MB');return;}
   if(!application&&uploading&&!bffRequest&&!canonicalPath.includes('/candidate-resumes/')&&(req.headers['content-type']!=='image/png'||!validStaticPng(body))){reply(res,415,'Use a valid static PNG image');return;}
   if(!await budgets(data))return;
+  if(!application&&!bffRequest&&canonicalPath==='/auth/v1/user'&&req.method==='PUT'&&data&&Object.hasOwn(data,'email')){reply(res,403,'Use account settings to change email');return;}
   if(canonicalPath==='/auth/v1/user'||canonicalPath==='/auth/v1/factors'||canonicalPath.startsWith('/auth/v1/factors/')){
    const hint=sessionClaimHints(req.headers.authorization);
    if(!hint){reply(res,401,'Session unavailable');return;}

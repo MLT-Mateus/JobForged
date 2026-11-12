@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
  try {
   const session = await readSession(request, headers);
   if (!session || !session.company || session.platformAdmin) return reply("Entre novamente para continuar.", 401);
-  const input = await request.json().catch(() => null) as {operation?: unknown; password?: unknown; email?: unknown; confirmation?: unknown} | null;
+  const input = await request.json().catch(() => null) as {operation?: unknown; password?: unknown; email?: unknown; confirmation?: unknown; currentPassword?: unknown} | null;
   if (input?.operation === "password") {
    const password = typeof input.password === "string" ? input.password : "";
    if (new TextEncoder().encode(password).length > 72 || !Object.values(passwordRules(password)).every(Boolean))
@@ -29,7 +29,13 @@ export async function POST(request: NextRequest) {
     return reply("Informe um novo e-mail válido.", 400);
    if (email !== (typeof input.confirmation === "string" ? input.confirmation.trim().toLowerCase() : ""))
     return reply("Os e-mails não coincidem.", 400);
-   const updated = await requestAuth("user", {email}, session.accessToken, "PUT");
+   const currentPassword=typeof input.currentPassword==='string'?input.currentPassword:'';
+   if(!currentPassword||new TextEncoder().encode(currentPassword).length>72)return reply("Informe sua senha atual.",400);
+   const reauth=await requestAuth("token?grant_type=password",{email:session.email,password:currentPassword});
+   const user=reauth.payload?.user as {id?:string}|undefined;
+   const token=reauth.payload?.access_token;
+   if(!reauth.response?.ok||user?.id!==session.id||typeof token!=='string')return reply("A senha atual não confere.",400);
+   const updated=await requestAuth("user",{email},token,"PUT").finally(()=>requestAuth("logout?scope=local",{},token).catch(()=>null));
    if (!updated.response?.ok) return reply("Não foi possível solicitar a troca. Confira o endereço e tente novamente.", 400);
    return Response.json({ok:true}, {headers});
   }
