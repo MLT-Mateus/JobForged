@@ -53,7 +53,7 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     [[ "$(stat -c '%u:%a' "$metadata")" == "0:600" && "$(stat -c '%u:%a' "$archive")" == "0:600" && "$(stat -c '%u:%a' "$encrypted")" == "0:600" ]] || { echo "Pacote com permissões inseguras" >&2; exit 77; }
     expected="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["encrypted_sha256"])' "$metadata")"
     [[ "$expected" == "$encrypted_sha" ]] || { echo "Hash cifrado não corresponde ao preparo" >&2; exit 65; }
-    python3 "$security_work/record-offsite-copy.py" "$name" \
+    python3 "$security_work/record-vault-offsite-copy.py" "$name" \
       "$(sha256sum -- "$archive" | cut -d ' ' -f 1)" "$encrypted_sha" "$artifact_id"
     if [[ "$environment" == live ]]; then
       python3 - "$metadata" "$name" <<'PY'
