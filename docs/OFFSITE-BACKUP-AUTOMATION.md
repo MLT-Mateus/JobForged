@@ -23,3 +23,5 @@ No repositório `MLT-Mateus/JobForged`, criar o secret `BACKUP_WORKFLOW_TOKEN` n
 Instalar na VPS a chave pública SSH de Test em `/root/.ssh/authorized_keys`, presa a `/opt/jbfd/bin/jbfd-backup-vault-gateway.sh test` com `restrict`, sem TTY, forwarding ou shell. Instalar os helpers root-owned em `/opt/jbfd/bin` e `/opt/jbfd/security-work`, as chaves públicas de cifra em `/opt/jbfd/security-work/backup-keys` e permissões `0700` para diretórios e `0600` para arquivos.
 
 Não adicionar chave privada, dados de conexão, backup plaintext ou valores de `.env` ao Git. Mudanças no projeto entram por PR e deploy Test; configuração do VPS é feita separadamente pelo acesso root autorizado.
+
+Instale `record-offsite-copy.py` como `/opt/jbfd/security-work/record-vault-offsite-copy.py` para o gateway. A manutenção de Test sincroniza o coletor da estação de trabalho no caminho antigo.
