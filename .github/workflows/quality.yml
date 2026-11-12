@@ -111,7 +111,7 @@ jobs:
 
       - name: Validar proteção de publicação sem Auth
         run: |
-          bash -n scripts/retain-client-assets.sh scripts/deploy-vps.sh scripts/supabase-migrate.sh scripts/jbfd-deploy-live-root.sh scripts/jbfd-deploy-test-root.sh scripts/jbfd-supabase-smtp-test-root.sh
+          bash -n scripts/retain-client-assets.sh scripts/deploy-vps.sh scripts/supabase-migrate.sh scripts/jbfd-deploy-live-root.sh scripts/jbfd-deploy-test-root.sh scripts/jbfd-supabase-smtp-test-root.sh scripts/security/request-offsite-backup.sh scripts/security/backup-vault-gateway.sh
           node --test tests/auth-readiness.test.mjs tests/live-deploy-stdin.test.mjs tests/toast-channel.test.mjs tests/status-sound.test.mjs tests/document-scrollbar.test.mjs tests/favicon.test.mjs
 
       - name: Testar e validar a publicação
@@ -215,12 +215,25 @@ jobs:
     needs: [mcp, validate, docker, database-security, native-security, publish-test-image]
     if: needs.publish-test-image.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     environment: jbfd-test
     permissions:
       contents: read
       packages: read
     steps:
+      - name: Baixar o script versionado do backup
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Criar backup Test cifrado no repositório privado
+        env:
+          BACKUP_REPOSITORY_TOKEN: ${{ secrets.BACKUP_WORKFLOW_TOKEN }}
+          REVISION: ${{ github.sha }}
+          REQUEST_ID: ${{ github.run_id }}-${{ github.run_attempt }}-test
+        run: bash scripts/security/request-offsite-backup.sh test "$REVISION" "$REQUEST_ID"
+
       - name: Implantar somente no ambiente Test
         env:
           VPS_DEPLOY_HOST: ${{ vars.VPS_DEPLOY_HOST }}
