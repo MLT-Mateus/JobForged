@@ -317,3 +317,9 @@ body:has(.admin-shell){overflow:hidden}
 .admin-user>a{padding:var(--jf-ui-space-2);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);text-decoration:none}
 .admin-user>a:is(:hover,:focus-visible){text-decoration:none;color:var(--jf-ui-brand-strong);background:var(--jf-ui-brand-soft);border-color:currentColor}
 .admin-user>a :is(strong,small){text-decoration:none}
+
+.admin-shell .jf-admin-directory__summary{flex-wrap:wrap}
+.admin-shell .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr) repeat(4,auto)}
+.admin-shell .jf-admin-directory__list[data-layout="blocks"] .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-surface)}
+.admin-shell .jf-admin-directory__list[data-layout="blocks"] .jf-admin-directory__row > :is(.jf-status,.jf-status-help,.jf-action){grid-column:2;justify-self:start}
+@media(max-width:900px){.admin-shell .jf-admin-directory__row{grid-template-columns:auto minmax(0,1fr)}.admin-shell .jf-admin-directory__row > :is(.jf-status,.jf-status-help,.jf-action){grid-column:2;justify-self:start}}

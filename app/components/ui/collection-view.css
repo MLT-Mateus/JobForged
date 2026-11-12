@@ -1,0 +1,3 @@
+.jf-collection-switch{display:flex;align-items:center;gap:var(--jf-ui-space-2)}
+.jf-collection-switch [aria-pressed="true"]{background:var(--jf-ui-brand-soft);border-color:var(--jf-ui-brand);color:var(--jf-ui-brand-strong)}
+.jf-collection-view[data-layout="blocks"]{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-4)}

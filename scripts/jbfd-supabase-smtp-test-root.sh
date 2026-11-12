@@ -53,6 +53,8 @@ services:
   auth:
     environment:
       GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "false"
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: https://test.jobforged.com/api/auth/email-templates/email-change
       GOTRUE_MAILER_TEMPLATES_RECOVERY: https://test.jobforged.com/api/auth/email-templates/password-recovery
       GOTRUE_MAILER_SUBJECTS_RECOVERY: Redefina sua senha na JobForged
       GOTRUE_MAILER_TEMPLATES_CONFIRMATION: https://test.jobforged.com/api/auth/email-templates/auth-confirmation
