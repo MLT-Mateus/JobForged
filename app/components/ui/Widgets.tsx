@@ -35,7 +35,7 @@ export function WidgetDialog({open,onClose,title,description,kind="modal",size="
  </dialog>;
 }
 
-export function FocusPopover({label,children,triggerContent,triggerVariant="secondary",triggerClassName="",align="start",showCloseAction=true}:{showCloseAction?:boolean;align?:"start"|"end";label:string;children:ReactNode;triggerContent?:ReactNode;triggerVariant?:"secondary"|"quiet";triggerClassName?:string}) {
+export function FocusPopover({label,children,triggerContent,triggerVariant="secondary",triggerClassName="",align="start",showCloseAction=true,closeOnAction=false}:{closeOnAction?:boolean;showCloseAction?:boolean;align?:"start"|"end";label:string;children:ReactNode;triggerContent?:ReactNode;triggerVariant?:"secondary"|"quiet";triggerClassName?:string}) {
  const [open,setOpen]=useState(false),root=useRef<HTMLDivElement>(null),trigger=useRef<HTMLButtonElement>(null),panel=useRef<HTMLDivElement>(null),id=useId();
  useLayoutEffect(()=>{
   if(!open||!panel.current||!trigger.current)return;
@@ -51,7 +51,12 @@ export function FocusPopover({label,children,triggerContent,triggerVariant="seco
   doc.addEventListener('pointerdown',outside);doc.addEventListener('keydown',key);doc.addEventListener('scroll',schedule,true);view.addEventListener('resize',schedule);view.visualViewport?.addEventListener('resize',schedule);view.visualViewport?.addEventListener('scroll',schedule);
   return()=>{observer.disconnect();view.cancelAnimationFrame(pending);element.hidePopover?.();doc.removeEventListener('pointerdown',outside);doc.removeEventListener('keydown',key);doc.removeEventListener('scroll',schedule,true);view.removeEventListener('resize',schedule);view.visualViewport?.removeEventListener('resize',schedule);view.visualViewport?.removeEventListener('scroll',schedule)};
  },[open,align]);
- return <div className={`jf-focus-group jf-focus-group--${align}`} ref={root} onBlur={e=>{if(e.relatedTarget&&'nodeType' in e.relatedTarget&&!e.currentTarget.contains(e.relatedTarget as Node))setOpen(false)}}><button ref={trigger} type="button" className={`jf-action jf-action--${triggerVariant} ${triggerClassName}`} title={label} aria-label={label} aria-expanded={open} aria-controls={id} aria-haspopup="dialog" onClick={()=>setOpen(v=>!v)}>{triggerContent??label}</button>{open&&<div id={id} ref={panel} popover="manual" style={{visibility:"hidden"}} tabIndex={-1} role="dialog" aria-label={label} className="jf-focus-group__panel">{children}{showCloseAction&&<ActionButton variant="quiet" onClick={()=>{setOpen(false);trigger.current?.focus()}}>Concluir</ActionButton>}</div>}</div>;
+ return <div className={`jf-focus-group jf-focus-group--${align}`} ref={root} onBlur={e=>{if(e.relatedTarget&&'nodeType' in e.relatedTarget&&!e.currentTarget.contains(e.relatedTarget as Node))setOpen(false)}}><button ref={trigger} type="button" className={`jf-action jf-action--${triggerVariant} ${triggerClassName}`} title={label} aria-label={label} aria-expanded={open} aria-controls={id} aria-haspopup="dialog" onClick={()=>setOpen(v=>!v)}>{triggerContent??label}</button>{open&&<div id={id} ref={panel} popover="manual" style={{visibility:"hidden"}} tabIndex={-1} onClick={event=>{
+  if(closeOnAction && (event.target as Element).closest('button:not(:disabled), a[href]')){
+   setOpen(false);
+   trigger.current?.focus({preventScroll:true});
+  }
+ }} role="dialog" aria-label={label} className="jf-focus-group__panel">{children}{showCloseAction&&<ActionButton variant="quiet" onClick={()=>{setOpen(false);trigger.current?.focus()}}>Concluir</ActionButton>}</div>}</div>;
 }
 
 export function EditorAccordion({title,icon,badge,children,defaultOpen=false}:{title:string;icon?:ReactNode;badge?:ReactNode;children:ReactNode;defaultOpen?:boolean}) {

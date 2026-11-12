@@ -223,15 +223,15 @@
 @media(max-width:680px){.jf-external-preview .mock-hero{grid-template-columns:1fr}.jf-external-preview .mock-hero__copy,.jf-external-preview .mock-hero__visual{grid-column:1;grid-row:auto}}
 
 
-.appearance-publishing>.jf-panel-body{display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-5);flex-wrap:wrap}
+.appearance-publishing{border-top:1px solid var(--jf-ui-border);padding:var(--jf-ui-space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-5);flex-wrap:wrap}
 .appearance-publishing p{margin:var(--jf-ui-space-3) 0 0;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
-.appearance-publishing__actions{display:flex;align-items:center;gap:var(--jf-ui-space-3);flex-wrap:wrap}
+.appearance-publishing__actions{margin-inline-start:auto;justify-content:flex-end;display:flex;align-items:center;gap:var(--jf-ui-space-3);flex-wrap:wrap}
 .custom-editor .custom-card{border:0;background:transparent;border-radius:0;box-shadow:none;overflow:visible}
 .custom-editor .custom-card>.jf-panel-head{padding:0 0 var(--jf-ui-space-3)}
 .custom-editor .custom-card-body{padding:var(--jf-ui-space-4) 0 0}
 .jf-editor-workbench .appearance-preview-panel{position:static}
 .jf-editor-workbench .custom-grid.three,.jf-editor-workbench .asset-grid,.jf-editor-workbench .theme-panels{grid-template-columns:1fr}
-@media(max-width:680px){.appearance-publishing__actions{width:100%}.appearance-publishing__actions>.jf-action{flex:1 1 140px}.jf-editor-workbench .custom-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.appearance-publishing__actions{width:100%}.jf-editor-workbench .custom-grid{grid-template-columns:1fr}}
 
 /* Isolated from the institutional landing page's legacy .custom-preview. */
 .appearance-preview-panel{margin:0;align-self:start;color:var(--jf-ui-text)}
@@ -281,3 +281,6 @@
 .appearance-domain-stage{display:grid;min-width:0;gap:var(--jf-ui-space-3)}
 .appearance-domain-stage h3,.appearance-domain-steps h3{margin:0;font-size:var(--jf-ui-font-size-md);line-height:1.4}
 .appearance-domain-steps{display:grid;gap:var(--jf-ui-space-3)}
+
+.appearance-editor-tabs .jf-workspace-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.appearance-editor-tabs .jf-workspace-tabs>.jf-action{justify-content:center;padding-inline:0;font-size:var(--jf-ui-font-size-xs);white-space:nowrap}
