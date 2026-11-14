@@ -26,3 +26,11 @@ O pipeline executa as migrations e testes em PostgreSQL descartável antes do de
 - `/api/company/jobs/assistant/media` exige sessão owner/admin, mesma origem e empresa ativa, valida limite e assinatura do arquivo. Emite autorização de uso único para a leitura, compartilhando o limite empresarial de 30 solicitações/hora. Credenciais de IA continuam apenas no n8n.
 - Workflow `NTb1OmXykFRnRETw`: novas entradas `jbfd-test-job-authoring-stream` e `jbfd-test-job-media`, mantendo a entrada anterior. Versão publicada `8f2b6b31-01ab-4e4f-bb1b-ecf6288fd573`. Histórico de execução com conteúdo desativado. Fluxo temporário de teste removido antes da publicação.
 - Verificação real do provedor: extração de PDF sintético (execução 1748) e transcrição de voz sintetizada (1749). Testes locais cobrem fragmentação do stream, revisão segura, isolamento empresarial, tipos/tamanho de arquivo e rejeição de campos não autorizados.
+
+## Refinamento do compositor (14/11/2026)
+
+A gravação oferece cancelar, pausar/continuar e concluir. Concluir inicia a transcrição automaticamente; o texto aparece no campo para revisão e confirmação em Enviar. O botão manual de transcrição e o player intermediário foram removidos. Falhas oferecem repetir ou descartar. O campo usa nome acessível sem label visual repetido; a orientação está na abertura da conversa.
+
+Após aplicar sugestões, `applicationFeedback` avalia o formulário resultante pelos mesmos critérios do editor, reconhece informações já preenchidas, identifica pendências e faz a próxima pergunta. Complementos opcionais são separados das obrigações; consentimento e salvamento continuam humanos. Esse retorno é imediato e não depende de nova chamada à IA.
+
+O loader compartilhado tem uma opção de cores originais, ativada somente nos componentes de chat. Outros usos preservam a personalização empresarial.

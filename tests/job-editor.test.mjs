@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import ts from 'typescript';
 async function load(path){const source=readFileSync(new URL(path,import.meta.url),'utf8');return import('data:text/javascript;base64,'+Buffer.from(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText).toString('base64'))}
 const {emptyJob}=await load('../app/components/jobs/job-types.ts');
-const {editorChecks,reconcileStages}=await load('../app/components/jobs/job-editor-model.ts');
+const {editorChecks,reconcileStages,applicationFeedback}=await load('../app/components/jobs/job-editor-model.ts');
 test('publication checklist matches required identification and leaves requirements optional',()=>{
  const job={...emptyJob('company'),title:'Cargo',area:'Área',level:'Pleno',pcd:'Disponível para PCD',salaryRange:'Salário a combinar',contractType:'CLT',modality:'Presencial',journey:'Matutino',branchIds:['a'],city:'Brasília',state:'DF',summary:'Descrição',responsibilities:['Atender clientes'],requirements:[],lgpd:true};
  assert.equal(editorChecks(job).every(x=>x.done),true);
@@ -18,4 +18,12 @@ test('stage identity survives reorder, deletion and renaming',()=>{
  assert.deepEqual(reconcileStages([a,b],['Entrevista','Triagem']),[b,a]);
  assert.deepEqual(reconcileStages([a,b],['Triagem inicial','Entrevista']),[{...a,name:'Triagem inicial'},b]);
  assert.deepEqual(reconcileStages([a,b],['Entrevista']),[b]);
+});
+
+test('application feedback reports only applied facts and separates essentials from optional improvements',()=>{
+ const partial={...emptyJob(),title:'Analista'};
+ const feedback=applicationFeedback(partial);assert.match(feedback,/cargo identificado/);assert.match(feedback,/faixa salarial/);assert.doesNotMatch(feedback,/remuneração informada/);assert.match(feedback,/ainda precisam ser salvas/);
+ const complete={...partial,area:'Tecnologia',level:'Pleno',pcd:'Disponível para PCD',salaryRange:'Salário a combinar',contractType:'CLT',modality:'Presencial',journey:'Matutino',branchIds:['a'],city:'Brasília',state:'DF',summary:'Descrição',responsibilities:['Atender clientes']};
+ const result=applicationFeedback(complete);assert.match(result,/informações essenciais da vaga estão preenchidas/);assert.match(result,/complementos são opcionais/);assert.match(result,/confirmação de privacidade/);assert.doesNotMatch(result,/vaga está publicada/);
+ assert.match(applicationFeedback({...complete,branchIds:[]}),/qual filial/);
 });
