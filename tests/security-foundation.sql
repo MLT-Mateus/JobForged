@@ -203,6 +203,19 @@ do $$declare j jsonb;uid uuid;public_result jsonb;begin
  public_result:=public.public_jobs_v1('security-jobs-fixture');
  if jsonb_array_length(public_result)<>1 then raise exception 'published job absent';end if;
  if public_result::text like '%PRIVATE_FIXTURE%' or public_result::text like '%12345%' or public_result::text like '%67890%' or public_result->0 ? 'organizationId' then raise exception 'public job secret leak';end if;
+
+ -- The reference editor accepts optional requirements, persists its fields and validates contacts.
+ declare d jsonb;b jsonb;bid uuid;bd jsonb:='{"name":"Editor location","type":"Filial","cnpj":"","corporateName":"","description":"","region":"","postalCode":"01001000","street":"Praça da Sé","number":"1","complement":"","district":"Sé","city":"São Paulo","state":"SP","status":"Ativo","mapsUrl":"","photos":[],"jobIds":[]}';begin
+  b:=public.company_branches_v1('save',null,bd);bid:=(b->>'id')::uuid;
+  d:=(j-'id'-'organizationId'-'status'-'version'-'createdAt'-'updatedAt'-'applicationsCount')||'{"pcd":"Disponível para PCD","journey":"Matutino","salaryRange":"PRIVATE_SALARY","description":"<b>Role description</b>","attributions":"One responsibility","requirements":[],"responsibilities":["One responsibility"],"contactEmail":"rh@example.invalid","contactPhone":"(11) 99999-1234","contactWhatsapp":""}'||jsonb_build_object('branchIds',jsonb_build_array(bid));
+  begin perform public.company_jobs_v1('save',uid,d||'{"contactEmail":"invalid"}','Publicada',(j->>'version')::bigint);raise exception 'invalid contact accepted';exception when invalid_parameter_value then null;end;
+  begin perform public.company_jobs_v1('save',uid,d||'{"branchIds":[]}','Publicada',(j->>'version')::bigint);raise exception 'missing environment accepted';exception when invalid_parameter_value then null;end;
+  begin perform public.company_jobs_v1('save',uid,d||'{"salaryRange":"Informar valores","salaryMin":""}','Publicada',(j->>'version')::bigint);raise exception 'missing numeric salary accepted';exception when invalid_parameter_value then null;end;
+  j:=public.company_jobs_v1('save',uid,d,'Publicada',(j->>'version')::bigint);
+  if j->>'journey'<>'Matutino' or j->'requirements'<>'[]'::jsonb then raise exception 'editor fields not persisted';end if;
+  public_result:=public.public_jobs_v1('security-jobs-fixture')->0;
+  if public_result->>'description'<>'<b>Role description</b>' or public_result->>'contactEmail'<>'rh@example.invalid' or public_result::text like '%PRIVATE_SALARY%' then raise exception 'editor public projection failed';end if;
+ end;
  begin perform public.company_jobs_v1('status',uid,null,'Pausada',1);raise exception 'stale version accepted';exception when serialization_failure then null;end;
  j:=public.company_jobs_v1('status',uid,null,'Pausada',(j->>'version')::bigint);
  if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'paused job exposed';end if;

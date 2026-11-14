@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import {editorChecks} from "./job-editor-model";
 import { defaultSettings } from "./job-mocks";
 import { type Candidate, type Job, type JobSettings, type JobStatus } from "./job-types";
 async function request<T>(id?:string,body?:unknown):Promise<T>{const r=await fetch('/api/company/jobs'+(id?'?id='+encodeURIComponent(id):''),{method:body?'POST':'GET',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await r.json() as T & {message?:string};if(!r.ok)throw new Error(data.message||'Não foi possível salvar a vaga.');return data}
@@ -24,7 +25,7 @@ export const jobService={
 };
 
 export function getCompletion(job:Job){
- const required=[job.title,job.area,job.level,job.contractType,job.modality,job.country,job.state,job.city,job.summary,job.responsibilities.length>=3,job.requirements.length>=3,job.stages.length>0,job.lgpd];
+ const required=editorChecks({...job,pcd:job.pcd||"",journey:job.journey||"",salaryRange:job.salaryRange||""}).map(c=>c.done);
  const optional=[job.experience,job.weeklyHours,job.softSkills.length,job.benefits.length,job.teamDescription,job.tools.length,job.applicationDeadline,job.education,job.interviewTypes.length];
  const score=Math.round((required.filter(Boolean).length*2+optional.filter(Boolean).length)/(required.length*2+optional.length)*100);
  return {score,requiredDone:required.filter(Boolean).length,requiredTotal:required.length,quality:score>=85?"Completa":score>=55?"Estruturada":"Básica",canPublish:required.every(Boolean)};
