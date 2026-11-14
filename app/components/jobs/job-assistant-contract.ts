@@ -1,6 +1,7 @@
 import type {Job} from './job-types';
 
 export const assistantFields = {
+ pcd:'Acessibilidade PCD',salaryRange:'Faixa salarial',journey:'Jornada',description:'Descrição da vaga',attributions:'Atribuições',contactEmail:'E-mail de contato',contactPhone:'Telefone de contato',contactWhatsapp:'WhatsApp',
  title:'Título da vaga',area:'Área',level:'Nível',contractType:'Contratação',modality:'Modalidade',
  country:'País',state:'Estado',city:'Cidade',summary:'Resumo',experience:'Experiência',weeklyHours:'Carga horária',
  schedule:'Horário',salaryMin:'Salário mínimo',salaryMax:'Salário máximo',currency:'Moeda',education:'Formação',
