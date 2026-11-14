@@ -7,6 +7,8 @@
 }
 .black-friday-page .hero-layout { align-items: center; gap: 48px; }
 .black-friday-page .hero-copy h1 { font-size: clamp(38px, 4.1vw, 60px); }
+.black-friday-page .hero-copy { min-width: 0; }
+.black-friday-page .hero-copy h1 .highlight-pair { white-space: normal; }
 .black-friday-page .bf-eyebrow {
   display: inline-block;
   margin-bottom: 20px;
