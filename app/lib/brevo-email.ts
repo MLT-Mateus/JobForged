@@ -1,3 +1,4 @@
+import {emailRecipient} from './email-recipient.ts';
 import {
   renderEmailHtml,
   resolveEmailTheme,
@@ -9,6 +10,8 @@ const SENDER = { name: "JobForged", email: "suporte@jobforged.com" };
 export type BrevoSendResult = "sent" | "not-configured" | "failed";
 
 export async function sendCompanyInvitationEmail(email: string, company: string, token: string): Promise<BrevoSendResult> {
+  const recipient=emailRecipient(email);
+  if(!recipient)return 'failed';
   const apiKey = process.env.BREVO_API_KEY?.trim();
   if (!apiKey) return "not-configured";
   const origin = process.env.APP_ENV === "live" ? "https://jobforged.com" : "https://test.jobforged.com";
@@ -18,7 +21,7 @@ export async function sendCompanyInvitationEmail(email: string, company: string,
     const response = await fetch(BREVO_SEND_URL, {
       method: "POST", cache: "no-store", signal: AbortSignal.timeout(8000),
       headers: { accept: "application/json", "api-key": apiKey, "content-type": "application/json" },
-      body: JSON.stringify({ sender: SENDER, to: [{ email }], subject: "Convite para acessar uma empresa na JobForged",
+      body: JSON.stringify({ sender: SENDER, to: [{ email:recipient }], subject: "Convite para acessar uma empresa na JobForged",
         htmlContent: renderEmailHtml("company-invitation", "light", false, {}, {COMPANY_NAME:company.slice(0,160), APP_URL:url}) }),
     });
     return response.ok ? "sent" : "failed";
@@ -50,6 +53,8 @@ export async function sendCompanyWelcomeEmail({
   company: string;
   preferredTheme?: string | null;
 }): Promise<BrevoSendResult> {
+  const recipient=emailRecipient(email);
+  if(!recipient)return 'failed';
   const apiKey = process.env.BREVO_API_KEY?.trim();
   if (!apiKey) return "not-configured";
 
@@ -73,7 +78,7 @@ export async function sendCompanyWelcomeEmail({
       },
       body: JSON.stringify({
         sender: SENDER,
-        to: [{ email }],
+        to: [{ email:recipient }],
         subject: safeSubjectName ? `Bem-vindo à JobForged, ${safeSubjectName}` : "Bem-vindo à JobForged",
         htmlContent,
       }),
