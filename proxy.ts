@@ -27,7 +27,8 @@ export async function proxy(request:NextRequest){
    const accountRead=['/api/auth/session','/api/portal/account','/api/portal/resume'].includes(path)&&['GET','HEAD'].includes(request.method);
    const accountWrite=['/api/auth/sign-in','/api/auth/sign-out','/api/auth/recover','/api/auth/candidate-sign-up','/api/portal/account','/api/portal/resume'].includes(path)&&request.method==='POST';
    const publicJobs=path==='/api/portals/'+slug+'/jobs'&&['GET','HEAD'].includes(request.method);
-   const allowed=(path==="/api/tracking"&&request.method==="GET")||publicJobs||accountRead||accountWrite||['/termos-servico','/politicas-privacidade'].includes(path)||path.startsWith('/api/portals/'+slug+'/assets/')||/^\/(careers|fonts|brand|assets)\//.test(path);
+   const publicJobPage=path.startsWith('/vagas/'+slug+'/')&&path.split('/').length===4&&['GET','HEAD'].includes(request.method);
+   const allowed=publicJobPage||(path==="/api/tracking"&&request.method==="GET")||publicJobs||accountRead||accountWrite||['/termos-servico','/politicas-privacidade'].includes(path)||path.startsWith('/api/portals/'+slug+'/assets/')||/^\/(careers|fonts|brand|assets)\//.test(path);
    if(!allowed)return new NextResponse('Página não encontrada.',{status:404,headers});
   }catch{return new NextResponse('Serviço temporariamente indisponível.',{status:503,headers})}
  }
