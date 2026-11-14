@@ -1,6 +1,6 @@
 import type { HomePermission } from "@/app/home/types";
 
-export type AdminModuleId = "dashboards" | "vagas" | "candidaturas" | "agenda" | "personalizacao" | "administradores" | "financeiro" | "configuracoes" | "minha-conta";
+export type AdminModuleId = "filiais" | "dashboards" | "vagas" | "candidaturas" | "agenda" | "personalizacao" | "administradores" | "financeiro" | "configuracoes" | "minha-conta";
 export type AdminPermission = HomePermission | "finance.view" | "admins.manage" | "organization.edit" | "candidates.manage";
 
 export const activeOrganization = { id: "org_jobforged_demo", name: "Inside Forge Tecnologia", shortName: "Inside Forge", logo: "/brand/jobforged-symbol.svg" };
@@ -35,6 +35,7 @@ export const invoices = [
 ];
 
 export const moduleCopy: Record<AdminModuleId,{title:string;description:string}> = {
+  filiais:{title:'Filiais',description:'Gerencie as unidades e os espaços de trabalho da empresa.'},
   dashboards:{title:"Dashboards",description:"Indicadores que ajudam sua equipe a entender desempenho, conversão e ritmo de contratação."},
   vagas:{title:"Vagas",description:"Organize as vagas e prepare as próximas oportunidades da empresa."},
   candidaturas:{title:"Candidaturas",description:"Centralize candidatos, avaliações e movimentações do processo seletivo."},
