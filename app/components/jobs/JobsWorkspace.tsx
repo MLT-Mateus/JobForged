@@ -16,6 +16,7 @@ export default function JobsWorkspace({view,jobId}:{view:'list'|'edit'|'detail'|
  if(auth.checking||!auth.company||!auth.authenticated||auth.platformAdmin)return <main className="jf-session-state"><BrandAsset src="/brand/jobforged-symbol.svg" alt="JobForged" width={48} height={48}/><WorkspaceState title="Validando seu acesso"/></main>;
  const manage=!!access?.permissions[jobId?'jobs.edit':'jobs.create'];
  if(!access)return <WorkspaceState title="Validando permissões..."/>;
+ if(access.error)return <WorkspaceState kind="error" title={access.error}/>;
  if(view==='edit'&&!manage)return <main className="jf-session-state"><WorkspaceState kind="forbidden" title="Acesso restrito" description="Somente titulares e administradores podem editar vagas."/></main>;
  const name=auth.fullName||auth.email||'Conta';
  const context:AwaitedAdminContext={organization:{id:auth.company.id,name:auth.company.name,shortName:auth.company.name,logo:'/brand/jobforged-symbol.svg'},user:{id:'',name,fullName:name,email:auth.email||'',phone:'',role:auth.role||'',initials:name.slice(0,2),permissions:['create','edit','delete'].filter(action=>access.permissions['jobs.'+action]).map(action=>'vacancies.'+action)},vacancies:[],candidates:[],team:[],invoices:[]};

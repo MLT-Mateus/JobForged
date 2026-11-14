@@ -1,8 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {editorChecks} from "./job-editor-model";
-import { defaultSettings } from "./job-mocks";
-import { type Candidate, type Job, type JobSettings, type JobStatus } from "./job-types";
+import { type Job, type JobStatus } from "./job-types";
 async function request<T>(id?:string,body?:unknown):Promise<T>{const r=await fetch('/api/company/jobs'+(id?'?id='+encodeURIComponent(id):''),{method:body?'POST':'GET',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await r.json() as T & {message?:string};if(!r.ok)throw new Error(data.message||'Não foi possível salvar a vaga.');return data}
 function document(job:Job){const {id,organizationId,createdAt,updatedAt,status,applicationsCount,version,...fields}=job;void id;void organizationId;void createdAt;void updatedAt;void status;void applicationsCount;void version;return fields}
 export const jobService={
@@ -14,13 +13,6 @@ export const jobService={
  async changeJobStatus(id:string,status:JobStatus){const current=await this.getJobById(id);if(!current)throw new Error('Vaga não encontrada.');return request<Job>(undefined,{operation:'status',id,companyId:current.organizationId,version:current.version,status})},
  async archiveJob(id:string){return this.changeJobStatus(id,'Arquivada')},
  async deleteJob(id:string){const current=await this.getJobById(id);if(!current)throw new Error('Vaga não encontrada.');await request(undefined,{operation:'delete',id,companyId:current.organizationId,version:current.version})},
- async getJobApplications(_jobId:string):Promise<Candidate[]>{return []},
- async moveCandidate(_id:string,_stage:string){throw new Error('Candidaturas ainda não disponíveis.')},
- async saveCandidateNotes(_id:string,_notes:string){throw new Error('Candidaturas ainda não disponíveis.')},
- async getJobSettings(id:string){return {...defaultSettings,slug:id}},
- async saveJobAutomation(_id:string,_settings:JobSettings):Promise<JobSettings>{throw new Error('Automações ainda não disponíveis.')},
- async saveJobSettings(_id:string,_settings:JobSettings):Promise<JobSettings>{throw new Error('Configurações adicionais ainda não disponíveis.')},
- async isSlugAvailable(_slug:string,_jobId:string){return false},
 
 };
 
