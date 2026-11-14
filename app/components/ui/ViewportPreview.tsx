@@ -1,5 +1,6 @@
 "use client";
-import {Component,useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
+import {Component,useCallback,useEffect,useRef,useState,type ReactNode,type CSSProperties} from 'react';
+import {applyDocumentScrollbar} from '../personalization/document-scrollbar';
 import {createPortal} from 'react-dom';
 import './widgets.css';
 import {ActionButton} from './AdminPrimitives';
@@ -13,7 +14,7 @@ class PreviewBoundary extends Component<{children:ReactNode},{failed:boolean}>{
 
 const documentSource='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'none\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' https: data:; font-src \'self\' data:; form-action \'none\'; base-uri \'none\'"></head><body style="margin:0"><div id="preview-root"></div></body></html>';
 /** A real viewport, scaled to its available space without changing breakpoints. */
-export function ViewportPreview({children,width,height=800,theme,title='Prévia da página'}:{children:ReactNode;width:number;height?:number;theme:'light'|'dark';title?:string}){
+export function ViewportPreview({children,width,height=800,theme,scrollbarStyle,title='Prévia da página'}:{children:ReactNode;width:number;height?:number;theme:'light'|'dark';title?:string;scrollbarStyle?:CSSProperties}){
  const container=useRef<HTMLDivElement>(null),frame=useRef<HTMLIFrameElement>(null);
  const [doc,setDoc]=useState<Document|null>(null),[scale,setScale]=useState(1);
  const ready=useCallback(()=>{const current=frame.current?.contentDocument;if(current?.getElementById("preview-root"))setDoc(current)},[]);
@@ -34,6 +35,7 @@ export function ViewportPreview({children,width,height=800,theme,title='Prévia 
   doc.addEventListener('click',navigate,true);return()=>{observer.disconnect();cancelAnimationFrame(pending);for(const {clone} of copies.values())clone.remove();doc.removeEventListener('click',navigate,true)};
  },[doc]);
  useEffect(()=>{if(doc){doc.documentElement.setAttribute('data-theme',theme);doc.documentElement.style.setProperty('color-scheme',theme)}},[doc,theme]);
+ useEffect(()=>{if(doc&&scrollbarStyle)return applyDocumentScrollbar(doc.documentElement.style,scrollbarStyle)},[doc,scrollbarStyle]);
  const root=doc?.getElementById('preview-root');
  return <div className="jf-viewport-preview"><p className="jf-viewport-preview__scale">{width} × {height} px · {Math.round(scale*100)}%</p><div ref={container} className="jf-viewport-preview__available"><div className="jf-viewport-preview__stage" style={{height:height*scale,width:width*scale}}><iframe ref={frame} title={title} sandbox="allow-same-origin" srcDoc={documentSource} onLoad={ready} style={{width,height,transform:`scale(${scale})`}}/>{root&&createPortal(<PreviewBoundary>{children}</PreviewBoundary>,root)}</div></div><p className="jf-viewport-preview__hint">Role dentro da prévia para conferir a página. Links externos ficam desativados.</p></div>;
 }

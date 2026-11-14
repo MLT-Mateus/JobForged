@@ -1,4 +1,6 @@
 "use client";
+import {IntegrationsClient} from './IntegrationsClient';
+
 import {apiResponse} from '@/app/lib/api-response';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
@@ -17,7 +19,7 @@ import { backofficeSections, defaultPlatformSettings, platformActions, platformS
 type Result = {total?:number;items?:RecordRow[];company?:RecordRow;members?:RecordRow[];invitations?:RecordRow[]} & Partial<PlatformSettings> & Record<string,unknown>;
 type Edit = {operation:string;company?:string;target?:string;title:string;description:string;values:Record<string,string>};
 const date=(value?:string)=>value?new Date(value).toLocaleString('pt-BR'):'—';
-const icons=[LayoutDashboard,Building2,Users,Mail,Megaphone,Settings,History,ShieldCheck];
+const icons=[LayoutDashboard,Building2,Users,Mail,Megaphone,Settings,History,ShieldCheck,Settings];
 const labels:Record<string,string>={name:'Nome da empresa',cnpj:'CNPJ',phone:'Telefone',email:'E-mail do convidado',platform_name:'Nome da plataforma',support_email:'E-mail de contato',support_url:'Link de suporte'};
 const placeholders:Record<string,string>={name:'Ex.: Empresa Tecnologia Ltda.',cnpj:'14 dígitos, apenas números',phone:'DDD e telefone, apenas números',email:'nome@empresa.com.br',platform_name:'Ex.: JobForged',support_email:'contato@empresa.com.br',support_url:'https://exemplo.com/suporte'};
 export function BackofficeManagementClient({email,section='overview',companyId,deletionEnabled=false}:{email:string;section?:BackofficeSection;companyId?:string;deletionEnabled?:boolean}) {
@@ -25,10 +27,10 @@ export function BackofficeManagementClient({email,section='overview',companyId,d
  const [search,setSearch]=useState(''),[query,setQuery]=useState(''),[status,setStatus]=useState(''),[page,setPage]=useState(1);
  const [settings,setSettings]=useState<PlatformSettings>(defaultPlatformSettings),[edit,setEdit]=useState<Edit|null>(null),[reason,setReason]=useState(''),[saving,setSaving]=useState(false),[saveError,setSaveError]=useState(''),[notice,setNotice]=useState<ToastNotice|null>(null),[auditRow,setAuditRow]=useState<RecordRow|null>(null);
  const key=JSON.stringify([section,query,status,page,companyId,revision]);
- const loading=!['communications','security'].includes(section)&&snapshot?.key!==key,data=loading?null:snapshot?.data,error=loading?'':snapshot?.error;
+ const loading=!['communications','security','integrations'].includes(section)&&snapshot?.key!==key,data=loading?null:snapshot?.data,error=loading?'':snapshot?.error;
  const load=useCallback(()=>setRevision(value=>value+1),[]);
  useEffect(()=>{
-  if(['communications','security'].includes(section))return;
+  if(['communications','security','integrations'].includes(section))return;
   const c=new AbortController(),params=new URLSearchParams({section,search:query,status,page:String(page)});if(companyId)params.set('company',companyId);
   void fetch(`/api/backoffice?${params}`,{cache:'no-store',credentials:'same-origin',signal:c.signal})
    .then(async response=>{const result=await apiResponse<{data:Result;message?:string}>(response);if(!response.ok)throw new Error(result.message||'Não foi possível carregar.');return result.data})
@@ -53,7 +55,7 @@ export function BackofficeManagementClient({email,section='overview',companyId,d
  return <WorkspaceShell items={backofficeSections.map((s,i)=>({label:s.label,href:`/backoffice${s.path}`,icon:icons[i],active:s.id===activeSection}))} logo="/brand/jobforged-symbol.svg" brand={settings.platform_name} title={settings.platform_name} subtitle="Administração interna" actions={<><NotificationBell key={email}/><BackofficeLogout/></>}>
  <div className="admin-main jf-workspace-stack"><WorkspacePageHeader section="Backoffice" title={title} description={`Administração da plataforma · ${email}`} back={section==='company'?{href:'/backoffice/empresas',label:'Empresas'}:undefined} action={<ActionButton variant="secondary" disabled={loading} onClick={()=>void load()}>Atualizar</ActionButton>}/>
  {deletionEnabled&&section==='companies'&&<CompanyDeletionJobs key={revision}/>}
- {section==='communications'&&<CommunicationsClient revision={revision}/>}{section==='security'&&<SecurityClient revision={revision}/>}
+ {section==='integrations'&&<IntegrationsClient key={revision}/>}{section==='communications'&&<CommunicationsClient revision={revision}/>}{section==='security'&&<SecurityClient revision={revision}/>}
  {['companies','users','invitations','audit'].includes(section)&&<Panel><form className="jf-panel-body jf-workspace-toolbar" onSubmit={e=>{e.preventDefault();setPage(1);setQuery(search)}}><TextField label={section==='audit'?'Buscar por ação, motivo ou empresa':'Buscar'} type="search" placeholder={section==='audit'?'Ex.: empresa, ação ou motivo':'Ex.: nome da empresa ou e-mail'} maxLength={160} value={search} onChange={e=>setSearch(e.target.value)}/>{section!=='audit'&&<SelectField label="Situação" value={status} onValueChange={v=>{setStatus(v);setPage(1)}} options={[{value:'',label:'Todas as situações'},...(section==='companies'?['active','suspended']:section==='users'?['active','inactive']:['pending','expired','accepted','revoked']).map(v=>({value:v,label:platformStatus[v]}))]}/>}<ActionButton type="submit">Buscar</ActionButton></form></Panel>}
  {loading?<WorkspaceState title="Carregando dados autorizados…"/>:error?<WorkspaceState kind="error" title={error===adminVerificationMessage?'Confirme sua autenticação':'Não foi possível carregar'} description={error} action={<div className="jf-workspace-toolbar">{error===adminVerificationMessage&&<AdministrativeVerificationAction/>}<ActionButton variant="secondary" onClick={()=>void load()}>Tentar novamente</ActionButton></div>}/>:data&&<>
  {section==='overview'&&<><div className="admin-metrics">{[['companies','Empresas cadastradas','Todas as empresas preservadas no banco.'],['active_companies','Empresas ativas','Com acesso operacional habilitado.'],['suspended_companies','Empresas suspensas','Com acesso empresarial bloqueado.'],['users','Identidades vinculadas','Pessoas distintas com ao menos um vínculo.'],['members','Vínculos empresariais','Inclui vínculos ativos e inativos.'],['pending_invitations','Convites pendentes','Dentro do prazo, não aceitos nem revogados.'],['expired_invitations','Convites expirados','Fora do prazo, não aceitos nem revogados.']].map(([k,l,d])=><MetricCard key={k} label={l} value={Number(data[k]||0)} detail={d}/>)}</div><Panel><PanelHeading title="Atividade da plataforma" description="Consulte as operações mais recentes e seus responsáveis."/><div className="jf-panel-body"><Link className="jf-action jf-action--secondary" href="/backoffice/auditoria">Ver histórico de atividades</Link></div></Panel></>}
