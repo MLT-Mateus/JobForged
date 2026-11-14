@@ -177,6 +177,9 @@
   .black-friday-page .hero-copy { padding-bottom: 0; }
   .black-friday-page .bf-people { margin: 8px 6px 0; }
   .black-friday-page .bf-photo { aspect-ratio: 1.15; }
+  .black-friday-page .bf-stamp { position: relative; right: auto; bottom: auto; width: fit-content; margin: -52px 14px 20px auto; transform: rotate(3deg); }
+  .black-friday-page .bf-people figcaption { margin: 0 12px; }
+  .black-friday-page .floating-whatsapp-cta strong { display: none; }
   .black-friday-page .bf-ribbon { display: grid; grid-template-columns: 1fr 1fr; font-size: 10px; gap: 20px; }
   .black-friday-page .bf-ribbon > * { min-width: 0; }
   .black-friday-page .hero-actions > a { width: 100%; justify-content: center; }
