@@ -2,7 +2,7 @@ import type { AdminModuleId } from "./admin-data";
 
 export type WorkspaceModule = AdminModuleId | "home";
 export type FeatureAvailability = {
-  status: "available" | "soon" | "available";
+  status: "available";
   description: string;
 };
 
@@ -49,6 +49,3 @@ export const featureAvailability: Record<WorkspaceModule, FeatureAvailability> =
   },
 };
 
-export function availabilityLabel(status: FeatureAvailability["status"]) {
-  return status === "beta" ? "Beta" : "Em breve";
-}

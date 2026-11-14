@@ -16,7 +16,7 @@ import "./jobs.css";
 type Tab="sobre"|"candidaturas"|"automacoes"|"configuracoes";
 const tabs:[Tab,string][]=[["sobre","Sobre a vaga"],["candidaturas","Candidaturas"],["automacoes","Automações"],["configuracoes","Configurações"]];
 export default function JobDetailClient({context,jobId,initialTab="sobre"}:{context:AwaitedAdminContext;jobId:string;initialTab?:Tab}){
- const manage=context.user.permissions.includes("vacancies.create");
+ const manage=context.user.permissions.includes("vacancies.edit");
 
  const [job,setJob]=useState<Job|null>(null),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[tab,setTab]=useState<Tab>(initialTab),[notice,setNotice]=useState('');
  useEffect(()=>{let active=true;jobService.getJobById(jobId).then(j=>{if(active){setJob(j);setLoading(false)}}).catch(()=>{if(active){setLoadError(true);setLoading(false)}});return()=>{active=false}},[jobId]);

@@ -24,8 +24,8 @@ export async function proxy(request:NextRequest){
    if(path==='/recuperar-senha')return NextResponse.redirect(new URL('/recuperar-senha',process.env.APP_PUBLIC_URL||'https://test.jobforged.com'),303);
    if(path==='/'){const target=new URL(request.url);target.pathname='/'+slug;return NextResponse.rewrite(target,{headers})}
    if(path==='/'+slug)return NextResponse.redirect(new URL('/',request.url));
-   const accountRead=['/api/auth/session','/api/portal/account','/api/portal/resume'].includes(path)&&['GET','HEAD'].includes(request.method);
-   const accountWrite=['/api/auth/sign-in','/api/auth/sign-out','/api/auth/recover','/api/auth/candidate-sign-up','/api/portal/account','/api/portal/resume'].includes(path)&&request.method==='POST';
+   const accountRead=['/api/auth/session','/api/portal/account','/api/portal/resume','/api/portal/applications'].includes(path)&&['GET','HEAD'].includes(request.method);
+   const accountWrite=['/api/auth/sign-in','/api/auth/sign-out','/api/auth/recover','/api/auth/candidate-sign-up','/api/portal/account','/api/portal/resume','/api/portal/applications'].includes(path)&&request.method==='POST';
    const publicJobs=path==='/api/portals/'+slug+'/jobs'&&['GET','HEAD'].includes(request.method);
    const publicJobPage=path.startsWith('/vagas/'+slug+'/')&&path.split('/').length===4&&['GET','HEAD'].includes(request.method);
    const allowed=publicJobPage||(path==="/api/tracking"&&request.method==="GET")||publicJobs||accountRead||accountWrite||['/termos-servico','/politicas-privacidade'].includes(path)||path.startsWith('/api/portals/'+slug+'/assets/')||/^\/(careers|fonts|brand|assets)\//.test(path);
