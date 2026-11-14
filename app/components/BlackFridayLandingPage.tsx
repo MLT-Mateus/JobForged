@@ -94,6 +94,14 @@ function Reveal({
   return <div ref={ref} className={`lp-reveal ${className ?? ''}`} style={{'--reveal-delay': `${delay}s`} as CSSProperties}>{children}</div>;
 }
 
+function BlackFridaySeal({ className = "" }: { className?: string }) {
+  return <div className={`bf-seal ${className}`} aria-label="Black Friday JobForged, 48% de economia">
+    <span>JOBFORGED · EDIÇÃO ESPECIAL</span>
+    <strong>BLACK<br />FRIDAY</strong>
+    <span className="bf-seal-offer">48% DE ECONOMIA</span>
+  </div>;
+}
+
 function SectionIntro({
   eyebrow,
   title,
@@ -279,7 +287,7 @@ export default function BlackFridayLandingPage() {
   const closeMenu = () => setMenuOpen(false);
   return (
     <main className={`landing-page ${blackFriday ? "black-friday-page" : ""}`}>
-{blackFriday && <div className="bf-concept">Prévia conceitual de campanha · condições sujeitas à definição comercial</div>}
+
       <header className="site-header">
         <div className="container nav-wrap">
           <a className="brand" href="#inicio" aria-label="JobForged — início">
@@ -347,7 +355,7 @@ export default function BlackFridayLandingPage() {
               <a className="button button--ghost jf-action jf-action--secondary" href="#como-funciona">Conhecer a plataforma</a>
             </div>
           </motion.div>
-          {blackFriday ? <figure className="bf-people"><div className="bf-photo-label">PESSOAS NO CENTRO. SEMPRE.</div><BrandAsset className="bf-photo" src="/careers/team-collaboration.jpg" alt="Profissionais reunidos para conversar e planejar o trabalho da equipe" width={1400} height={933} fetchPriority="high"/><div className="bf-stamp"><span>BÔNUS DA CAMPANHA</span><strong>Consultoria<br />inicial de RH</strong><span>INCLUÍDA</span></div><figcaption><span className="bf-photo-symbol"><BrandAsset src="/brand/jobforged-symbol-dark.svg" alt="" width={40} height={40}/></span><div><strong>Não é só uma nova ferramenta.</strong><span>É um novo ponto de partida para o seu RH.</span></div></figcaption></figure> : <ProductMockup />}
+          {blackFriday ? <figure className="bf-people"><div className="bf-photo-label">PESSOAS NO CENTRO. SEMPRE.</div><BrandAsset className="bf-photo" src="/campaigns/blackfriday-team-v1.webp" alt="Profissionais reunidos para conversar e planejar o trabalho da equipe" width={1536} height={1024} fetchPriority="high"/><BlackFridaySeal className="bf-stamp" /><figcaption><span className="bf-photo-symbol"><BrandAsset src="/brand/jobforged-symbol-dark.svg" alt="" width={40} height={40}/></span><div><strong>Não é só uma nova ferramenta.</strong><span>É um novo ponto de partida para o seu RH.</span></div></figcaption></figure> : <ProductMockup />}
         </div>
         <div className="container capability-carousel" role="region" aria-label="Capacidades da JobForged">
           <div className="capability-track">
@@ -573,12 +581,33 @@ export default function BlackFridayLandingPage() {
         </div>
       </section>
 
+      <section className="bf-human-section" aria-labelledby="bf-human-title">
+        <div className="container bf-human-layout">
+          <figure className="bf-human-photo">
+            <BrandAsset src="/campaigns/blackfriday-consulting-v1.webp" alt="Cena ilustrativa de uma consultora e um gestor conversando sobre os próximos passos do RH" width={1536} height={1024} />
+            <BlackFridaySeal className="bf-human-seal" />
+            <figcaption>Uma boa conversa pode mudar o próximo passo.</figcaption>
+          </figure>
+          <div className="bf-human-copy">
+            <span className="bf-human-eyebrow">BLACK FRIDAY · UM BÔNUS QUE FAZ DIFERENÇA</span>
+            <h2 id="bf-human-title">Antes de transformar seu RH,<br /><em>vamos conhecer sua história.</em></h2>
+            <p>Por trás de cada vaga existe uma equipe, um desafio e um negócio que quer crescer. Sua jornada começa com uma consultoria para entender esse cenário e traçar prioridades com você.</p>
+            <ul>
+              <li><span>01</span><div><strong>Seu negócio, em primeiro lugar</strong><p>Uma conversa sobre sua operação e seus desafios de contratação.</p></div></li>
+              <li><span>02</span><div><strong>Clareza sobre o momento do RH</strong><p>Mapeamento dos processos e do grau de maturidade da equipe.</p></div></li>
+              <li><span>03</span><div><strong>Direção para o próximo passo</strong><p>Prioridades para evoluir com tecnologia e decisões mais conscientes.</p></div></li>
+            </ul>
+            <a className="jf-action jf-action--primary" href="#planos">Conhecer os planos e o bônus <ArrowRight size={18} /></a>
+          </div>
+        </div>
+      </section>
+
       <section className="pricing-section" id="planos">
         <div className="container">
           <SectionIntro
             eyebrow="BLACK FRIDAY · INVESTIMENTO MENOR, NOVAS POSSIBILIDADES"
             title={<>O próximo passo do seu RH.<br /><BrandPair blue="Por" teal="48% menos." /></>}
-            text="Os valores abaixo representam o preço final com 48% de economia nesta proposta de campanha."
+            text="Escolha seu plano com 48% de economia e comece com consultoria inicial de RH incluída."
             align="center"
           />
           <div className="billing-toggle" role="group" aria-label="Período de cobrança">
@@ -631,7 +660,7 @@ export default function BlackFridayLandingPage() {
               </ul>
             </Reveal>
           </div>
-          <p className="pricing-note"><ShieldCheck /> Campanha conceitual: preços e benefícios sujeitos à definição comercial. Consulte a equipe para saber mais; não há cobrança nesta página.</p>
+          <p className="pricing-note"><ShieldCheck /> Consulte as condições com nossa equipe. A contratação é acompanhada pelo comercial; não há cobrança nesta página.</p>
         </div>
       </section>
 
