@@ -1,5 +1,5 @@
 "use client";
-import {formatInput,inputFormatRules,type InputFormat} from './input-format';
+import {formatInput,inputFormatRules,inferInputFormat,type InputFormat} from './input-format';
 import {ActionButton} from './AdminPrimitives';
 import {fileMatchesAccept} from '@/shared/image-upload';
 
@@ -80,7 +80,7 @@ export function TextField({
   error: suppliedError,
   requiredLabel,
   icon: Icon,
-  format,
+  format: explicitFormat,
   labelAdornment,
   startAdornment,
   endAdornment,
@@ -89,6 +89,7 @@ export function TextField({
   type = "text",
   ...inputProps
 }: TextFieldProps) {
+  const format=explicitFormat??inferInputFormat(label,type);
   const contextualError=useFieldError(inputProps.name);
   const error=suppliedError??contextualError;
   const generatedId = useId();
@@ -121,7 +122,7 @@ export function TextField({
           {...inputProps}
           {...(format?inputFormatRules[format]:{})}
           maxLength={format?inputFormatRules[format].maxLength:inputProps.maxLength??(type==='email'?254:type==='url'?2048:undefined)}
-          inputMode={inputProps.inputMode??(format==='phone'?'tel':format?'numeric':type==='email'?'email':type==='url'?'url':undefined)}
+          inputMode={inputProps.inputMode??(format==='phone'?'tel':format==='cnpj-alpha'?'text':format?'numeric':type==='email'?'email':type==='url'?'url':undefined)}
           value={format&&inputProps.value!==undefined?formatInput(String(inputProps.value),format):inputProps.value}
           defaultValue={format&&inputProps.defaultValue!==undefined?formatInput(String(inputProps.defaultValue),format):inputProps.defaultValue}
           onChange={event=>{if(format)event.target.value=formatInput(event.target.value,format);inputProps.onChange?.(event)}}
