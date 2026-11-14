@@ -40,8 +40,9 @@ begin
 end;$$;
 -- Enforce permissions inside existing RPCs too (including direct PostgREST calls).
 do $$declare r record;definition text;guard text;begin
- for r in select p.oid,p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_language l on l.oid=p.prolang where n.nspname='public' and l.lanname='plpgsql' and p.proname=any(array['company_jobs_v1','company_branches_v1','create_company_invitation','update_company_member','update_company_member_identity_v1','revoke_company_invitation','write_company_branding','reserve_company_image','register_company_brand_asset','write_company_portal','publish_portal_with_domain','company_domain','company_domain_with_preferences','update_company_profile','job_assistant_issue']) loop
+ for r in select p.oid,p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_language l on l.oid=p.prolang where n.nspname='public' and l.lanname='plpgsql' and p.proname=any(array['company_jobs_v1','company_branches_v1','company_activity_v1','create_company_invitation','update_company_member','update_company_member_identity_v1','revoke_company_invitation','write_company_branding','reserve_company_image','register_company_brand_asset','write_company_portal','publish_portal_with_domain','company_domain','company_domain_with_preferences','update_company_profile','job_assistant_issue']) loop
  guard:=case r.proname
+ when 'company_activity_v1' then 'if not(app_private.company_can(''settings.manage'') or app_private.company_can(''admins.view'') or app_private.company_can(''dashboards.view'')) then raise exception ''denied'' using errcode=''42501'';end if;'
  when 'company_jobs_v1' then 'perform app_private.require_company_permission(case when operation in (''list'',''get'') then ''jobs.view'' when operation=''delete'' then ''jobs.delete'' when operation=''save'' and job_id is null then ''jobs.create'' else ''jobs.edit'' end);'
  when 'company_branches_v1' then 'perform app_private.require_company_permission(case when operation in (''list'',''get'') then ''branches.view'' else ''branches.manage'' end);'
  when 'job_assistant_issue' then 'if not(app_private.company_can(''jobs.create'') or app_private.company_can(''jobs.edit'')) then raise exception ''denied'' using errcode=''42501'';end if;'
@@ -49,7 +50,7 @@ do $$declare r record;definition text;guard text;begin
  when 'register_company_brand_asset' then 'if not(app_private.company_can(''appearance.manage'') or app_private.company_can(''branches.manage'')) then raise exception ''denied'' using errcode=''42501'';end if;'
  when 'update_company_profile' then 'perform app_private.require_company_permission(''settings.manage'');'
  when 'create_company_invitation' then 'perform app_private.require_company_permission(''admins.manage'');if invite_role<>''admin'' then raise exception ''invalid role'' using errcode=''22023'';end if;'
- when 'update_company_member' then 'perform app_private.require_company_permission(''admins.manage'');if new_role<>''admin'' then raise exception ''invalid role'' using errcode=''42501'';end if;'
+ when 'update_company_member' then 'perform app_private.require_company_permission(''admins.manage'');if exists(select 1 from public.company_members where id=target_member_id and role=''owner'') then raise exception ''protected owner'' using errcode=''42501'';end if;if new_role<>''admin'' then raise exception ''invalid role'' using errcode=''42501'';end if;'
  when 'update_company_member_identity_v1' then 'perform app_private.require_company_permission(''admins.manage'');if exists(select 1 from public.company_members where id=target_member_id and role=''owner'') then raise exception ''protected owner'' using errcode=''42501'';end if;'
  when 'revoke_company_invitation' then 'perform app_private.require_company_permission(''admins.manage'');'
  when 'company_domain' then 'if operation<>''read'' then perform app_private.require_company_permission(''appearance.manage'');end if;'
