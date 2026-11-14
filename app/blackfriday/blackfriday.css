@@ -1,0 +1,68 @@
+.black-friday-page .bf-concept {
+  padding: 12px 24px;
+  background: var(--jf-ui-brand-soft);
+  color: var(--jf-ui-brand-strong);
+  text-align: center;
+  font-size: 13px;
+}
+.black-friday-page .hero-layout { align-items: center; gap: 48px; }
+.black-friday-page .hero-copy h1 { font-size: clamp(38px, 4.1vw, 60px); }
+.black-friday-page .bf-eyebrow {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--jf-ui-brand-strong);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+.black-friday-page .bf-offer { margin: 24px 0 0; font-size: 18px; color: var(--jf-ui-text); }
+.black-friday-page .bf-offer strong { color: var(--jf-ui-accent); }
+.black-friday-page .bf-people { margin: 0; min-width: 0; position: relative; padding-bottom: 36px; }
+.black-friday-page .bf-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 4.3;
+  object-fit: cover;
+  object-position: 47% center;
+  border-radius: var(--jf-ui-radius-marketing);
+  border: 1px solid var(--jf-ui-border);
+}
+.black-friday-page .bf-people figcaption {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: -46px 20px 0;
+  padding: 20px;
+  border: 1px solid var(--jf-ui-border);
+  border-radius: var(--jf-ui-radius-card);
+  background: var(--jf-ui-surface);
+  box-shadow: var(--jf-ui-shadow-marketing);
+  color: var(--jf-ui-text);
+}
+.black-friday-page .bf-photo-symbol { flex-shrink: 0; }
+.black-friday-page .bf-people figcaption div { display: grid; gap: 6px; }
+.black-friday-page .bf-people figcaption div span { font-size: 13px; color: var(--jf-ui-text-muted); line-height: 1.5; }
+.black-friday-page .bf-bonus {
+  width: 100%;
+  margin: 32px 0;
+  padding: 32px;
+  border: 1px solid var(--jf-ui-border);
+  border-radius: var(--jf-ui-radius-marketing);
+  background: linear-gradient(120deg, var(--jf-ui-brand-soft), var(--jf-ui-accent-soft));
+  text-align: left;
+}
+.black-friday-page .bf-bonus > span { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--jf-ui-brand-strong); }
+.black-friday-page .bf-bonus h2 { font-size: clamp(26px, 3vw, 38px); margin: 16px 0; line-height: 1.2; }
+.black-friday-page .bf-bonus p { max-width: 760px; line-height: 1.7; }
+.black-friday-page .bf-bonus ul { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; padding-left: 20px; line-height: 1.6; }
+.black-friday-page .bf-saving { font-weight: 700; color: var(--jf-ui-accent); }
+.black-friday-page .bf-saving del { color: var(--jf-ui-text-muted); font-weight: 400; }
+@media(max-width: 760px) {
+  .black-friday-page .hero-layout { gap: 28px; }
+  .black-friday-page .bf-photo { aspect-ratio: 4 / 3; }
+  .black-friday-page .bf-bonus { padding: 24px; }
+  .black-friday-page .bf-bonus ul { grid-template-columns: 1fr; gap: 12px; }
+  .black-friday-page .bf-people figcaption { margin-inline: 12px; }
+}
