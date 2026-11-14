@@ -124,6 +124,26 @@ do $$declare result jsonb;mid uuid;photo text:=encode(convert_to('RIFF1234WEBPfi
  if public.member_photo_read_v1(mid,true) is not null or public.account_read_v1()->>'photoVersion'<>'0' then raise exception 'photo removal failed';end if;
 end$$;
 
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+select public.job_assistant_issue(repeat('a',64),'{"message":"Synthetic test"}');
+do $$begin
+ begin perform count(*) from app_private.job_assistant_requests;raise exception 'assistant table exposed';exception when insufficient_privilege then null;end;
+end$$;
+set local role anon;
+do $$begin
+ if public.job_assistant_consume(repeat('a',64))->>'message'<>'Synthetic test' then raise exception 'context missing';end if;
+ begin perform public.job_assistant_consume(repeat('a',64));raise exception 'token replay accepted';exception when insufficient_privilege then null;end;
+ begin perform public.job_assistant_consume(repeat('b',64));raise exception 'unknown token accepted';exception when insufficient_privilege then null;end;
+ begin perform public.job_assistant_issue(repeat('b',64),'{}');raise exception 'anonymous issued token';exception when insufficient_privilege then null;end;
+end$$;
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
+do $$begin
+ begin perform public.job_assistant_issue(repeat('c',64),'{}');raise exception 'member issued token';exception when insufficient_privilege then null;end;
+end$$;
+set local role authenticated;
+
 -- Persistent publication, tenant isolation, authorization and public projection.
 do $$begin
  begin perform count(*) from app_private.company_jobs;raise exception 'private jobs table exposed';exception when insufficient_privilege then null;end;
@@ -148,15 +168,27 @@ do $$declare d jsonb:='{"title":"Public job fixture","area":"Engineering","level
   perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
   perform public.company_branches_v1('save',bid,bd,1);
   perform public.company_branches_v1('delete',bid,null,2);
+  declare b2 uuid;v bigint;begin
+   b:=public.company_branches_v1('save',null,bd);bid:=(b->>'id')::uuid;
+   b:=public.company_branches_v1('save',null,bd||'{"name":"Segunda filial"}');b2:=(b->>'id')::uuid;
+   v:=(public.company_jobs_v1('get',uid)->>'version')::bigint;
+   j:=public.company_jobs_v1('save',uid,d||jsonb_build_object('branchIds',jsonb_build_array(bid,b2)),'Rascunho',v);
+   if jsonb_array_length(j->'branchIds')<>2 then raise exception 'multiple branches not saved';end if;
+   begin perform public.company_jobs_v1('save',uid,d||'{"branchIds":["00000000-0000-4000-8000-000000000000"]}','Rascunho',(j->>'version')::bigint);raise exception 'foreign branch accepted';exception when invalid_parameter_value then null;end;
+   begin perform public.company_branches_v1('save',bid,bd,1);raise exception 'stale branch overwrote job selection';exception when serialization_failure then null;end;
+   j:=public.company_jobs_v1('save',uid,d||'{"branchIds":[]}','Rascunho',(j->>'version')::bigint);
+   perform public.company_branches_v1('delete',bid,null,3);
+   perform public.company_branches_v1('delete',b2,null,3);
+  end;
  end;
  if public.company_jobs_v1('get',uid)->>'title'<>'Public job fixture' then raise exception 'job not persisted';end if;
  if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'draft exposed';end if;
- begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'unpublished portal accepted';exception when sqlstate 'PT422' then null;end;
- begin perform public.company_jobs_v1('save',uid,d||'{"unknown":"secret"}',null,1);raise exception 'unknown field accepted';exception when invalid_parameter_value then null;end;
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'unpublished portal accepted';exception when sqlstate 'PT422' then null;end;
+ begin perform public.company_jobs_v1('save',uid,d||'{"unknown":"secret"}',null,(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'unknown field accepted';exception when invalid_parameter_value then null;end;
  perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000002","session_id":"17000000-0000-4000-8000-000000000102","aal":"aal1","role":"authenticated"}',true);
  if public.company_jobs_v1('list')<>'[]'::jsonb then raise exception 'cross tenant list leak';end if;
  begin perform public.company_jobs_v1('get',uid);raise exception 'cross tenant get leak';exception when no_data_found then null;end;
- begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'cross tenant write';exception when no_data_found then null;end;
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'cross tenant write';exception when no_data_found then null;end;
  perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
  begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'member published';exception when insufficient_privilege then null;end;
  perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
@@ -166,16 +198,16 @@ update public.company_portals set is_public=true where slug='security-jobs-fixtu
 set local role authenticated;
 do $$declare j jsonb;uid uuid;public_result jsonb;begin
  j:=public.company_jobs_v1('list')->0;uid:=(j->>'id')::uuid;
- begin perform public.company_jobs_v1('save',uid,(j-'id'-'organizationId'-'status'-'version'-'createdAt'-'updatedAt'-'applicationsCount')||'{"title":""}', 'Publicada',1);raise exception 'incomplete job published';exception when invalid_parameter_value then null;end;
- j:=public.company_jobs_v1('status',uid,null,'Publicada',1);
+ begin perform public.company_jobs_v1('save',uid,(j-'id'-'organizationId'-'status'-'version'-'createdAt'-'updatedAt'-'applicationsCount')||'{"title":""}', 'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'incomplete job published';exception when invalid_parameter_value then null;end;
+ j:=public.company_jobs_v1('status',uid,null,'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);
  public_result:=public.public_jobs_v1('security-jobs-fixture');
  if jsonb_array_length(public_result)<>1 then raise exception 'published job absent';end if;
  if public_result::text like '%PRIVATE_FIXTURE%' or public_result::text like '%12345%' or public_result::text like '%67890%' or public_result->0 ? 'organizationId' then raise exception 'public job secret leak';end if;
  begin perform public.company_jobs_v1('status',uid,null,'Pausada',1);raise exception 'stale version accepted';exception when serialization_failure then null;end;
- j:=public.company_jobs_v1('status',uid,null,'Pausada',2);
+ j:=public.company_jobs_v1('status',uid,null,'Pausada',(j->>'version')::bigint);
  if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'paused job exposed';end if;
- j:=public.company_jobs_v1('status',uid,null,'Publicada',3);
- perform public.company_jobs_v1('delete',uid,null,null,4);
+ j:=public.company_jobs_v1('status',uid,null,'Publicada',(j->>'version')::bigint);
+ perform public.company_jobs_v1('delete',uid,null,null,(j->>'version')::bigint);
  if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb or public.company_jobs_v1('list')<>'[]'::jsonb then raise exception 'deleted job exposed';end if;
 end;$$;
 reset role;

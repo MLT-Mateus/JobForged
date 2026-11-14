@@ -2,6 +2,7 @@ export type JobStatus = "Rascunho" | "Publicada" | "Pausada" | "Encerrada" | "Ar
 export type ProcessStage = { id: string; name: string; required: boolean };
 export type Language = { language: string; level: string };
 export type Job = {
+  branchIds: string[];
   version?: number; id: string; organizationId: string; createdAt: string; updatedAt: string; status: JobStatus;
   title: string; area: string; level: string; contractType: string; modality: string; country: string; state: string; city: string;
   summary: string; responsibilities: string[]; requirements: string[]; experience: string; weeklyHours: string; schedule: string;
@@ -18,7 +19,7 @@ export type AutomationRule = { id:string; name:string; trigger:string; condition
 export type JobSettings = { aiScreening:boolean; advanceScore:number; rejectScore:number; highFitNotification:boolean; visibility:"Pública"|"Restrita"; acceptApplications:boolean; resumeRequired:boolean; coverLetter:boolean; anonymous:boolean; applicationLimit:number; positions:number; autoClose:boolean; notifications:string[]; slug:string; metaDescription:string; shareTitle:string; questions:{id:string;label:string;type:string;required:boolean}[]; rules:AutomationRule[] };
 
 export const emptyJob = (organizationId=""):Job => ({
-  id:"",organizationId,createdAt:"",updatedAt:"",status:"Rascunho",title:"",area:"",level:"",contractType:"",modality:"",country:"Brasil",state:"",city:"",
+  branchIds:[],id:"",organizationId,createdAt:"",updatedAt:"",status:"Rascunho",title:"",area:"",level:"",contractType:"",modality:"",country:"Brasil",state:"",city:"",
   summary:"",responsibilities:[],requirements:[],experience:"",weeklyHours:"",schedule:"",salaryMin:"",salaryMax:"",currency:"BRL",salaryConfidential:false,
   softSkills:[],differentiators:[],certifications:[],education:"",languages:[],benefits:[],additionalBenefits:"",careerPlan:"",performanceReviews:false,promotionPossible:false,
   teamDescription:"",reportsTo:"",teamSize:"",tools:[],methodology:"",challenges:"",openingReason:"",autonomy:"",hierarchy:"",stages:[{id:"triagem",name:"Triagem",required:true},{id:"entrevista",name:"Entrevista",required:true}],technicalTest:false,interviewTypes:[],applicationDeadline:"",responseSla:"",lgpd:false,responsibleId:"",currentStep:0,applicationsCount:0
