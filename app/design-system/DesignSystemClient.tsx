@@ -384,6 +384,8 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
                   <TextField label="Nome da vaga" required icon={BriefcaseBusiness} placeholder="Ex.: Analista de Customer Success" defaultValue="Analista de Customer Success" helpText="Use um título reconhecido pelo mercado." />
                   <TextField label="Foco compartilhado" className="is-focus-demo" icon={Check} defaultValue="Token único · tema atual" readOnly helpText="Usa --jf-ui-focus, o mesmo token dos formulários do app." />
                   <TextField label="E-mail do responsável" icon={Mail} type="email" placeholder="nome@empresa.com" helpText="Usado apenas nas comunicações sobre a vaga." />
+                  <TextField label="Buscar fatura" icon={Search} type="search" />
+                  <TextField label="Buscar compromisso" icon={Search} type="search" />
                   <TextField label="Buscar candidato" icon={Search} type="search" placeholder="Nome, e-mail ou competência" helpText="Pesquise por dados ou competências do perfil." />
                   <TextField label="Senha de acesso" icon={LockKeyhole} type="password" placeholder="Digite ao menos 8 caracteres" defaultValue="12345" error="A senha precisa ter pelo menos 8 caracteres." />
                   <TextField label="Desabilitado" labelAdornment={<StatusBadge>Em breve</StatusBadge>} icon={LockKeyhole} defaultValue="Indisponível" disabled helpText="Estado inativo do mesmo componente compartilhado." />

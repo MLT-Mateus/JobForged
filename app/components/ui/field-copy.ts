@@ -10,7 +10,11 @@ export function fieldPlaceholder({label='',type='text',placeholder,multiline=fal
  if(concise)return finish(supplied);
  if(selection)return finish(multiple?'Selecione opções':'Selecione uma opção');
  const context=label.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- if(type==='search'||/buscar|pesquisar/.test(context))return finish('Busque por nome');
+ if(type==='search'||/buscar|pesquisar/.test(context)){
+  if(/fatura/.test(context))return finish('Busque uma fatura');
+  if(/compromisso/.test(context))return finish('Busque um compromisso');
+  return finish('Busque por nome');
+ }
  if(type==='password'||/senha/.test(context))return finish('Digite a senha');
  if(type==='email'||/e-mail|email/.test(context))return finish('Digite o e-mail');
  if(/dominio|subdominio|endereco jobforged/.test(context))return finish('Digite o domínio');
