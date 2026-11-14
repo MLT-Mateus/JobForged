@@ -54,3 +54,5 @@ export {UserAvatar} from "./UserAvatar";
 export {PostalCodeField,type PostalAddress} from './PostalCodeField';
 
 export {ItemListField} from './ItemListField';
+
+export {ChatBubble,ChatProcessing,ChatComposer} from './ChatPrimitives';
