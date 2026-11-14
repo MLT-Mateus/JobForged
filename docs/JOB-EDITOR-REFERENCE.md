@@ -14,3 +14,5 @@ Dados anteriores são preservados no documento; contexto complementar continua e
 
 ## Verificação
 Testes de regras do editor e preservação de identidade das etapas, contrato do assistente e SQL de persistência, filiais, contatos e confidencialidade. Pipeline executa build, testes de API, migrations e isolamento empresarial antes do deploy Test.
+
+Validação visual local com o componente real, dados fictícios e a referência aberta no Chrome: formulário editável, duas colunas no desktop, atribuições e navegação acima do formulário em largura reduzida. Ajustados deslocamento sob cabeçalho fixo e cor do progresso para tokens do DS.
