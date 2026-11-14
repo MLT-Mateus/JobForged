@@ -13,6 +13,8 @@ test('job BFF enforces session, origin, organization and preserves RPC concurren
   if(address.endsWith('/rpc/company_branches_v1'))return Response.json([{id:'branch-a',name:'Centro',city:'Brasília',state:'DF',status:'Ativo'},{id:'branch-b',name:'Norte',city:'Brasília',state:'DF',status:'Ativo'}]);
   if(address.endsWith('/rpc/job_assistant_issue')){issued=body;return Response.json(true)}
   if(address==='https://n8n.jobforged.com/webhook/jbfd-test-job-authoring'){assert.match(body.token,/^[A-Za-z0-9_-]{43}$/);assert.equal(createHash('sha256').update(body.token).digest('hex'),issued.token_hash);assert.equal(init.redirect,'error');return Response.json({reply:'Sugestão para revisão',patch:unsafe?{status:'Publicada'}:{title:'Enfermeiro',branchIds:['branch-a','branch-b']}})}
+  if(address.endsWith('/jbfd-test-job-media'))return Response.json({text:'Analista, filial Centro, salário a combinar.'});
+  if(address.endsWith('/jbfd-test-job-authoring-stream')){const output=JSON.stringify({reply:'Qual é o salário previsto?',patch:unsafe?{status:'Publicada'}:{title:'Analista'}});const wire=[{type:'begin'},...Array.from(output).map(content=>({type:'item',content,metadata:{nodeName:'Assistente de vagas'}})),{type:'end'}].map(x=>JSON.stringify(x)+'\n').join('');return new Response(wire)}
   if(address.endsWith('/rpc/company_jobs_v1')){calls.push(body);return code?Response.json({code},{status:400}):Response.json(body.operation==='list'?[]:{id,version:2})}
   if(address.endsWith('/rpc/public_jobs_v1')){assert.equal(init.headers.Authorization,'Bearer public-fixture-key');assert.deepEqual(body,{requested_slug:'fixture-company'});return Response.json([{id,title:'Published fixture'}])}
   throw Error('Unexpected isolated request');
@@ -29,6 +31,16 @@ test('job BFF enforces session, origin, organization and preserves RPC concurren
  const proposal=await request('/api/company/jobs/assistant',ai);assert.equal(proposal.status,200);assert.deepEqual((await proposal.json()).patch.branchIds,['branch-a','branch-b']);
  assert.deepEqual(issued.payload.draft,{title:'Enfermeiro'});assert.equal(calls.length,0);
  unsafe=true;assert.equal((await request('/api/company/jobs/assistant',ai)).status,503);unsafe=false;assert.equal(calls.length,0);
+ const direct=(path,body,extra={})=>worker.fetch(new Request('http://localhost'+path,{method:'POST',headers:{host:'localhost',origin:'http://localhost',cookie:'jf_auth_access=fixture',...extra},body}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+ const streamed=await direct('/api/company/jobs/assistant',JSON.stringify(ai),{'Content-Type':'application/json',Accept:'application/x-ndjson'});
+ const events=(await streamed.text()).trim().split('\n').map(JSON.parse);assert.equal(events.at(-1).type,'done');assert.equal(events.at(-1).patch.title,'Analista');assert.ok(events.some(x=>x.type==='reply'));
+ unsafe=true;const invalidStream=await direct('/api/company/jobs/assistant',JSON.stringify(ai),{Accept:'application/x-ndjson'});assert.equal(JSON.parse((await invalidStream.text()).trim().split('\n').at(-1)).type,'error');unsafe=false;
+ const mediaPath='/api/company/jobs/assistant/media',mediaHeaders={'Content-Type':'application/pdf','x-company-id':cid};
+ assert.equal((await direct(mediaPath,'%PDF-1.4 synthetic fixture',mediaHeaders)).status,200);assert.equal(issued.payload.purpose,'job-media');
+ assert.equal((await direct(mediaPath,'invalid file content',mediaHeaders)).status,415);
+ assert.equal((await direct(mediaPath,'%PDF-1.4 synthetic fixture',{...mediaHeaders,'x-company-id':'foreign'})).status,409);
+ assert.equal((await direct(mediaPath,'%PDF-'+ 'x'.repeat(2*1024*1024),mediaHeaders)).status,413);
+ role='member';assert.equal((await direct(mediaPath,'%PDF-1.4 synthetic fixture',mediaHeaders)).status,403);role='owner';
  const mutation={operation:'save',companyId:cid,id,version:1,status:'Publicada',document:{title:'Fixture'}};
  assert.equal((await request('/api/company/jobs',mutation,undefined,'https://other.invalid')).status,403);
  assert.equal((await request('/api/company/jobs',{...mutation,companyId:'other'})).status,409);

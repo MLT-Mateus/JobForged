@@ -43,7 +43,7 @@ const server=http.createServer(async(req,res)=>{
   try{await pool.query('select 1');reply(res,200,'healthy');}catch{reply(res,503,'unavailable');}return;
  }
  const rawPath=(req.url||'/').split('?')[0].replace(/\/+$/,'')||'/',application=rawPath.startsWith('/api/');
- const uploading=req.method==='POST'&&(rawPath.startsWith('/storage/v1/object/')||rawPath.endsWith('/assets')||rawPath==='/api/portal/resume');
+ const uploading=req.method==='POST'&&(rawPath.startsWith('/storage/v1/object/')||rawPath.endsWith('/assets')||rawPath==='/api/portal/resume'||rawPath==='/api/company/jobs/assistant/media');
  const address=clientAddress(req.socket.remoteAddress,req.headers['x-forwarded-for'],trustedPeers);
  const clientKey=(application?'app:':'native:')+address;
  const bffRequest=!application&&bffPeers.has(req.socket.remoteAddress?.replace(/^::ffff:/,''));
