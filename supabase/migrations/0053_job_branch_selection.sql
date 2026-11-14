@@ -117,7 +117,7 @@ begin
   end if;
  end if;
  if operation='save' then
-  update app_private.company_jobs j set version=j.version+1,updated_at=now() where j.company_id=cid and j.deleted_at is null and ((previous_jobs ? j.id::text) is distinct from (document->'jobIds' ? j.id::text));
+  update app_private.company_jobs j set version=j.version+1,updated_at=now() where j.company_id=cid and j.deleted_at is null and ((previous_jobs ? j.id::text) is distinct from (company_branches_v1.document->'jobIds' ? j.id::text));
  end if;
  insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(cid,auth.uid(),'branch.'||operation,b.id);
  return case when operation='delete' then 'null'::jsonb else b.document||jsonb_build_object('id',b.id,'version',b.version) end;
