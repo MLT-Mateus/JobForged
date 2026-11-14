@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {editorChecks} from "./job-editor-model";
 import { type Job, type JobStatus } from "./job-types";
 async function request<T>(id?:string,body?:unknown):Promise<T>{const r=await fetch('/api/company/jobs'+(id?'?id='+encodeURIComponent(id):''),{method:body?'POST':'GET',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await r.json() as T & {message?:string};if(!r.ok)throw new Error(data.message||'Não foi possível salvar a vaga.');return data}

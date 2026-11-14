@@ -30,7 +30,7 @@ begin
   end if;
  elsif operation='withdraw' then
   update app_private.job_applications x set stage='Desistência',version=x.version+1,updated_at=now() where x.job_id=candidate_applications_v1.job_id and candidate_id=auth.uid() and stage not in ('Contratação','Desistência') returning * into a;
-  if a.id is not null then insert into app_private.application_events(application_id,actor,action) values(a.id,auth.uid(),'Desistência informada');end if;
+  if a.id is not null then insert into app_private.application_events(application_id,actor,action) values(a.id,auth.uid(),'Desistência informada');update app_private.company_interviews set status='Cancelada',version=version+1,updated_at=now() where application_id=a.id and status in ('A agendar','Agendada');insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(a.company_id,auth.uid(),'application.withdraw',a.id);end if;
  elsif operation<>'list' then raise exception 'invalid operation' using errcode='22023';end if;
  select coalesce(jsonb_agg(jsonb_build_object('id',x.id,'jobId',x.job_id,'title',j.document->>'title','company',c.name,'stage',x.stage,'createdAt',x.created_at) order by x.created_at desc),'[]') into answer from app_private.job_applications x join app_private.company_jobs j on j.id=x.job_id join public.companies c on c.id=x.company_id where x.candidate_id=auth.uid();return answer;
 end;$$;
@@ -76,7 +76,7 @@ begin
  elsif operation='invitation' then
   perform app_private.require_company_permission('agenda.manage');
   select * into e from app_private.company_interviews where id=record_id and company_id=cid and status='Agendada';if e.id is null then raise exception 'not found' using errcode='P0002';end if;
-  perform app_private.consume_operation_budget('interview-invitation',e.id,3,86400);
+  perform app_private.consume_operation_budget('interview-invitation',e.id,3,86400);insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(cid,auth.uid(),'agenda.invitation_requested',e.id);
   return (select jsonb_build_object('event',to_jsonb(e),'email',u.email,'name',c.full_name,'company',co.name,'slug',(select p.slug from public.company_portals p where p.company_id=co.id),'branding',b.published) from app_private.job_applications applied join public.candidate_accounts c on c.user_id=applied.candidate_id join auth.users u on u.id=c.user_id join public.companies co on co.id=applied.company_id left join public.company_branding b on b.company_id=co.id where applied.id=e.application_id);
  elsif operation='options' then
   perform app_private.require_company_permission('jobs.edit');select * into j from app_private.company_jobs where id=record_id and company_id=cid and deleted_at is null for update;if j.id is null then raise exception 'not found' using errcode='P0002';end if;

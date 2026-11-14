@@ -66,3 +66,22 @@ do $$declare definition text;begin
  definition:=replace(definition,'actor_role in (''owner'',''admin'')','app_private.company_can(''admins.view'')');execute definition;
 end;$$;
 notify pgrst,'reload schema';
+-- New invited administrators inherit at most the inviter's current operational grants.
+create function app_private.inherit_invited_permissions() returns trigger language plpgsql security definer set search_path=pg_catalog as $$
+declare inviter public.company_members;invitation public.company_invitations;grants jsonb;
+begin
+ if new.role='owner' then return new;end if;
+ select * into invitation from public.company_invitations i where i.company_id=new.company_id and i.email=lower(new.email) and i.accepted_at is null and i.revoked_at is null and i.expires_at>now() order by i.created_at desc limit 1;
+ if invitation.id is null then return new;end if;
+ select * into inviter from public.company_members m where m.company_id=new.company_id and m.user_id=invitation.invited_by and m.status='active';
+ if inviter.id is null then
+  if exists(select 1 from public.platform_admins where user_id=invitation.invited_by) then return new;end if;
+  raise exception 'inviter unavailable' using errcode='42501';
+ end if;
+ select jsonb_object_agg(key,case when key in ('finance.view','admins.permissions') then false when invitation.role='member' then key in ('jobs.view','branches.view') when inviter.role='owner' then true when p.member_id is not null then coalesce((p.grants->>key)::boolean,false) else inviter.role='admin' end) into grants from unnest(app_private.permission_keys()) key left join app_private.company_member_permissions p on p.member_id=inviter.id;
+ insert into app_private.company_member_permissions(member_id,grants) values(new.id,grants) on conflict do nothing;
+ return new;
+end;$$;
+alter function app_private.inherit_invited_permissions() owner to postgres;
+revoke all on function app_private.inherit_invited_permissions() from public,anon,authenticated,service_role;
+create trigger inherit_invited_permissions after insert on public.company_members for each row execute function app_private.inherit_invited_permissions();
