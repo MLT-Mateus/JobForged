@@ -41,3 +41,33 @@ export function reconcileStages(previous:Job['stages'],names:string[]):Job['stag
  const used=new Set(matched.filter(Boolean).map(stage=>stage!.id));
  return names.map((name,index)=>{const stage=matched[index]||previous.find(stage=>!used.has(stage.id));const id=stage?.id||crypto.randomUUID();used.add(id);return {id,name,required:stage?.required??true}});
 }
+
+/** Follow-up uses the applied form, never unchecked AI suggestions. */
+export function applicationFeedback(job:Job){
+ const checks=editorChecks(job),critical=checks.filter(c=>!c.done&&c.section!==4);
+ const strengths=[job.title.trim()?'cargo identificado':'',checks.find(c=>c.label==='Endereço da vaga')?.done?'local de trabalho definido':'',checks.find(c=>c.label==='Faixa salarial')?.done?'remuneração informada':'',job.responsibilities.some(x=>x.trim())?'atribuições descritas':''].filter(Boolean);
+ const questions:Record<string,string>={
+  'Título da vaga':'Qual é o nome do cargo?',
+  'Acessibilidade para PCD':'A vaga é disponível para PCD, exclusiva para PCD ou indisponível para PCD?',
+  'Setor do cargo':'Em qual setor essa pessoa vai trabalhar?',
+  'Nível mínimo':'Qual é o nível esperado para o cargo?',
+  'Faixa salarial':'Qual é o salário previsto ou prefere informar “a combinar”?',
+  'Modelo de contrato':'Qual será o tipo de contratação?',
+  'Disposição do trabalho':'O trabalho será presencial, híbrido ou remoto?',
+  'Jornada de trabalho':'Em qual período a pessoa vai trabalhar?',
+  'Endereço da vaga':'Para qual filial e cidade é a vaga?',
+  'Descrição da vaga':'Como você resumiria o propósito deste cargo?',
+  'Atribuições do cargo':'Quais serão as principais atividades dessa pessoa?',
+ };
+ const lines=['Sugestões selecionadas aplicadas ao formulário. Elas ainda precisam ser salvas.'];
+ if(strengths.length)lines.push('Já temos uma boa base: '+strengths.join(', ')+'.');
+ if(critical.length){lines.push('Para completar as informações essenciais, falta: '+critical.map(c=>c.label.toLowerCase()).join(', ')+'.');lines.push(questions[critical[0].label]);}
+ else{
+  const optional=[!job.benefits.some(x=>x.trim())&&!job.additionalBenefits.trim()?'benefícios':'',!job.requirements.some(x=>x.trim())?'requisitos realmente necessários':'',!job.teamDescription.trim()?'contexto da equipe':''].filter(Boolean);
+  lines.push('As informações essenciais da vaga estão preenchidas.');
+  if(optional.length)lines.push('Para ajudar o candidato a decidir, podemos detalhar '+optional.join(', ')+'. Esses complementos são opcionais. Quer começar por '+optional[0]+'?');
+  else lines.push('A vaga também apresenta benefícios, requisitos e contexto da equipe. Revise os textos antes de salvar.');
+ }
+ const process=checks.filter(c=>!c.done&&c.section===4);if(process.length)lines.push('No formulário, confira também: '+process.map(c=>c.label.toLowerCase()).join(' e ')+'.');
+ return lines.join('\n\n');
+}
