@@ -254,7 +254,7 @@ const FaqList = memo(function FaqList() {
   );
 });
 
-export default function Home() {
+export default function Home({blackFriday=false}:{blackFriday?:boolean}) {
   const reduceMotion = useReducedMotion();
   const [menuOpen, setMenuOpen] = useState(false);
   const [annualBilling, setAnnualBilling] = useState(true);
@@ -277,7 +277,8 @@ export default function Home() {
 
   const closeMenu = () => setMenuOpen(false);
   return (
-    <main className="landing-page">
+    <main className={`landing-page ${blackFriday ? "black-friday-page" : ""}`}>
+{blackFriday && <div className="bf-concept">Prévia conceitual de campanha · condições sujeitas à definição comercial</div>}
       <header className="site-header">
         <div className="container nav-wrap">
           <a className="brand" href="#inicio" aria-label="JobForged — início">
@@ -333,7 +334,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1>Recrute com a <BrandPair blue="sua" teal="marca." /><br />Contrate com inteligência.</h1>
+            {blackFriday ? <h1>Black Friday para dar o próximo passo no seu RH.<br/><BrandPair blue="48%" teal="de economia."/></h1> : <h1>Recrute com a <BrandPair blue="sua" teal="marca." /><br />Contrate com inteligência.</h1>}
             <p className="hero-lead">
               Conheça a JobForged, plataforma ATS de recrutamento e seleção para PMEs que buscam processos mais organizados e uma experiência com a sua marca.
             </p>
@@ -342,7 +343,7 @@ export default function Home() {
               <a className="button button--ghost jf-action jf-action--secondary" href="#como-funciona"><span className="play-dot">▶</span> Ver como funciona</a>
             </div>
           </motion.div>
-          <ProductMockup />
+          {blackFriday ? <BrandAsset className="bf-art" src="/campaigns/black-friday.webp" alt="Black Friday JobForged com 48% de economia" width={1672} height={941}/> : <ProductMockup />}
         </div>
         <div className="container capability-carousel" role="region" aria-label="Capacidades da JobForged">
           <div className="capability-track">
@@ -578,7 +579,7 @@ export default function Home() {
             <button type="button" className={!annualBilling ? "is-active" : ""} aria-pressed={!annualBilling} onClick={() => setAnnualBilling(false)}>Mensal</button>
             <button type="button" className={annualBilling ? "is-active" : ""} aria-pressed={annualBilling} onClick={() => setAnnualBilling(true)}>Anual <span>2 meses grátis</span></button>
           </div>
-          <div className="pricing-grid">
+          {blackFriday && <section className="container bf-bonus"><span>PLUS · CONSULTORIA INICIAL INCLUÍDA</span><h2>Seu RH ganha tecnologia. Sua empresa ganha direção.</h2><p>Comece com um diagnóstico estratégico do seu negócio e da sua operação de RH. Vamos mapear processos, identificar o grau de maturidade e revelar prioridades para transformar gargalos em um plano de evolução.</p><ul><li>Entendimento do negócio e dos desafios de contratação</li><li>Mapeamento estratégico dos processos de RH</li><li>Diagnóstico de maturidade e prioridades de evolução</li></ul></section>}<div className="pricing-grid">
             <Reveal className="price-card price-card--free">
               <div className="plan-head"><span>Gratuito</span><small>Para conhecer a plataforma</small></div>
               <div className="plan-price"><strong>R$ 0</strong><span>para começar</span></div>
@@ -596,8 +597,8 @@ export default function Home() {
             <Reveal className="price-card price-card--featured" delay={0.08}>
               <span className="plan-badge"><Clock3 /> Em breve</span>
               <div className="plan-head"><span>Básico</span><small>Para PMEs que querem mais controle</small></div>
-              <div className="plan-price"><strong>R$ {plansById[annualBilling ? "basico-anual" : "basico-mensal"].price}</strong><span>{plansById[annualBilling ? "basico-anual" : "basico-mensal"].suffix}</span></div>
-              {annualBilling && <small className="plan-equivalent">Economize R$ 40,00 por mês — R$ 480,00 por ano</small>}
+              {blackFriday && <p className="bf-saving"><del>De R$ {((Number(plansById[annualBilling ? "basico-anual" : "basico-mensal"].price.replace(",", "."))/0.52)).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}</del> · 48% de economia</p>}<div className="plan-price"><strong>R$ {plansById[annualBilling ? "basico-anual" : "basico-mensal"].price}</strong><span>{plansById[annualBilling ? "basico-anual" : "basico-mensal"].suffix}</span></div>
+              {annualBilling && !blackFriday && <small className="plan-equivalent">Economize R$ 40,00 por mês — R$ 480,00 por ano</small>}
               <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
               <button className="button button--primary jf-action jf-action--primary" type="button" disabled aria-label="Plano Básico indisponível: contratação em breve">Contratação em breve</button>
               <ul>
@@ -611,8 +612,8 @@ export default function Home() {
             <Reveal className="price-card price-card--professional" delay={0.16}>
               <span className="plan-badge"><Clock3 /> Em breve</span>
               <div className="plan-head"><span>Profissional</span><small>Para operações estruturadas</small></div>
-              <div className="plan-price"><strong>R$ {plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price}</strong><span>{plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].suffix}</span></div>
-              {annualBilling && <small className="plan-equivalent">Economize R$ 47,00 por mês — R$ 564,00 por ano</small>}
+              {blackFriday && <p className="bf-saving"><del>De R$ {((Number(plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price.replace(",", "."))/0.52)).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}</del> · 48% de economia</p>}<div className="plan-price"><strong>R$ {plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price}</strong><span>{plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].suffix}</span></div>
+              {annualBilling && !blackFriday && <small className="plan-equivalent">Economize R$ 47,00 por mês — R$ 564,00 por ano</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
               <button className="button button--blue jf-action jf-action--accent" type="button" disabled aria-label="Plano Profissional indisponível: contratação em breve">Contratação em breve</button>
               <ul>

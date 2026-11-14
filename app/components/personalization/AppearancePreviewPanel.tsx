@@ -2,7 +2,7 @@
 import {useState,type ReactNode} from 'react';
 import {Monitor,Tablet,Smartphone} from 'lucide-react';
 import {ActionButton,SelectField,ViewportPreview} from '../ui';
-import {brandingStyle} from './branding-model';
+import {brandingStyle,brandingScrollbarStyle} from './branding-model';
 import {PreviewContent} from './AppearancePreview';
 import type {Customization,PreviewSurface} from './personalization-types';
 import './personalization.css';
@@ -10,5 +10,5 @@ const devices=[{id:'desktop',label:'Desktop',width:1200,height:800,icon:Monitor}
 const surfaces:[PreviewSurface,string][]=[['portal','Página da empresa'],['vaga','Exemplo de vaga']];
 export function AppearancePreviewPanel({data,theme,onThemeChange,device,onDeviceChange,actions}:{actions?:ReactNode;device:"desktop"|"tablet"|"mobile";onDeviceChange:(device:"desktop"|"tablet"|"mobile")=>void;data:Customization;theme:'light'|'dark';onThemeChange:(theme:'light'|'dark')=>void}){
  const [preview,setPreview]=useState<PreviewSurface>('portal');
- return <aside className="appearance-preview-panel"><header><div><b>Prévia do candidato</b><span>Atualiza enquanto você edita</span></div></header><div className="appearance-preview-controls"><div role="group" aria-label="Dispositivo da prévia">{devices.map(({id,label,icon:Icon})=><ActionButton variant="quiet" aria-pressed={device===id} onClick={()=>onDeviceChange(id as "desktop"|"tablet"|"mobile")} key={id} aria-label={`Visualizar em ${label}`}><Icon/>{label}</ActionButton>)}</div><SelectField className="jf-field--compact-label" label="Página da prévia" value={preview} onValueChange={value=>setPreview(value as PreviewSurface)} options={surfaces.map(([value,label])=>({value,label}))}/></div><ViewportPreview width={devices.find(item=>item.id===device)?.width??1200} height={devices.find(item=>item.id===device)?.height??800} theme={theme}><div className="company-branding" style={brandingStyle(data,theme)}><PreviewContent surface={preview} data={data} theme={theme} onThemeChange={onThemeChange}/></div></ViewportPreview>{actions}</aside>;
+ return <aside className="appearance-preview-panel"><header><div><b>Prévia do candidato</b><span>Atualiza enquanto você edita</span></div></header><div className="appearance-preview-controls"><div role="group" aria-label="Dispositivo da prévia">{devices.map(({id,label,icon:Icon})=><ActionButton variant="quiet" aria-pressed={device===id} onClick={()=>onDeviceChange(id as "desktop"|"tablet"|"mobile")} key={id} aria-label={`Visualizar em ${label}`}><Icon/>{label}</ActionButton>)}</div><SelectField className="jf-field--compact-label" label="Página da prévia" value={preview} onValueChange={value=>setPreview(value as PreviewSurface)} options={surfaces.map(([value,label])=>({value,label}))}/></div><ViewportPreview scrollbarStyle={brandingScrollbarStyle(data,theme)} width={devices.find(item=>item.id===device)?.width??1200} height={devices.find(item=>item.id===device)?.height??800} theme={theme}><div className="company-branding" style={brandingStyle(data,theme)}><PreviewContent surface={preview} data={data} theme={theme} onThemeChange={onThemeChange}/></div></ViewportPreview>{actions}</aside>;
 }

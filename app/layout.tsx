@@ -1,3 +1,4 @@
+import {TrackingPixels} from './components/TrackingPixels';
 import type { Metadata } from "next";
 import "@fontsource-variable/montserrat";
 import "@fontsource-variable/open-sans";
@@ -72,7 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <NavigationLoader />
         <GlobalInteractions />
-        <AppToastHost />
+        <AppToastHost /><TrackingPixels/>
         <script dangerouslySetInnerHTML={{__html:'performance.mark("jobforged-loader-first-paint");'}}/>
         {children}
       </body>

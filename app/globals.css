@@ -5901,3 +5901,4 @@ html[data-theme="dark"] .jf-brand-asset--dark,
 .system-status-summary p{margin-block:var(--jf-ui-space-3);line-height:1.6}.system-status-summary small{color:var(--jf-ui-text-muted)}
 
 .system-page__support-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.tracking-consent{position:fixed;bottom:20px;left:20px;z-index:9998;padding:20px;max-width:min(440px,calc(100vw - 40px));background:var(--jf-ui-surface);color:var(--jf-ui-text);border:1px solid var(--jf-ui-border);border-radius:16px;box-shadow:0 12px 40px #0003}.tracking-consent>div{display:flex;gap:12px}.tracking-preferences{position:fixed;bottom:8px;left:8px;z-index:9000;font-size:11px;background:var(--jf-ui-surface);color:var(--jf-ui-text);border:1px solid var(--jf-ui-border);border-radius:6px;padding:6px}
