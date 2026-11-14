@@ -127,21 +127,21 @@ end$$;
 set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
 select public.job_assistant_issue(repeat('a',64),'{"message":"Synthetic test"}');
-do $begin
+do $$begin
  begin perform count(*) from app_private.job_assistant_requests;raise exception 'assistant table exposed';exception when insufficient_privilege then null;end;
-end$;
+end$$;
 set local role anon;
-do $begin
+do $$begin
  if public.job_assistant_consume(repeat('a',64))->>'message'<>'Synthetic test' then raise exception 'context missing';end if;
  begin perform public.job_assistant_consume(repeat('a',64));raise exception 'token replay accepted';exception when insufficient_privilege then null;end;
  begin perform public.job_assistant_consume(repeat('b',64));raise exception 'unknown token accepted';exception when insufficient_privilege then null;end;
  begin perform public.job_assistant_issue(repeat('b',64),'{}');raise exception 'anonymous issued token';exception when insufficient_privilege then null;end;
-end$;
+end$$;
 set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
-do $begin
+do $$begin
  begin perform public.job_assistant_issue(repeat('c',64),'{}');raise exception 'member issued token';exception when insufficient_privilege then null;end;
-end$;
+end$$;
 set local role authenticated;
 
 -- Persistent publication, tenant isolation, authorization and public projection.
