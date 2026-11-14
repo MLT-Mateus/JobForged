@@ -355,7 +355,7 @@ export default function BlackFridayLandingPage() {
               <a className="button button--ghost jf-action jf-action--secondary" href="#como-funciona">Conhecer a plataforma</a>
             </div>
           </motion.div>
-          {blackFriday ? <figure className="bf-people"><div className="bf-photo-label">PESSOAS NO CENTRO. SEMPRE.</div><BrandAsset className="bf-photo" src="/campaigns/blackfriday-team-v1.webp" alt="Profissionais reunidos para conversar e planejar o trabalho da equipe" width={1536} height={1024} fetchPriority="high"/><BlackFridaySeal className="bf-stamp" /><figcaption><span className="bf-photo-symbol"><BrandAsset src="/brand/jobforged-symbol-dark.svg" alt="" width={40} height={40}/></span><div><strong>Não é só uma nova ferramenta.</strong><span>É um novo ponto de partida para o seu RH.</span></div></figcaption></figure> : <ProductMockup />}
+          {blackFriday ? <figure className="bf-people"><div className="bf-photo-label">PESSOAS NO CENTRO. SEMPRE.</div><BrandAsset className="bf-photo" src="/campaigns/blackfriday-team-br-v2.webp" alt="Profissionais reunidos para conversar e planejar o trabalho da equipe" width={1536} height={1024} fetchPriority="high"/><BlackFridaySeal className="bf-stamp" /><figcaption><span className="bf-photo-symbol"><BrandAsset src="/brand/jobforged-symbol-dark.svg" alt="" width={40} height={40}/></span><div><strong>Não é só uma nova ferramenta.</strong><span>É um novo ponto de partida para o seu RH.</span></div></figcaption></figure> : <ProductMockup />}
         </div>
         <div className="container capability-carousel" role="region" aria-label="Capacidades da JobForged">
           <div className="capability-track">
@@ -584,7 +584,7 @@ export default function BlackFridayLandingPage() {
       <section className="bf-human-section" aria-labelledby="bf-human-title">
         <div className="container bf-human-layout">
           <figure className="bf-human-photo">
-            <BrandAsset src="/campaigns/blackfriday-consulting-v1.webp" alt="Cena ilustrativa de uma consultora e um gestor conversando sobre os próximos passos do RH" width={1536} height={1024} />
+            <BrandAsset src="/campaigns/blackfriday-consulting-br-v2.webp" alt="Cena ilustrativa de uma consultora e um gestor conversando sobre os próximos passos do RH" width={1536} height={1024} />
             <BlackFridaySeal className="bf-human-seal" />
             <figcaption>Uma boa conversa pode mudar o próximo passo.</figcaption>
           </figure>
