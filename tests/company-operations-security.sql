@@ -53,6 +53,6 @@ reset role;
 insert into auth.users(id,email,email_confirmed_at) values('58000000-0000-4000-8000-000000000005','invited-restricted@example.invalid',now());
 insert into public.company_invitations(company_id,email,role,token_hash,invited_by,expires_at) values('58000000-0000-4000-8000-000000000011','invited-restricted@example.invalid','admin',repeat('5',64),'58000000-0000-4000-8000-000000000002',now()+interval '1 hour');
 insert into public.company_members(id,company_id,user_id,email,full_name,role,status) values('58000000-0000-4000-8000-000000000025','58000000-0000-4000-8000-000000000011','58000000-0000-4000-8000-000000000005','invited-restricted@example.invalid','Invited Fixture','admin','active');
-do $declare g jsonb;begin select grants into g from app_private.company_member_permissions where member_id='58000000-0000-4000-8000-000000000025';if g->>'jobs.view'<>'true' or g->>'jobs.delete'<>'false' or g->>'finance.view'<>'false' then raise exception 'invitation privilege escalation';end if;end$;
+do $$declare g jsonb;begin select grants into g from app_private.company_member_permissions where member_id='58000000-0000-4000-8000-000000000025';if g->>'jobs.view'<>'true' or g->>'jobs.delete'<>'false' or g->>'finance.view'<>'false' then raise exception 'invitation privilege escalation';end if;end$$;
 rollback;
 select 'company_operations_security_passed';
