@@ -1,4 +1,5 @@
 "use client";
+import {useCompanyAccess} from '../operations/access';
 import {Search,Plus,Building2} from 'lucide-react';
 import {CollectionView,CollectionViewSwitch,type CollectionLayout} from '../ui/CollectionView';
 import {Fragment,useEffect,useState} from 'react';
@@ -16,12 +17,12 @@ const required:Key[]=['name','type','postalCode','street','number','district','c
 
 async function request<T=Branch[]>(body?:unknown):Promise<T>{const r=await fetch('/api/company/branches',{method:body?'POST':'GET',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await r.json() as {message?:string};if(!r.ok)throw Error(data.message||'Não foi possível concluir.');return data as T}
 export default function BranchesClient(){
- const auth=useCompanyAuthSession();
+ const auth=useCompanyAuthSession(),access=useCompanyAccess();
  if(auth.checking)return <WorkspaceState kind="loading" title="Validando acesso"/>;
  if(!auth.company||!auth.authenticated||auth.platformAdmin)return <WorkspaceState kind="forbidden" title="Entre com sua conta empresarial"/>;
  const name=auth.fullName||auth.email||'Conta';
  const context:AwaitedAdminContext={organization:{id:auth.company.id,name:auth.company.name,shortName:auth.company.name,logo:'/brand/jobforged-symbol.svg'},user:{id:'',name,fullName:name,email:auth.email||'',phone:'',role:auth.role||'',initials:name.slice(0,2),permissions:[]},vacancies:[],candidates:[],team:[],invoices:[]};
- return <AdminShell module="filiais" context={context}><Manager key={auth.company.id} companyId={auth.company.id} manage={['owner','admin'].includes(auth.role||'')}/></AdminShell>;
+ return <AdminShell module="filiais" context={context}><Manager key={auth.company.id} companyId={auth.company.id} manage={!!access?.permissions['branches.manage']}/></AdminShell>;
 }
 function Manager({companyId,manage}:{companyId:string;manage:boolean}){
  const [layout,setLayout]=useState<CollectionLayout>('blocks'),[pendingFiles,setPendingFiles]=useState<File[]>([]),[newTypes,setNewTypes]=useState<string[]>([]);

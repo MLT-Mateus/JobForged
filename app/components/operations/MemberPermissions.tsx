@@ -1,0 +1,12 @@
+"use client";
+import {useEffect,useState} from 'react';
+import {permissionLabels,useCompanyAccess,type Access} from './access';
+import {ActionButton,CheckboxField,WorkspaceState,AppToast} from '../ui';
+export function MemberPermissions({memberId}:{memberId:string}){
+ const mine=useCompanyAccess(),[data,setData]=useState<Access|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(false),[busy,setBusy]=useState(false);
+ useEffect(()=>{let active=true;fetch('/api/company/access?member='+memberId,{cache:'no-store'}).then(async r=>{if(!r.ok)throw Error();const result=await r.json() as Access;if(active)setData(result)}).catch(()=>{if(active)setError('Não foi possível consultar as permissões.')});return()=>{active=false}},[memberId]);
+ if(!data)return <WorkspaceState kind={error?'error':'loading'} title={error||'Carregando permissões...'}/>;
+ const editable=mine?.permissions['admins.permissions']&&data.role!=='owner'&&data.memberId!==mine.memberId;
+ async function save(){if(!data)return;setBusy(true);try{const r=await fetch('/api/company/access',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({companyId:data.companyId,memberId,permissions:data.permissions,version:data.version})});if(!r.ok)throw Error('Não foi possível salvar. Atualize a página e confira suas permissões.');setData(await r.json() as Access);setError('');setNotice(true);window.dispatchEvent(new Event('jobforged-access-updated'))}catch(e){setError(e instanceof Error?e.message:'Falha ao salvar.')}finally{setBusy(false)}}
+ return <details><summary>Permissões por ação</summary><div className="jf-workspace-stack">{Object.entries(permissionLabels).map(([key,label])=><CheckboxField key={key} label={label} checked={!!data.permissions[key]} disabled={!editable||!mine?.permissions[key]||busy} onChange={e=>{const permissions={...data.permissions,[key]:e.target.checked};if(e.target.checked){const group=key.split('.')[0],view=group+'.view';if(view in permissionLabels)permissions[view]=true;if(key==='applications.decide')permissions['applications.move']=true;if(key==='admins.permissions')permissions['admins.manage']=true}setData({...data,permissions})}}/>)}{error&&<p role="alert">{error}</p>}{editable&&<ActionButton disabled={busy} onClick={()=>void save()}>Salvar permissões</ActionButton>}{notice&&<AppToast notice={{kind:'success',title:'Permissões salvas',text:'Os acessos foram atualizados.'}} onClose={()=>setNotice(false)}/>}</div></details>
+}
