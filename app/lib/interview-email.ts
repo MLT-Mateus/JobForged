@@ -1,5 +1,9 @@
-const escape=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+import {renderEmailHtml} from '../design-system/email-template-catalog.ts';
 export function renderInterviewEmail(data:{company:string;name:string;title:string;startsAt:string;endsAt:string;url:string;logo:string;color:string}){
- const color=/^#[0-9a-f]{6}$/i.test(data.color)?data.color:'#20B2AA';const logo=/^https:\/\//.test(data.logo)?data.logo:'';const time=(v:string)=>new Date(v).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'long',timeStyle:'short'});
- return `<html lang="pt-BR"><body style="margin:0;background:#f4f8f7;font-family:Arial,sans-serif;color:#142321"><table role="presentation" width="100%"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="560" style="max-width:100%;background:white;border-radius:16px"><tr><td style="padding:32px">${logo?`<img src="${escape(logo)}" alt="${escape(data.company)}" width="160" style="max-height:80px;object-fit:contain"/>`:''}<h1 style="font-size:24px">Seu convite para entrevista</h1><p>Olá, ${escape(data.name)}.</p><p>${escape(data.company)} convida você para ${escape(data.title)}.</p><p><strong>${escape(time(data.startsAt))}</strong><br/>Término: ${escape(time(data.endsAt))}<br/>Horário de Brasília</p><p style="padding:16px 0"><a style="background:${color};color:#071411;padding:14px 20px;border-radius:8px;text-decoration:none" href="${escape(data.url)}">Acessar reunião</a></p>${data.url==='https://meet.google.com/'?'<p>Este é um convite de demonstração. O endereço acima ilustra o acesso; a empresa deve fornecer o link da reunião antes da entrevista.</p>':''}<hr style="border:0;border-top:1px solid #dbe5e2"/><p style="font-size:12px">Powered by JobForged</p></td></tr></table></td></tr></table></body></html>`;
+ const time=(value:string)=>new Date(value).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'long',timeStyle:'short'});
+ return renderEmailHtml('interview-invitation','light',false,{}, {
+  COMPANY_NAME:data.company,CANDIDATE_NAME:data.name,JOB_TITLE:data.title,
+  INTERVIEW_START:time(data.startsAt),INTERVIEW_END:time(data.endsAt),MEETING_URL:data.url,
+  INTERVIEW_NOTE:data.url==='https://meet.google.com/'?'Este é um convite de demonstração. A empresa deve fornecer o link da reunião antes da entrevista.':'Confira o horário e acesse o link no momento da entrevista.',
+ });
 }

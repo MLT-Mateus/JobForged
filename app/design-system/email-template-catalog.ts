@@ -7,7 +7,7 @@ export type EmailTypography = {
 };
 
 export type EmailTemplateVariables = Partial<Record<
-  "COMMUNICATION_TITLE" | "COMMUNICATION_MESSAGE" | "FIRST_NAME" | "COMPANY_NAME" | "CANDIDATE_NAME" | "JOB_TITLE" | "RECRUITER_NAME" | "APPLICATION_URL" | "APP_URL" | "JOB_URL",
+  "INTERVIEW_START" | "INTERVIEW_END" | "INTERVIEW_NOTE" | "MEETING_URL" | "COMMUNICATION_TITLE" | "COMMUNICATION_MESSAGE" | "FIRST_NAME" | "COMPANY_NAME" | "CANDIDATE_NAME" | "JOB_TITLE" | "RECRUITER_NAME" | "APPLICATION_URL" | "APP_URL" | "JOB_URL",
   string
 >>;
 
@@ -33,6 +33,9 @@ export function resolveEmailTheme(preferredTheme: string | null | undefined): Em
 }
 
 export type EmailTemplateId =
+  | "company-invitation"
+  | "interview-invitation"
+  | "email-change"
   | "auth-confirmation"
   | "password-recovery"
   | "account-invitation"
@@ -52,6 +55,9 @@ export type EmailTemplateDefinition = {
 };
 
 export const emailTemplates: EmailTemplateDefinition[] = [
+  {id:"company-invitation",name:"Convite de administrador",audience:"E-mail convidado",trigger:"Convite de acesso à empresa",channel:"Brevo · e-mail transacional",subject:"Convite para {{ params.COMPANY_NAME }}",description:"Acesso à empresa com validade de 24 horas."},
+  {id:"interview-invitation",name:"Convite de entrevista",audience:"Pessoa candidata vinculada ao agendamento",trigger:"Envio pela agenda",channel:"Brevo · e-mail transacional",subject:"Convite para entrevista · {{ params.COMPANY_NAME }}",description:"Data, horário e link da entrevista no padrão JobForged."},
+  {id:"email-change",name:"Confirmação de novo e-mail",audience:"Conta JobForged",trigger:"Solicitação de troca de e-mail",channel:"Supabase Auth · SMTP Brevo",subject:"Confirme seu novo e-mail",description:"Confirma a alteração do endereço da conta."},
   {id:"platform-communication",name:"Comunicado JobForged",audience:"Contas selecionadas no backoffice",trigger:"Publicação e envio pelo backoffice",channel:"Brevo · e-mail transacional",subject:"{{ params.COMMUNICATION_TITLE }}",description:"Comunicado institucional para destinatários verificados."},
   {
     id: "auth-confirmation",
@@ -111,6 +117,10 @@ type EmailCopy = {
 };
 
 const previewValues: Record<string, string> = {
+  "{{ params.INTERVIEW_START }}":"16 de novembro de 2026 às 10:00",
+  "{{ params.INTERVIEW_END }}":"16 de novembro de 2026 às 10:30",
+  "{{ params.INTERVIEW_NOTE }}":"Confira o horário e acesse o link no momento da entrevista.",
+  "{{ params.MEETING_URL }}":"https://meet.google.com/",
   "{{ params.COMMUNICATION_TITLE }}": "Novidades para sua equipe",
   "{{ params.COMMUNICATION_MESSAGE }}": "Confira as novidades da JobForged no seu painel.",
   "{{ .Email }}": "pessoa@empresa.com",
@@ -129,6 +139,12 @@ const previewValues: Record<string, string> = {
 
 function copyFor(id: EmailTemplateId): EmailCopy {
   switch (id) {
+    case "company-invitation":
+      return {preheader:"Você recebeu um convite para acessar uma empresa na JobForged.",eyebrow:"EQUIPE E ACESSOS",title:"Convite para {{ params.COMPANY_NAME }}",paragraphs:["Você recebeu um convite para acessar {{ params.COMPANY_NAME }} na JobForged.","O link expira em 24 horas e só funciona com este e-mail confirmado."],button:{label:"Aceitar convite",url:"{{ params.APP_URL }}"},note:"Se você não esperava este convite, ignore esta mensagem."};
+    case "interview-invitation":
+      return {preheader:"Confira os detalhes da sua entrevista.",eyebrow:"PROCESSO SELETIVO",title:"Seu convite para entrevista",paragraphs:["Olá, {{ params.CANDIDATE_NAME }}.","{{ params.COMPANY_NAME }} convida você para {{ params.JOB_TITLE }}.","Início: {{ params.INTERVIEW_START }}\nTérmino: {{ params.INTERVIEW_END }}\nHorário de Brasília"],button:{label:"Acessar reunião",url:"{{ params.MEETING_URL }}"},note:"{{ params.INTERVIEW_NOTE }}"};
+    case "email-change":
+      return {preheader:"Confirme a alteração do seu endereço de e-mail.",eyebrow:"SEGURANÇA DA CONTA",title:"Confirme seu novo e-mail",paragraphs:["Confirme a troca para usar o novo endereço no login da JobForged."],button:{label:"Confirmar novo e-mail",url:"{{ .SiteURL }}/confirmar-email?token_hash={{ .TokenHash }}&amp;type=email_change"},note:"Se você não fez esta solicitação, ignore esta mensagem."};
     case "auth-confirmation":
       return {
         preheader: "Confirme seu endereço para continuar com seu cadastro JobForged.",
@@ -287,7 +303,7 @@ export function renderEmailHtml(id: EmailTemplateId, theme: EmailTheme, preview 
   const note = copy.note
     ? `<tr><td style="padding:0 32px 30px;"><p style="margin:0;padding:16px;border:1px solid ${colors.border};border-radius:8px;background:${colors.surface};color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">${valueFor(copy.note, preview, variables)}</p></td></tr>`
     : "";
-  const previewSubject = preview ? subject : template.subject;
+  const previewSubject = subject;
   const origin = process.env.APP_ENV === "live" ? "https://jobforged.com" : "https://test.jobforged.com";
   // Browser-based previews and downloaded HTML share the application's scrollbar. Mail clients may ignore this optional CSS.
   const scrollbarStyles = `<style>

@@ -4,7 +4,7 @@ import {renderInterviewEmail} from '../app/lib/interview-email.ts';
 
 test('interview invitation escapes client content and retains brand and demo meeting disclosure',()=>{
  const html=renderInterviewEmail({company:'Company <script>',name:'A & B',title:'Interview',startsAt:'2026-11-16T13:00:00Z',endsAt:'2026-11-16T14:00:00Z',url:'https://meet.google.com/',logo:'https://example.invalid/logo.png',color:'#123456'});
- assert.ok(html.includes('Company &lt;script&gt;'));assert.ok(html.includes('A &amp; B'));assert.ok(html.includes('Powered by JobForged'));assert.ok(html.includes('convite de demonstração'));assert.ok(html.includes('10:00'));assert.ok(html.includes('#123456'));assert.ok(!html.includes('<script>'));
+ assert.ok(html.includes('Company &lt;script&gt;'));assert.ok(html.includes('A &amp; B'));assert.ok(html.includes('Enviado por'));assert.ok(html.includes('convite de demonstração'));assert.ok(html.includes('10:00'));assert.ok(html.includes('/brand/jobforged-logo.png'));assert.ok(html.includes('#087a76'));assert.ok(!html.includes('#123456'));assert.ok(!html.includes('<script>'));
 });
 test('operational BFF rejects wrong origins and tenant switches, preserves versions and custom-host candidate access',async()=>{
  const saved={APP_ENV:process.env.APP_ENV,SUPABASE_INTERNAL_URL:process.env.SUPABASE_INTERNAL_URL,SUPABASE_ANON_KEY:process.env.SUPABASE_ANON_KEY},original=globalThis.fetch;
