@@ -25,7 +25,7 @@ import { CompanyBrandingProvider } from '../personalization/CompanyBranding';
 import '../personalization/company-branding.css';
 
 const nav = [
-  ["Home","/app/home",House],["Dashboards","/app/dashboards",LayoutDashboard],["Vagas","/app/vagas",BriefcaseBusiness],["Candidaturas","/app/candidaturas",UsersRound],["Agenda","/app/agenda",CalendarDays],["Personalização","/app/personalizacao",Palette],["Administradores","/app/administradores",ShieldCheck],["Financeiro","/app/financeiro",WalletCards],["Configurações","/app/configuracoes",Settings2],
+  ["Home","/app/home",House],["Dashboards","/app/dashboards",LayoutDashboard],["Vagas","/app/vagas",BriefcaseBusiness],["Filiais","/app/filiais",House],["Candidaturas","/app/candidaturas",UsersRound],["Agenda","/app/agenda",CalendarDays],["Personalização","/app/personalizacao",Palette],["Administradores","/app/administradores",ShieldCheck],["Financeiro","/app/financeiro",WalletCards],["Configurações","/app/configuracoes",Settings2],
 ] as const;
 
 export function AdminShell({ module, context, children }: { module: WorkspaceModule; context: {organization: AwaitedAdminContext["organization"]; user: Pick<AwaitedAdminContext["user"], "name" | "role" | "initials">}; children: ReactNode }) {

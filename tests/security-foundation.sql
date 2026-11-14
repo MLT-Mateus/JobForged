@@ -135,6 +135,20 @@ set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
 do $$declare d jsonb:='{"title":"Public job fixture","area":"Engineering","level":"Senior","contractType":"CLT","modality":"Remoto","country":"Brasil","state":"SP","city":"São Paulo","summary":"Public description","responsibilities":["One","Two","Three"],"requirements":["One","Two","Three"],"experience":"","weeklyHours":"","schedule":"","salaryMin":"12345","salaryMax":"67890","currency":"BRL","salaryConfidential":true,"softSkills":[],"differentiators":[],"certifications":[],"education":"","languages":[],"benefits":[],"additionalBenefits":"","careerPlan":"","performanceReviews":false,"promotionPossible":false,"teamDescription":"","reportsTo":"","teamSize":"","tools":[],"methodology":"","challenges":"","openingReason":"","autonomy":"","hierarchy":"","stages":[{"id":"triagem","name":"Triagem","required":true},{"id":"entrevista","name":"Entrevista","required":true}],"technicalTest":false,"interviewTypes":[],"applicationDeadline":"","responseSla":"","lgpd":true,"responsibleId":"PRIVATE_FIXTURE","currentStep":0}';j jsonb;uid uuid;begin
  j:=public.company_jobs_v1('save',null,d,'Rascunho');uid:=(j->>'id')::uuid;
+  declare b jsonb;bd jsonb:='{"name":"Filial teste","type":"Filial","cnpj":"","corporateName":"","description":"","region":"","postalCode":"01001000","street":"Praça da Sé","number":"1","complement":"","district":"Sé","city":"São Paulo","state":"SP","status":"Ativo","mapsUrl":"","photos":[],"jobIds":[]}';bid uuid;
+ begin
+  b:=public.company_branches_v1('save',null,bd||jsonb_build_object('jobIds',jsonb_build_array(uid)));bid:=(b->>'id')::uuid;
+  if jsonb_array_length(public.company_branches_v1('list'))<>1 then raise exception 'branch persistence failed';end if;
+  begin perform public.company_branches_v1('delete',bid,null,1);raise exception 'linked branch deleted';exception when sqlstate 'PT422' then null;end;
+  begin perform public.company_branches_v1('save',bid,bd,0);raise exception 'stale branch accepted';exception when serialization_failure then null;end;
+  begin perform public.company_branches_v1('save',null,bd||'{"photos":[{"id":"00000000-0000-4000-8000-000000000000","alt":"Denied"}]}');raise exception 'foreign image accepted';exception when insufficient_privilege then null;end;
+  perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000002","session_id":"17000000-0000-4000-8000-000000000102","aal":"aal1","role":"authenticated"}',true);
+  if public.company_branches_v1('list')<>'[]'::jsonb then raise exception 'branches leaked';end if;
+  begin perform public.company_branches_v1('delete',bid,null,1);raise exception 'foreign branch deleted';exception when no_data_found then null;end;
+  perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+  perform public.company_branches_v1('save',bid,bd,1);
+  perform public.company_branches_v1('delete',bid,null,2);
+ end;
  if public.company_jobs_v1('get',uid)->>'title'<>'Public job fixture' then raise exception 'job not persisted';end if;
  if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'draft exposed';end if;
  begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'unpublished portal accepted';exception when sqlstate 'PT422' then null;end;

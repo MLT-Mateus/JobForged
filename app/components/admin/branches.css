@@ -1,0 +1,6 @@
+.branches-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:var(--jf-ui-space-4)}
+.branches-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:var(--jf-ui-space-4)}
+.branch-cover{aspect-ratio:16/9;display:grid;place-items:center;background:var(--jf-ui-surface);overflow:hidden;border-radius:var(--jf-ui-control-radius)}
+.branch-cover img{width:100%;height:100%;object-fit:cover}
+.branch-fields{border:0;padding:0;min-width:0;display:grid;gap:var(--jf-ui-space-5)}
+.branches-actions{display:flex;gap:var(--jf-ui-space-3);flex-wrap:wrap}

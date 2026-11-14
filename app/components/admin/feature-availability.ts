@@ -9,6 +9,7 @@ export type FeatureAvailability = {
 // Keep the navigation and the page notice in sync until each module is
 // backed by real organization data and has been verified in Test.
 export const featureAvailability: Record<WorkspaceModule, FeatureAvailability> = {
+  filiais:{status:'available',description:'Unidades, endereços e fotos da empresa.'},
   home: {
     status: "beta",
     description: "Indicadores, atividades e dados da organização são exemplos. A Home ainda não mostra os dados da sua empresa.",
