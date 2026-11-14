@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   if (!session || session.platformAdmin || !session.company || !["owner", "admin"].includes(session.role)) return Response.json({ message: "Acesso negado." }, { status: 403, headers });
   const body = await request.json().catch(() => null) as { email?: unknown; role?: unknown } | null;
   const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
-  const role = body?.role === "admin" ? "admin" : "member";
+  const role = "admin";
   if (!isEmail(email) || email.length > 254) return Response.json({ message: "Informe um e-mail válido." }, { status: 400, headers });
   const response = await requestDatabase("rpc/create_company_invitation", session.accessToken,
     { target_company_id: session.company.id, invite_email: email, invite_role: role });
