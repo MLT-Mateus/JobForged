@@ -13,7 +13,7 @@ export function JobAssistant({job,onApply,onNotice}:{job:Job;onApply:(patch:Assi
   if(!message.trim()||busy)return;setBusy(true);setError('');setPatch(null);base.current=structuredClone(job);
   const current=message.trim();
   try{
-   const r=await fetch('/api/company/jobs/assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({companyId:job.organizationId,draft:job,message:current,history:messages.slice(-12)}),signal:AbortSignal.timeout(95000)});
+   const r=await fetch('/api/company/jobs/assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({companyId:job.organizationId,draft:job,message:current,history:messages.slice(-12)}),signal:AbortSignal.timeout(28000)});
    const data=await r.json() as {message?:string;reply:string;patch:AssistantPatch;branches:{id:string;name:string;city:string;state:string}[]};if(!r.ok)throw Error(data.message||'Assistente indisponível.');
    setBranchNames(Object.fromEntries(data.branches.map(b=>[b.id,`${b.name} · ${b.city}/${b.state}`])));
    setMessages(x=>[...x,{role:'user',text:current},{role:'assistant',text:data.reply}]);setMessage('');setPatch(data.patch);setSelected(Object.keys(data.patch));

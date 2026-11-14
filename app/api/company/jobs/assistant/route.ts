@@ -24,7 +24,7 @@ export async function POST(request:NextRequest){
   const token=Buffer.from(randomBytes(32)).toString('base64url');
   const issued=await requestDatabase('rpc/job_assistant_issue',session.accessToken,{token_hash:createHash('sha256').update(token).digest('hex'),payload:{draft,branches,history,message:body.message,today:new Date().toISOString().slice(0,10)}});
   if(!issued?.ok)return fail(issued?.status===429?'Limite do assistente atingido. Tente novamente mais tarde.':'Não foi possível iniciar o assistente.',issued?.status===429?429:503);
-  const result=await fetch('https://n8n.jobforged.com/webhook/jbfd-test-job-authoring',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),redirect:'error',signal:AbortSignal.timeout(85000)});
+  const result=await fetch('https://n8n.jobforged.com/webhook/jbfd-test-job-authoring',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),redirect:'error',signal:AbortSignal.timeout(22000)});
   if(!result.ok)return fail('O assistente está indisponível. Seu formulário permanece preservado.',503);
   const data=await result.json() as {reply?:unknown;patch?:unknown};
   if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>4000)return fail('O assistente não retornou uma sugestão válida. Tente novamente.',502);
