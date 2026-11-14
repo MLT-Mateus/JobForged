@@ -57,7 +57,7 @@ begin
  if operation in ('save','delete') then
   if operation='delete' then selected:='[]'::jsonb;end if;
   update app_private.company_branches b set document=jsonb_set(b.document,'{jobIds}',
-   (b.document->'jobIds' - j.id::text) || case when selected ? b.id::text then jsonb_build_array(j.id::text) else '[]'::jsonb end),version=b.version+1,updated_at=now()
+   ((b.document->'jobIds') - j.id::text) || case when selected ? b.id::text then jsonb_build_array(j.id::text) else '[]'::jsonb end),version=b.version+1,updated_at=now()
   where b.company_id=cid and ((b.document->'jobIds' ? j.id::text) is distinct from (selected ? b.id::text));
  end if;
  insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(cid,auth.uid(),'job.'||operation,j.id);
