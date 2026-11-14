@@ -335,16 +335,19 @@ export default function BlackFridayLandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            {blackFriday ? <><span className="bf-eyebrow">BLACK FRIDAY JOBFORGED</span><h1>Mais tempo para pessoas.<br/><BrandPair blue="Um novo" teal="momento para o seu RH."/></h1><p className="bf-offer"><strong>48% de economia</strong> + consultoria inicial de RH</p></> : <h1>Recrute com a <BrandPair blue="sua" teal="marca." /><br />Contrate com inteligência.</h1>}
+            <span className="bf-eyebrow"><Sparkles size={15} aria-hidden="true" /> EDIÇÃO ESPECIAL · JOBFORGED</span>
+            <h1 className="bf-headline">BLACK<br /><span>FRIDAY.</span></h1>
+            <p className="bf-promise">Seu RH evolui.<br />O investimento diminui.</p>
+            <div className="bf-discount"><strong>48<span>%</span></strong><div><b>DE ECONOMIA</b><span>nos planos pagos da campanha</span></div></div>
             <p className="hero-lead">
-              Conhecemos os desafios de quem cuida de pessoas. Organize suas contratações com a sua marca e comece com uma conversa estratégica sobre o futuro do seu RH.
+              Menos planilhas. Mais tempo para pessoas. Dê ao seu RH uma nova forma de contratar — com a sua marca e consultoria inicial incluída.
             </p>
             <div className="hero-actions">
-              <a className="button button--primary jf-action jf-action--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Conhecer a condição Black Friday <ArrowRight size={19} /></a>
-              <a className="button button--ghost jf-action jf-action--secondary" href="#como-funciona"><span className="play-dot">▶</span> Ver como funciona</a>
+              <a className="button button--primary jf-action jf-action--primary" href="#planos">Quero conhecer a oferta <ArrowRight size={19} /></a>
+              <a className="button button--ghost jf-action jf-action--secondary" href="#como-funciona">Conhecer a plataforma</a>
             </div>
           </motion.div>
-          {blackFriday ? <figure className="bf-people"><BrandAsset className="bf-photo" src="/careers/team-collaboration.jpg" alt="Profissionais reunidos para conversar e planejar o trabalho da equipe" width={1400} height={933} fetchPriority="high"/><figcaption><span className="bf-photo-symbol"><BrandAsset src="/brand/jobforged-symbol.svg" alt="" width={40} height={40}/></span><div><strong>Seu próximo passo começa com pessoas.</strong><span>Tecnologia e orientação para o RH evoluir junto.</span></div></figcaption></figure> : <ProductMockup />}
+          {blackFriday ? <figure className="bf-people"><div className="bf-photo-label">PESSOAS NO CENTRO. SEMPRE.</div><BrandAsset className="bf-photo" src="/careers/team-collaboration.jpg" alt="Profissionais reunidos para conversar e planejar o trabalho da equipe" width={1400} height={933} fetchPriority="high"/><div className="bf-stamp"><span>BÔNUS DA CAMPANHA</span><strong>Consultoria<br />inicial de RH</strong><span>INCLUÍDA</span></div><figcaption><span className="bf-photo-symbol"><BrandAsset src="/brand/jobforged-symbol-dark.svg" alt="" width={40} height={40}/></span><div><strong>Não é só uma nova ferramenta.</strong><span>É um novo ponto de partida para o seu RH.</span></div></figcaption></figure> : <ProductMockup />}
         </div>
         <div className="container capability-carousel" role="region" aria-label="Capacidades da JobForged">
           <div className="capability-track">
@@ -361,6 +364,8 @@ export default function BlackFridayLandingPage() {
           </div>
         </div>
       </section>
+
+      <div className="bf-ribbon" aria-label="Benefícios da campanha"><span>BLACK FRIDAY JOBFORGED</span><span>48% DE ECONOMIA</span><span>CONSULTORIA INICIAL INCLUÍDA</span><a href="#planos">CONHEÇA OS PLANOS <ArrowRight size={16} aria-hidden="true" /></a></div>
 
       <section className="problem-section" id="produto">
         <div className="container problem-layout">
@@ -571,8 +576,8 @@ export default function BlackFridayLandingPage() {
       <section className="pricing-section" id="planos">
         <div className="container">
           <SectionIntro
-            eyebrow="Condição conceitual Black Friday"
-            title={<>Escolha o <BrandPair blue="plano" teal="ideal" /> para sua operação</>}
+            eyebrow="BLACK FRIDAY · INVESTIMENTO MENOR, NOVAS POSSIBILIDADES"
+            title={<>O próximo passo do seu RH.<br /><BrandPair blue="Por" teal="48% menos." /></>}
             text="Os valores abaixo representam o preço final com 48% de economia nesta proposta de campanha."
             align="center"
           />
@@ -601,7 +606,7 @@ export default function BlackFridayLandingPage() {
               {blackFriday && <p className="bf-saving"><del>De R$ {((Number(plansById[annualBilling ? "basico-anual" : "basico-mensal"].price.replace(",", "."))/0.52)).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}</del> · 48% de economia</p>}<div className="plan-price"><strong>R$ {plansById[annualBilling ? "basico-anual" : "basico-mensal"].price}</strong><span>{plansById[annualBilling ? "basico-anual" : "basico-mensal"].suffix}</span></div>
               {annualBilling && !blackFriday && <small className="plan-equivalent">Economize R$ 40,00 por mês — R$ 480,00 por ano</small>}
               <p>O plano principal para organizar o recrutamento e acelerar a triagem.</p>
-              <button className="button button--primary jf-action jf-action--primary" type="button" disabled aria-label="Plano Básico indisponível: contratação em breve">Contratação em breve</button>
+              <a className="button button--primary jf-action jf-action--primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Consultar oferta Básico <ArrowRight /></a>
               <ul>
                 <li><Check /> Até 5 vagas simultâneas</li>
                 <li><Check /> 3 usuários</li>
@@ -616,7 +621,7 @@ export default function BlackFridayLandingPage() {
               {blackFriday && <p className="bf-saving"><del>De R$ {((Number(plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price.replace(",", "."))/0.52)).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}</del> · 48% de economia</p>}<div className="plan-price"><strong>R$ {plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].price}</strong><span>{plansById[annualBilling ? "profissional-anual" : "profissional-mensal"].suffix}</span></div>
               {annualBilling && !blackFriday && <small className="plan-equivalent">Economize R$ 47,00 por mês — R$ 564,00 por ano</small>}
               <p>Mais vagas e usuários para equipes com maior volume de contratações.</p>
-              <button className="button button--blue jf-action jf-action--accent" type="button" disabled aria-label="Plano Profissional indisponível: contratação em breve">Contratação em breve</button>
+              <a className="button button--blue jf-action jf-action--accent" href={WHATSAPP_URL} target="_blank" rel="noreferrer">Consultar oferta Profissional <ArrowRight /></a>
               <ul>
                 <li><Check /> Até 15 vagas simultâneas</li>
                 <li><Check /> 10 usuários</li>
@@ -626,7 +631,7 @@ export default function BlackFridayLandingPage() {
               </ul>
             </Reveal>
           </div>
-          <p className="pricing-note"><ShieldCheck /> Básico e Profissional terão contratação e pagamento direto em breve. Se quiser conversar antes, use o botão lateral de WhatsApp.</p>
+          <p className="pricing-note"><ShieldCheck /> Campanha conceitual: preços e benefícios sujeitos à definição comercial. Consulte a equipe para saber mais; não há cobrança nesta página.</p>
         </div>
       </section>
 
