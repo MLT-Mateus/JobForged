@@ -6,7 +6,7 @@ revoke all on app_private.company_member_permissions from public,anon,authentica
 create function app_private.permission_keys() returns text[] language sql immutable set search_path=pg_catalog as $$select array['dashboards.view','jobs.view','jobs.create','jobs.edit','jobs.delete','branches.view','branches.manage','applications.view','applications.move','applications.decide','applications.notes','applications.resume','agenda.view','agenda.manage','appearance.manage','admins.view','admins.manage','admins.permissions','settings.manage','finance.view']::text[]$$;
 create function app_private.current_company_id() returns uuid language sql stable security definer set search_path=pg_catalog as $$select m.company_id from public.company_members m where m.user_id=auth.uid() and app_private.is_company_member(m.company_id) limit 1$$;
 create function app_private.company_can(permission text) returns boolean language sql stable security definer set search_path=pg_catalog as $$
- select coalesce((select case when m.role='owner' then true when p.member_id is not null then coalesce((p.grants->>permission)::boolean,false) else m.role='admin' and permission not in ('finance.view','admins.permissions') end from public.company_members m left join app_private.company_member_permissions p on p.member_id=m.id where m.user_id=auth.uid() and app_private.is_company_member(m.company_id) limit 1),false) and permission=any(app_private.permission_keys()) and not public.is_platform_admin();
+ select coalesce((select case when m.role='owner' then true when p.member_id is not null then coalesce((p.grants->>permission)::boolean,false) else (m.role='admin' and permission not in ('finance.view','admins.permissions')) or (m.role='member' and permission in ('jobs.view','branches.view')) end from public.company_members m left join app_private.company_member_permissions p on p.member_id=m.id where m.user_id=auth.uid() and app_private.is_company_member(m.company_id) limit 1),false) and permission=any(app_private.permission_keys()) and not public.is_platform_admin();
 $$;
 create function app_private.require_company_permission(permission text) returns void language plpgsql security definer set search_path=pg_catalog as $$begin perform app_private.security_gate();if not app_private.company_can(permission) then raise exception 'permission denied' using errcode='42501';end if;end;$$;
 -- Preserve the former restricted member role as a restricted administrator.
@@ -40,11 +40,13 @@ begin
 end;$$;
 -- Enforce permissions inside existing RPCs too (including direct PostgREST calls).
 do $$declare r record;definition text;guard text;begin
- for r in select p.oid,p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_language l on l.oid=p.prolang where n.nspname='public' and l.lanname='plpgsql' and p.proname=any(array['company_jobs_v1','company_branches_v1','create_company_invitation','update_company_member','update_company_member_identity_v1','revoke_company_invitation','write_company_branding','reserve_company_image','register_company_image','write_company_portal','publish_portal_with_domain','company_domain','company_domain_with_preferences','update_company_profile','job_assistant_issue']) loop
+ for r in select p.oid,p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_language l on l.oid=p.prolang where n.nspname='public' and l.lanname='plpgsql' and p.proname=any(array['company_jobs_v1','company_branches_v1','create_company_invitation','update_company_member','update_company_member_identity_v1','revoke_company_invitation','write_company_branding','reserve_company_image','register_company_brand_asset','write_company_portal','publish_portal_with_domain','company_domain','company_domain_with_preferences','update_company_profile','job_assistant_issue']) loop
  guard:=case r.proname
  when 'company_jobs_v1' then 'perform app_private.require_company_permission(case when operation in (''list'',''get'') then ''jobs.view'' when operation=''delete'' then ''jobs.delete'' when operation=''save'' and job_id is null then ''jobs.create'' else ''jobs.edit'' end);'
  when 'company_branches_v1' then 'perform app_private.require_company_permission(case when operation in (''list'',''get'') then ''branches.view'' else ''branches.manage'' end);'
  when 'job_assistant_issue' then 'if not(app_private.company_can(''jobs.create'') or app_private.company_can(''jobs.edit'')) then raise exception ''denied'' using errcode=''42501'';end if;'
+ when 'reserve_company_image' then 'if not(app_private.company_can(''appearance.manage'') or app_private.company_can(''branches.manage'')) then raise exception ''denied'' using errcode=''42501'';end if;'
+ when 'register_company_brand_asset' then 'if not(app_private.company_can(''appearance.manage'') or app_private.company_can(''branches.manage'')) then raise exception ''denied'' using errcode=''42501'';end if;'
  when 'update_company_profile' then 'perform app_private.require_company_permission(''settings.manage'');'
  when 'create_company_invitation' then 'perform app_private.require_company_permission(''admins.manage'');if invite_role<>''admin'' then raise exception ''invalid role'' using errcode=''22023'';end if;'
  when 'update_company_member' then 'perform app_private.require_company_permission(''admins.manage'');if new_role<>''admin'' then raise exception ''invalid role'' using errcode=''42501'';end if;'
@@ -58,4 +60,9 @@ do $$declare r record;definition text;guard text;begin
 end;$$;
 do $$declare r record;begin for r in select p.oid::regprocedure signature,n.nspname,p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace where p.proname=any(array['permission_keys','current_company_id','company_can','require_company_permission','company_access_v1']) loop execute format('alter function %s owner to postgres',r.signature);execute format('revoke all on function %s from public,anon,authenticated,service_role',r.signature);end loop;end;$$;
 grant execute on function public.company_access_v1(text,uuid,jsonb,bigint) to authenticated;
+-- Read-only organization context remains available; sensitive roster fields require access.
+do $$declare definition text;begin
+ definition:=pg_get_functiondef('public.company_read_v1()'::regprocedure);
+ definition:=replace(definition,'actor_role in (''owner'',''admin'')','app_private.company_can(''admins.view'')');execute definition;
+end;$$;
 notify pgrst,'reload schema';

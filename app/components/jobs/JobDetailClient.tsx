@@ -3,7 +3,7 @@ import {OperationalModule} from '../operations/OperationalModule';
 import {JobOptionsPanel} from '../operations/JobOptionsPanel';
 
 import { Panel } from "@/app/components/ui";
-/* eslint-disable @next/next/no-html-link-for-pages, react-hooks/set-state-in-effect */
+/* eslint-disable @next/next/no-html-link-for-pages */
 import { useEffect,useMemo,useState } from "react";
 import { Check, ChevronRight, ExternalLink, Pause, Play } from "lucide-react";
 import { AppToast, ActionButton,EmptyState,StatusBadge,WorkspacePageHeader,WorkspaceTabs,WorkspaceState } from "@/app/components/ui";

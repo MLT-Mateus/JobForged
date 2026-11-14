@@ -105,7 +105,9 @@ begin
  'preferences',coalesce(cfg,'{"reminderDay":true,"reminderTenMinutes":true}'),
  'activity',case when app_private.company_can('dashboards.view') then (select coalesce(jsonb_agg(to_jsonb(x)),'[]') from(select action,created_at from public.company_audit_events where company_id=cid order by created_at desc limit 15)x) else '[]'::jsonb end);
 end;$$;
-create or replace function app_private.job_result(j app_private.company_jobs) returns jsonb language sql stable set search_path=pg_catalog as $$select j.document||jsonb_build_object('id',j.id,'organizationId',j.company_id,'status',j.status,'version',j.version,'createdAt',j.created_at,'updatedAt',j.updated_at,'applicationsCount',(select count(*) from app_private.job_applications a where a.job_id=j.id))$$;
+create or replace function app_private.job_result(j app_private.company_jobs) returns jsonb language sql stable set search_path=pg_catalog as $$
+ select j.document||jsonb_build_object('branchIds',coalesce((select jsonb_agg(b.id order by b.id) from app_private.company_branches b where b.company_id=j.company_id and b.document->'jobIds' ? j.id::text),'[]'::jsonb))||jsonb_build_object('id',j.id,'organizationId',j.company_id,'status',j.status,'version',j.version,'createdAt',j.created_at,'updatedAt',j.updated_at,'applicationsCount',(select count(*) from app_private.job_applications a where a.job_id=j.id));
+$$;
 -- Resume access is tied to an application in the active company, never a public URL.
 create function app_private.company_resume_access(object_name text) returns boolean language sql stable security definer set search_path=pg_catalog as $$select app_private.company_can('applications.resume') and exists(select 1 from app_private.candidate_documents d join app_private.job_applications a on a.resume_id=d.id where d.path=object_name and a.company_id=app_private.current_company_id())$$;
 alter function app_private.company_resume_access(text) owner to postgres;

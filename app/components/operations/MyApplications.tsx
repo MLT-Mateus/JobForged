@@ -1,0 +1,5 @@
+"use client";
+import {useEffect,useState} from 'react';
+import {Panel,EmptyState,StatusBadge} from '../ui';
+type Entry={id:string;jobId:string;title:string;company:string;stage:string;createdAt:string};
+export function MyApplications(){const [rows,setRows]=useState<Entry[]>([]),[error,setError]=useState('');useEffect(()=>{fetch('/api/portal/applications',{cache:'no-store'}).then(async r=>{if(!r.ok)throw Error();setRows(await r.json() as Entry[])}).catch(()=>setError('Não foi possível carregar suas candidaturas.'))},[]);return <section><h3>Minhas candidaturas</h3>{error?<p role="alert">{error}</p>:rows.length?rows.map(a=><Panel key={a.id}><div className="jf-panel-body"><h4>{a.title}</h4><p>{a.company}</p><StatusBadge>{a.stage}</StatusBadge><p>{new Date(a.createdAt).toLocaleDateString('pt-BR')}</p></div></Panel>):<EmptyState title="Você ainda não se candidatou" description="Abra uma oportunidade e envie sua candidatura."/>}</section>}

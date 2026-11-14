@@ -382,8 +382,8 @@ def main():
         result=json.loads(run([sys.executable,str(Path(__file__).with_name('quarantine-test-orphans.py')),'--isolated-database',args.restore,'--isolated-storage',storage_name]))
         assert result['quarantined']==1 and result['purged_after_offsite_receipt']==0,'Real orphan worker failed or purged without receipt'
         for number in range(10):
-            assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-'+str(number)+'-'+suffix,'invite_role':'member'},other_session['access_token'])[0]==200,'Invitation budget rejected valid fixture'
-        assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-over-'+suffix,'invite_role':'member'},other_session['access_token'])[0]==429,'Direct invitation RPC bypassed company budget'
+            assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-'+str(number)+'-'+suffix,'invite_role':'admin'},other_session['access_token'])[0]==200,'Invitation budget rejected valid fixture'
+        assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-over-'+suffix,'invite_role':'admin'},other_session['access_token'])[0]==429,'Direct invitation RPC bypassed company budget'
         second_owner_email='security-second-owner-'+suffix;second_owner=create(second_owner_email)
         sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+own_context['company_id']+"','"+second_owner+"','"+second_owner_email+"','Isolated second owner','owner','active');")
         sql("update public.company_members set status='inactive' where user_id='"+first+"';")

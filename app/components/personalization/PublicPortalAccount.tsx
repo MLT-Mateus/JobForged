@@ -1,5 +1,5 @@
 "use client";
-import {MyApplications} from '../operations/ApplicationAction';
+import {MyApplications} from '../operations/MyApplications';
 import {apiResponse} from '@/app/lib/api-response';
 import {NotificationTrigger} from '../ui/NotificationTrigger';
 import {createPortal} from 'react-dom';

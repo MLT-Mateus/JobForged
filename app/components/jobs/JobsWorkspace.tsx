@@ -18,6 +18,6 @@ export default function JobsWorkspace({view,jobId}:{view:'list'|'edit'|'detail'|
  if(!access)return <WorkspaceState title="Validando permissões..."/>;
  if(view==='edit'&&!manage)return <main className="jf-session-state"><WorkspaceState kind="forbidden" title="Acesso restrito" description="Somente titulares e administradores podem editar vagas."/></main>;
  const name=auth.fullName||auth.email||'Conta';
- const context:AwaitedAdminContext={organization:{id:auth.company.id,name:auth.company.name,shortName:auth.company.name,logo:'/brand/jobforged-symbol.svg'},user:{id:'',name,fullName:name,email:auth.email||'',phone:'',role:auth.role||'',initials:name.slice(0,2),permissions:manage?['vacancies.create']:[]},vacancies:[],candidates:[],team:[],invoices:[]};
+ const context:AwaitedAdminContext={organization:{id:auth.company.id,name:auth.company.name,shortName:auth.company.name,logo:'/brand/jobforged-symbol.svg'},user:{id:'',name,fullName:name,email:auth.email||'',phone:'',role:auth.role||'',initials:name.slice(0,2),permissions:['create','edit','delete'].filter(action=>access.permissions['jobs.'+action]).map(action=>'vacancies.'+action)},vacancies:[],candidates:[],team:[],invoices:[]};
  return view==='list'?<JobsListClient key={auth.company.id} context={context}/>:(view==='edit'||view==='detail'&&manage)?<JobWizardClient key={auth.company.id+jobId} context={context} jobId={jobId}/>:<JobDetailClient key={auth.company.id+jobId} context={context} jobId={jobId!}/>;
 }
