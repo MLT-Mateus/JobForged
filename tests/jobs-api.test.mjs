@@ -28,5 +28,6 @@ test('job BFF enforces session, origin, organization and preserves RPC concurren
  assert.equal((await request('/api/portals/fixture-company/jobs',null,'',undefined,'careers.fixture.invalid')).status,200);
  assert.equal((await request('/api/portals/other-company/jobs',null,'',undefined,'careers.fixture.invalid')).status,404);
  assert.equal((await request('/api/company/jobs',null,'',undefined,'careers.fixture.invalid')).status,404);
+ assert.equal((await request('/vagas/other-company/analista-'+id,null,'',undefined,'careers.fixture.invalid')).status,404);
  }finally{globalThis.fetch=original;for(const [k,v] of Object.entries(previous)){if(v===undefined)delete process.env[k];else process.env[k]=v}}
 });
