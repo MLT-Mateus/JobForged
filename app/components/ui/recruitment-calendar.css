@@ -1,7 +1,7 @@
-.jf-recruitment-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--jf-ui-space-2);padding:var(--jf-ui-space-5)}
+.jf-recruitment-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--jf-ui-space-2);padding:var(--jf-ui-space-6)}
 .jf-recruitment-calendar button{min-height:64px;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface);color:var(--jf-ui-text);cursor:pointer}
 .jf-recruitment-calendar button span{display:block;color:var(--jf-ui-text)}
 .jf-recruitment-calendar .is-active{background:var(--jf-ui-brand-soft);border-color:var(--jf-ui-brand)}
 .jf-recruitment-calendar button:focus-visible{outline:3px solid var(--jf-ui-focus-ring);outline-offset:2px}
-.jf-recruitment-calendar__weekday{text-align:center;color:var(--jf-ui-muted);font-size:var(--jf-ui-font-size-sm)}
+.jf-recruitment-calendar__weekday{text-align:center;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
 @media(max-width:800px){.jf-recruitment-calendar{gap:var(--jf-ui-space-1);padding:var(--jf-ui-space-3)}.jf-recruitment-calendar button{min-height:44px}}
