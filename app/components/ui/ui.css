@@ -947,3 +947,5 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-directory__filters>.jf-action{align-self:center}
 @media(max-width:760px){.jf-directory__filters,.jf-directory__filters--pair{grid-template-columns:1fr 1fr;padding-inline:var(--jf-ui-space-4)}.jf-directory__filters>.jf-field:first-child{grid-column:1/-1}.jf-directory__summary{padding-inline:var(--jf-ui-space-4)}}
 @media(max-width:420px){.jf-directory__filters,.jf-directory__filters--pair{grid-template-columns:minmax(0,1fr)}}
+
+.jf-profile-security-form{padding:var(--jf-ui-space-5);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-brand-soft)}

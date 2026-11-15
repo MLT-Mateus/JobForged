@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {readFileSync} from 'node:fs';
+import ts from 'typescript';
+const source=readFileSync(new URL('../app/components/operations/calendar-model.ts',import.meta.url),'utf8');
+const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText;
+const {filterInterviews,calendarDate}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const applications=[{id:'candidate1',name:'João da Silva',jobTitle:'Analista de RH'}];
+const events=[{id:'a',application_id:'candidate1',title:'Conversa inicial',starts_at:'2026-11-14T02:30:00Z'},{id:'b',application_id:null,title:'Entrevista técnica',starts_at:'2026-11-15T14:00:00Z'},{id:'c',application_id:null,title:'A agendar',starts_at:null}];
+test('busca encontra candidato com acentos e nome da entrevista',()=>{assert.equal(filterInterviews(events,applications,{query:'joao',from:'',to:''})[0].id,'a');assert.equal(filterInterviews(events,applications,{query:'tecnica',from:'',to:''})[0].id,'b');});
+test('período inclui limites usando a data de Brasília',()=>{assert.equal(calendarDate(events[0].starts_at),'2026-11-13');assert.deepEqual(filterInterviews(events,applications,{query:'',from:'2026-11-13',to:'2026-11-13'}).map(e=>e.id),['a']);assert.deepEqual(filterInterviews(events,applications,{query:'',from:'2026-11-13',to:'2026-11-15'}).map(e=>e.id),['a','b']);});
+test('datas invertidas não mostram resultados e eventos sem data aparecem sem filtro',()=>{assert.equal(filterInterviews(events,applications,{query:'',from:'2026-11-15',to:'2026-11-13'}).length,0);assert.equal(filterInterviews(events,applications,{query:'',from:'',to:''}).length,3);});

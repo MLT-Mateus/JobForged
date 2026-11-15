@@ -7,3 +7,12 @@ test('company guest access is a login-first modal with text links; LP access sta
  assert.match(html,/Entre na sua conta/);assert.match(html,/jf-widget-dialog--modal/);assert.match(html,/Cadastre-se/);assert.match(html,/Esqueci minha senha/);assert.doesNotMatch(html,/Acesso à conta/);
  const login=await get('/login');assert.equal(login.status,200);const lp=await login.text();assert.match(lp,/auth-official-header/);assert.doesNotMatch(lp,/jf-portal-access-links/);
 });
+
+test('account confirmation and invitation share the approved header and theme selector',async()=>{
+ const {default:worker}=await import('../dist/server/index.js');
+ for(const path of ['/confirmar-email','/convite','/recuperar-senha']){
+  const response=await worker.fetch(new Request('http://localhost'+path),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+  assert.equal(response.status,200,path);
+  const html=await response.text();assert.match(html,/auth-official-header/,path);assert.match(html,/jf-theme-selector/,path);assert.match(html,/auth-card/,path);
+ }
+});
