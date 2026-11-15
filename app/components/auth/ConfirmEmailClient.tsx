@@ -1,9 +1,10 @@
 "use client";
 
+import {AuthShell} from './AuthShell';
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { ActionButton, AppToast, TextField, createToastNotice, type ToastNotice } from "@/app/components/ui";
-import { BrandAsset } from "@/app/components/BrandAsset";
+
 import { isEmail } from "./auth-validation";
 import { focusFirstInvalid } from "./focus-first-invalid";
 import "./auth.css";
@@ -41,8 +42,7 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
     setResending(false);
     setNotice(createToastNotice({kind:response?.ok?"info":"danger",title:response?.ok?"Solicitação recebida":"Não foi possível solicitar",text:response?.ok?"Se houver um cadastro pendente, enviaremos um novo link.":"Confira o e-mail e tente novamente."}));
   }
-  return <main className="auth-page auth-page--compact"><div className="auth-layout"><section className="auth-card">
-    <Link href="/" className="brand"><BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={190} height={55} /></Link>
+  return <AuthShell compact>
     <div className="auth-heading"><h1>Confirme seu e-mail</h1><p>O link será usado somente quando você clicar em confirmar.</p></div>
     {status === "pending" && <ActionButton type="button" onClick={confirm}>Confirmar meu e-mail</ActionButton>}
     {status === "loading" && <p role="status">Validando link…</p>}
@@ -52,5 +52,5 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
       <ActionButton type="submit" disabled={resending}>{resending?"Solicitando...":"Solicitar novo e-mail"}</ActionButton></form>}</>}
     <p><Link href="/login">Voltar ao login</Link></p>
     {notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}
-  </section></div></main>;
+  </AuthShell>;
 }
