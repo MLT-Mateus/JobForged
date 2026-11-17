@@ -1,14 +1,11 @@
 "use client";
-import {ChatDemo} from './ChatDemo';
-import {ItemListDemo} from './ItemListDemo';
-import {AddressLookupExample} from '@/app/components/ui/AddressLookupExample';
+import {FormInputGuide} from './FormInputGuide';
 import {BrandColorsDemo} from '../components/personalization/BrandColorsEditor';
 import {imageAccept,imageFormats} from '@/shared/image-upload';
 
 
 
 import Link from "next/link";
-import {ValidationDemo} from "./ValidationDemo";
 import { WorkspaceShell } from "../components/ui/WorkspaceShell";
 import { InlineBrandLoader } from "../components/InlineBrandLoader";
 import { WidgetsIcon } from "../components/ui/Icons";
@@ -21,7 +18,7 @@ import { JobForgedLoadingAnimation } from "@/app/components/JobForgedLoadingAnim
 import { useCallback, useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, Check, CircleAlert, CircleCheck, CircleX, Clock3, Copy, Download, FileText, Info, Layers3, LayoutDashboard, LockKeyhole, Mail, MoreHorizontal, MousePointerClick, Palette, PanelLeftClose, PanelLeftOpen, PanelsTopLeft, Plus, Ruler, Search, Settings2, SlidersHorizontal, Sparkles, Type } from "lucide-react";
 import { AdvancedCharts, BackgroundsSection, ButtonSpecs, EmptyStatesSection, IconLibrary } from "./DesignSystemAdditions";
-import { CheckboxField, UserAvatar, StatusBadge, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, DisplayValue, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspacePagination, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
+import { CheckboxField, UserAvatar, StatusBadge, ColorField, MultilineInput, AppToast, DateField, DateRangeField, FileUploadField, InlineNotice, MultiFileUploadField, MultiSelectField, Panel, PanelHeading, RadioField, RichTextField, SelectField, TextField, ToggleSwitch, WorkspacePageHeader, createToastNotice, type ToastNotice, type DateRangeValue, type SelectOption, WorkspaceState, WorkspacePagination, WorkspaceTabs, WorkspaceActionMenu, WidgetDialog, ActionButton } from "@/app/components/ui";
 import { setStatusSoundEnabled, useStatusSoundPreference } from "@/app/components/ui/status-sound";
 import { fontPairs } from "@/app/components/ui/font-pairs";
 import { CommunicationsDemo } from './CommunicationsDemo';
@@ -368,16 +365,8 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
           </section>
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "formularios"} aria-label="Formulários">
-            <SectionHeading title="Controles limpos, previsíveis e prontos para o produto." description="Todo campo vazio orienta o próximo passo. Todo valor ausente comunica seu estado." />
-            <div className="ds-form-showcase ds-placeholder-guidance" aria-label="Regra global de placeholders e valores">
-              <ExampleCard title="Placeholder · curto e direto"><div className="ds-modern-stack"><p><strong>Verbo + dado + ...</strong><br/>Use 2–4 palavras. Prefira até 28 caracteres.</p><TextField label="Nome"/><TextField label="E-mail" type="email"/><p>Label sempre visível. Formatos e requisitos ficam na ajuda.</p></div></ExampleCard>
-              <ExampleCard title="Valores · mostre o estado"><div className="ds-modern-stack"><p>Campo vazio orienta. Valor ausente informa.</p><dl className="ds-value-examples"><div><dt>Sem dado</dt><dd><DisplayValue value={null}/></dd></div><div><dt>Em carregamento</dt><dd><DisplayValue value={null} state="loading"/></dd></div><div><dt>Indisponível</dt><dd><DisplayValue value={null} state="unavailable"/></dd></div><div><dt>Zero real</dt><dd><DisplayValue value={0}/></dd></div></dl><p>Não preencha com dados fictícios.</p></div></ExampleCard>
-            </div>
-            <div className="ds-form-showcase"><ExampleCard title="Validação que orienta" className="ds-form-card--wide"><ValidationDemo/></ExampleCard><ExampleCard title="Perfil e permissões" className="ds-form-card--wide"><div className="jf-workspace-stack"><p>Identidade em campos separados, estados legíveis e descrição da função ao passar o mouse, focar ou tocar na tag. Escape fecha a ajuda.</p><div className="jf-workspace-toolbar"><StatusBadge tone="info" description="Responsável pela empresa e pela gestão dos acessos.">Titular</StatusBadge><StatusBadge tone="info" description="Pode convidar pessoas e gerenciar os acessos da equipe.">Administrador</StatusBadge><StatusBadge tone="positive">Ativo</StatusBadge><StatusBadge>Suspenso</StatusBadge></div><div className="jf-workspace-grid"><TextField label="Nome completo" autoComplete="name"/><TextField label="CPF" format="cpf" helpText="11 dígitos. A validação ocorre ao salvar."/><TextField label="Telefone" format="phone" helpText="Inclua o DDD."/></div><DisplayValue value={null}/></div></ExampleCard></div>
-            <div className="ds-form-showcase" aria-label="Máscaras e formatos"><ExampleCard title="Formato certo, sem adivinhação" className="ds-form-card--wide"><p>CPF, CNPJ, telefone brasileiro e código do autenticador recebem máscara ao digitar ou colar. E-mail, links e datas usam seu formato próprio. Senhas e textos livres nunca são alterados. A máscara orienta; a validação no servidor confirma o dado.</p><div className="ds-modern-field-grid"><TextField format="cnpj" label="CNPJ" helpText="14 dígitos; a pontuação é automática."/><TextField format="cnpj-alpha" label="CNPJ alfanumérico" helpText="Pontuação automática, preservando letras."/><AddressLookupExample/><ItemListDemo/><ChatDemo/><TextField format="phone" label="Telefone com DDD" helpText="10 ou 11 dígitos."/><TextField format="otp" label="Código do autenticador" helpText="6 dígitos; nunca compartilhe o código."/></div><p>Em caso de erro, explique o campo, o formato esperado e como corrigir. Preserve o preenchimento; não repita salvamentos ou envios automaticamente. Consultas temporariamente ocupadas podem tentar uma única vez novamente.</p></ExampleCard></div>
-            <div className="ds-form-showcase ds-placeholder-guidance" aria-label="Campos obrigatórios">
-              <ExampleCard title="Preenchimento obrigatório" className="ds-form-card--wide"><div className="ds-modern-stack"><p>O asterisco vermelho em negrito junto ao título indica um campo obrigatório. Campos sem asterisco são opcionais.</p><p>Mantenha a indicação no título, nunca no placeholder. Informe o que falta na validação.</p><div className="ds-modern-field-grid"><TextField label="Nome completo" required/><TextField label="Complemento"/><MultilineInput label="Motivo" required rows={3}/></div></div></ExampleCard>
-            </div>
+            <SectionHeading title="Inputs claros, do primeiro toque ao envio." description="Regras de preenchimento e exemplos para manter os campos consistentes." />
+            <FormInputGuide/>
             <div className="ds-form-showcase">
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
                 <div className="ds-modern-field-grid">
