@@ -1,5 +1,5 @@
 import type {NextRequest} from "next/server";
-import {clearSessionCookies, readSession, requestAuth, requireSameOrigin} from "../../auth/_server";
+import {clearSessionCookies, readSession, requestAuth, requestDatabase, requireSameOrigin} from "../../auth/_server";
 import {isEmail, passwordRules} from "@/app/components/auth/auth-validation";
 
 export const runtime = "nodejs";
@@ -31,13 +31,17 @@ export async function POST(request: NextRequest) {
     return reply("Os e-mails não coincidem.", 400);
    const currentPassword=typeof input.currentPassword==='string'?input.currentPassword:'';
    if(!currentPassword||new TextEncoder().encode(currentPassword).length>72)return reply("Informe sua senha atual.",400);
-   const reauth=await requestAuth("token?grant_type=password",{email:session.email,password:currentPassword});
-   const user=reauth.payload?.user as {id?:string}|undefined;
-   const token=reauth.payload?.access_token;
-   if(!reauth.response?.ok||user?.id!==session.id||typeof token!=='string')return reply("A senha atual não confere.",400);
-   const updated=await requestAuth("user",{email},token,"PUT").finally(()=>requestAuth("logout?scope=local",{},token).catch(()=>null));
-   if (!updated.response?.ok) return reply("Não foi possível solicitar a troca. Confira o endereço e tente novamente.", 400);
-   return Response.json({ok:true}, {headers});
+   const updated=await requestDatabase("rpc/change_my_login_email",session.accessToken,{new_email:email,current_password:currentPassword});
+   const result=await updated?.json().catch(()=>null) as {email?:string;code?:string}|null;
+   if(!updated?.ok){
+    if(result?.code==='PT401')return reply("A senha atual não confere.",400);
+    if(result?.code==='23505')return reply("Este e-mail já está vinculado a outra conta. Escolha outro endereço ou recupere o acesso à conta existente.",409);
+    if(updated?.status===403)return reply("Não foi possível autorizar a troca. Entre novamente e confirme a autenticação de segurança da conta.",403);
+    return reply("Não foi possível alterar o e-mail. Seu acesso não foi alterado. Tente novamente.",400);
+   }
+   if(result?.email!==email)return reply("Não foi possível validar o novo endereço. Entre novamente para conferir.",502);
+   clearSessionCookies(headers);
+   return Response.json({ok:true,email}, {headers});
   }
   return reply("Operação indisponível para esta conta.", 403);
  } catch {

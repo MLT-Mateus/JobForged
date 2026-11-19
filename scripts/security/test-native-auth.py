@@ -169,6 +169,28 @@ def main():
         assert request(auth,'/token?grant_type=password',{'email':signup_email,'password':password})[0]==200,'Subsequent login failed'
         assert request(auth,'/token?grant_type=password',{'email':signup_email,'password':'Incorrect9!'})[0] in (400,422),'Incorrect password accepted'
         first=create(email,'Native fixture A');create(other,'Native fixture B')
+        # Direct login email change: no SMTP call, same account/password,
+        # immediate member projection, and all old sessions revoked.
+        old_address='email-before-'+suffix;new_address='email-after-'+suffix
+        changed_user=create(old_address,'Email change fixture')
+        status,change_session=request(auth,'/token?grant_type=password',{'email':old_address,'password':password})
+        assert status==200
+        change_token=change_session['access_token']
+        change_body={'new_email':new_address,'current_password':password}
+        assert request(rest,'/rpc/change_my_login_email',change_body,jwt(signing,'anon'))[0] in (401,403),'Anonymous email change allowed'
+        assert request(rest,'/rpc/change_my_login_email',{**change_body,'current_password':'Wrong9!'},change_token)[0]==401,'Incorrect password allowed email change'
+        assert request(rest,'/rpc/change_my_login_email',{**change_body,'new_email':other},change_token)[0]==409,'Duplicate login email allowed'
+        assert request(rest,'/rpc/change_my_login_email',{**change_body,'new_email':'invalid'},change_token)[0]==400,'Invalid email allowed'
+        assert sql("select email from auth.users where id='"+changed_user+"';")==old_address,'Rejected email change mutated identity'
+        status,changed=request(rest,'/rpc/change_my_login_email',change_body,change_token)
+        assert status==200 and changed.get('email')==new_address,'Direct email change failed'
+        assert request(auth,'/token?grant_type=password',{'email':old_address,'password':password})[0] in (400,422),'Old email still authorizes login'
+        status,new_session=request(auth,'/token?grant_type=password',{'email':new_address,'password':password})
+        assert status==200 and new_session['user']['id']==changed_user,'New email did not retain login and account'
+        assert request(rest,'/rpc/session_context_v1',{},change_token)[1] is None,'Old session retained company access'
+        assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':change_session['refresh_token']})[0] in (400,401),'Old session can refresh'
+        assert sql("select email from public.company_members where user_id='"+changed_user+"';")==new_address,'Member email was not synchronized'
+        assert sql("select email from auth.identities where user_id='"+changed_user+"' and provider='email';")==new_address,'Provider identity email was not synchronized'
         status,session=request(auth,'/token?grant_type=password',{'email':email,'password':password})
         assert status==200,'Native password sign-in failed'
         token=session['access_token'];status,context=request(rest,'/rpc/session_context_v1',{},token)
