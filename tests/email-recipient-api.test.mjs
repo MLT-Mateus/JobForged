@@ -20,6 +20,7 @@ test('Test recipient routing: auth, signup, invitations, interview and communica
    throw Error('Unexpected auth operation');
   }
   database.push({path,body});
+  if(path.endsWith('/change_my_login_email'))return Response.json({email:body.new_email});
   if(path.endsWith('/is_platform_admin'))return Response.json(platform);
   if(path.endsWith('/session_context_v1'))return Response.json({company_id:cid,role:'owner',companies:{id:cid,name:'Fixture'}});
   if(path.endsWith('/create_company_signup_intent')||path.endsWith('/create_candidate_signup_intent'))return Response.json('a'.repeat(64));
@@ -45,7 +46,9 @@ test('Test recipient routing: auth, signup, invitations, interview and communica
   await ok('/api/company/operations/invitation',{companyId:cid,id,email:'wrong@example.invalid',to:'wrong@example.invalid'});assert.deepEqual(mail.at(-1).to,[{email:'linked-candidate@example.invalid'}]);
   const sent=mail.length;assert.equal((await send('/api/company/operations/invitation',{companyId:'foreign',id})).status,409);assert.equal(mail.length,sent);
   await ok('/api/account/credentials',{operation:'email',email:'new@example.invalid',confirmation:'new@example.invalid',currentPassword:'Fixture9!Example',userId:'foreign'});
-  assert.equal(auth.findLast(x=>x.path.endsWith('/token')).body.email,'actor@example.invalid');assert.deepEqual(auth.findLast(x=>x.path.endsWith('/user')&&x.body).body,{email:'new@example.invalid'});
+  assert.deepEqual(database.findLast(x=>x.path.endsWith('/change_my_login_email')).body,{new_email:'new@example.invalid',current_password:'Fixture9!Example'});
+  assert.equal(mail.length,sent,'Direct email change must not send a message');
+  assert.equal(auth.filter(x=>x.path.endsWith('/user')&&x.body).length,0,'Direct change must not start Auth confirmation mail');
   platform=true;
   for(const operation of ['invitation.create','invitation.resend']){await ok('/api/backoffice',{operation,company:cid,target:id,values:{email:'wrong@example.invalid',role:'admin'},reason:'Fixture audit'});assert.deepEqual(mail.at(-1).to,[{email:'saved-invitation@example.invalid'}]);}
   await ok('/api/backoffice/communications/email',{id,email:'wrong@example.invalid'});assert.deepEqual(mail.at(-1).to,[{email:'selected-current@example.invalid'}]);

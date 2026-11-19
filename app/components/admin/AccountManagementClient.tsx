@@ -33,7 +33,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
  const [credentialValue,setCredentialValue]=useState("");
  const [currentPassword,setCurrentPassword]=useState('');
  const [credentialConfirmation,setCredentialConfirmation]=useState("");
- const {dialog:pendingChanges}=usePendingChanges(dirty||!!credentialValue||!!credentialConfirmation||!!currentPassword);
+ const {dialog:pendingChanges,leaveAfterSave}=usePendingChanges(dirty||!!credentialValue||!!credentialConfirmation||!!currentPassword);
  const role=memberRoles[session.role as keyof typeof memberRoles];
  async function save(event:FormEvent<HTMLFormElement>){
   event.preventDefault();const next:Record<string,string>={};
@@ -74,8 +74,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
    const result=await response.json() as {message?:string};
    if(!response.ok)throw new Error(result.message||'Não foi possível salvar.');
    openCredential(null);
-   if(credential==='password'){location.replace('/login');return;}
-   setNotice({kind:'success',title:'Confirme a troca de e-mail',text:'Abra o link de confirmação enviado ao novo endereço. Depois de confirmar, use o novo e-mail para entrar.'});
+   leaveAfterSave(()=>location.replace(credential==='password'?'/login':'/login?emailChanged=1'));
   }catch(error){
    setNotice({kind:'danger',title:'Alteração não concluída',text:error instanceof Error?error.message:'Tente novamente.'});
   }finally{setBusy(null);}
@@ -88,7 +87,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
     <form className="jf-panel-body jf-workspace-stack" onSubmit={save}>
      <TextField label="Nome completo" autoComplete="name" value={draft.fullName} minLength={3} maxLength={120} required readOnly={session.platformAdmin} disabled={!!busy} error={errors.fullName} onChange={event=>setDraft({...draft,fullName:event.target.value})}/>
      {!session.platformAdmin&&<div className="jf-profile-fields"><TextField label="CPF" format="cpf" value={draft.cpf??''} helpText="11 dígitos. Visível para você e para a gestão da empresa." error={errors.cpf} disabled={!!busy} onChange={event=>setDraft({...draft,cpf:event.target.value})}/><TextField label="Telefone" format="phone" autoComplete="tel-national" value={draft.phone??''} helpText="Inclua o DDD. Campo opcional." error={errors.phone} disabled={!!busy} onChange={event=>setDraft({...draft,phone:event.target.value})}/></div>}
-     <div className="jf-profile-readonly"><span>E-mail de acesso</span><strong><DisplayValue value={session.email}/></strong><small>Endereço confirmado utilizado para entrar e recuperar sua conta.</small></div>
+     <div className="jf-profile-readonly"><span>E-mail de acesso</span><strong><DisplayValue value={session.email}/></strong><small>Endereço utilizado para entrar e recuperar sua conta.</small></div>
      {!session.platformAdmin&&<div className="jf-profile-save"><span className="admin-muted" role="status">{dirty?'Você tem alterações não salvas.':'Seus dados estão atualizados.'}</span><div className="jf-profile-actions jf-workspace-toolbar"><ActionButton type="button" variant="secondary" disabled={!!busy||!dirty} onClick={()=>{setDraft(saved);setErrors({})}}>Descartar</ActionButton><ActionButton type="submit" icon={<Save size={16}/>} disabled={!!busy||!dirty}>{busy==='save'?'Salvando...':'Salvar'}</ActionButton></div></div>}
     </form></Panel>
     <div className="jf-workspace-stack"><Panel><PanelHeading title="Vínculo e permissões"/><div className="jf-panel-body jf-workspace-stack"><div className="jf-profile-readonly"><span><Building2 size={16}/> Organização</span><strong><DisplayValue value={session.platformAdmin?'JobForged':session.company?.name}/></strong></div><div className="jf-profile-readonly"><span><ShieldCheck size={16}/> Sua função</span><StatusBadge tone="info" description={role?.description}>{session.platformAdmin?'Administrador da plataforma':role?.label??'Não informado'}</StatusBadge></div><div className="jf-profile-readonly"><span>Na equipe desde</span><strong><DisplayValue value={saved.createdAt?new Date(saved.createdAt).toLocaleDateString('pt-BR'):null}/></strong></div></div></Panel>
@@ -98,12 +97,12 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
      </div>
      {credential&&<form key={credential} className="jf-workspace-stack jf-profile-security-form" onSubmit={saveCredential}>
 
-      <TextField type={credential} label={credential==='password'?'Nova senha':'Novo e-mail'} autoComplete={credential==='password'?'new-password':'email'} value={credentialValue} onChange={event=>setCredentialValue(event.target.value)} required disabled={!!busy} maxLength={credential==='password'?72:254} helpText={credential==='password'?'Use pelo menos 8 caracteres, com maiúscula, minúscula, número e símbolo.':'A troca depende da confirmação por e-mail.'}/>
+      <TextField type={credential} label={credential==='password'?'Nova senha':'Novo e-mail'} autoComplete={credential==='password'?'new-password':'email'} value={credentialValue} onChange={event=>setCredentialValue(event.target.value)} required disabled={!!busy} maxLength={credential==='password'?72:254} helpText={credential==='password'?'Use pelo menos 8 caracteres, com maiúscula, minúscula, número e símbolo.':'A troca é imediata, sem envio de e-mail. Depois, entre com o novo endereço e sua senha atual.'}/>
       <TextField type={credential} label={credential==='password'?'Confirme a nova senha':'Confirme o novo e-mail'} autoComplete={credential==='password'?'new-password':'off'} value={credentialConfirmation} onChange={event=>setCredentialConfirmation(event.target.value)} required disabled={!!busy} maxLength={credential==='password'?72:254}/>
       {credential==='email'&&<TextField type="password" label="Confirme com sua senha atual" autoComplete="current-password" value={currentPassword} onChange={event=>setCurrentPassword(event.target.value)} required disabled={!!busy} maxLength={72}/>}
       <div className="jf-profile-actions jf-workspace-toolbar">
        <ActionButton type="button" variant="secondary" disabled={!!busy} onClick={()=>openCredential(null)}>Cancelar</ActionButton>
-       <ActionButton type="submit" disabled={!!busy}>{busy?'Salvando...':credential==='password'?'Salvar senha':'Solicitar troca'}</ActionButton>
+       <ActionButton type="submit" disabled={!!busy}>{busy?'Salvando...':credential==='password'?'Salvar senha':'Salvar e-mail'}</ActionButton>
       </div>
      </form>}
      <ActionButton type="button" variant="danger" icon={<LogOut size={16}/>} disabled={!!busy} onClick={async()=>{setBusy('signout');const result=await signOutCompany();if(result.ok){location.replace('/login');return}setBusy(null);setNotice({kind:'danger',title:'Sessão não encerrada',text:'Tente novamente.'})}}>Sair da conta</ActionButton></div></Panel>

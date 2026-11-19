@@ -19,7 +19,7 @@ function LoadingLabel({ loading, idle }: { loading: boolean; idle: string }) {
   return loading ? <><span className="auth-spinner" />Processando...</> : idle;
 }
 
-export function LoginClient() {
+export function LoginClient({emailChanged=false}:{emailChanged?:boolean}={}) {
   const router = useRouter();
   const [values, setValues] = useState<LoginValues>({ identifier: "", password: "" });
   const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
@@ -58,7 +58,7 @@ export function LoginClient() {
       <div className="auth-heading">
         <p className="auth-eyebrow">Bem-vindo de volta</p>
         <h1>Acesse sua conta</h1>
-        <p>Entre com o e-mail e a senha da sua conta empresarial.</p>
+        <p>{emailChanged?'E-mail de acesso alterado. Entre com o novo endereço e sua senha atual.':'Entre com o e-mail e a senha da sua conta empresarial.'}</p>
       </div>
       <form className="auth-form" noValidate onSubmit={submit}>
         <TextField
