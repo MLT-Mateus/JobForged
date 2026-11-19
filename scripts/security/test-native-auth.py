@@ -185,7 +185,8 @@ def main():
         assert request(rest,'/rpc/change_my_login_email',{**change_body,'new_email':'invalid'},change_token)[0]==400,'Invalid email allowed'
         assert sql("select email from auth.users where id='"+changed_user+"';")==old_address,'Rejected email change mutated identity'
         status,changed=request(rest,'/rpc/change_my_login_email',change_body,change_token)
-        assert status==200 and changed.get('email')==new_address,'Direct email change failed'
+        denial=changed.get('message','') if isinstance(changed,dict) and changed.get('code')=='42501' else ''
+        assert status==200 and changed.get('email')==new_address,'Direct email change HTTP '+str(status)+' code '+str(changed.get('code') if isinstance(changed,dict) else None)+' denial '+denial
         assert request(auth,'/token?grant_type=password',{'email':old_address,'password':password})[0] in (400,422),'Old email still authorizes login'
         status,new_session=request(auth,'/token?grant_type=password',{'email':new_address,'password':password})
         assert status==200 and new_session['user']['id']==changed_user,'New email did not retain login and account'
