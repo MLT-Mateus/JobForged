@@ -13,8 +13,10 @@ grant update(email,email_confirmed_at,email_change,email_change_token_new,email_
 grant update(identity_data,updated_at) on auth.identities to jbfd_login_email_writer;
 grant update(email) on public.company_members to jbfd_login_email_writer;
 grant insert on public.company_audit_events,app_private.session_revocations to jbfd_login_email_writer;
+grant select(session_id) on app_private.session_revocations to jbfd_login_email_writer;
 grant usage on sequence public.company_audit_events_id_seq to jbfd_login_email_writer;
 grant delete on auth.refresh_tokens,auth.sessions to jbfd_login_email_writer;
+grant select(user_id) on auth.refresh_tokens to jbfd_login_email_writer;
 grant execute on function auth.uid(),auth.jwt(),app_private.identity_session_valid(),extensions.crypt(text,text) to jbfd_login_email_writer;
 create function public.change_my_login_email(new_email text,current_password text) returns jsonb
 language plpgsql security definer set search_path=pg_catalog as $$
