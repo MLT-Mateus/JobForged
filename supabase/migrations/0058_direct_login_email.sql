@@ -1,6 +1,21 @@
 -- migration-role: supabase_admin
 -- Product policy: an authenticated company user authorizes their own email
 -- change with the current password, without an email-delivery dependency.
+-- A non-login executor owns only this operation. No application connection or
+-- authenticated role inherits it; provider tables keep their native ownership.
+create role jbfd_login_email_writer nologin noinherit bypassrls;
+grant usage on schema auth,public,app_private,extensions to jbfd_login_email_writer;
+grant select on auth.users,auth.identities,auth.sessions,auth.mfa_factors,
+ public.company_members,public.companies,public.platform_admins to jbfd_login_email_writer;
+grant update(email,email_confirmed_at,email_change,email_change_token_new,email_change_token_current,
+ email_change_sent_at,email_change_confirm_status,confirmation_token,recovery_token,recovery_sent_at,
+ raw_user_meta_data,updated_at) on auth.users to jbfd_login_email_writer;
+grant update(identity_data,updated_at) on auth.identities to jbfd_login_email_writer;
+grant update(email) on public.company_members to jbfd_login_email_writer;
+grant insert on public.company_audit_events,app_private.session_revocations to jbfd_login_email_writer;
+grant usage on sequence public.company_audit_events_id_seq to jbfd_login_email_writer;
+grant delete on auth.refresh_tokens,auth.sessions to jbfd_login_email_writer;
+grant execute on function auth.uid(),auth.jwt(),app_private.identity_session_valid(),extensions.crypt(text,text) to jbfd_login_email_writer;
 create function public.change_my_login_email(new_email text,current_password text) returns jsonb
 language plpgsql security definer set search_path=pg_catalog as $$
 declare person auth.users; address text:=lower(trim(new_email));
@@ -49,6 +64,8 @@ begin
  delete from auth.sessions where user_id=person.id;
  return jsonb_build_object('email',address);
 end;$$;
-alter function public.change_my_login_email(text,text) owner to postgres;
+grant create on schema public to jbfd_login_email_writer;
+alter function public.change_my_login_email(text,text) owner to jbfd_login_email_writer;
+revoke create on schema public from jbfd_login_email_writer;
 revoke all on function public.change_my_login_email(text,text) from public,anon,service_role;
 grant execute on function public.change_my_login_email(text,text) to authenticated;
