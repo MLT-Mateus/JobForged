@@ -11,7 +11,6 @@ grant update(email,email_confirmed_at,email_change,email_change_token_new,email_
  email_change_sent_at,email_change_confirm_status,confirmation_token,recovery_token,recovery_sent_at,
  raw_user_meta_data,updated_at) on auth.users to jbfd_login_email_writer;
 grant update(identity_data,updated_at) on auth.identities to jbfd_login_email_writer;
-grant update(email) on public.company_members to jbfd_login_email_writer;
 grant insert on public.company_audit_events,app_private.session_revocations to jbfd_login_email_writer;
 grant select(session_id) on app_private.session_revocations to jbfd_login_email_writer;
 grant usage on sequence public.company_audit_events_id_seq to jbfd_login_email_writer;
@@ -57,7 +56,8 @@ begin
  where id=person.id;
  update auth.identities set identity_data=identity_data||jsonb_build_object('email',address),updated_at=now()
  where user_id=person.id and provider='email';
- update public.company_members set email=address where user_id=person.id;
+ -- Existing sync_confirmed_member_email trigger updates member projections
+ -- within this transaction under its original, restricted owner.
  insert into public.company_audit_events(company_id,actor_user_id,action,target_id,details)
  select company_id,person.id,'member.email_changed',id,jsonb_build_object('authorization','current_password') from public.company_members where user_id=person.id;
  insert into app_private.session_revocations(session_id,user_id)
