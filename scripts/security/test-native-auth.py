@@ -179,7 +179,8 @@ def main():
         change_body={'new_email':new_address,'current_password':password}
         assert request(rest,'/rpc/change_my_login_email',change_body,jwt(signing,'anon'))[0] in (401,403),'Anonymous email change allowed'
         rejected_status,rejected=request(rest,'/rpc/change_my_login_email',{**change_body,'current_password':'Wrong9!'},change_token)
-        assert rejected_status==401,'Incorrect-password response HTTP '+str(rejected_status)+' code '+str(rejected.get('code') if isinstance(rejected,dict) else None)
+        denial=rejected.get('message','') if isinstance(rejected,dict) and rejected.get('code')=='42501' else ''
+        assert rejected_status==401,'Incorrect-password response HTTP '+str(rejected_status)+' code '+str(rejected.get('code') if isinstance(rejected,dict) else None)+' denial '+denial
         assert request(rest,'/rpc/change_my_login_email',{**change_body,'new_email':other},change_token)[0]==409,'Duplicate login email allowed'
         assert request(rest,'/rpc/change_my_login_email',{**change_body,'new_email':'invalid'},change_token)[0]==400,'Invalid email allowed'
         assert sql("select email from auth.users where id='"+changed_user+"';")==old_address,'Rejected email change mutated identity'
