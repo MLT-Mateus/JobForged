@@ -33,7 +33,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
  const [credentialValue,setCredentialValue]=useState("");
  const [currentPassword,setCurrentPassword]=useState('');
  const [credentialConfirmation,setCredentialConfirmation]=useState("");
- const {dialog:pendingChanges}=usePendingChanges(dirty||!!credentialValue||!!credentialConfirmation||!!currentPassword);
+ const {dialog:pendingChanges,leaveAfterSave}=usePendingChanges(dirty||!!credentialValue||!!credentialConfirmation||!!currentPassword);
  const role=memberRoles[session.role as keyof typeof memberRoles];
  async function save(event:FormEvent<HTMLFormElement>){
   event.preventDefault();const next:Record<string,string>={};
@@ -74,8 +74,7 @@ function AccountEditor({session,embedded}:{session:AuthSessionState;embedded:boo
    const result=await response.json() as {message?:string};
    if(!response.ok)throw new Error(result.message||'Não foi possível salvar.');
    openCredential(null);
-   if(credential==='password'){location.replace('/login');return;}
-   location.replace('/login?emailChanged=1');
+   leaveAfterSave(()=>location.replace(credential==='password'?'/login':'/login?emailChanged=1'));
   }catch(error){
    setNotice({kind:'danger',title:'Alteração não concluída',text:error instanceof Error?error.message:'Tente novamente.'});
   }finally{setBusy(null);}
