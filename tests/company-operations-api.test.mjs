@@ -17,7 +17,7 @@ test('operational BFF rejects wrong origins and tenant switches, preserves versi
   if(address.endsWith('/rpc/session_context_v1'))return Response.json(candidate?null:{company_id:cid,role:'owner',companies:{id:cid,name:'Fixture'}});
   if(address.endsWith('/rpc/candidate_context'))return Response.json(candidate?{fullName:'Candidate Fixture',version:0,slug:'fixture-company'}:null);
   if(address.endsWith('/rpc/company_operations_v1')){calls.push(body);return code?Response.json({code},{status:400}):Response.json({companyId:cid,applications:[]})}
-  if(address.endsWith('/rpc/candidate_applications_v1')){calls.push(body);return Response.json([])}
+  if(address.endsWith('/rpc/candidate_applications_v2')){calls.push(body);return Response.json([])}
   throw Error('Unexpected isolated request '+address);
  };
  try{const {default:worker}=await import('../dist/server/index.js');

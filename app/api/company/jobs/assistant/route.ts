@@ -3,6 +3,7 @@ import {createHash,randomBytes} from 'node:crypto';
 import type {NextRequest} from 'next/server';
 import {readSession,requestDatabase,requireSameOrigin} from '@/app/api/auth/_server';
 import {assistantDraft,validateAssistantPatch} from '@/app/components/jobs/job-assistant-contract';
+import {validateAssistantResponse} from '@/app/components/jobs/assistant-response';
 import {emptyJob} from '@/app/components/jobs/job-types';
 import {editorChecks} from '@/app/components/jobs/job-editor-model';
 import {jsonFrames,partialReply} from '@/app/components/jobs/chat-stream';
@@ -24,10 +25,11 @@ export async function POST(request:NextRequest){
   const response=await requestDatabase('rpc/company_branches_v1',session.accessToken,{operation:'list'});
   if(!response?.ok)return fail('Não foi possível consultar as filiais.',503);
   const branches=(await response.json() as {id:string;name:string;city:string;state:string;status:string}[]).filter(b=>b.status==='Ativo').map(({id,name,city,state})=>({id,name,city,state}));
-  const draft=validateAssistantPatch(assistantDraft(body.draft),branches.map(b=>b.id));
-  const missing=editorChecks({...emptyJob(),...draft}).filter(c=>!c.done).map(c=>c.label);
+  let draft,pendingProposal;try{draft=validateAssistantPatch(assistantDraft(body.draft),branches.map(b=>b.id));pendingProposal=validateAssistantPatch(body.pendingProposal??{},branches.map(b=>b.id))}catch{return fail('Confira os valores do formulário. A sugestão não foi iniciada.',422)}
+  const currentDraft={...emptyJob(),...draft,lgpd:body.draft.lgpd===true};
+  const missing=editorChecks(currentDraft).filter(c=>!c.done).map(c=>c.label);
   const history=Array.isArray(body.history)?body.history.slice(-12).map((m:{role?:string;text?:string})=>({role:m?.role==='assistant'?'assistant':'user',text:typeof m?.text==='string'?m.text.slice(0,3000):''})):[];
-  const payload={draft,branches,history,attachments:attachments.map(a=>({name:a.name,text:a.text})),company:{name:session.company.name},missing,message:body.message,today:new Date().toISOString().slice(0,10)};
+  const payload={contractVersion:2,draft,currentDraft:draft,pendingProposal,objective:typeof body.objective==='string'?body.objective.slice(0,1000):'',validationState:{consentConfirmed:currentDraft.lgpd,essentialMissing:missing,example:currentDraft.example===true},branches,history,attachments:attachments.map(a=>({name:a.name,text:a.text})),company:{name:session.company.name},missing,message:body.message,today:new Date().toISOString().slice(0,10)};
   if(new TextEncoder().encode(JSON.stringify(payload)).length>95000)return fail('Reduza o tamanho dos anexos para continuar.',413);
   const token=Buffer.from(randomBytes(32)).toString('base64url');
   const issued=await requestDatabase('rpc/job_assistant_issue',session.accessToken,{token_hash:createHash('sha256').update(token).digest('hex'),payload});
@@ -36,11 +38,7 @@ export async function POST(request:NextRequest){
   const abort=new AbortController(),signal=AbortSignal.any([request.signal,abort.signal,AbortSignal.timeout(24000)]);
   const result=await fetch('https://n8n.jobforged.com/webhook/'+(wantsStream?'jbfd-test-job-authoring-stream':'jbfd-test-job-authoring'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),redirect:'error',signal});
   if(!result.ok)return fail('O assistente está indisponível. Seu formulário permanece preservado.',503);
-  function validate(data:{reply?:unknown;patch?:unknown}){
-   if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>4000)throw Error('Resposta inválida.');
-   const patch=validateAssistantPatch(data.patch,branches.map(b=>b.id));
-   return {reply:data.reply,patch,branches};
-  }
+  function validate(data:unknown){return {...validateAssistantResponse(data,branches.map(b=>b.id),currentDraft),branches}}
   if(!wantsStream)return Response.json(validate(await result.json()),{headers});
   headers.set('Content-Type','application/x-ndjson; charset=utf-8');headers.set('X-Accel-Buffering','no');
   const encoder=new TextEncoder();let closed=false;
