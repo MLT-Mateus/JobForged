@@ -34,7 +34,7 @@ export function DataTable({ headers, children, label, layout='list' }: { headers
 }
 
 export function MetricCard({ label, value, detail, state }: { label: string; value: ReactNode; detail?: string; state?: ValueState }) {
-  return <article className="jf-metric"><span>{label}</span><strong><DisplayValue value={value} state={state}/></strong>{detail && <small>{detail}</small>}</article>;
+  return <article className="jf-metric" data-state={state||'ready'}><span>{label}</span><strong><DisplayValue value={value} state={state}/></strong>{detail && <small>{detail}</small>}</article>;
 }
 
 export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HTMLElement>&{as?:"section"|"article"|"aside"}) {

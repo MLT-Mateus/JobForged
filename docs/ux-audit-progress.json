@@ -12,7 +12,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G02",
@@ -24,7 +30,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Barra compartilhada alinha base dos campos e ações; filtros extensos usam grade 3/2/1.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G03",
@@ -36,7 +48,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G04",
@@ -48,7 +66,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G05",
@@ -60,7 +84,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G06",
@@ -72,7 +102,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G07",
@@ -84,7 +120,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G08",
@@ -96,7 +138,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G09",
@@ -108,7 +156,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G10",
@@ -120,7 +174,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G11",
@@ -132,7 +192,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G12",
@@ -144,7 +210,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G13",
@@ -156,7 +228,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Contexto explícito de retorno preserva filtros, página e visão em empresa e vagas, inclusive editor/prévia. Destinos de retorno são restritos à coleção.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G14",
@@ -168,7 +246,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G15",
@@ -180,7 +264,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Métricas BO usam Indisponível para resposta parcial, zero real continua zero; números locais e grade equilibrada.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "G16",
@@ -192,7 +282,13 @@
         "app/components/ui",
         "app/components/ui/ui.css",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "H01",
@@ -204,7 +300,13 @@
         "app/components/admin/AdminModuleClient.tsx",
         "app/components/admin/PlatformHomeBanners.tsx",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "H02",
@@ -216,7 +318,13 @@
         "app/components/admin/AdminModuleClient.tsx",
         "app/components/admin/PlatformHomeBanners.tsx",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "H03",
@@ -228,7 +336,13 @@
         "app/components/admin/AdminModuleClient.tsx",
         "app/components/admin/PlatformHomeBanners.tsx",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "H04",
@@ -240,7 +354,13 @@
         "app/components/admin/AdminModuleClient.tsx",
         "app/components/admin/PlatformHomeBanners.tsx",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "H05",
@@ -252,7 +372,13 @@
         "app/components/admin/AdminModuleClient.tsx",
         "app/components/admin/PlatformHomeBanners.tsx",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "D01",
@@ -263,7 +389,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0057_company_operations.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "D02",
@@ -274,7 +406,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0057_company_operations.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "D03",
@@ -285,7 +423,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0057_company_operations.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "D04",
@@ -296,7 +440,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0057_company_operations.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "V01",
@@ -307,7 +457,13 @@
       "sources": [
         "app/components/jobs/JobsListClient.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "V02",
@@ -318,7 +474,13 @@
       "sources": [
         "app/components/jobs/JobsListClient.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "V03",
@@ -329,7 +491,13 @@
       "sources": [
         "app/components/jobs/JobsListClient.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "V04",
@@ -340,7 +508,13 @@
       "sources": [
         "app/components/jobs/JobsListClient.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "V05",
@@ -351,7 +525,13 @@
       "sources": [
         "app/components/jobs/JobsListClient.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "V06",
@@ -362,7 +542,13 @@
       "sources": [
         "app/components/jobs/JobsListClient.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J01",
@@ -374,7 +560,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J02",
@@ -386,7 +578,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J03",
@@ -398,7 +596,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J04",
@@ -410,7 +614,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J05",
@@ -422,7 +632,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J06",
@@ -434,7 +650,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J07",
@@ -446,7 +668,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J08",
@@ -458,7 +686,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J09",
@@ -470,7 +704,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "J10",
@@ -482,7 +722,13 @@
         "app/components/jobs/JobWizardClient.tsx",
         "app/components/jobs/JobDraftDescription.tsx",
         "app/components/jobs/job-editor-model.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "JD01",
@@ -493,7 +739,13 @@
       "sources": [
         "app/components/jobs/JobDetailClient.tsx",
         "app/components/operations/JobSettings.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "JD02",
@@ -504,7 +756,13 @@
       "sources": [
         "app/components/jobs/JobDetailClient.tsx",
         "app/components/operations/JobSettings.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "JD03",
@@ -515,7 +773,13 @@
       "sources": [
         "app/components/jobs/JobDetailClient.tsx",
         "app/components/operations/JobSettings.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "JD04",
@@ -526,7 +790,13 @@
       "sources": [
         "app/components/jobs/JobDetailClient.tsx",
         "app/components/operations/JobSettings.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "JD05",
@@ -537,7 +807,13 @@
       "sources": [
         "app/components/jobs/JobDetailClient.tsx",
         "app/components/operations/JobSettings.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "F01",
@@ -548,7 +824,13 @@
       "sources": [
         "app/components/admin/BranchesClient.tsx",
         "app/components/admin/branches.css"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "F02",
@@ -559,7 +841,13 @@
       "sources": [
         "app/components/admin/BranchesClient.tsx",
         "app/components/admin/branches.css"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "F03",
@@ -570,7 +858,13 @@
       "sources": [
         "app/components/admin/BranchesClient.tsx",
         "app/components/admin/branches.css"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "F04",
@@ -581,7 +875,13 @@
       "sources": [
         "app/components/admin/BranchesClient.tsx",
         "app/components/admin/branches.css"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "F05",
@@ -592,7 +892,13 @@
       "sources": [
         "app/components/admin/BranchesClient.tsx",
         "app/components/admin/branches.css"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "F06",
@@ -603,7 +909,13 @@
       "sources": [
         "app/components/admin/BranchesClient.tsx",
         "app/components/admin/branches.css"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "C01",
@@ -613,7 +925,13 @@
       "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
       "sources": [
         "app/components/operations/OperationalModule.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "C02",
@@ -623,7 +941,13 @@
       "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
       "sources": [
         "app/components/operations/OperationalModule.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "C03",
@@ -633,7 +957,13 @@
       "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
       "sources": [
         "app/components/operations/OperationalModule.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "C04",
@@ -643,7 +973,13 @@
       "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
       "sources": [
         "app/components/operations/OperationalModule.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "C05",
@@ -653,7 +989,13 @@
       "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
       "sources": [
         "app/components/operations/OperationalModule.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AG01",
@@ -664,7 +1006,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0060_interview_candidate_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AG02",
@@ -675,7 +1023,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0060_interview_candidate_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AG03",
@@ -686,7 +1040,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0060_interview_candidate_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AG04",
@@ -697,7 +1057,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0060_interview_candidate_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AG05",
@@ -708,7 +1074,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0060_interview_candidate_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AG06",
@@ -719,7 +1091,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0060_interview_candidate_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AG07",
@@ -730,7 +1108,13 @@
       "sources": [
         "app/components/operations/OperationalModule.tsx",
         "supabase/migrations/0060_interview_candidate_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "FIN01",
@@ -740,7 +1124,13 @@
       "validation": "Inspeção de fonte e build; comparação do plano com contexto empresarial real.",
       "sources": [
         "app/components/admin/AdminModuleClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "FIN02",
@@ -750,7 +1140,13 @@
       "validation": "Inspeção de fonte e build; comparação do plano com contexto empresarial real.",
       "sources": [
         "app/components/admin/AdminModuleClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "FIN03",
@@ -760,7 +1156,13 @@
       "validation": "Inspeção de fonte e build; comparação do plano com contexto empresarial real.",
       "sources": [
         "app/components/admin/AdminModuleClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM01",
@@ -772,7 +1174,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM02",
@@ -784,7 +1192,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM03",
@@ -796,7 +1210,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM04",
@@ -808,7 +1228,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM05",
@@ -820,7 +1246,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM06",
@@ -832,7 +1264,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM07",
@@ -844,7 +1282,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM08",
@@ -856,7 +1300,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM09",
@@ -868,7 +1318,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ADM10",
@@ -880,7 +1336,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/MemberIdentityForm.tsx",
         "app/components/operations/MemberPermissions.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CFG01",
@@ -892,7 +1354,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/CompanyActivity.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CFG02",
@@ -904,7 +1372,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/CompanyActivity.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CFG03",
@@ -916,7 +1390,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/CompanyActivity.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CFG04",
@@ -928,7 +1408,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/CompanyActivity.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CFG05",
@@ -940,7 +1426,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/CompanyActivity.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CFG06",
@@ -952,7 +1444,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/CompanyActivity.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CFG07",
@@ -964,7 +1462,13 @@
         "app/components/admin/CompanyManagementClient.tsx",
         "app/components/admin/CompanyActivity.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MC01",
@@ -975,7 +1479,13 @@
       "sources": [
         "app/components/admin/AccountManagementClient.tsx",
         "app/components/admin/ProfilePhoto.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MC02",
@@ -986,7 +1496,13 @@
       "sources": [
         "app/components/admin/AccountManagementClient.tsx",
         "app/components/admin/ProfilePhoto.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MC03",
@@ -997,7 +1513,13 @@
       "sources": [
         "app/components/admin/AccountManagementClient.tsx",
         "app/components/admin/ProfilePhoto.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MC04",
@@ -1008,7 +1530,13 @@
       "sources": [
         "app/components/admin/AccountManagementClient.tsx",
         "app/components/admin/ProfilePhoto.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MC05",
@@ -1019,7 +1547,13 @@
       "sources": [
         "app/components/admin/AccountManagementClient.tsx",
         "app/components/admin/ProfilePhoto.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MC06",
@@ -1030,7 +1564,13 @@
       "sources": [
         "app/components/admin/AccountManagementClient.tsx",
         "app/components/admin/ProfilePhoto.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MC07",
@@ -1041,7 +1581,13 @@
       "sources": [
         "app/components/admin/AccountManagementClient.tsx",
         "app/components/admin/ProfilePhoto.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "N01",
@@ -1053,7 +1599,13 @@
         "app/components/ui/NotificationPanel.tsx",
         "app/components/admin/NotificationBell.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "N02",
@@ -1065,7 +1617,13 @@
         "app/components/ui/NotificationPanel.tsx",
         "app/components/admin/NotificationBell.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "N03",
@@ -1077,7 +1635,13 @@
         "app/components/ui/NotificationPanel.tsx",
         "app/components/admin/NotificationBell.tsx",
         "supabase/migrations/0063_activity_and_alert_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "PER01",
@@ -1088,7 +1652,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/ui/Widgets.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "PER02",
@@ -1099,7 +1669,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/ui/Widgets.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "PER03",
@@ -1110,7 +1686,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/ui/Widgets.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "PER04",
@@ -1121,7 +1703,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/ui/Widgets.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "PER05",
@@ -1132,7 +1720,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/ui/Widgets.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "EL01",
@@ -1143,7 +1737,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/design-system/PortalValidationDemo.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "EL02",
@@ -1154,7 +1754,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/design-system/PortalValidationDemo.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "EL03",
@@ -1165,7 +1771,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/design-system/PortalValidationDemo.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "EL04",
@@ -1176,7 +1788,13 @@
       "sources": [
         "app/components/personalization/PersonalizationClient.tsx",
         "app/design-system/PortalValidationDemo.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "TX01",
@@ -1188,7 +1806,13 @@
         "app/components/ui/ContentField.tsx",
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/personalization/PublicCompanyPortal.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "TX02",
@@ -1200,7 +1824,13 @@
         "app/components/ui/ContentField.tsx",
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/personalization/PublicCompanyPortal.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "TX03",
@@ -1212,7 +1842,13 @@
         "app/components/ui/ContentField.tsx",
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/personalization/PublicCompanyPortal.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "TX04",
@@ -1224,7 +1860,13 @@
         "app/components/ui/ContentField.tsx",
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/personalization/PublicCompanyPortal.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "TX05",
@@ -1236,7 +1878,13 @@
         "app/components/ui/ContentField.tsx",
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/personalization/PublicCompanyPortal.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "TX06",
@@ -1248,7 +1896,13 @@
         "app/components/ui/ContentField.tsx",
         "app/components/personalization/PersonalizationClient.tsx",
         "app/components/personalization/PublicCompanyPortal.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MAR01",
@@ -1260,7 +1914,13 @@
         "app/components/personalization/BrandColorsEditor.tsx",
         "app/components/personalization/CareerPortalPreview.tsx",
         "app/components/SiteFooter.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MAR02",
@@ -1272,7 +1932,13 @@
         "app/components/personalization/BrandColorsEditor.tsx",
         "app/components/personalization/CareerPortalPreview.tsx",
         "app/components/SiteFooter.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MAR03",
@@ -1284,7 +1950,13 @@
         "app/components/personalization/BrandColorsEditor.tsx",
         "app/components/personalization/CareerPortalPreview.tsx",
         "app/components/SiteFooter.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "MAR04",
@@ -1296,7 +1968,13 @@
         "app/components/personalization/BrandColorsEditor.tsx",
         "app/components/personalization/CareerPortalPreview.tsx",
         "app/components/SiteFooter.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "END01",
@@ -1308,7 +1986,13 @@
         "app/components/personalization/CompanyDomainEditor.tsx",
         "supabase/migrations/0062_page_publication_address_transaction.sql",
         "scripts/security/reconcile-test-domains.py"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "END02",
@@ -1320,7 +2004,13 @@
         "app/components/personalization/CompanyDomainEditor.tsx",
         "supabase/migrations/0062_page_publication_address_transaction.sql",
         "scripts/security/reconcile-test-domains.py"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "END03",
@@ -1332,7 +2022,13 @@
         "app/components/personalization/CompanyDomainEditor.tsx",
         "supabase/migrations/0062_page_publication_address_transaction.sql",
         "scripts/security/reconcile-test-domains.py"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "END04",
@@ -1344,7 +2040,13 @@
         "app/components/personalization/CompanyDomainEditor.tsx",
         "supabase/migrations/0062_page_publication_address_transaction.sql",
         "scripts/security/reconcile-test-domains.py"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "END05",
@@ -1356,7 +2058,13 @@
         "app/components/personalization/CompanyDomainEditor.tsx",
         "supabase/migrations/0062_page_publication_address_transaction.sql",
         "scripts/security/reconcile-test-domains.py"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "END06",
@@ -1368,7 +2076,13 @@
         "app/components/personalization/CompanyDomainEditor.tsx",
         "supabase/migrations/0062_page_publication_address_transaction.sql",
         "scripts/security/reconcile-test-domains.py"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "HIS01",
@@ -1379,7 +2093,13 @@
       "sources": [
         "app/components/personalization/BrandingHistory.tsx",
         "supabase/migrations/0061_branding_history_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "HIS02",
@@ -1390,7 +2110,13 @@
       "sources": [
         "app/components/personalization/BrandingHistory.tsx",
         "supabase/migrations/0061_branding_history_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "HIS03",
@@ -1401,7 +2127,13 @@
       "sources": [
         "app/components/personalization/BrandingHistory.tsx",
         "supabase/migrations/0061_branding_history_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "HIS04",
@@ -1412,7 +2144,13 @@
       "sources": [
         "app/components/personalization/BrandingHistory.tsx",
         "supabase/migrations/0061_branding_history_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "HIS05",
@@ -1423,7 +2161,13 @@
       "sources": [
         "app/components/personalization/BrandingHistory.tsx",
         "supabase/migrations/0061_branding_history_pagination.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P01",
@@ -1436,7 +2180,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P02",
@@ -1449,7 +2199,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P03",
@@ -1462,7 +2218,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P04",
@@ -1475,7 +2237,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P05",
@@ -1488,7 +2256,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P06",
@@ -1501,7 +2275,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P07",
@@ -1514,7 +2294,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P08",
@@ -1527,7 +2313,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "P09",
@@ -1540,7 +2332,13 @@
         "app/components/jobs/JobDescription.tsx",
         "app/components/jobs/PublicVacancy.tsx",
         "app/[companySlug]/page.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA01",
@@ -1552,7 +2350,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA02",
@@ -1564,7 +2368,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA03",
@@ -1576,7 +2386,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA04",
@@ -1588,7 +2404,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA05",
@@ -1600,7 +2422,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA06",
@@ -1612,7 +2440,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA07",
@@ -1624,7 +2458,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "CA08",
@@ -1636,7 +2476,13 @@
         "app/components/personalization/PublicPortalAccount.tsx",
         "app/components/personalization/CandidateCredentials.tsx",
         "app/components/operations/MyApplications.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AP01",
@@ -1646,7 +2492,13 @@
       "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
       "sources": [
         "app/components/operations/ApplicationAction.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AP02",
@@ -1656,7 +2508,13 @@
       "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
       "sources": [
         "app/components/operations/ApplicationAction.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AP03",
@@ -1666,7 +2524,13 @@
       "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
       "sources": [
         "app/components/operations/ApplicationAction.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AP04",
@@ -1676,7 +2540,13 @@
       "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
       "sources": [
         "app/components/operations/ApplicationAction.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BO01",
@@ -1687,7 +2557,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BO02",
@@ -1698,7 +2574,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BO03",
@@ -1709,7 +2591,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BO04",
@@ -1720,7 +2608,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Filtro de empresa validado é enviado ao servidor; busca/status/autor/alvo/datas são aplicados juntos.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BO05",
@@ -1731,7 +2625,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BO06",
@@ -1742,7 +2642,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/ui/WorkspaceShell.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOV01",
@@ -1752,7 +2658,13 @@
       "validation": "Projeção real, typecheck e testes backoffice-api/SQL.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Corrigido estado ausente e tamanho textual do fallback; resposta parcial testada visualmente.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOV02",
@@ -1762,7 +2674,13 @@
       "validation": "Projeção real, typecheck e testes backoffice-api/SQL.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOV03",
@@ -1772,7 +2690,13 @@
       "validation": "Projeção real, typecheck e testes backoffice-api/SQL.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOE01",
@@ -1782,7 +2706,13 @@
       "validation": "Typecheck e SQL/API administrativa com MFA.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "CNPJ/telefone usam máscaras compartilhadas; plano/contrato/estado operacional separados.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOE02",
@@ -1792,7 +2722,13 @@
       "validation": "Typecheck e SQL/API administrativa com MFA.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOE03",
@@ -1802,7 +2738,13 @@
       "validation": "Typecheck e SQL/API administrativa com MFA.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOD01",
@@ -1813,7 +2755,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/admin/CompanyDeletion.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Equipe limitada a 10 e convites a 5, com links que efetivamente filtram a empresa.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOD02",
@@ -1824,7 +2772,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/admin/CompanyDeletion.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Detalhe em Dados, Equipe, Convites e Gestão. Plano e acesso têm valores separados.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOD03",
@@ -1835,7 +2789,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "app/components/admin/CompanyDeletion.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Suspensão e exclusão na Gestão, com revisão de impacto, motivo, confirmação nominal e MFA preservados.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOU01",
@@ -1846,7 +2806,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOU02",
@@ -1857,7 +2823,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Avatar compacto e dados pessoais progressivos; largura mínima legível na tabela e blocos no móvel.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOU03",
@@ -1868,7 +2840,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Editor informa pessoa, empresa e que apenas o vínculo muda; conta global preservada.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOC01",
@@ -1878,7 +2856,13 @@
       "validation": "Typecheck, contrato de estados e testes de convite; sem envio real.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Datas em Brasília e destinatário/empresa na confirmação; ações dependem do estado.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOC02",
@@ -1888,7 +2872,13 @@
       "validation": "Typecheck, contrato de estados e testes de convite; sem envio real.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOC03",
@@ -1898,7 +2888,13 @@
       "validation": "Typecheck, contrato de estados e testes de convite; sem envio real.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "COM01",
@@ -1910,7 +2906,13 @@
         "app/components/admin/CommunicationsClient.tsx",
         "supabase/migrations/0064_communication_management_pagination.sql",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Carregamento não mostra resultado antigo ao trocar busca; paginação ocupada e vazio distinguem busca e coleção.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "COM02",
@@ -1922,7 +2924,13 @@
         "app/components/admin/CommunicationsClient.tsx",
         "supabase/migrations/0064_communication_management_pagination.sql",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "COM03",
@@ -1934,7 +2942,13 @@
         "app/components/admin/CommunicationsClient.tsx",
         "supabase/migrations/0064_communication_management_pagination.sql",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "COM04",
@@ -1946,7 +2960,13 @@
         "app/components/admin/CommunicationsClient.tsx",
         "supabase/migrations/0064_communication_management_pagination.sql",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Banner recuperável por sete dias no mesmo navegador/conta, sem publicar; upload concluído distinto de salvar. Cancelar/descartar remove rascunho local. Sem apagar assets registrados.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "COM05",
@@ -1958,7 +2978,13 @@
         "app/components/admin/CommunicationsClient.tsx",
         "supabase/migrations/0064_communication_management_pagination.sql",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "COM06",
@@ -1970,7 +2996,13 @@
         "app/components/admin/CommunicationsClient.tsx",
         "supabase/migrations/0064_communication_management_pagination.sql",
         "supabase/migrations/0068_communication_destination_guard.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOS01",
@@ -1980,7 +3012,13 @@
       "validation": "Typecheck e APIs administrativas; motivo/MFA preservados.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOS02",
@@ -1990,7 +3028,13 @@
       "validation": "Typecheck e APIs administrativas; motivo/MFA preservados.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOS03",
@@ -2000,7 +3044,13 @@
       "validation": "Typecheck e APIs administrativas; motivo/MFA preservados.",
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOA01",
@@ -2011,7 +3061,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOA02",
@@ -2022,7 +3078,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Datas exibidas no mesmo fuso dos filtros; grade extensa evita campo isolado com largura total.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BOA03",
@@ -2033,7 +3095,13 @@
       "sources": [
         "app/components/admin/BackofficeManagementClient.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BSEC01",
@@ -2043,7 +3111,13 @@
       "validation": "Typecheck e testes de sessão/MFA existentes. Não se simulou relógio divergente na conta real.",
       "sources": [
         "app/components/admin/SecurityClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BSEC02",
@@ -2053,7 +3127,13 @@
       "validation": "Typecheck e testes de sessão/MFA existentes. Não se simulou relógio divergente na conta real.",
       "sources": [
         "app/components/admin/SecurityClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "BSEC03",
@@ -2063,7 +3143,13 @@
       "validation": "Typecheck e testes de sessão/MFA existentes. Não se simulou relógio divergente na conta real.",
       "sources": [
         "app/components/admin/SecurityClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Estado de sessão deriva do mesmo requisito de MFA recente do servidor. Expira automaticamente e atualiza ao retornar à aba; permite nova confirmação mesmo com aal2.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "INT01",
@@ -2073,7 +3159,13 @@
       "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
       "sources": [
         "app/components/admin/IntegrationsClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "INT02",
@@ -2083,7 +3175,13 @@
       "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
       "sources": [
         "app/components/admin/IntegrationsClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "INT03",
@@ -2093,7 +3191,13 @@
       "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
       "sources": [
         "app/components/admin/IntegrationsClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "INT04",
@@ -2103,7 +3207,13 @@
       "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
       "sources": [
         "app/components/admin/IntegrationsClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "INT05",
@@ -2113,7 +3223,13 @@
       "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
       "sources": [
         "app/components/admin/IntegrationsClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Erro aponta a linha original, incluindo linhas vazias; salvar indisponível enquanto inválida.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DEL01",
@@ -2124,7 +3240,13 @@
       "sources": [
         "app/components/admin/CompanyDeletion.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DEL02",
@@ -2135,7 +3257,13 @@
       "sources": [
         "app/components/admin/CompanyDeletion.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DEL03",
@@ -2146,7 +3274,13 @@
       "sources": [
         "app/components/admin/CompanyDeletion.tsx",
         "supabase/migrations/0067_backoffice_read_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "real-component-isolated-visual-and-source",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AU01",
@@ -2157,7 +3291,13 @@
       "sources": [
         "app/components/auth/AuthClient.tsx",
         "app/components/auth/auth-validation.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AU02",
@@ -2168,7 +3308,13 @@
       "sources": [
         "app/components/auth/AuthClient.tsx",
         "app/components/auth/auth-validation.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "AU03",
@@ -2179,7 +3325,13 @@
       "sources": [
         "app/components/auth/AuthClient.tsx",
         "app/components/auth/auth-validation.ts"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "IV01",
@@ -2190,7 +3342,13 @@
       "sources": [
         "app/components/auth/CompanyInvitationClient.tsx",
         "supabase/migrations/0069_invitation_recipient_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "IV02",
@@ -2201,7 +3359,13 @@
       "sources": [
         "app/components/auth/CompanyInvitationClient.tsx",
         "supabase/migrations/0069_invitation_recipient_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "IV03",
@@ -2212,7 +3376,13 @@
       "sources": [
         "app/components/auth/CompanyInvitationClient.tsx",
         "supabase/migrations/0069_invitation_recipient_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "IV04",
@@ -2223,7 +3393,13 @@
       "sources": [
         "app/components/auth/CompanyInvitationClient.tsx",
         "supabase/migrations/0069_invitation_recipient_context.sql"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "EM01",
@@ -2233,7 +3409,13 @@
       "validation": "Testes de email/API e typecheck; fluxo novo imediato permanece independente.",
       "sources": [
         "app/components/auth/ConfirmEmailClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "EM02",
@@ -2243,7 +3425,13 @@
       "validation": "Testes de email/API e typecheck; fluxo novo imediato permanece independente.",
       "sources": [
         "app/components/auth/ConfirmEmailClient.tsx"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ST01",
@@ -2254,7 +3442,13 @@
       "sources": [
         "app/components/system/SystemPage.tsx",
         "app/status"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ST02",
@@ -2265,7 +3459,13 @@
       "sources": [
         "app/components/system/SystemPage.tsx",
         "app/status"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ST03",
@@ -2276,7 +3476,13 @@
       "sources": [
         "app/components/system/SystemPage.tsx",
         "app/status"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ST04",
@@ -2287,7 +3493,13 @@
       "sources": [
         "app/components/system/SystemPage.tsx",
         "app/status"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ST05",
@@ -2298,7 +3510,13 @@
       "sources": [
         "app/components/system/SystemPage.tsx",
         "app/status"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "ST06",
@@ -2309,7 +3527,13 @@
       "sources": [
         "app/components/system/SystemPage.tsx",
         "app/status"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DS01",
@@ -2321,7 +3545,13 @@
         "app/design-system/OperationalPatternsDemo.tsx",
         "app/design-system/PortalValidationDemo.tsx",
         "app/components/ui"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DS02",
@@ -2333,7 +3563,13 @@
         "app/design-system/OperationalPatternsDemo.tsx",
         "app/design-system/PortalValidationDemo.tsx",
         "app/components/ui"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DS03",
@@ -2345,7 +3581,13 @@
         "app/design-system/OperationalPatternsDemo.tsx",
         "app/design-system/PortalValidationDemo.tsx",
         "app/components/ui"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DS04",
@@ -2357,7 +3599,13 @@
         "app/design-system/OperationalPatternsDemo.tsx",
         "app/design-system/PortalValidationDemo.tsx",
         "app/components/ui"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DS05",
@@ -2369,7 +3617,13 @@
         "app/design-system/OperationalPatternsDemo.tsx",
         "app/design-system/PortalValidationDemo.tsx",
         "app/components/ui"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DS06",
@@ -2381,7 +3635,13 @@
         "app/design-system/OperationalPatternsDemo.tsx",
         "app/design-system/PortalValidationDemo.tsx",
         "app/components/ui"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     },
     {
       "id": "DS07",
@@ -2393,9 +3653,16 @@
         "app/design-system/OperationalPatternsDemo.tsx",
         "app/design-system/PortalValidationDemo.tsx",
         "app/components/ui"
-      ]
+      ],
+      "revalidation": {
+        "date": "2026-11-22",
+        "method": "source-and-existing-validation",
+        "result": "Correspondência com a implementação e o aceite revisada; ver limites no relatório.",
+        "authenticatedBackoffice": false
+      }
     }
   ],
   "implementationBranch": "feat/ux-audit-revitalization",
-  "pullRequest": 220
+  "pullRequest": 220,
+  "revalidationReport": "docs/UX-AUDIT-REVALIDATION-2026-11-22.md"
 }

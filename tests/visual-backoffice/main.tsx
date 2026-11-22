@@ -1,0 +1,10 @@
+import React from 'react';import{createRoot}from'react-dom/client';
+import '@fontsource-variable/montserrat';import '@fontsource-variable/open-sans';
+import '../../app/globals.css';import '../../app/components/ui/ui.css';import '../../app/components/ui/widgets.css';
+import {BackofficeManagementClient} from '../../app/components/admin/BackofficeManagementClient';
+import {backofficeSections} from '../../app/components/admin/backoffice-model';
+import {AppToastHost} from '../../app/components/ui';
+const companyId=location.pathname.match(/\/empresas\/(.+)/)?.[1];
+const section=companyId?'company':backofficeSections.find(s=>'/backoffice'+s.path===location.pathname)?.id||'overview';
+document.documentElement.dataset.theme=localStorage.getItem('jobforged-theme')||'light';
+createRoot(document.getElementById('root')!).render(<><BackofficeManagementClient email="operador@example.invalid" section={section} companyId={companyId} deletionEnabled/><AppToastHost/></>);

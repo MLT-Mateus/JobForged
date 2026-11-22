@@ -10,5 +10,5 @@ export function BackofficeLogout(){
   if(response.ok||response.status===503){window.location.replace('/login');return}
   throw Error();
  }catch{setError('Não foi possível encerrar a sessão. Confira sua conexão e tente novamente.');setBusy(false)}}
- return <><ActionButton variant="secondary" disabled={busy} onClick={()=>void logout()}><LogOut size={16}/>{busy?'Saindo...':'Sair da conta'}</ActionButton>{error&&<AppToast notice={{kind:'danger',title:'Sessão não encerrada',text:error}} onClose={()=>setError('')}/>}</>;
+ return <><ActionButton variant="danger" className="jf-action--compact-mobile" aria-label={busy?'Saindo...':'Sair da conta'} title="Sair da conta" disabled={busy} onClick={()=>void logout()}><LogOut size={16}/><span>{busy?'Saindo...':'Sair da conta'}</span></ActionButton>{error&&<AppToast notice={{kind:'danger',title:'Sessão não encerrada',text:error}} onClose={()=>setError('')}/>}</>;
 }

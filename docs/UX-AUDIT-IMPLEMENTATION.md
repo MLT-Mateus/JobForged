@@ -630,3 +630,7 @@ O primeiro deploy foi confirmado em Test no SHA `6d375c6818cd42688b984f10e7365cf
 A mesma conferência substituiu os dois filtros de data simples restantes na Agenda pelo DateField do DS, preservando limites inicial/final e reinício da paginação. Os campos de horário do compromisso continuam datetime-local com Brasília explícita, conforme a exceção documentada.
 
 O calendário compartilhado também recebeu largura própria limitada ao viewport e deslocamento horizontal para não cortar mês/ano em filtros estreitos. O DS inclui um campo de 180 px para reproduzir esse caso. DateField identifica o label no nome acessível e mantém o valor/placeholder em uma linha.
+
+## Complemento de revalidação — 22/11/2026
+
+A [revalidação dos 211 IDs](UX-AUDIT-REVALIDATION-2026-11-22.md) documenta lacunas adicionais corrigidas, evidências e limites. A conferência do backoffice foi isolada por escolha do usuário; não confundir com sessão administrativa autenticada em Test. As entradas antigas expressam implementação, não aprovação manual de todas as combinações.

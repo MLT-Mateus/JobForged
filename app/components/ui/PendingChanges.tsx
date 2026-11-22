@@ -25,7 +25,7 @@ export function usePendingChanges(dirty:boolean){
   const navigation=(window as Window & {navigation?:EventTarget}).navigation;
   const traverse=(event:Event)=>{
    const intent=event as Event & {navigationType:string;destination:{key:string;url:string}};
-   if(savedNavigation.current||!event.cancelable||intent.navigationType!=='traverse'||intent.destination.url===location.href)return;
+   if(event.defaultPrevented||savedNavigation.current||!event.cancelable||intent.navigationType!=='traverse'||intent.destination.url===location.href)return;
    event.preventDefault();
    setPending(()=>()=>{window.removeEventListener('beforeunload',warn);navigation?.removeEventListener('navigate',traverse);
     (navigation as EventTarget & {traverseTo:(key:string)=>void}).traverseTo(intent.destination.key)});

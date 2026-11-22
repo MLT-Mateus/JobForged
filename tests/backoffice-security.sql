@@ -22,6 +22,22 @@ do $$begin
  begin insert into public.platform_admins(user_id,email,role) values(auth.uid(),'fixture-owner-26@example.invalid','platform_admin');raise exception 'platform escalation allowed';exception when insufficient_privilege then null;end;
 end$$;
 select pg_temp.assume_user(current_setting('jbfd.test_admin')::uuid);
+do $$declare state jsonb;begin
+ state:=public.security_status();
+ if state->>'recentMfa'<>'true' or (state->>'verificationRemainingSeconds')::integer not between 1 and 300 then raise exception 'fresh MFA status mismatch';end if;
+end$$;
+reset role;
+update auth.mfa_amr_claims set created_at=now()-interval '6 minutes',updated_at=now()-interval '6 minutes'
+where id='19000000-0000-4000-8000-000000000201';
+set local role authenticated;
+do $$declare state jsonb;begin
+ state:=public.security_status();
+ if state->>'aal'<>'aal2' or state->>'recentMfa'<>'false' or (state->>'verificationRemainingSeconds')::integer<>0 then raise exception 'expired MFA must remain renewable despite aal2';end if;
+ begin perform public.platform_read('overview');raise exception 'expired MFA gate bypass';exception when insufficient_privilege then null;end;
+end$$;
+reset role;
+update auth.mfa_amr_claims set created_at=now(),updated_at=now() where id='19000000-0000-4000-8000-000000000201';
+set local role authenticated;
 do $$declare result jsonb; token_value text; invitation uuid;begin
  perform public.platform_read('overview');
  perform public.platform_read('companies','Fixture 26');
