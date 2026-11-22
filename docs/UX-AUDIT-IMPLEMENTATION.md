@@ -626,3 +626,5 @@ A publicação final deve registrar SHA, execução de CI, execução de deploy,
 ## Conferência autenticada após a publicação
 
 O primeiro deploy foi confirmado em Test no SHA `6d375c6818cd42688b984f10e7365cfb32265d62`, pipeline `44977932125`, com backup cifrado automático e migrations verificadas. A conta Hitori confirmou Home sem os dois banners demonstrativos, Financeiro real, coleção de vagas, domínio ativo, histórico com 10 versões por página e comparação, além da proteção de rascunho na Personalização. Um rascunho vazio foi criado para exercitar o bloqueio de publicação e removido pelo fluxo de exclusão lógica; nenhuma vaga foi publicada nem candidatura enviada. A revisão revelou título vazio no detalhe/menu/confirmação: o complemento usa `jobDisplayTitle` compartilhado e ajusta o singular da contagem. O recibo local de publicação registra o SHA final e demais verificações.
+
+A mesma conferência substituiu os dois filtros de data simples restantes na Agenda pelo DateField do DS, preservando limites inicial/final e reinício da paginação. Os campos de horário do compromisso continuam datetime-local com Brasília explícita, conforme a exceção documentada.
