@@ -11,6 +11,8 @@ export function WorkspaceShell({children,items,logo,fullLogo,brand,title,subtitl
  const collapsed=controlled??localCollapsed; const {theme,changeTheme}=useThemePreference();
  const [mobile,setMobile]=useState(false);
  const trigger=useRef<HTMLButtonElement>(null),side=useRef<HTMLElement>(null);
+ const previouslyOpen=useRef(false);
+ useEffect(()=>{if(previouslyOpen.current&&!menu)trigger.current?.focus();previouslyOpen.current=menu},[menu]);
  useEffect(()=>{const media=matchMedia("(min-width: 901px)");const update=()=>{setMobile(!media.matches);if(media.matches)setMenu(false)};const timer=setTimeout(update,0);media.addEventListener("change",update);return()=>{clearTimeout(timer);media.removeEventListener("change",update)}},[]);
  const toggle=()=>{setLocalCollapsed(!collapsed);onCollapsedChange?.(!collapsed)};
  useEffect(()=>{if(!menu)return;const first=side.current?.querySelector<HTMLElement>('button.admin-close');first?.focus();const close=(e:KeyboardEvent)=>{if(e.key==='Escape'){setMenu(false);trigger.current?.focus();}if(e.key==='Tab'){const nodes=Array.from(side.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled])')??[]).filter(n=>n.offsetParent!==null);const a=nodes[0],b=nodes.at(-1);if(e.shiftKey&&document.activeElement===a){e.preventDefault();b?.focus()}else if(!e.shiftKey&&document.activeElement===b){e.preventDefault();a?.focus()}}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close)},[menu]);
