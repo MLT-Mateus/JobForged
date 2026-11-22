@@ -30,4 +30,18 @@ end;$$;
 alter function public.communications_manage(text,uuid,integer,jsonb) owner to postgres;
 revoke all on function public.communications_manage(text,uuid,integer,jsonb) from public,anon,authenticated,service_role;
 grant execute on function public.communications_manage(text,uuid,integer,jsonb) to authenticated;
+-- The audit and read-only Test inspection identified these exact demonstration
+-- assets in the operational Home. Unpublish reversibly; preserve files/history.
+-- A release is a system action, never attributed to the original uploader.
+-- Application mutations still derive their actor from the authenticated session.
+alter table public.platform_audit_events alter column actor_user_id drop not null;
+with retired as (
+ update public.platform_banners set active=false,version=version+1,updated_at=now()
+ where active and (
+  (title='Validação técnica de upload' and image_id='63b5389f-09b0-4cbc-8ec2-08dfe0769279') or
+  (title='Teste' and image_id='999952d4-1e5f-4f94-896c-83434e944355')
+ ) returning id,title
+)
+insert into public.platform_audit_events(target_id,action,reason,details)
+select id,'platform.banner.save','Auditoria UX H01: retirar demonstração da Home operacional',jsonb_build_object('title',title,'active',false,'source','0068_communication_destination_guard') from retired;
 notify pgrst,'reload schema';
