@@ -25,16 +25,17 @@ export function normalizeJob<T extends Partial<Job>>(job:T):T {
  if(next.description!==undefined)next.summary=richTextPlain(next.description).trim().slice(0,500);
  if(next.attributions!==undefined)next.responsibilities=next.attributions.split(/<br\s*\/?>|\n|<\/li>/i).map(x=>richTextPlain(x).trim()).filter(Boolean).slice(0,50).map(x=>x.slice(0,2000));
  if(next.modality==='Home Office')next.modality='Remoto';
+ if(next.contractType)next.contractType=({'CLT':'Efetivo - CLT','PJ':'Prestador de Serviço','Freelancer':'Free Lancer'} as Record<string,string>)[next.contractType]||next.contractType;
  if(next.schemaVersion===2)next.stages=[];
  return next;
 }
 export function editorChecks(job:Job){return [
  {section:0,key:'title',label:'Cargo',done:!!job.title.trim()&&job.title.trim().length<=120},
  {section:0,key:'area',label:'Área',done:!!job.area.trim()},
- {section:0,key:'contractType',label:'Contratação',done:!!job.contractType.trim()},
+ {section:0,key:'contractType',label:'Contratação',done:jobOptions.contracts.includes(job.contractType)},
  {section:0,key:'modality',label:'Modalidade',done:['Presencial','Remoto','Home Office','Híbrido'].includes(job.modality)},
  {section:0,key:remoteJob(job)?'remoteScope':'branchIds',label:remoteJob(job)?'Abrangência do trabalho':'Local de trabalho',done:remoteJob(job)?!!job.remoteScope?.trim():!!job.branchIds?.length&&!!job.city.trim()&&!!job.state.trim()},
- {section:0,key:'journey',label:'Jornada',done:!!job.journey.trim()&&(!['Horário definido','Escala'].includes(job.journey)||!!job.schedule.trim())},
+ {section:0,key:'journey',label:'Jornada',done:jobOptions.journeys.includes(job.journey)&&(!['Horário definido','Escala'].includes(job.journey)||!!job.schedule.trim())},
  {section:0,key:'positions',label:'Quantidade',done:Number.isInteger(job.positions??1)&&(job.positions??1)>0&&(job.positions??1)<=99999},
  {section:1,key:'description',label:'Apresentação',done:!!richTextPlain(job.description||job.summary).trim()&&(job.description||job.summary).length<=5000},
  {section:1,key:'attributions',label:'Atividades',done:!!richTextPlain(job.attributions||job.responsibilities.join('\n')).trim()&&(job.attributions||job.responsibilities.join('\n')).length<=5000},

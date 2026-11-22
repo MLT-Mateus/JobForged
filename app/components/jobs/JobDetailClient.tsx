@@ -1,5 +1,6 @@
 "use client";
 import {useCollectionNavigation} from '../ui/useCollectionNavigation';
+import {useUrlFilter} from '../ui/useUrlFilter';
 import {JobColorPicker} from './JobColorPicker';
 import {FormReadiness} from '../ui/FormReadiness';
 import {editorChecks,publicationIssues} from './job-editor-model';
@@ -29,7 +30,8 @@ export default function JobDetailClient({context,jobId,initialTab="sobre"}:{cont
 
  const [busy,setBusy]=useState(false),[noticeKind,setNoticeKind]=useState<"success"|"danger">("success");
  const {returnHref,withReturn}=useCollectionNavigation('/app/vagas');
- const [job,setJob]=useState<Job|null>(null),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[tab,setTab]=useState<Tab>(initialTab),[notice,setNotice]=useState('');
+ const [job,setJob]=useState<Job|null>(null),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[notice,setNotice]=useState('');
+ const [tab,setTab]=useUrlFilter('tab',initialTab);
  useEffect(()=>{let active=true;jobService.getJobById(jobId).then(j=>{if(active){setJob(j);setLoading(false)}}).catch(()=>{if(active){setLoadError(true);setLoading(false)}});return()=>{active=false}},[jobId]);
  const status=async(next:JobStatus)=>{if(!job||busy)return;setBusy(true);setNoticeKind("success");try{setJob(await jobService.changeJobStatus(job.id,next,job));setNotice(`Status alterado para ${next.toLowerCase()}.`)}catch(error){setNoticeKind("danger");setNotice(error instanceof Error?error.message:"Não foi possível alterar a vaga.")}finally{setBusy(false)}};
  if(loading||loadError)return <AdminShell module="vagas" context={context}><WorkspaceState kind={loadError?"error":"loading"} title={loadError?"Não foi possível carregar a vaga":"Carregando vaga…"} action={loadError?<a className="jf-action jf-action--secondary" href={returnHref}>Voltar para vagas</a>:undefined}/></AdminShell>;

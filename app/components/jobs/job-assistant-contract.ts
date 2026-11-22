@@ -7,8 +7,8 @@ export const assistantFields = {
  country:'País',state:'Estado',city:'Cidade',summary:'Resumo',experience:'Experiência',weeklyHours:'Carga horária',
  schedule:'Horário',salaryMin:'Salário mínimo',salaryMax:'Salário máximo',currency:'Moeda',education:'Formação',
  additionalBenefits:'Outros benefícios',careerPlan:'Plano de carreira',teamDescription:'Time',reportsTo:'Liderança',
- teamSize:'Tamanho do time',methodology:'Metodologia',challenges:'Desafios',openingReason:'Motivo da abertura',
- autonomy:'Autonomia',hierarchy:'Hierarquia',applicationDeadline:'Prazo',responseSla:'Prazo de retorno',
+ teamSize:'Tamanho do time',methodology:'Metodologia',challenges:'Desafios',
+ applicationDeadline:'Prazo',responseSla:'Prazo de retorno',
  responsibilities:'Responsabilidades',requirements:'Requisitos',softSkills:'Competências',differentiators:'Diferenciais',
  certifications:'Certificações',benefits:'Benefícios',tools:'Ferramentas',interviewTypes:'Entrevistas',branchIds:'Filiais',
 } as const;
@@ -30,7 +30,7 @@ export function validateAssistantPatch(value:unknown,branchIds:string[]):Assista
    if(key==='branchIds'&&item.some(id=>!branchIds.includes(id)))throw new Error('Filial indisponível.');
    clean[key]=Array.from(new Set(item));
   }else{
-   if(typeof item!=='string'||item.length>(key==='summary'?500:key==='title'?120:['description','attributions'].includes(key)?5000:key==='remoteScope'?500:6000))throw new Error(key+': use texto dentro do limite.');
+   if(typeof item!=='string'||item.length>(key==='summary'?500:key==='title'?120:['description','attributions','additionalBenefits','careerPlan'].includes(key)?5000:key==='remoteScope'?500:6000))throw new Error(key+': use texto dentro do limite.');
    if(['salaryMin','salaryMax'].includes(key)&&item&&!/^\d+(\.\d{1,2})?$/.test(item))throw new Error('Salário inválido.');
    clean[key]=item;
   }

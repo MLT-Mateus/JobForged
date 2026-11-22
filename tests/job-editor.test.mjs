@@ -10,6 +10,9 @@ test('ten essentials; salary, level, benefits and accessibility are optional',()
  assert.equal(editorChecks({...complete,requirements:[],noPrerequisites:true}).every(c=>c.done),true);
  assert.equal(editorChecks({...complete,modality:'Presencial',branchIds:[],city:'Brasília',state:'DF'}).find(c=>c.key==='branchIds').done,false);
  assert.equal(editorChecks({...complete,journey:'Escala',schedule:''}).find(c=>c.key==='journey').done,false);
+ assert.equal(editorChecks({...complete,contractType:'invented'}).find(c=>c.key==='contractType').done,false);
+ assert.equal(editorChecks({...complete,journey:'invented'}).find(c=>c.key==='journey').done,false);
+ assert.equal(normalizeJob({...complete,contractType:'PJ'}).contractType,'Prestador de Serviço');
 });
 test('publication conditions are separate and malformed optional data can be removed',()=>{
  assert.deepEqual(publicationIssues({...complete,example:true,lgpd:false,portalReady:false}).map(i=>i.key),['lgpd','example','portal']);
