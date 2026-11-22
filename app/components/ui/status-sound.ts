@@ -56,14 +56,14 @@ export function setStatusSoundEnabled(value: boolean) {
   window.dispatchEvent(new Event(preferenceEvent));
 }
 
-export function playStatusSound(kind: ToastKind) {
-  if (typeof window === "undefined" || !enabled() || !window.AudioContext) return;
+export function playStatusSound(kind: ToastKind, isCurrent: () => boolean = () => true) {
+  if (typeof window === "undefined" || !enabled() || !window.AudioContext || !isCurrent()) return;
   try {
     audioContext ??= new window.AudioContext();
     const context = audioContext;
     void context.resume().then(() => {
       return loadSound(context, kind).then((buffer) => {
-        if (!enabled()) return;
+        if (!enabled() || !isCurrent()) return;
         const source = context.createBufferSource();
         source.buffer = buffer;
         source.connect(context.destination);

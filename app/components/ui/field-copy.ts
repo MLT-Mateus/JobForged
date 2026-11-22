@@ -10,12 +10,22 @@ export function fieldPlaceholder({label='',type='text',placeholder,multiline=fal
  if(concise)return finish(supplied);
  if(selection)return finish(multiple?'Selecione opções':'Selecione uma opção');
  const context=label.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- if(type==='search'||/buscar|pesquisar/.test(context))return finish('Busque por nome');
+ if(type==='search'||/buscar|pesquisar/.test(context)){
+  if(/titulo/.test(context))return finish('Busque pelo título');
+  if(/destinatario/.test(context))return finish('Busque um destinatário');
+  if(/empresa/.test(context)&&!/acao|motivo/.test(context))return finish('Busque uma empresa');
+  if(/integracao/.test(context))return finish('Busque uma integração');
+  if(/fatura/.test(context))return finish('Busque uma fatura');
+  if(/compromisso/.test(context))return finish('Busque um compromisso');
+  return finish('Busque por nome');
+ }
  if(type==='password'||/senha/.test(context))return finish('Digite a senha');
  if(type==='email'||/e-mail|email/.test(context))return finish('Digite o e-mail');
  if(/dominio|subdominio|endereco jobforged/.test(context))return finish('Digite o domínio');
  if(type==='url'||/link|url|linkedin|instagram|endereco do link/.test(context))return finish('Informe o link');
  if(type==='tel'||/telefone|whatsapp|celular/.test(context))return finish('Digite o telefone');
+ if(/\bcpf\b/.test(context))return finish('Digite o CPF');
+ if(/\bcnpj\b/.test(context))return finish('Digite o CNPJ');
  if(/codigo|token/.test(context))return finish('Digite o código');
  if(/cor principal|cor secundaria|cor de |cor do |paleta|hex/.test(context))return finish('Digite a cor');
  if(type==='number'||/salario|valor|preco|peso/.test(context))return finish('Informe o valor');

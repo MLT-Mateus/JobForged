@@ -1,7 +1,11 @@
+import {isPublicDestination} from '../../../shared/public-link.mjs';
+import {contrast,foreground,blendColor,navigationColors,readableColor,sectionColors} from '../ui/color-contrast.ts';
+export {contrast,foreground,luminance} from '../ui/color-contrast.ts';
 import {portalChrome,portalMenu,portalFooter,defaultPortalFooter,validPortalMenuLink} from './portal-chrome.ts';
 import {renderRichText,richTextPlain} from '../ui/rich-content.ts';
 import {careerCopy} from './career-copy.ts';
 import {careerDefaults} from './career-defaults.ts';
+import {careerBrandColors} from './career-brand.ts';
 import {portalPresentation,validPortalPresentation} from './portal-presentation.ts';
 import type { CSSProperties } from 'react';
 import { fontPairs } from '../ui/font-pairs.ts';
@@ -10,7 +14,7 @@ import type { Customization, Palette } from './personalization-types';
 export const assetKinds=['logoMain','logoAlternative','logoLight','logoDark','favicon','avatar','shareImage'] as const;
 export function brandingDefaults(companyId:string,name:string):Customization {
  const source=structuredClone(defaultCustomization);
- return {...source,organizationId:companyId,displayName:name,shortName:name.slice(0,24),slogan:'',assets:Object.fromEntries(assetKinds.map(key=>[key,null])),banners:[{id:"default-culture",organizationId:companyId,createdAt:"",updatedAt:"",status:"Ativo",title:"Conheça nosso jeito de trabalhar",description:"Pessoas, ideias e oportunidades para construir o próximo capítulo. Conteúdo de exemplo · mock.",buttonText:"Conheça a JobForged",link:"https://jobforged.com",image:"",startAt:"",endAt:"",placement:"Portal",order:0}],
+ return {...source,organizationId:companyId,displayName:name,shortName:name.slice(0,24),slogan:'',assets:Object.fromEntries(assetKinds.map(key=>[key,null])),banners:[{id:"default-culture",organizationId:companyId,createdAt:"",updatedAt:"",status:"Ativo",title:"Conheça nosso jeito de trabalhar",description:"Pessoas, ideias e oportunidades para construir o próximo capítulo. Conteúdo de exemplo.",buttonText:"Conheça a JobForged",link:"https://jobforged.com",image:"",startAt:"",endAt:"",placement:"Portal",order:0}],
   portal:{...source.portal,footer:defaultPortalFooter(name),layout:'classico',headline:careerDefaults.headline,introduction:careerDefaults.introduction,about:careerDefaults.about,contactEmail:'',contactPhone:'',socialLinkedin:'',socialInstagram:'',footerText:name,customDomain:'',jobforgedDomain:''},draftUpdatedAt:'',publishedAt:'',publishedBy:'',revision:0};
 }
 export const brandContent=(value:Customization)=>{
@@ -18,13 +22,17 @@ export const brandContent=(value:Customization)=>{
  void organizationId;void draftUpdatedAt;void publishedAt;void publishedBy;void revision;
  return content;
 };
-export const brandingLogo=(value:Customization,theme:'light'|'dark')=>(theme==='dark'?value.assets.logoDark?.url:value.assets.logoLight?.url)||value.assets.logoMain?.url||value.assets.logoAlternative?.url||'/brand/jobforged-symbol.svg';
+/** Merge historical partial palettes without replacing a saved choice with a default. */
+export function hydrateBranding(base:Customization,stored:Partial<Customization>):Customization{
+ const {primary,secondary}=careerBrandColors(stored);
+ return {...base,...stored,palette:{...base.palette,...stored.palette,primary,secondary},
+  portal:{...base.portal,...stored.portal},backgrounds:{...base.backgrounds,...stored.backgrounds},
+  theme:{...base.theme,...stored.theme,light:{...base.theme.light,...stored.theme?.light},dark:{...base.theme.dark,...stored.theme?.dark}}};
+}
+export const brandingLogo=(value:Customization,theme:'light'|'dark')=>(theme==='dark'?value.assets.logoDark?.url:value.assets.logoLight?.url)||value.assets.logoLight?.url||value.assets.logoMain?.url||value.assets.logoAlternative?.url||'/brand/jobforged-symbol.svg';
+export const brandingIcon=(value:Customization,_theme:'light'|'dark')=>{void _theme;return value.assets.favicon?.url};
 export function safeBrandingLink(value:string){try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:undefined}catch{return undefined}}
-export function luminance(value:string){const rgb=[1,3,5].map(i=>parseInt(value.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}
-export function contrast(a:string,b:string){const [x,y]=[luminance(a),luminance(b)].sort((m,n)=>n-m);return(x+.05)/(y+.05)}
-export const foreground=(background:string)=>contrast(background,'#142321')>=4.5?'#142321':contrast(background,'#000000')>=4.5?'#000000':'#FFFFFF';
 export function paletteFor(value:Customization,theme:'light'|'dark'):Palette {return theme==='dark'?value.theme.dark:{...value.palette,background:value.theme.light.background,surface:value.theme.light.surface,text:value.theme.light.text}}
-function blendColor(source:string,target:string,amount:number){return '#'+[1,3,5].map(i=>Math.round(parseInt(source.slice(i,i+2),16)*(1-amount)+parseInt(target.slice(i,i+2),16)*amount).toString(16).padStart(2,'0')).join('')}
 export function brandingScrollbarStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
  const primary=/^#[0-9A-F]{6}$/i.test(value.palette.primary)?value.palette.primary:lightPalette.primary;
  const p=paletteFor(value,theme),surfaces=[p.background,p.surface],score=(color:string)=>Math.min(...surfaces.map(surface=>contrast(color,surface)));
@@ -38,15 +46,23 @@ export function brandingScrollbarStyle(value:Customization,theme:'light'|'dark')
 }
 export function brandingStyle(value:Customization,theme:'light'|'dark'):CSSProperties {
  const p=paletteFor(value,theme),pair=fontPairs.find(x=>x.id===value.typography.fontPair)||fontPairs[0];
+ const chrome=portalChrome(value)[theme],headerNavigation=navigationColors(p.button,chrome.headerBackground),footerNavigation=navigationColors(p.button,chrome.footerBackground);
+ const hoverCandidate=blendColor(p.link,theme==='dark'?'#FFFFFF':'#000000',.15);const linkHover=[p.background,p.surface,p.activeItem].every(s=>contrast(hoverCandidate,s)>=4.5)?hoverCandidate:p.link;
+ const sections=sectionColors(p.background,p.text);
  const image=value.backgrounds.panelImage||value.backgrounds.textureImage;
  return {...brandingScrollbarStyle(value,theme),'--teal':p.primary,'--teal-deep':p.link,'--teal-soft':p.activeItem,'--blue':p.secondary,'--app-bg':p.background,'--app-panel':p.surface,
-  '--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
-  '--jf-ui-focus':p.link,'--jf-ui-focus-ring':'color-mix(in srgb,var(--jf-ui-focus) 28%,transparent)','--jf-ui-surface':p.surface,'--jf-ui-surface-soft':p.background,
-  '--jf-ui-accent':p.secondary,'--jf-ui-text':p.text,'--jf-ui-text-muted':'color-mix(in srgb,var(--jf-ui-text) 72%,var(--jf-ui-surface))','--jf-ui-text-soft':'var(--jf-ui-text-muted)',
+  '--jf-ui-action-primary-border':readableColor(p.button,[p.surface],3),'--jf-ui-action-primary-hover-border':readableColor(p.buttonHover,[p.surface],3),'--cp-header-link-hover':headerNavigation.interaction,'--cp-header-link-hover-bg':headerNavigation.hoverBackground,'--cp-footer-link-hover':footerNavigation.interaction,'--cp-footer-link-hover-bg':footerNavigation.hoverBackground,'--jf-ui-action-primary-bg':p.button,'--jf-ui-action-primary-text':foreground(p.button),'--jf-ui-action-primary-hover-bg':p.buttonHover,'--jf-ui-action-primary-hover-text':foreground(p.buttonHover),'--company-link-hover':linkHover,'--jf-ui-brand':p.button,'--jf-ui-brand-strong':p.link,'--jf-ui-brand-soft':p.activeItem,'--jf-ui-on-brand':foreground(p.button),
+  '--jf-ui-focus':p.link,'--jf-ui-focus-ring':'color-mix(in srgb,var(--jf-ui-focus) 28%,transparent)','--jf-ui-surface':p.surface,'--jf-ui-surface-raised':p.surface,'--jf-ui-surface-soft':p.background,
+  '--jf-ui-accent':readableColor(p.secondary,[p.surface,p.background,blendColor(p.surface,p.secondary,.08)]),'--jf-ui-accent-soft':blendColor(p.surface,p.secondary,.08),
+  '--jf-ui-success':readableColor('#15946b',[p.surface,p.background,blendColor(p.surface,'#15946b',.08)]),'--jf-ui-success-soft':blendColor(p.surface,'#15946b',.08),
+  '--jf-ui-warning':readableColor('#a06408',[p.surface,p.background,blendColor(p.surface,'#a06408',.08)]),'--jf-ui-warning-soft':blendColor(p.surface,'#a06408',.08),
+  '--jf-ui-danger':readableColor('#b92d43',[p.surface,p.background,blendColor(p.surface,'#b92d43',.08)]),'--jf-ui-danger-soft':blendColor(p.surface,'#b92d43',.08),
+  '--jf-loader-primary':p.primary,'--jf-loader-secondary':p.secondary,'--jf-loader-surface':p.background,
+  '--jf-ui-text':p.text,'--jf-ui-text-muted':'color-mix(in srgb,var(--jf-ui-text) 72%,var(--jf-ui-surface))','--jf-ui-text-soft':'var(--jf-ui-text-muted)',
   '--jf-ui-border':'color-mix(in srgb,var(--jf-ui-text) 18%,var(--jf-ui-surface))','--jf-ui-border-strong':'color-mix(in srgb,var(--jf-ui-text) 35%,var(--jf-ui-surface))',
   '--jf-ui-font-heading':pair.heading,'--jf-ui-font-body':pair.body,'--company-line-height':value.typography.density==='Compacta'?'1.4':value.typography.density==='Ampla'?'1.8':'1.6','--company-sidebar':p.sidebar,'--company-button':p.button,'--company-button-hover':p.buttonHover,'--company-on-button':foreground(p.button),'--company-on-button-hover':foreground(p.buttonHover),
   '--company-panel-image':image?`linear-gradient(color-mix(in srgb,${value.backgrounds.overlay} ${value.backgrounds.opacity}%,transparent),color-mix(in srgb,${value.backgrounds.overlay} ${value.backgrounds.opacity}%,transparent)),url("${image}")`:'none','--company-panel-fit':value.backgrounds.fit,'--company-panel-position':value.backgrounds.position,
-  '--cp-header-bg':portalChrome(value)[theme].headerBackground,'--cp-header-text':portalChrome(value)[theme].headerText,'--cp-footer-bg':portalChrome(value)[theme].footerBackground,'--cp-footer-text':portalChrome(value)[theme].footerText,'--cp-primary':p.primary,'--cp-secondary':p.secondary,'--cp-accent':p.accent,'--cp-button':p.button,'--cp-button-hover':p.buttonHover,'--cp-sidebar':p.sidebar,'--cp-active':p.activeItem,'--cp-link':p.link,'--cp-bg':p.background,'--cp-surface':p.surface,'--cp-portal':p.portalBackground,'--cp-text':p.text,'--cp-overlay':String(value.backgrounds.opacity/100)} as CSSProperties;
+  '--cp-section-subtle':sections.subtle,'--cp-section-accent':sections.accent,'--cp-header-bg':portalChrome(value)[theme].headerBackground,'--cp-header-text':portalChrome(value)[theme].headerText,'--cp-footer-bg':portalChrome(value)[theme].footerBackground,'--cp-footer-text':portalChrome(value)[theme].footerText,'--cp-primary':p.primary,'--cp-secondary':p.secondary,'--cp-accent':p.accent,'--cp-button':p.button,'--cp-button-hover':p.buttonHover,'--cp-sidebar':p.sidebar,'--cp-active':p.activeItem,'--cp-link':p.link,'--cp-bg':p.background,'--cp-surface':p.surface,'--cp-portal':p.portalBackground,'--cp-text':p.text,'--cp-overlay':String(value.backgrounds.opacity/100)} as CSSProperties;
 }
 /** Reject unknown structure and CSS/URL values before sending data to the database. */
 export type BrandingIssue={path:string;message:string};
@@ -59,14 +75,15 @@ export function brandingIssue(content:unknown):BrandingIssue|null {
   if(richTextPlain(c.portal.headline).length>90)return issue('portal.headline','Use até 90 caracteres no título principal.');
   if(c.portal.content)for(const [key,value] of Object.entries(c.portal.content))if(!(key in careerCopy)||typeof value!=='string'||value.length>4000)return issue('portal.content.'+key,'Revise os textos das seções.');
   for(const key of ['socialLinkedin','socialInstagram'] as const)if(c.portal[key]&&!safeBrandingLink(c.portal[key]))return issue(`portal.${key}`,'Use um endereço HTTPS válido.');
-  for(let i=0;i<c.banners.length;i++)if(c.banners[i].link&&!validContentLink(c.banners[i].link))return issue(`banners.${i}.link`,'Use um endereço HTTPS ou um caminho interno.');
+  for(let i=0;i<c.banners.length;i++){const banner=c.banners[i];if(!richTextPlain(banner.title).trim()||richTextPlain(banner.title).length>100)return issue(`banners.${i}.title`,'Informe um nome interno com até 100 caracteres.');if(banner.link&&(!validContentLink(banner.link)||!isPublicDestination(banner.link)))return issue(`banners.${i}.link`,'Cole um endereço completo começando com https:// ou um caminho interno.');}
   if(c.portal.footer){const f=c.portal.footer;
    if(f.links.length>6)return issue('portal.footer.links.0.label','Use até seis links no rodapé.');
-   for(let i=0;i<f.links.length;i++){const link=f.links[i];if(typeof link.label!=='string'||!richTextPlain(link.label).trim()||richTextPlain(link.label).length>60)return issue(`portal.footer.links.${i}.label`,'Informe um nome de até 60 caracteres.');if(!validContentLink(link.href))return issue(`portal.footer.links.${i}.href`,'Use um endereço HTTPS ou um caminho interno.');}
-   if(!validContentLink(f.phoneUrl))return issue('portal.footer.phoneUrl','Revise o link de contato.');
+   for(let i=0;i<f.links.length;i++){const link=f.links[i];if(typeof link.label!=='string'||!richTextPlain(link.label).trim()||richTextPlain(link.label).length>60)return issue(`portal.footer.links.${i}.label`,'Informe um nome de até 60 caracteres.');if(!validContentLink(link.href)||!isPublicDestination(link.href))return issue(`portal.footer.links.${i}.href`,'Use um destino público HTTPS ou uma seção desta página.');}
+   if(!validContentLink(f.phoneUrl)||!isPublicDestination(f.phoneUrl))return issue('portal.footer.phoneUrl','Revise o link de contato.');
    if(f.email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email))return issue('portal.footer.email','Revise o e-mail de contato.');
   }
-  if(c.portal.navigation!==undefined){if(!Array.isArray(c.portal.navigation)||c.portal.navigation.length>5)return issue('portal.navigation.0.label','Use até cinco links no cabeçalho.');for(let i=0;i<c.portal.navigation.length;i++){const link=c.portal.navigation[i];if(typeof link.label!=='string'||!link.label.trim()||link.label.length>60)return issue(`portal.navigation.${i}.label`,'Informe um nome de até 60 caracteres.');if(typeof link.href!=='string'||link.href.length>2048||link.href!==''&&!validPortalMenuLink(link.href))return issue(`portal.navigation.${i}.href`,'Use HTTPS ou um caminho interno válido no cabeçalho.');}}
+  if(c.portal.headerPosition!==undefined&&c.portal.headerPosition!=='static'&&c.portal.headerPosition!=='floating')return issue('portal.headerPosition','Escolha um comportamento válido para o cabeçalho.');
+  if(c.portal.navigation!==undefined){if(!Array.isArray(c.portal.navigation)||c.portal.navigation.length>5)return issue('portal.navigation.0.label','Use até cinco links no cabeçalho.');for(let i=0;i<c.portal.navigation.length;i++){const link=c.portal.navigation[i];if(typeof link.label!=='string'||!link.label.trim()||link.label.length>60)return issue(`portal.navigation.${i}.label`,'Informe um nome de até 60 caracteres.');if(typeof link.href!=='string'||link.href.length>2048||link.href!==''&&(!validPortalMenuLink(link.href)||!isPublicDestination(link.href)))return issue(`portal.navigation.${i}.href`,'Use um destino público HTTPS ou uma seção desta página. Áreas de administração não podem ser abertas pelos candidatos.');}}
   if(c.portal.chrome!==undefined){const chrome=c.portal.chrome;if(Object.keys(chrome).sort().join(',')!=='dark,light')return issue('portal.chrome.light.headerBackground','Revise as cores do cabeçalho e rodapé.');for(const mode of ['light','dark'] as const){const row=chrome[mode];if(!row||Object.keys(row).sort().join(',')!=='footerBackground,footerText,headerBackground,headerText')return issue(`portal.chrome.${mode}.headerBackground`,'Revise as cores do cabeçalho e rodapé.');for(const [key,color] of Object.entries(row))if(typeof color!=='string'||!/^#[0-9a-f]{6}$/i.test(color))return issue(`portal.chrome.${mode}.${key}`,'Use cores no formato #RRGGBB.');if(contrast(row.headerBackground,row.headerText)<4.5)return issue(`portal.chrome.${mode}.headerText`,`O texto fica difícil de ler sobre esse fundo (contraste ${contrast(row.headerBackground,row.headerText).toFixed(1)}:1; mínimo 4,5:1). Mantenha a cor de fundo e use ${foreground(row.headerBackground)} no texto do menu superior.`);if(contrast(row.footerBackground,row.footerText)<4.5)return issue(`portal.chrome.${mode}.footerText`,`O texto fica difícil de ler sobre esse fundo (contraste ${contrast(row.footerBackground,row.footerText).toFixed(1)}:1; mínimo 4,5:1). Mantenha a cor de fundo e use ${foreground(row.footerBackground)} no texto do rodapé.`);}}
   if(c.portal.presentation!==undefined&&!validPortalPresentation(c.portal.presentation))return issue('portal.presentation.imageAlt','Revise a composição da página e a descrição da imagem.');
   if(c.portal.layout!==undefined&&!['classico','equipe','panorama','vagas','essencial'].includes(c.portal.layout))return issue('portal.layout','Escolha um template válido.');

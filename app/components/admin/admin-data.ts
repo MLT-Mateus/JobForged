@@ -1,7 +1,7 @@
 import type { HomePermission } from "@/app/home/types";
 
-export type AdminModuleId = "dashboards" | "vagas" | "candidaturas" | "agenda" | "personalizacao" | "administradores" | "financeiro" | "configuracoes" | "minha-conta";
-export type AdminPermission = HomePermission | "finance.view" | "admins.manage" | "organization.edit" | "candidates.manage";
+export type AdminModuleId = "filiais" | "dashboards" | "vagas" | "candidaturas" | "agenda" | "personalizacao" | "administradores" | "financeiro" | "configuracoes" | "minha-conta";
+export type AdminPermission = HomePermission | "vacancies.edit" | "vacancies.delete" | "finance.view" | "admins.manage" | "organization.edit" | "candidates.manage";
 
 export const activeOrganization = { id: "org_jobforged_demo", name: "Inside Forge Tecnologia", shortName: "Inside Forge", logo: "/brand/jobforged-symbol.svg" };
 export const currentAdmin = { id: "usr_mateus", name: "Mateus", fullName: "Mateus Batista", email: "mateus@insideforge.com.br", phone: "+55 61 99163-0130", role: "Titular da conta", initials: "MB", permissions: ["home.metrics.view","home.activities.view","home.onboarding.view","home.onboarding.continue","vacancies.create","finance.view","admins.manage","organization.edit","candidates.manage"] as AdminPermission[] };
@@ -35,8 +35,9 @@ export const invoices = [
 ];
 
 export const moduleCopy: Record<AdminModuleId,{title:string;description:string}> = {
+  filiais:{title:'Filiais',description:'Gerencie as unidades e os espaços de trabalho da empresa.'},
   dashboards:{title:"Dashboards",description:"Indicadores que ajudam sua equipe a entender desempenho, conversão e ritmo de contratação."},
-  vagas:{title:"Vagas",description:"Crie, publique e acompanhe todas as oportunidades da organização."},
+  vagas:{title:"Vagas",description:"Organize as vagas e prepare as próximas oportunidades da empresa."},
   candidaturas:{title:"Candidaturas",description:"Centralize candidatos, avaliações e movimentações do processo seletivo."},
   agenda:{title:"Agenda",description:"Organize entrevistas, testes e compromissos do time de recrutamento."},
   personalizacao:{title:"Personalização",description:"Aplique a identidade da sua organização em toda a experiência de recrutamento."},

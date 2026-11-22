@@ -114,7 +114,7 @@ def main():
             'GOTRUE_DB_DATABASE_URL':'postgres://supabase_auth_admin:'+auth_password+'@security-db:5432/postgres',
             'GOTRUE_JWT_SECRET':signing,'GOTRUE_JWT_EXP':'900','GOTRUE_JWT_AUD':'authenticated',
             'GOTRUE_JWT_DEFAULT_GROUP_NAME':'authenticated','GOTRUE_JWT_ADMIN_ROLES':'service_role',
-            'GOTRUE_EXTERNAL_EMAIL_ENABLED':'true','GOTRUE_MAILER_AUTOCONFIRM':'false',
+            'GOTRUE_EXTERNAL_EMAIL_ENABLED':'true','GOTRUE_MAILER_AUTOCONFIRM':'true',
             'GOTRUE_SMTP_HOST':'example.invalid','GOTRUE_SMTP_PORT':'25','GOTRUE_SMTP_ADMIN_EMAIL':'no-reply@example.invalid',
             'GOTRUE_PASSWORD_MIN_LENGTH':'8','GOTRUE_PASSWORD_REQUIRED_CHARACTERS':characters,
             'GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED':'true','GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL':'10',
@@ -155,7 +155,45 @@ def main():
             if status not in (200,201):raise AssertionError('Native fixture creation failed')
             return user['id']
         suffix=stamp+'@example.invalid';email='security-a-'+suffix;other='security-b-'+suffix
+        # Test policy: public signup returns a real session without SMTP. The
+        # provider network is internal and the SMTP hostname cannot deliver mail.
+        signup_email='signup-'+suffix
+        status,requirements=request(rest,'/rpc/registration_requirements',{},jwt(signing,'anon'));assert status==200
+        status,nonce=request(rest,'/rpc/create_company_signup_intent',{'email':signup_email,'company_name':'Immediate signup fixture','responsible_name':'Signup fixture','cnpj':'11222333000181','phone':'11999999999','accepted_terms':True,'terms_revision':requirements['termsRevision']},jwt(signing,'anon'));assert status==200
+        signup_body={'email':signup_email,'password':password,'data':{'account_type':'company_admin','company_signup_nonce':nonce}}
+        status,immediate=request(auth,'/signup',signup_body)
+        assert status==200 and immediate.get('access_token') and immediate.get('refresh_token'),'Public signup did not authenticate immediately'
+        assert immediate['user']['email_confirmed_at'],'Test auto-confirm state missing'
+        assert request(rest,'/rpc/session_context_v1',{},immediate['access_token'])[1]['company_id'],'Signup session cannot open company context'
+        assert request(auth,'/signup',signup_body)[0] in (400,422),'Duplicate signup unexpectedly succeeded'
+        assert request(auth,'/token?grant_type=password',{'email':signup_email,'password':password})[0]==200,'Subsequent login failed'
+        assert request(auth,'/token?grant_type=password',{'email':signup_email,'password':'Incorrect9!'})[0] in (400,422),'Incorrect password accepted'
         first=create(email,'Native fixture A');create(other,'Native fixture B')
+        # Direct login email change: no SMTP call, same account/password,
+        # immediate member projection, and all old sessions revoked.
+        old_address='email-before-'+suffix;new_address='email-after-'+suffix
+        changed_user=create(old_address,'Email change fixture')
+        status,change_session=request(auth,'/token?grant_type=password',{'email':old_address,'password':password})
+        assert status==200
+        change_token=change_session['access_token']
+        change_body={'new_email':new_address,'current_password':password}
+        assert request(rest,'/rpc/change_my_login_email',change_body,jwt(signing,'anon'))[0] in (401,403),'Anonymous email change allowed'
+        rejected_status,rejected=request(rest,'/rpc/change_my_login_email',{**change_body,'current_password':'Wrong9!'},change_token)
+        denial=rejected.get('message','') if isinstance(rejected,dict) and rejected.get('code')=='42501' else ''
+        assert rejected_status==401,'Incorrect-password response HTTP '+str(rejected_status)+' code '+str(rejected.get('code') if isinstance(rejected,dict) else None)+' denial '+denial
+        assert request(rest,'/rpc/change_my_login_email',{**change_body,'new_email':other},change_token)[0]==409,'Duplicate login email allowed'
+        assert request(rest,'/rpc/change_my_login_email',{**change_body,'new_email':'invalid'},change_token)[0]==400,'Invalid email allowed'
+        assert sql("select email from auth.users where id='"+changed_user+"';")==old_address,'Rejected email change mutated identity'
+        status,changed=request(rest,'/rpc/change_my_login_email',change_body,change_token)
+        denial=changed.get('message','') if isinstance(changed,dict) and changed.get('code')=='42501' else ''
+        assert status==200 and changed.get('email')==new_address,'Direct email change HTTP '+str(status)+' code '+str(changed.get('code') if isinstance(changed,dict) else None)+' denial '+denial
+        assert request(auth,'/token?grant_type=password',{'email':old_address,'password':password})[0] in (400,422),'Old email still authorizes login'
+        status,new_session=request(auth,'/token?grant_type=password',{'email':new_address,'password':password})
+        assert status==200 and new_session['user']['id']==changed_user,'New email did not retain login and account'
+        assert request(rest,'/rpc/session_context_v1',{},change_token)[1] is None,'Old session retained company access'
+        assert request(auth,'/token?grant_type=refresh_token',{'refresh_token':change_session['refresh_token']})[0] in (400,401),'Old session can refresh'
+        assert sql("select email from public.company_members where user_id='"+changed_user+"';")==new_address,'Member email was not synchronized'
+        assert sql("select email from auth.identities where user_id='"+changed_user+"' and provider='email';")==new_address,'Provider identity email was not synchronized'
         status,session=request(auth,'/token?grant_type=password',{'email':email,'password':password})
         assert status==200,'Native password sign-in failed'
         token=session['access_token'];status,context=request(rest,'/rpc/session_context_v1',{},token)
@@ -208,6 +246,15 @@ def main():
         sql("update public.candidate_accounts set status='active' where user_id='"+candidate_id+"';")
         assert request(auth,'/logout?scope=global',{},candidate_token)[0] in (200,204),'Candidate logout failed'
         assert request(rest,'/rpc/candidate_context',{},candidate_token)[0]==403,'Revoked candidate JWT accepted'
+        # Candidate parity: isolated provider proves immediate login change, not merely UI copy.
+        status,candidate_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200
+        before_candidate_email=candidate_email;candidate_email='candidate-updated-'+suffix
+        candidate_token=candidate_session['access_token']
+        assert request(rest,'/rpc/change_my_login_email',{'new_email':candidate_email,'current_password':'Wrong9!'},candidate_token)[0]==401,'Candidate wrong password accepted'
+        assert request(rest,'/rpc/change_my_login_email',{'new_email':candidate_email,'current_password':password},candidate_token)[0]==200,'Candidate email not changed'
+        assert request(auth,'/token?grant_type=password',{'email':before_candidate_email,'password':password})[0] in (400,422),'Old candidate email accepted'
+        status,candidate_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200 and candidate_session['user']['id']==candidate_id
+        assert request(rest,'/rpc/my_notifications_v2',{},candidate_session['access_token'])[1]['hasNext'] is False,'Candidate inbox has phantom continuation'
         assert request(auth,'/signup',{'email':'weak-'+suffix,'password':'abc'})[0] in (400,422),'Weak password not rejected by Auth'
         for index,symbol in enumerate(policy['symbols']):
             assert request(auth,'/admin/users',{'email':'symbol-'+str(index)+'-'+suffix,'password':'Abcdef9'+symbol,'email_confirm':True},admin)[0] in (200,201),'Approved password symbol rejected by Auth'
@@ -287,6 +334,14 @@ def main():
         status,other_session=request(auth,'/token?grant_type=password',{'email':other,'password':password});assert status==200
         asset=str(uuid.uuid4());path='/object/company-branding/'+own_context['company_id']+'/'+asset+'.png'
         assert request(rest,'/rpc/reserve_company_image',{'asset_id':asset},own_token)[0]==200,'Native upload reservation failed'
+        abandoned=str(uuid.uuid4())
+        assert request(rest,'/rpc/reserve_company_image',{'asset_id':abandoned},own_token)[0]==200
+        assert request(rest,'/rpc/release_company_image',{'asset_id':abandoned},other_session['access_token'])[0] in (200,204)
+        # A foreign company cannot release the owner's reservation.
+        assert sql("select (expires_at>now())::text from app_private.company_upload_reservations where asset_id='"+abandoned+"';").strip()=='true'
+        assert request(rest,'/rpc/release_company_image',{'asset_id':abandoned},own_token)[0] in (200,204)
+        assert sql("select (expires_at<=now())::text from app_private.company_upload_reservations where asset_id='"+abandoned+"';").strip()=='true'
+        assert sql("select count(*) from app_private.company_upload_reservations where asset_id='"+abandoned+"';").strip()=='1','Release deleted the rate-limit receipt'
         def chunk(kind,data):return struct.pack('>I',len(data))+kind+data+struct.pack('>I',zlib.crc32(kind+data))
         png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',1,1,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(b'\0\0\x80\x80\xff'))+chunk(b'IEND',b'')
         assert binary_request(storage,path,png,own_token)[0]==200,'Native reserved upload failed'
@@ -361,8 +416,8 @@ def main():
         result=json.loads(run([sys.executable,str(Path(__file__).with_name('quarantine-test-orphans.py')),'--isolated-database',args.restore,'--isolated-storage',storage_name]))
         assert result['quarantined']==1 and result['purged_after_offsite_receipt']==0,'Real orphan worker failed or purged without receipt'
         for number in range(10):
-            assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-'+str(number)+'-'+suffix,'invite_role':'member'},other_session['access_token'])[0]==200,'Invitation budget rejected valid fixture'
-        assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-over-'+suffix,'invite_role':'member'},other_session['access_token'])[0]==429,'Direct invitation RPC bypassed company budget'
+            assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-'+str(number)+'-'+suffix,'invite_role':'admin'},other_session['access_token'])[0]==200,'Invitation budget rejected valid fixture'
+        assert request(rest,'/rpc/create_company_invitation',{'target_company_id':other_context['company_id'],'invite_email':'budget-over-'+suffix,'invite_role':'admin'},other_session['access_token'])[0]==429,'Direct invitation RPC bypassed company budget'
         second_owner_email='security-second-owner-'+suffix;second_owner=create(second_owner_email)
         sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+own_context['company_id']+"','"+second_owner+"','"+second_owner_email+"','Isolated second owner','owner','active');")
         sql("update public.company_members set status='inactive' where user_id='"+first+"';")
@@ -522,6 +577,44 @@ def main():
         status,bootstrap_verified=request(gateways[0][1],'/auth/v1/factors/'+bootstrap_factor['id']+'/verify',{'challenge_id':bootstrap_challenge['id'],'code':totp_code(bootstrap_factor['totp']['secret'])},bootstrap_session['access_token']);assert status==200,'Bootstrap MFA verification failed'
         assert request(gateways[0][1],'/rest/v1/rpc/platform_read',{'section':'overview'},bootstrap_verified['access_token'])[0]==200,'Bootstrap administrator denied after fresh MFA'
         assert sql("select count(*) from public.platform_audit_events where actor_user_id='"+bootstrap_id+"' and action='platform.security.bootstrap';")=='1','Bootstrap ownership grant was not audited'
+        # Explicit deletion lifecycle uses actual private Storage files and native
+        # Auth identities. No production names, backups, ports or recipients.
+        delete_email='delete-'+suffix;delete_user=create(delete_email,'Deletion fixture')
+        status,delete_session=request(auth,'/token?grant_type=password',{'email':delete_email,'password':password});assert status==200
+        delete_token=delete_session['access_token'];delete_context=request(rest,'/rpc/session_context_v1',{},delete_token)[1];delete_cid=delete_context['company_id']
+        delete_asset=str(uuid.uuid4());delete_path='/object/company-branding/'+delete_cid+'/'+delete_asset+'.png'
+        assert request(rest,'/rpc/reserve_company_image',{'asset_id':delete_asset},delete_token)[0]==200
+        assert binary_request(storage,delete_path,png,delete_token)[0]==200
+        assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},delete_token)[0]==403,'Company owner accessed destructive admin RPC'
+        status,low_admin=request(auth,'/token?grant_type=password',{'email':bootstrap_email,'password':password});assert status==200
+        assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},low_admin['access_token'])[0]==403,'Password-only admin accessed deletion'
+        assert request(rest,'/rpc/revoke_current_session',{},low_admin['access_token'])[0] in (200,204),'Logout incorrectly required MFA'
+        assert request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[0] in (401,403) or request(rest,'/rpc/session_context_v1',{},low_admin['access_token'])[1] is None,'Pre-MFA logout did not revoke session'
+        elevated=bootstrap_verified['access_token']
+        assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'wrong','change_reason':'Isolated acceptance','remove_accounts':True},elevated)[0]==400,'Wrong company confirmation accepted'
+        assert request(rest,'/rpc/company_deletion',{'operation':'preview','target_company':delete_cid},anonymous)[0] in (401,403),'Anonymous accessed deletion'
+        # A genuine shared member must survive deletion of this one company.
+        try:
+            sql("insert into public.company_members(company_id,user_id,email,full_name,role,status) values('"+delete_cid+"','"+first+"','"+email+"','Shared fixture','member','inactive');")
+        except subprocess.CalledProcessError as error:raise AssertionError("Shared fixture setup: "+(error.stderr or "").splitlines()[0]) from None
+        status,job=request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Isolated acceptance','remove_accounts':True},elevated);assert status==200,'Deletion request failed'
+        assert request(rest,'/rpc/company_deletion',{'operation':'request','target_company':delete_cid,'confirmation':'Deletion fixture','change_reason':'Idempotent retry','remove_accounts':True},elevated)[1]['id']==job['id'],'Deletion retry created another job'
+        assert request(rest,'/rpc/platform_manage',{'operation':'company.status','target_company':delete_cid,'target_record':None,'values_json':{'status':'active'},'change_reason':'Attempted reactivation'},elevated)[0]==403,'Queued deletion could be reactivated'
+        assert request(rest,'/rpc/session_context_v1',{},delete_token)[1] is None,'Queued company retained access'
+        assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name like '"+delete_cid+"/%';")=='1','Request deleted files before verified backup'
+        # Scoped worker capability cannot be forged by ordinary signed sessions.
+        assert request(storage,'/object/company-branding',{'prefixes':[delete_path.removeprefix('/object/company-branding/')]},delete_token,method='DELETE')[0] in (200,400,403)
+        assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name like '"+delete_cid+"/%';")=='1','Tenant bypassed deletion worker policy'
+        command=[sys.executable,str(Path(__file__).with_name('process-test-company-deletions.py')),'--isolated-database',args.restore,'--isolated-storage',storage_name,'--isolated-auth',auth_name]
+        deleted=json.loads(run(command));assert deleted['processed']==1,'Deletion worker did not finish'
+        assert json.loads(run(command))['processed']==0,'Deletion worker repeated completed work'
+        assert sql("select exists(select 1 from public.companies where id='"+delete_cid+"');")=='f','Company row survived deletion'
+        assert sql("select count(*) from storage.objects where bucket_id='company-branding' and name like '"+delete_cid+"/%';")=='0','Company files survived deletion'
+        assert sql("select exists(select 1 from auth.users where id='"+delete_user+"');")=='f','Exclusive account survived requested deletion'
+        assert sql("select exists(select 1 from auth.users where id='"+first+"');")=='t','Shared identity was deleted'
+        assert sql("select exists(select 1 from public.companies where id='"+own_context['company_id']+"');")=='t','Another company was deleted'
+        assert sql("select state from app_private.company_deletion_jobs where id='"+job['id']+"';")=='completed'
+        assert sql("select count(*) from public.platform_audit_events where action='platform.company.deletion.completed' and target_id='"+delete_cid+"';")=='1','Minimal deletion audit missing'
         print(json.dumps({'native_candidate_identity_and_isolation':True,'native_candidate_profile_and_alerts':True,'native_candidate_revocation':True,'native_password_login':True,'signed_jwt_rpc':True,'direct_select_denied':True,
             'native_password_policy':True,'recovery_link_single_use':True,'recovery_session_binding':True,'recovery_nonce_single_use':True,'revoked_jwt_denied':True,
             'refresh_cannot_bypass_revocation':True,'native_mfa_enrollment':True,'native_mfa_freshness':True,

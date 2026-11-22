@@ -84,3 +84,53 @@ test("Test and Live Auth point recovery emails to the approved Design System tem
   assert.match(liveComposeOverride, /GOTRUE_MAILER_TEMPLATES_RECOVERY:\s*https:\/\/jobforged\.com\/api\/auth\/email-templates\/password-recovery/);
   assert.match(liveComposeOverride, /GOTRUE_MAILER_SUBJECTS_RECOVERY:\s*Redefina sua senha na JobForged/);
 });
+
+
+test("all shared email footers identify Test without labeling Live", () => {
+  const previous=process.env.APP_ENV;
+  try {
+    for (const environment of ["test","live"]) {
+      process.env.APP_ENV=environment;
+      for (const template of emailTemplates) {
+        const html=renderEmailHtml(template.id,"light");
+        assert.match(html,/Enviado por/);
+        assert.equal(html.includes("[TESTE]"),environment==="test");
+      }
+    }
+  } finally { if(previous===undefined) delete process.env.APP_ENV; else process.env.APP_ENV=previous; }
+});
+
+test("all email categories share the signup layout and test footer in both themes", () => {
+  const previous=process.env.APP_ENV;
+  try {
+    process.env.APP_ENV="test";
+    for(const template of emailTemplates) for(const theme of ["light","dark"]) {
+      const html=renderEmailHtml(template.id,theme);
+      assert.match(html,/jobforged-logo\.png/);
+      assert.match(html,/max-width:600px/);
+      assert.match(html,/\[TESTE\]/);
+      assert.match(html,/Esta é uma mensagem transacional da JobForged/);
+    }
+    const html=renderEmailHtml("email-change","light");
+    assert.match(html,/type=email_change/);
+    assert.match(html,/\{\{ \.TokenHash \}\}/);
+  } finally {if(previous===undefined)delete process.env.APP_ENV;else process.env.APP_ENV=previous;}
+});
+
+test("administrator invitation keeps the exact intended recipient and uses approved layout", async () => {
+  const {sendCompanyInvitationEmail}=await import('../app/lib/brevo-email.ts');
+  const original=globalThis.fetch,previous=process.env.APP_ENV,key=process.env.BREVO_API_KEY;
+  try {
+    process.env.APP_ENV='test';process.env.BREVO_API_KEY='fixture-not-a-secret';
+    let payload;
+    globalThis.fetch=async(_url,init)=>{payload=JSON.parse(init.body);return Response.json({messageId:'fixture'});};
+    assert.equal(await sendCompanyInvitationEmail('invited@example.invalid','A & B <RH>','fixture-token'),'sent');
+    assert.deepEqual(payload.to,[{email:'invited@example.invalid'}]);
+    assert.equal(payload.cc,undefined);assert.equal(payload.bcc,undefined);
+    assert.equal(payload.sender.email,'suporte@jobforged.com');
+    assert.match(payload.htmlContent,/A &amp; B &lt;RH&gt;/);
+    assert.match(payload.htmlContent,/max-width:600px/);
+    assert.match(payload.htmlContent,/\[TESTE\]/);
+    assert.match(payload.htmlContent,/convite\?token=fixture-token/);
+  } finally {globalThis.fetch=original;if(previous===undefined)delete process.env.APP_ENV;else process.env.APP_ENV=previous;if(key===undefined)delete process.env.BREVO_API_KEY;else process.env.BREVO_API_KEY=key;}
+});

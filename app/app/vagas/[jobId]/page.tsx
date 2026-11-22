@@ -1,2 +1,3 @@
-export const metadata = { title: "JobForged | Detalhes da vaga" };
-import JobDetailClient from "@/app/components/jobs/JobDetailClient"; import { activeOrganization,getAdminContext } from "@/app/components/admin/admin-data"; export default async function Page({params}:{params:Promise<{jobId:string}>}){const [{jobId},context]=await Promise.all([params,getAdminContext(activeOrganization.id)]);return context?<JobDetailClient context={context} jobId={jobId}/>:null}
+import JobsWorkspace from '@/app/components/jobs/JobsWorkspace';
+export const metadata={title:'JobForged | Vaga'};
+export default async function Page({params}:{params:Promise<{jobId:string}>}){const {jobId}=await params;return <JobsWorkspace view="detail" jobId={jobId}/>}

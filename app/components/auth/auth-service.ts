@@ -1,4 +1,5 @@
 "use client";
+import {publicError} from '@/app/lib/api-response';
 
 import { useEffect, useState } from "react";
 import type { LoginValues, SignupValues } from "./auth-validation";
@@ -24,7 +25,7 @@ async function postAuth(path: string, body?: unknown): Promise<AuthResult> {
       body: JSON.stringify(body ?? {}),
     });
     const payload = (await response.json().catch(() => ({}))) as { message?: string; requiresConfirmation?: boolean };
-    if (!response.ok) return { ok: false, message: payload.message || "Não foi possível concluir a solicitação.", status: response.status };
+    if (!response.ok) return { ok: false, message: publicError(payload.message,"Não foi possível concluir a solicitação. Confira os dados e tente novamente."), status: response.status };
     return { ok: true, requiresConfirmation: payload.requiresConfirmation, message: payload.message, status: response.status };
   } catch {
     return { ok: false, message: "Serviço de autenticação indisponível. Tente novamente em instantes." };
@@ -94,7 +95,8 @@ export function useCompanyAuthSession(): AuthSessionState {
     void refresh();
     window.addEventListener('focus',refresh);
     window.addEventListener('pageshow',refresh);
-    return () => { active = false; window.removeEventListener('focus',refresh); window.removeEventListener('pageshow',refresh); };
+    window.addEventListener('jobforged-profile-updated',refresh);
+    return () => { active = false; window.removeEventListener('focus',refresh); window.removeEventListener('pageshow',refresh); window.removeEventListener('jobforged-profile-updated',refresh); };
   }, []);
 
   return state;

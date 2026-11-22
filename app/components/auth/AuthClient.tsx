@@ -1,57 +1,25 @@
 "use client";
+import {AuthShell} from './AuthShell';
 
 import Link from "next/link";
 import { safeReturnPath } from "@/app/components/system/safe-return";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent, type ReactNode } from "react";
-import { ArrowLeft, Building2, Check, LockKeyhole, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
-import { BrandAsset } from "@/app/components/BrandAsset";
-import { ActionButton, AppToast, CheckboxField, TextField, ThemeSelector, createToastNotice, useThemePreference, type ToastNotice } from "@/app/components/ui";
+import { useState, type FormEvent } from "react";
+import { ArrowLeft, Building2, Check, LockKeyhole, Mail, Phone, UserRound } from "lucide-react";
+import { ActionButton, AppToast, CheckboxField, TextField, createToastNotice, showAppToast, type ToastNotice } from "@/app/components/ui";
 import { maskCnpj, maskPhone, normalizeText, passwordRules, validateLogin, validateSignup, type LoginValues, type SignupValues } from "./auth-validation";
 import { requestPasswordRecovery, signInCompany, signUpCompany, updateRecoveredPassword, verifyPasswordRecovery } from "./auth-service";
 import { focusFirstInvalid } from "./focus-first-invalid";
-import { playStatusSound } from "@/app/components/ui/status-sound";
 import "./auth.css";
 
 type FieldErrors<T> = Partial<Record<keyof T, string>>;
 
-function AuthShell({ children, compact = false }: { children: ReactNode; compact?: boolean }) {
-  const { theme, changeTheme } = useThemePreference();
-
-  return (
-    <main className={`auth-page ${compact ? "auth-page--compact" : ""}`}>
-      <div className="auth-grid" aria-hidden="true" />
-      <header className="site-header auth-official-header">
-        <div className="container nav-wrap">
-          <Link href="/" className="brand" aria-label="JobForged — página inicial">
-            <BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} />
-          </Link>
-          <ThemeSelector theme={theme} onChange={changeTheme} />
-        </div>
-      </header>
-      <div className="auth-layout">
-        <aside className="auth-context">
-          <span className="auth-context__icon"><Building2 /></span>
-          <p className="auth-eyebrow">Conta empresarial JobForged</p>
-          <h2>Recrutamento estruturado desde o primeiro acesso.</h2>
-          <p>Ambiente exclusivo para empresas e administradores responsáveis.</p>
-          <ul>
-            <li><ShieldCheck />Plano Freemium sem cobrança</li>
-            <li><UserRound />Conta vinculada à organização</li>
-            <li><LockKeyhole />Autenticação segura pelo Supabase</li>
-          </ul>
-        </aside>
-        <section className="auth-card">{children}</section>
-      </div>
-    </main>
-  );
-}
 
 function LoadingLabel({ loading, idle }: { loading: boolean; idle: string }) {
   return loading ? <><span className="auth-spinner" />Processando...</> : idle;
 }
 
-export function LoginClient() {
+export function LoginClient({emailChanged=false}:{emailChanged?:boolean}={}) {
   const router = useRouter();
   const [values, setValues] = useState<LoginValues>({ identifier: "", password: "" });
   const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
@@ -60,6 +28,7 @@ export function LoginClient() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     const next = validateLogin(values);
     setErrors(next);
     if (Object.keys(next).length) {
@@ -77,7 +46,7 @@ export function LoginClient() {
       }
       setValues(current => ({ ...current, password: "" }));
       const session = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).catch(() => null) as { platformAdmin?: boolean;role?:string;originSlug?:string } | null;
-      playStatusSound("success");
+      showAppToast({kind:"success",title:"Acesso confirmado",text:"Você entrou na sua conta com segurança."});
       router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")) ?? (session?.platformAdmin ? "/backoffice" : session?.role==="candidate"?"/"+session.originSlug:"/app/home"));
     } finally {
       setLoading(false);
@@ -89,7 +58,7 @@ export function LoginClient() {
       <div className="auth-heading">
         <p className="auth-eyebrow">Bem-vindo de volta</p>
         <h1>Acesse sua conta</h1>
-        <p>Entre com o e-mail e a senha da sua conta empresarial.</p>
+        <p>{emailChanged?'E-mail de acesso alterado. Entre com o novo endereço e sua senha atual.':'Entre com o e-mail e a senha da sua conta empresarial.'}</p>
       </div>
       <form className="auth-form" noValidate onSubmit={submit}>
         <TextField
@@ -114,7 +83,6 @@ export function LoginClient() {
           icon={LockKeyhole}
           type="password"
           value={values.password}
-          maxLength={72}
           autoComplete="current-password"
           onChange={event => {
             setValues(current => ({ ...current, password: event.target.value }));
@@ -165,6 +133,7 @@ export function SignupClient() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     const next = validateSignup(values);
     setErrors(next);
     if (Object.keys(next).length || !acceptedTerms) {
@@ -189,7 +158,7 @@ export function SignupClient() {
       }
       setRequiresConfirmation(Boolean(result.requiresConfirmation));
       setCreated(true);
-      playStatusSound(result.requiresConfirmation ? "info" : "success");
+      if(!result.requiresConfirmation)showAppToast({kind:result.requiresConfirmation?"info":"success",title:result.requiresConfirmation?"Cadastro recebido":"Conta criada",text:result.requiresConfirmation?"Se o cadastro puder ser concluído, você receberá as instruções para confirmar seu e-mail.":"Seu acesso está ativo. Abrindo o painel da empresa."});
       if (!result.requiresConfirmation) router.replace("/app/home");
     } finally {
       setLoading(false);
@@ -198,14 +167,14 @@ export function SignupClient() {
 
   if (created) {
     return (
-      <AuthShell>
+      <AuthShell centered>
         <div className="auth-confirmation">
           <span><Check /></span>
           <p className="auth-eyebrow">Conta empresarial</p>
           <h1>{requiresConfirmation ? "Confirme seu e-mail" : "Conta Freemium criada"}</h1>
           <p>
             {requiresConfirmation
-              ? `Enviamos as instruções para ${values.email}. Depois de confirmar, entre com seu e-mail e senha.`
+              ? `Se o cadastro puder ser concluído, você receberá as instruções em ${values.email}. Depois de confirmar, entre com seu e-mail e senha.`
               : "Seu acesso inicial está ativo. Você será direcionado ao painel empresarial."}
           </p>
           <div className="auth-selected-plan">
@@ -220,7 +189,7 @@ export function SignupClient() {
   }
 
   return (
-    <AuthShell>
+    <AuthShell centered>
       <div className="auth-stepper" aria-label="Progresso do cadastro">
         <div className="is-active"><i>1</i><span>Dados cadastrais</span></div>
         <b />
@@ -231,7 +200,7 @@ export function SignupClient() {
         <h1>Cadastre sua empresa</h1>
         <p>Crie o acesso do responsável e comece sem cobrança ou dados de pagamento.</p>
       </div>
-      <form className="auth-form auth-form--signup" noValidate onSubmit={submit}>
+      <form className="auth-form auth-form--signup" noValidate onSubmit={submit}><fieldset className="auth-form-group"><legend>Empresa e responsável</legend>
         <TextField
           name="responsible"
           label="Nome do responsável"
@@ -279,6 +248,7 @@ export function SignupClient() {
             error={errors.phone}
           />
         </div>
+</fieldset><fieldset className="auth-form-group"><legend>Acesso</legend>
         <TextField
           name="email"
           type="email"
@@ -298,7 +268,6 @@ export function SignupClient() {
           icon={LockKeyhole}
           type="password"
           autoComplete="new-password"
-          maxLength={72}
           value={values.password}
           onChange={event => update("password", event.target.value)}
           error={errors.password}
@@ -309,7 +278,6 @@ export function SignupClient() {
             [rules.upper && rules.lower, "Maiúscula e minúscula"],
             [rules.number, "Um número"],
             [rules.special, "Um símbolo (!@#...)"],
-            [rules.maxBytes, "Até 72 bytes UTF-8"],
           ].map(([valid, label]) => (
             <li className={valid ? "is-valid" : ""} key={String(label)}>
               <Check aria-hidden="true" />{label}
@@ -323,12 +291,11 @@ export function SignupClient() {
           icon={LockKeyhole}
           type="password"
           autoComplete="new-password"
-          maxLength={72}
           value={values.confirmPassword}
           onChange={event => update("confirmPassword", event.target.value)}
           error={errors.confirmPassword}
         />
-        <div className="auth-selected-plan">
+        </fieldset><fieldset className="auth-form-group"><legend>Confirmação</legend><div className="auth-selected-plan">
           <span><b>Plano Freemium</b><small>Acesso inicial · sem cobrança</small></span>
           <strong>R$ 0<small>/mês</small></strong>
         </div>
@@ -340,7 +307,7 @@ export function SignupClient() {
             onChange={event => setAcceptedTerms(event.target.checked)}
           />
         </div>
-        <ActionButton type="submit" disabled={loading} className="auth-submit">
+        </fieldset><ActionButton type="submit" disabled={loading} className="auth-submit">
           <LoadingLabel loading={loading} idle="Criar conta grátis" />
         </ActionButton>
       </form>
@@ -368,6 +335,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
 
   async function sendRecovery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       focusFirstInvalid(event.currentTarget, ["email"]);
       setNotice(createToastNotice({ kind: "danger", title: "Confira o e-mail", text: "Informe um endereço de e-mail válido." }));
@@ -381,13 +349,14 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
         return;
       }
       setRequestSent(true);
-      playStatusSound("info");
+
     } finally {
       setLoading(false);
     }
   }
 
   async function verifyRecoveryLink() {
+    setNotice(null);
     setLoading(true);
     try {
       const result = await verifyPasswordRecovery(tokenHash, recoveryType === "invite" ? "invite" : "recovery");
@@ -395,6 +364,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
         window.history.replaceState(null, "", "/redefinir-senha");
         setTokenHash("");
         setRecoveryStatus("ready");
+        setNotice(createToastNotice({kind:"success",title:"Link validado",text:"Agora você pode criar sua nova senha."}));
       } else {
         if ((result.status ?? 500) < 500) {
           window.history.replaceState(null, "", "/redefinir-senha");
@@ -410,15 +380,18 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
 
   async function saveNewPassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setNotice(null);
     if (Object.values(rules).some((valid) => !valid)) {
-      setPasswordError("Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
+      setPasswordError(!rules.maxBytes?"Esta senha é longa demais para o serviço de acesso. Tente uma frase mais curta.":"Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo.");
       setConfirmPasswordError("");
+      setNotice(createToastNotice({kind:"danger",title:"Revise a nova senha",text:!rules.maxBytes?"Esta senha é longa demais para o serviço de acesso. Tente uma frase mais curta.":"Use ao menos 8 caracteres, com maiúscula, minúscula, número e símbolo."}));
       focusFirstInvalid(event.currentTarget, ["new-password"]);
       return;
     }
     if (password !== confirmPassword) {
       setPasswordError("");
       setConfirmPasswordError("As senhas não coincidem.");
+      setNotice(createToastNotice({kind:"danger",title:"Confira a confirmação",text:"As senhas não coincidem. Digite a mesma senha nos dois campos."}));
       focusFirstInvalid(event.currentTarget, ["confirm-password"]);
       return;
     }
@@ -435,7 +408,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
       setPassword("");
       setConfirmPassword("");
       setRecoveryStatus("done");
-      playStatusSound("success");
+
     } finally {
       setLoading(false);
     }
@@ -487,7 +460,6 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
           placeholder="Crie uma senha segura"
           icon={LockKeyhole}
           autoComplete="new-password"
-          maxLength={72}
           value={password}
           onChange={event => { setPassword(event.target.value); setPasswordError(""); }}
           error={passwordError}
@@ -498,7 +470,6 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
             [rules.upper && rules.lower, "Maiúscula e minúscula"],
             [rules.number, "Um número"],
             [rules.special, "Um símbolo (!@#...)"],
-            [rules.maxBytes, "Até 72 bytes UTF-8"],
           ].map(([valid, label]) => <li className={valid ? "is-valid" : ""} key={String(label)}><Check aria-hidden="true" />{label}</li>)}
         </ul>
         <TextField
@@ -508,7 +479,6 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
           placeholder="Digite a senha novamente"
           icon={LockKeyhole}
           autoComplete="new-password"
-          maxLength={72}
           value={confirmPassword}
           onChange={event => { setConfirmPassword(event.target.value); setConfirmPasswordError(""); }}
           error={confirmPasswordError}

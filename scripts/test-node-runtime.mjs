@@ -90,10 +90,21 @@ try {
       const denied=await fetch(`${base}${path}`,{method:'POST',headers:{Origin:base},signal:AbortSignal.timeout(15000)});
       assert.equal(denied.status,403,`${environment}${path} must reject a visitor`);
     }
+    // Public Origin differs from the upstream Host behind the security gateway.
+    // Binary uploads must reach API authorization instead of multipart Server Action CSRF.
+    for(const path of ['/api/company/branding/assets','/api/backoffice/communications/assets']){
+      const host=environment==='live'?'jobforged.com':'test.jobforged.com';
+      for(const origin of [`https://${host}`,'https://foreign.example']){
+        const denied=await fetch(`${base}${path}`,{method:'POST',headers:{Origin:origin,'X-Forwarded-Host':host,'X-Forwarded-Proto':'https','Content-Type':'image/png','X-Upload-Name':'probe.png'},body:Buffer.from([137,80,78,71,13,10,26,10]),signal:AbortSignal.timeout(15000)});
+        assert.equal(denied.status,403,`${environment}${path} must retain authorization`);
+        assert.match(denied.headers.get('content-type')||'',/application\/json/);
+        assert.equal(typeof (await denied.json()).message,'string');
+      }
+    }
     for (const route of routes) {
       const response = await fetch(`${base}${route}`, { signal: AbortSignal.timeout(15_000) });
       const stateCode = /^\/(401|403|404|500|503)$/.exec(route);
-      const expected = stateCode ? Number(stateCode[1]) : /^\/backoffice(\/|$)/.test(route) ? 401 : 200;
+      const expected = stateCode ? Number(stateCode[1]) : /^(?:\/backoffice(?:\/|$)|\/candidato$)/.test(route) ? 401 : 200;
       assert.equal(response.status, expected, `${environment}: ${route}`);
       assert.match(response.headers.get("content-type") ?? "", /text\/html/);
       const html = await response.text();
@@ -101,6 +112,11 @@ try {
       if (route === "/") {
         const officialOrigin=environment==='live'?'https://jobforged.com':'https://test.jobforged.com';
         assert.match(html,/<title>JobForged \| ATS para recrutamento e seleção<\/title>/);
+        assert.match(html,/<link(?=[^>]*rel="icon")(?=[^>]*href="[^"]*\/favicon-96x96\.png")(?=[^>]*sizes="96x96")[^>]*>/);
+        for(const [path,type] of [['/favicon-96x96.png','image/png'],['/favicon.ico','image/'],['/apple-touch-icon.png','image/png']]){
+          const icon=await fetch(`${base}${path}`,{headers:{'User-Agent':'Googlebot-Image/1.0'},signal:AbortSignal.timeout(15000)});
+          assert.equal(icon.status,200,`${environment}${path}`);assert.ok(icon.headers.get('content-type')?.startsWith(type));assert.ok((await icon.arrayBuffer()).byteLength>100);
+        }
         assert.ok(html.includes(`href="${officialOrigin}/"`),'Home canonical must use the current environment');
         const robots=html.match(/<meta[^>]*name="robots"[^>]*>/g)?.join('')||'';
         if(environment==='test'){

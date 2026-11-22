@@ -1,6 +1,6 @@
 "use client";
 
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
+import { Children, isValidElement, useId, useState, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { Inbox, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import {DisplayValue,type ValueState} from "./DisplayValue";
@@ -10,8 +10,14 @@ export function ActionButton({ variant = "primary", icon, children, ...props }: 
   return <button {...props} className={`jf-action jf-action--${variant} ${props.className ?? ""}`.trim()}>{icon}{children}</button>;
 }
 
-export function StatusBadge({ tone = "neutral", children }: { tone?: "positive" | "warning" | "danger" | "info" | "neutral"; children: ReactNode }) {
-  return <span className={`jf-status jf-status--${tone}`}>{children}</span>;
+export function StatusBadge({ tone = "neutral", children, description }: { tone?: "positive" | "warning" | "danger" | "info" | "neutral"; children: ReactNode; description?: string }) {
+  const id=useId(),[dismissed,setDismissed]=useState(false);
+  const badge=<span className={`jf-status jf-status--${tone}`}>{children}</span>;
+  if(!description)return badge;
+  return <span className="jf-status-help" data-dismissed={dismissed} onMouseEnter={()=>setDismissed(false)} onFocus={()=>setDismissed(false)} onKeyDown={event=>{if(event.key==='Escape')setDismissed(true)}}>
+    <button type="button" className="jf-status-help__trigger" aria-describedby={id} onClick={()=>setDismissed(false)}>{badge}</button>
+    <span id={id} role="tooltip" className="jf-status-help__popup">{description}</span>
+  </span>;
 }
 
 export function EmptyStateVisual({icon:Icon=Inbox,variant="circle",compact=false}:{icon?:LucideIcon;variant?:"circle"|"tile";compact?:boolean}){
@@ -22,12 +28,13 @@ export function EmptyState({ title, description, action, icon:Icon=Inbox, varian
   return <div className={`jf-empty jf-empty--${variant}`} role="status"><EmptyStateVisual icon={Icon}/><div className="jf-empty__content"><strong>{title}</strong><p>{description}</p>{action&&<div className="jf-empty__action">{action}</div>}</div></div>;
 }
 
-export function DataTable({ headers, children, label }: { headers: string[]; children: ReactNode; label: string }) {
+export function DataTable({ headers, children, label, layout='list' }: { headers: string[]; children: ReactNode; label: string;layout?:'list'|'blocks'|'board' }) {
+  if(layout==='blocks')return <div className="jf-data-blocks" role="list" aria-label={label}>{Children.toArray(children).map((row,index)=>isValidElement<{children:ReactNode}>(row)?<article role="listitem" key={row.key??index}><dl>{Children.toArray(row.props.children).map((cell,column)=>isValidElement<{children:ReactNode}>(cell)?<div key={cell.key??column}><dt>{headers[column]}</dt><dd>{cell.props.children}</dd></div>:null)}</dl></article>:null)}</div>;
   return <div className="jf-table-wrap"><table className="jf-table" aria-label={label}><thead><tr>{headers.map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{children}</tbody></table></div>;
 }
 
 export function MetricCard({ label, value, detail, state }: { label: string; value: ReactNode; detail?: string; state?: ValueState }) {
-  return <article className="jf-metric"><span>{label}</span><strong><DisplayValue value={value} state={state}/></strong>{detail && <small>{detail}</small>}</article>;
+  return <article className="jf-metric" data-state={state||'ready'}><span>{label}</span><strong><DisplayValue value={value} state={state}/></strong>{detail && <small>{detail}</small>}</article>;
 }
 
 export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HTMLElement>&{as?:"section"|"article"|"aside"}) {
@@ -35,7 +42,7 @@ export function Panel({as:Tag="section",className="",...props}:HTMLAttributes<HT
 }
 
 export function WorkspacePageHeader({ section, title, description, action, back, meta }: { section: string; title: string; description?: string; action?: ReactNode; back?: { href: string; label: string }; meta?: ReactNode }) {
-  return <header className="jf-page-head"><div>{back && <Link className="jf-page-head__back" href={back.href}><ArrowLeft size={16}/>{back.label}</Link>}<span className="jf-page-head__section">{section}</span>{meta && <div className="jf-page-head__meta">{meta}</div>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action && <div className="jf-page-head__actions">{action}</div>}</header>;
+  return <header className="jf-page-head"><div>{back && <Link className="jf-page-head__back" href={back.href}><ArrowLeft size={16}/>{back.label}</Link>}{section&&<span className="jf-page-head__section">{section}</span>}{meta && <div className="jf-page-head__meta">{meta}</div>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{action && <div className="jf-page-head__actions">{action}</div>}</header>;
 }
 
 export function PanelHeading({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {

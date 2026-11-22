@@ -1,0 +1,14 @@
+.jf-recruitment-chart{margin:0;padding:var(--jf-ui-space-6)}
+.jf-recruitment-chart__caption{color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm);margin-bottom:var(--jf-ui-space-5)}
+.jf-recruitment-chart__plot{display:grid;gap:var(--jf-ui-space-4)}
+.jf-recruitment-chart__item{display:grid;grid-template-columns:minmax(100px,1fr) minmax(80px,2fr) 40px;align-items:center;gap:var(--jf-ui-space-3)}
+.jf-recruitment-chart__item>span{font-size:var(--jf-ui-font-size-sm);overflow-wrap:anywhere}
+.jf-recruitment-chart__track{height:16px;background:var(--jf-ui-brand-soft);border-radius:var(--jf-ui-control-radius);overflow:hidden}
+.jf-recruitment-chart__track i{display:block;height:100%;background:var(--jf-ui-brand);border-radius:inherit}
+.jf-recruitment-chart__item>strong{text-align:right;font-variant-numeric:tabular-nums}
+.jf-recruitment-chart.is-vertical .jf-recruitment-chart__plot{grid-template-columns:repeat(6,minmax(0,1fr));align-items:end;gap:var(--jf-ui-space-3)}
+.jf-recruitment-chart.is-vertical .jf-recruitment-chart__item{display:flex;flex-direction:column-reverse;gap:var(--jf-ui-space-3);text-align:center}
+.jf-recruitment-chart.is-vertical .jf-recruitment-chart__track{height:180px;width:70%;display:flex;align-items:end}
+.jf-recruitment-chart.is-vertical .jf-recruitment-chart__track i{width:100%}
+
+@media(max-width:600px){.jf-recruitment-chart{padding:var(--jf-ui-space-4)}.jf-recruitment-chart__item{grid-template-columns:minmax(90px,1fr) minmax(50px,1fr) 28px}}

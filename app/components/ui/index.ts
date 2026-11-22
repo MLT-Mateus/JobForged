@@ -16,7 +16,7 @@ export {
   type SelectOption,
 } from "./FormControls";
 
-export { AppToast, AppToastHost, createToastNotice, type ToastKind, type ToastNotice } from "./AppToast";
+export { AppToast, AppToastHost, createToastNotice, showAppToast, type ToastKind, type ToastNotice } from "./AppToast";
 export { ThemeSelector, type ThemeMode } from "./ThemeSelector";
 export { ActionButton, Panel, MetricCard, DataTable, EmptyState, EmptyStateVisual, StatusBadge, WorkspacePageHeader, PanelHeading, InlineNotice } from "./AdminPrimitives";
 
@@ -45,3 +45,16 @@ export {NotificationTrigger} from "./NotificationTrigger";
 export {FieldFeedback,revealField} from "./FieldFeedback";
 
 export {ProportionalImage} from "./ProportionalImage";
+
+export {WindowControls} from "./WindowControls";
+export {WorkspacePagination} from "./WorkspacePagination";
+
+export {UserAvatar} from "./UserAvatar";
+
+export {PostalCodeField,type PostalAddress} from './PostalCodeField';
+
+export {ItemListField} from './ItemListField';
+
+export {ChatBubble,ChatProcessing,ChatComposer} from './ChatPrimitives';
+export {FormActions} from './FormActions';
+export {useCollectionPreference} from './useCollectionPreference';

@@ -82,16 +82,164 @@ do $$declare result jsonb;begin
  begin perform public.update_company_profile('17000000-0000-4000-8000-000000000011','Fixture','11111111111111',null);raise exception 'invalid CNPJ accepted';exception when check_violation then null;end;
  begin perform public.begin_password_recovery('recovery');raise exception 'password session minted recovery';exception when insufficient_privilege then null;end;
  if public.update_my_member_profile('Fixture owner changed') ? 'security_fixture_secret' then raise exception 'profile projection leak';end if;
+ begin perform public.update_my_member_identity_v1('Fixture owner changed','11111111111',null);raise exception 'invalid CPF accepted';exception when invalid_parameter_value then null;end;
+ result:=public.update_my_member_identity_v1('Fixture owner changed','52998224725','11987654321');
+ if result->>'cpf'<>'52998224725' then raise exception 'identity save failed';end if;
+ if public.account_read_v1()->>'phone'<>'11987654321' then raise exception 'identity read failed';end if;
+ if not exists(select 1 from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'cpf'='52998224725') then raise exception 'authorized roster identity missing';end if;
+ perform public.update_my_member_profile('Fixture owner renamed');
+ if public.account_read_v1()->>'cpf'<>'52998224725' then raise exception 'legacy update cleared identity';end if;
 end$$;
+reset role;
+insert into public.company_audit_events(company_id,actor_user_id,action,details)
+select '17000000-0000-4000-8000-000000000011','17000000-0000-4000-8000-000000000001','domain.register','{"private":"DO_NOT_EXPOSE"}' from generate_series(1,25);
+insert into public.company_audit_events(company_id,action) values('17000000-0000-4000-8000-000000000012','domain.register');
+set local role authenticated;
+do $$declare first_page jsonb;second_page jsonb;mid uuid;begin
+ first_page:=public.company_activity_v1(1,'domain');second_page:=public.company_activity_v1(2,'domain');
+ if (first_page->>'total')::integer<>25 or jsonb_array_length(first_page->'items')<>10 or jsonb_array_length(public.company_activity_v1(3,'domain')->'items')<>5 then raise exception 'pagination or tenant isolation failed';end if;
+ if exists(select 1 from jsonb_array_elements(first_page->'items') a join jsonb_array_elements(second_page->'items') b on a->>'id'=b->>'id') then raise exception 'pagination overlaps';end if;
+ if first_page::text like '%DO_NOT_EXPOSE%' or first_page::text like '%52998224725%' then raise exception 'audit payload leaked';end if;
+ if public.company_activity_v1(99,'domain')->>'page'<>'3' then raise exception 'page clamping failed';end if;
+ begin perform public.company_activity_v1(0,'all');raise exception 'invalid page accepted';exception when invalid_parameter_value then null;end;
+ select (m->>'id')::uuid into mid from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'role'='member';
+ perform public.update_company_member_identity_v1(mid,'Fixture identity completed','52998224725','11987654321');
+ if not exists(select 1 from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'id'=mid::text and m->>'full_name'='Fixture identity completed' and m->>'cpf'='52998224725') then raise exception 'manager identity not persisted';end if;
+ begin perform public.update_company_member_identity_v1(mid,'Fixture invalid','11111111111',null);raise exception 'manager accepted invalid CPF';exception when invalid_parameter_value then null;end;
+ begin perform public.update_company_member_identity_v1('17000000-0000-4000-8000-000000000012','Fixture foreign',null,null);raise exception 'foreign identity write accepted';exception when insufficient_privilege then null;end;
+ -- Restore the earlier fixture expectation, without clearing the owner's identity.
+ perform public.update_company_member_identity_v1(mid,'Fixture Member',null,null);
+end$$;
+do $$declare result jsonb;mid uuid;photo text:=encode(convert_to('RIFF1234WEBPfixture','UTF8'),'base64');begin
+ result:=public.member_photo_write_v1(photo,photo);mid:=(result->>'memberId')::uuid;
+ if result->>'photoVersion'<>'1' then raise exception 'photo version missing';end if;
+ if public.member_photo_read_v1(mid,true)<>photo then raise exception 'thumbnail read failed';end if;
+ if public.account_read_v1()->>'photoVersion'<>'1' then raise exception 'profile photo projection missing';end if;
+ if not exists(select 1 from jsonb_array_elements(public.company_read_v1()->'members') m where m->>'id'=mid::text and m->>'photo_version'='1') then raise exception 'roster photo missing';end if;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000002","session_id":"17000000-0000-4000-8000-000000000102","aal":"aal1","role":"authenticated"}',true);
+ if public.member_photo_read_v1(mid,true) is not null then raise exception 'cross-tenant photo leak';end if;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+ begin perform public.member_photo_write_v1('invalid','invalid');raise exception 'invalid photo accepted';exception when invalid_parameter_value then null;end;
+ perform public.member_photo_write_v1(null,null);
+ if public.member_photo_read_v1(mid,true) is not null or public.account_read_v1()->>'photoVersion'<>'0' then raise exception 'photo removal failed';end if;
+end$$;
+
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+select public.job_assistant_issue(repeat('a',64),'{"message":"Synthetic test"}');
+do $$begin
+ begin perform count(*) from app_private.job_assistant_requests;raise exception 'assistant table exposed';exception when insufficient_privilege then null;end;
+end$$;
+set local role anon;
+do $$begin
+ if public.job_assistant_consume(repeat('a',64))->>'message'<>'Synthetic test' then raise exception 'context missing';end if;
+ begin perform public.job_assistant_consume(repeat('a',64));raise exception 'token replay accepted';exception when insufficient_privilege then null;end;
+ begin perform public.job_assistant_consume(repeat('b',64));raise exception 'unknown token accepted';exception when insufficient_privilege then null;end;
+ begin perform public.job_assistant_issue(repeat('b',64),'{}');raise exception 'anonymous issued token';exception when insufficient_privilege then null;end;
+end$$;
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
+do $$begin
+ begin perform public.job_assistant_issue(repeat('c',64),'{}');raise exception 'member issued token';exception when insufficient_privilege then null;end;
+end$$;
+set local role authenticated;
+
+-- Persistent publication, tenant isolation, authorization and public projection.
+do $$begin
+ begin perform count(*) from app_private.company_jobs;raise exception 'private jobs table exposed';exception when insufficient_privilege then null;end;
+end;$$;
+reset role;
+insert into public.company_portals(company_id,slug,is_public) values('17000000-0000-4000-8000-000000000011','security-jobs-fixture',false) on conflict(company_id) do update set slug=excluded.slug,is_public=false;
+update public.company_branding set published='{"fixture":true}' where company_id='17000000-0000-4000-8000-000000000011';
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+do $$declare d jsonb:='{"title":"Public job fixture","area":"Engineering","level":"Senior","contractType":"CLT","modality":"Remoto","country":"Brasil","state":"SP","city":"São Paulo","summary":"Public description","responsibilities":["One","Two","Three"],"requirements":["One","Two","Three"],"experience":"","weeklyHours":"","schedule":"","salaryMin":"12345","salaryMax":"67890","currency":"BRL","salaryConfidential":true,"softSkills":[],"differentiators":[],"certifications":[],"education":"","languages":[],"benefits":[],"additionalBenefits":"","careerPlan":"","performanceReviews":false,"promotionPossible":false,"teamDescription":"","reportsTo":"","teamSize":"","tools":[],"methodology":"","challenges":"","openingReason":"","autonomy":"","hierarchy":"","stages":[{"id":"triagem","name":"Triagem","required":true},{"id":"entrevista","name":"Entrevista","required":true}],"technicalTest":false,"interviewTypes":[],"applicationDeadline":"","responseSla":"","lgpd":true,"responsibleId":"PRIVATE_FIXTURE","currentStep":0}';j jsonb;uid uuid;begin
+ j:=public.company_jobs_v1('save',null,d,'Rascunho');uid:=(j->>'id')::uuid;
+  declare b jsonb;bd jsonb:='{"name":"Filial teste","type":"Filial","cnpj":"","corporateName":"","description":"","region":"","postalCode":"01001000","street":"Praça da Sé","number":"1","complement":"","district":"Sé","city":"São Paulo","state":"SP","status":"Ativo","mapsUrl":"","photos":[],"jobIds":[]}';bid uuid;
+ begin
+  b:=public.company_branches_v1('save',null,bd||jsonb_build_object('jobIds',jsonb_build_array(uid)));bid:=(b->>'id')::uuid;
+  if jsonb_array_length(public.company_branches_v1('list'))<>1 then raise exception 'branch persistence failed';end if;
+  begin perform public.company_branches_v1('delete',bid,null,1);raise exception 'linked branch deleted';exception when sqlstate 'PT422' then null;end;
+  begin perform public.company_branches_v1('save',bid,bd,0);raise exception 'stale branch accepted';exception when serialization_failure then null;end;
+  begin perform public.company_branches_v1('save',null,bd||'{"photos":[{"id":"00000000-0000-4000-8000-000000000000","alt":"Denied"}]}');raise exception 'foreign image accepted';exception when insufficient_privilege then null;end;
+  perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000002","session_id":"17000000-0000-4000-8000-000000000102","aal":"aal1","role":"authenticated"}',true);
+  if public.company_branches_v1('list')<>'[]'::jsonb then raise exception 'branches leaked';end if;
+  begin perform public.company_branches_v1('delete',bid,null,1);raise exception 'foreign branch deleted';exception when no_data_found then null;end;
+  perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+  perform public.company_branches_v1('save',bid,bd,1);
+  perform public.company_branches_v1('delete',bid,null,2);
+  declare b2 uuid;v bigint;begin
+   b:=public.company_branches_v1('save',null,bd);bid:=(b->>'id')::uuid;
+   b:=public.company_branches_v1('save',null,bd||'{"name":"Segunda filial"}');b2:=(b->>'id')::uuid;
+   v:=(public.company_jobs_v1('get',uid)->>'version')::bigint;
+   j:=public.company_jobs_v1('save',uid,d||jsonb_build_object('branchIds',jsonb_build_array(bid,b2)),'Rascunho',v);
+   if jsonb_array_length(j->'branchIds')<>2 then raise exception 'multiple branches not saved';end if;
+   begin perform public.company_jobs_v1('save',uid,d||'{"branchIds":["00000000-0000-4000-8000-000000000000"]}','Rascunho',(j->>'version')::bigint);raise exception 'foreign branch accepted';exception when invalid_parameter_value then null;end;
+   begin perform public.company_branches_v1('save',bid,bd,1);raise exception 'stale branch overwrote job selection';exception when serialization_failure then null;end;
+   j:=public.company_jobs_v1('save',uid,d||'{"branchIds":[]}','Rascunho',(j->>'version')::bigint);
+   perform public.company_branches_v1('delete',bid,null,3);
+   perform public.company_branches_v1('delete',b2,null,3);
+  end;
+ end;
+ if public.company_jobs_v1('get',uid)->>'title'<>'Public job fixture' then raise exception 'job not persisted';end if;
+ if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'draft exposed';end if;
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'unpublished portal accepted';exception when sqlstate 'PT422' then null;end;
+ begin perform public.company_jobs_v1('save',uid,d||'{"unknown":"secret"}',null,(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'unknown field accepted';exception when invalid_parameter_value then null;end;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000002","session_id":"17000000-0000-4000-8000-000000000102","aal":"aal1","role":"authenticated"}',true);
+ if public.company_jobs_v1('list')<>'[]'::jsonb then raise exception 'cross tenant list leak';end if;
+ begin perform public.company_jobs_v1('get',uid);raise exception 'cross tenant get leak';exception when no_data_found then null;end;
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'cross tenant write';exception when no_data_found then null;end;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
+ begin perform public.company_jobs_v1('status',uid,null,'Publicada',1);raise exception 'member published';exception when insufficient_privilege then null;end;
+ perform set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000001","session_id":"17000000-0000-4000-8000-000000000101","aal":"aal1","role":"authenticated"}',true);
+end;$$;
+reset role;
+update public.company_portals set is_public=true where slug='security-jobs-fixture';
+set local role authenticated;
+do $$declare j jsonb;uid uuid;public_result jsonb;begin
+ j:=public.company_jobs_v1('list')->0;uid:=(j->>'id')::uuid;
+ begin perform public.company_jobs_v1('save',uid,(j-'id'-'organizationId'-'status'-'version'-'createdAt'-'updatedAt'-'applicationsCount')||'{"title":""}', 'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);raise exception 'incomplete job published';exception when invalid_parameter_value then null;end;
+ j:=public.company_jobs_v1('status',uid,null,'Publicada',(public.company_jobs_v1('get',uid)->>'version')::bigint);
+ public_result:=public.public_jobs_v1('security-jobs-fixture');
+ if jsonb_array_length(public_result)<>1 then raise exception 'published job absent';end if;
+ if public_result::text like '%PRIVATE_FIXTURE%' or public_result::text like '%12345%' or public_result::text like '%67890%' or public_result->0 ? 'organizationId' then raise exception 'public job secret leak';end if;
+
+ -- The reference editor accepts optional requirements, persists its fields and validates contacts.
+ declare d jsonb;b jsonb;bid uuid;bd jsonb:='{"name":"Editor location","type":"Filial","cnpj":"","corporateName":"","description":"","region":"","postalCode":"01001000","street":"Praça da Sé","number":"1","complement":"","district":"Sé","city":"São Paulo","state":"SP","status":"Ativo","mapsUrl":"","photos":[],"jobIds":[]}';begin
+  b:=public.company_branches_v1('save',null,bd);bid:=(b->>'id')::uuid;
+  d:=(j-'id'-'organizationId'-'status'-'version'-'createdAt'-'updatedAt'-'applicationsCount')||'{"pcd":"Disponível para PCD","journey":"Matutino","salaryRange":"PRIVATE_SALARY","description":"<b>Role description</b>","attributions":"One responsibility","requirements":[],"responsibilities":["One responsibility"],"contactEmail":"rh@example.invalid","contactPhone":"(11) 99999-1234","contactWhatsapp":""}'||jsonb_build_object('branchIds',jsonb_build_array(bid));
+  begin perform public.company_jobs_v1('save',uid,d||'{"contactEmail":"invalid"}','Publicada',(j->>'version')::bigint);raise exception 'invalid contact accepted';exception when invalid_parameter_value then null;end;
+  begin perform public.company_jobs_v1('save',uid,d||'{"branchIds":[]}','Publicada',(j->>'version')::bigint);raise exception 'missing environment accepted';exception when invalid_parameter_value then null;end;
+  begin perform public.company_jobs_v1('save',uid,d||'{"salaryRange":"Informar valores","salaryMin":""}','Publicada',(j->>'version')::bigint);raise exception 'missing numeric salary accepted';exception when invalid_parameter_value then null;end;
+  j:=public.company_jobs_v1('save',uid,d,'Publicada',(j->>'version')::bigint);
+  if j->>'journey'<>'Matutino' or j->'requirements'<>'[]'::jsonb then raise exception 'editor fields not persisted';end if;
+  public_result:=public.public_jobs_v1('security-jobs-fixture')->0;
+  if public_result->>'description'<>'<b>Role description</b>' or public_result->>'contactEmail'<>'rh@example.invalid' or public_result::text like '%PRIVATE_SALARY%' then raise exception 'editor public projection failed';end if;
+ end;
+ begin perform public.company_jobs_v1('status',uid,null,'Pausada',1);raise exception 'stale version accepted';exception when serialization_failure then null;end;
+ j:=public.company_jobs_v1('status',uid,null,'Pausada',(j->>'version')::bigint);
+ if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb then raise exception 'paused job exposed';end if;
+ j:=public.company_jobs_v1('status',uid,null,'Publicada',(j->>'version')::bigint);
+ perform public.company_jobs_v1('delete',uid,null,null,(j->>'version')::bigint);
+ if public.public_jobs_v1('security-jobs-fixture')<>'[]'::jsonb or public.company_jobs_v1('list')<>'[]'::jsonb then raise exception 'deleted job exposed';end if;
+end;$$;
+reset role;
+update public.company_portals set is_public=false where slug='security-jobs-fixture';
+update public.company_branding set published='{}' where company_id='17000000-0000-4000-8000-000000000011';
+set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000005","session_id":"17000000-0000-4000-8000-000000000105","aal":"aal1","role":"authenticated"}',true);
 do $$declare result jsonb;begin
+ begin perform public.company_activity_v1();raise exception 'member read audit';exception when insufficient_privilege then null;end;
+ begin perform public.update_company_member_identity_v1('17000000-0000-4000-8000-000000000012','Denied write',null,null);raise exception 'member wrote identity';exception when insufficient_privilege then null;end;
  result:=public.company_read_v1();
- if exists(select 1 from jsonb_array_elements(result->'members') m where m ? 'email' or m ? 'security_fixture_secret') then raise exception 'member roster projection leak';end if;
+ if exists(select 1 from jsonb_array_elements(result->'members') m where m ? 'email' or m ? 'cpf' or m ? 'phone' or m ? 'security_fixture_secret') then raise exception 'member roster projection leak';end if;
+ if public.account_read_v1()->>'cpf' is not null then raise exception 'other account CPF leaked';end if;
  if public.read_company_branding()->>'publishedBy' is not null then raise exception 'member received colleague email';end if;
 end$$;
 select set_config('request.jwt.claims','{"sub":"17000000-0000-4000-8000-000000000003","session_id":"17000000-0000-4000-8000-000000000103","aal":"aal1","role":"authenticated"}',true);
 do $$begin
  if app_private.company_role('17000000-0000-4000-8000-000000000011')<>'' then raise exception 'unlinked authorized';end if;
+ begin perform public.account_read_v1();raise exception 'unlinked profile read';exception when insufficient_privilege then null;end;
  begin perform public.company_read_v1();raise exception 'unlinked read';exception when insufficient_privilege then null;end;
 end$$;
 reset role;
@@ -146,5 +294,15 @@ do $$begin
  if app_private.company_role('17000000-0000-4000-8000-000000000012')<>'' then raise exception 'banned identity accepted';end if;
 end$$;
 reset role;
+update auth.users set email='changed-company@example.invalid'
+where id='17000000-0000-4000-8000-000000000001';
+do $$
+begin
+ if not exists (
+  select 1 from public.company_members
+  where user_id='17000000-0000-4000-8000-000000000001' and email='changed-company@example.invalid'
+ ) then raise exception 'confirmed auth email did not synchronize to company membership'; end if;
+end;
+$$;
 rollback;
 select 'security_foundation_passed';

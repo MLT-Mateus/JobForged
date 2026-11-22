@@ -1,0 +1,13 @@
+"use client";
+import {useId,useState,type ReactNode} from 'react';
+import {ActionButton} from './AdminPrimitives';
+import './recruitment-patterns.css';
+export function OptionalSection({title,summary,children}:{title:string;summary?:string;children:ReactNode}){return <details className="jf-optional-section"><summary><span>{title}</span><small>{summary||'Opcional'}</small></summary><div>{children}</div></details>}
+export function FormReadiness({checks,onReveal,operational=[]}:{checks:{key:string;label:string;done:boolean;section:number}[];onReveal:(section:number,key:string)=>void;operational?:{key:string;message:string;section:number}[]}){
+ const missing=checks.filter(c=>!c.done),[expanded,setExpanded]=useState(false),id=useId();
+ return <section className="jf-readiness" aria-label="Para publicar" data-expanded={expanded}>
+  <div className="jf-readiness-compact"><p role="status"><strong>{missing.length?`Faltam ${missing.length} dados`:'Essenciais completos'}</strong></p><ActionButton variant="quiet" aria-expanded={expanded} aria-controls={id} onClick={()=>setExpanded(v=>!v)}>{expanded?'Recolher':'Ver pendências'}</ActionButton></div>
+  {missing[0]&&<button className="jf-readiness-next" type="button" onClick={()=>onReveal(missing[0].section,missing[0].key)}>Próximo: {missing[0].label}</button>}
+  <div id={id} className="jf-readiness-details"><h3>Para publicar</h3><p role="status"><strong>{checks.length-missing.length} de {checks.length}</strong> essenciais preenchidos</p>{missing.length?<ul>{missing.map(c=><li key={c.key}><button type="button" onClick={()=>onReveal(c.section,c.key)}>{c.label}</button></li>)}</ul>:<p>Dados essenciais completos.</p>}{operational.length>0&&<><h4>Antes de publicar</h4><ul>{operational.map(c=><li key={c.key}><button type="button" onClick={()=>onReveal(c.section,c.key)}>{c.message}</button></li>)}</ul></>}<ActionButton variant="secondary" onClick={()=>onReveal(2,'review')}>Revisar</ActionButton></div>
+ </section>;
+}

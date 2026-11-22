@@ -2,6 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {publicSearchPaths,searchEnvironment} from './app/lib/seo';
 import {getSupabaseConfig,requestDatabase} from './app/api/auth/_server';
 import {validCompanyHostname} from './app/lib/company-domain';
+import {isCareerPhotoMask} from './app/components/personalization/career-defaults';
 /** Custom hosts can render only their verified tenant, never the business/admin panels. */
 export async function proxy(request:NextRequest){
  const path=request.nextUrl.pathname;const headers=new Headers();
@@ -16,12 +17,18 @@ export async function proxy(request:NextRequest){
   if(!validCompanyHostname(hostname))return new NextResponse('Página não encontrada.',{status:404,headers});
   try{const config=getSupabaseConfig();if(!config)throw new Error();const r=await requestDatabase('rpc/resolve_company_domain',config.anonKey,{requested_hostname:hostname});if(!r?.ok)throw new Error();const slug=await r.json() as string|null;
    if(!slug)return new NextResponse('Domínio não verificado ou indisponível.',{status:404,headers});
-   headers.set('Cache-Control','private, no-store');
+   // These exact static masks contain no tenant data or colors. Leave their
+   // asset cache policy intact without changing verified-host routing.
+   if(!(['GET','HEAD'].includes(request.method)&&isCareerPhotoMask(path)))headers.set('Cache-Control','private, no-store');
    if(path==='/api/domain-ready')return NextResponse.json({ready:true},{headers});
    if(path==='/recuperar-senha')return NextResponse.redirect(new URL('/recuperar-senha',process.env.APP_PUBLIC_URL||'https://test.jobforged.com'),303);
-   if(path==='/')return NextResponse.rewrite(new URL('/'+slug,request.url),{headers});
+   if(path==='/'){const target=new URL(request.url);target.pathname='/'+slug;return NextResponse.rewrite(target,{headers})}
    if(path==='/'+slug)return NextResponse.redirect(new URL('/',request.url));
-   const allowed=['/termos-servico','/politicas-privacidade'].includes(path)||path.startsWith('/api/portals/'+slug+'/assets/')||/^\/(careers|fonts|brand|assets)\//.test(path);
+   const accountRead=['/api/auth/session','/api/portal/account','/api/portal/resume','/api/portal/applications'].includes(path)&&['GET','HEAD'].includes(request.method);
+   const accountWrite=['/api/account/credentials','/api/auth/sign-in','/api/auth/sign-out','/api/auth/recover','/api/auth/candidate-sign-up','/api/portal/account','/api/portal/resume','/api/portal/applications'].includes(path)&&request.method==='POST';
+   const publicJobs=path==='/api/portals/'+slug+'/jobs'&&['GET','HEAD'].includes(request.method);
+   const publicJobPage=path.startsWith('/vagas/'+slug+'/')&&path.split('/').length===4&&['GET','HEAD'].includes(request.method);
+   const allowed=publicJobPage||(path==="/api/tracking"&&request.method==="GET")||publicJobs||accountRead||accountWrite||['/termos-servico','/politicas-privacidade'].includes(path)||path.startsWith('/api/portals/'+slug+'/assets/')||/^\/(careers|fonts|brand|assets)\//.test(path);
    if(!allowed)return new NextResponse('Página não encontrada.',{status:404,headers});
   }catch{return new NextResponse('Serviço temporariamente indisponível.',{status:503,headers})}
  }

@@ -14,5 +14,5 @@ export default async function Page() {
   const session = await readSession(request, new Headers());
   if (!session) unauthorized();
   if (!session.platformAdmin) forbidden();
-  return <BackofficeManagementClient email={session.email} />;
+  return <BackofficeManagementClient deletionEnabled={process.env.APP_ENV==='test'} email={session.email} />;
 }

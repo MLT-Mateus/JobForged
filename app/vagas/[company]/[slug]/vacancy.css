@@ -1,0 +1,4 @@
+.public-vacancy{max-width:900px;margin:auto;padding:clamp(16px,4vw,48px);display:grid;gap:var(--jf-ui-space-5);overflow-wrap:anywhere}
+.public-vacancy section{margin-block:var(--jf-ui-space-5)}
+.public-vacancy p{white-space:pre-line;line-height:1.7}
+.public-vacancy li{margin-block:var(--jf-ui-space-2);line-height:1.6}

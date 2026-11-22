@@ -22,8 +22,9 @@ export async function PATCH(request: NextRequest) {
   const name = typeof body?.name === "string" ? body.name.trim() : "";
   const cnpj = typeof body?.cnpj === "string" ? body.cnpj.replace(/\D/g, "") : "";
   const phone = typeof body?.phone === "string" ? body.phone.replace(/\D/g, "") : "";
-  if (name.length < 2 || name.length > 160 || !isValidCnpj(cnpj) || !/^\d{10,11}$/.test(phone))
-    return Response.json({ message: "Revise os dados da empresa." }, { status: 400, headers });
+  if(name.length<2||name.length>160)return Response.json({message:'Informe o nome da empresa com 2 a 160 caracteres.'},{status:400,headers});
+  if(!isValidCnpj(cnpj))return Response.json({message:'Informe um CNPJ válido com 14 dígitos.'},{status:400,headers});
+  if(!/^\d{10,11}$/.test(phone))return Response.json({message:'Informe DDD e telefone brasileiro, com 10 ou 11 dígitos.'},{status:400,headers});
   const response = await requestDatabase("rpc/update_company_profile", session.accessToken,
     { target_company_id: session.company.id, new_name: name, new_cnpj: cnpj || null, new_phone: phone || null });
   if (!response?.ok) return Response.json({ message: "Não foi possível salvar os dados." }, { status: response?.status === 403 ? 403 : 400, headers });

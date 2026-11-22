@@ -1,4 +1,7 @@
 "use client";
+import {formatInput,inputFormatRules,inferInputFormat,type InputFormat} from './input-format';
+import {ActionButton} from './AdminPrimitives';
+import {fileMatchesAccept} from '@/shared/image-upload';
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -30,6 +33,7 @@ import {
 import {
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ChangeEvent,
@@ -40,6 +44,7 @@ import {
 } from "react";
 import {fieldPlaceholder} from "./field-copy";
 import {useFieldError} from "./FieldFeedback";
+import {popoverPosition} from "@/shared/popover-position.mjs";
 import {FocusPopover} from "./Widgets";
 import {sanitizeRichText,renderRichText,richTextSource} from "./rich-content";
 import { useStatusSoundForMessage } from "./status-sound";
@@ -63,6 +68,7 @@ type FieldBaseProps = {
 
 type TextFieldProps = FieldBaseProps &
   Omit<InputHTMLAttributes<HTMLInputElement>, "className"> & {
+    format?: InputFormat;
     labelAdornment?: ReactNode;
     startAdornment?: ReactNode;
     endAdornment?: ReactNode;
@@ -74,6 +80,7 @@ export function TextField({
   error: suppliedError,
   requiredLabel,
   icon: Icon,
+  format: explicitFormat,
   labelAdornment,
   startAdornment,
   endAdornment,
@@ -82,6 +89,7 @@ export function TextField({
   type = "text",
   ...inputProps
 }: TextFieldProps) {
+  const format=explicitFormat??inferInputFormat(label,type);
   const contextualError=useFieldError(inputProps.name);
   const error=suppliedError??contextualError;
   const generatedId = useId();
@@ -112,6 +120,12 @@ export function TextField({
         {Icon && <Icon size={17} aria-hidden="true" />}
         <input
           {...inputProps}
+          {...(format?inputFormatRules[format]:{})}
+          maxLength={format?inputFormatRules[format].maxLength:inputProps.maxLength??(type==='email'?254:type==='url'?2048:undefined)}
+          inputMode={inputProps.inputMode??(format==='phone'?'tel':format==='cnpj-alpha'?'text':format?'numeric':type==='email'?'email':type==='url'?'url':undefined)}
+          value={format&&inputProps.value!==undefined?formatInput(String(inputProps.value),format):inputProps.value}
+          defaultValue={format&&inputProps.defaultValue!==undefined?formatInput(String(inputProps.defaultValue),format):inputProps.defaultValue}
+          onChange={event=>{if(format)event.target.value=formatInput(event.target.value,format);inputProps.onChange?.(event)}}
           placeholder={fieldPlaceholder({label,type,placeholder:inputProps.placeholder,disabled:inputProps.disabled,readOnly:inputProps.readOnly})}
           ref={inputRef}
           id={inputId}
@@ -205,6 +219,52 @@ export function FieldControl({
 
 function useFloatingMenu(open: boolean, onClose: () => void) {
   const rootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const root = rootRef.current;
+    const anchor = root?.querySelector<HTMLElement>(".jf-floating-field");
+    const panel = anchor?.querySelector<HTMLElement>(":scope > :is(.jf-select__menu,.jf-multiselect__menu,.jf-calendar)");
+    const view = panel?.ownerDocument.defaultView;
+    if (!anchor || !panel || !view) return;
+    const place = () => {
+      const vp = view.visualViewport;
+      const bounds = anchor.getBoundingClientRect();
+      const placement = popoverPosition(bounds, panel.scrollHeight + 2, {
+        width: vp?.width ?? view.innerWidth,
+        height: vp?.height ?? view.innerHeight,
+        left: vp?.offsetLeft ?? 0,
+        top: vp?.offsetTop ?? 0,
+      });
+      if (panel.classList.contains("jf-calendar")) {
+        // A calendar needs room for seven days even when its field is narrow.
+        panel.style.width = `${placement.width}px`;
+        panel.style.minWidth = "0";
+        panel.style.left = `${placement.left - bounds.left}px`;
+        panel.style.right = "auto";
+      }
+      panel.dataset.side = placement.side;
+      panel.style.maxHeight = `${placement.maxHeight}px`;
+    };
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(anchor);
+    observer.observe(panel);
+    const mutations = new MutationObserver(place);
+    mutations.observe(panel, {childList:true, subtree:true});
+    view.addEventListener("resize", place);
+    view.addEventListener("scroll", place, true);
+    view.visualViewport?.addEventListener("resize", place);
+    view.visualViewport?.addEventListener("scroll", place);
+    return () => {
+      observer.disconnect();
+      mutations.disconnect();
+      view.removeEventListener("resize", place);
+      view.removeEventListener("scroll", place, true);
+      view.visualViewport?.removeEventListener("resize", place);
+      view.visualViewport?.removeEventListener("scroll", place);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -482,6 +542,7 @@ export function DateField({
           id={buttonId}
           type="button"
           className="jf-control jf-date__control"
+          aria-label={`${label}: ${selectedValue ? formatDate(selectedValue) : "Selecione a data"}`}
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={calendarId}
@@ -830,6 +891,11 @@ export function MultiSelectField({
 
 type FileUploadFieldProps = FieldBaseProps & {
   disabled?: boolean;
+  maxBytes?:number;
+  stateLabel?:string;
+  previewUrl?:string;
+  stored?:boolean;
+  onRemove?:()=>void;
   value: string | null;
   accept: string;
   emptyHint: string;
@@ -844,10 +910,23 @@ export function FileUploadField({
   emptyHint,
   variant = "file",
   disabled = false,
+  maxBytes,previewUrl,stored=false,onRemove,stateLabel,
+  error,helpText,
   onFileChange,
   className = "",
 }: FileUploadFieldProps) {
   const inputId = useId();
+  const [dragActive,setDragActive]=useState(false),[uploadError,setUploadError]=useState('');
+  const [selectedFile,setSelectedFile]=useState<File|null>(null);
+  const dragDepth=useRef(0),messageId=inputId+'-message';
+  function choose(files:File[]){
+    if(disabled||!files.length)return;
+    if(files.length!==1){setUploadError('Envie um arquivo por vez.');return}
+    if(!fileMatchesAccept(files[0],accept)){setUploadError('Formato não permitido. Confira os formatos indicados.');return}
+    if(maxBytes&&files[0].size>maxBytes){setUploadError(`Envie um arquivo de até ${Math.round(maxBytes/1048576)} MB.`);return}
+    setUploadError('');setSelectedFile(files[0]);onFileChange(files[0]);
+  }
+  const message=error||uploadError||helpText;
   const displayedValue=value?.trim()||null;
   const guidance=emptyHint.trim()||"Selecione o arquivo...";
   const EmptyIcon = variant === "picture" ? ImagePlus : FileText;
@@ -855,24 +934,36 @@ export function FileUploadField({
   const StateIcon = displayedValue ? FilledIcon : EmptyIcon;
 
   return (
-    <label className={`jf-upload jf-upload--${variant} ${displayedValue ? "is-filled" : ""} ${className}`} htmlFor={inputId}>
+    <div className={`jf-field jf-upload-field ${error||uploadError?'is-error':''}`}>
+    <label className={`jf-upload jf-upload--${variant} ${displayedValue ? "is-filled" : ""} ${dragActive?'is-dragging':''} ${disabled?'is-disabled':''} ${className}`} htmlFor={inputId} aria-disabled={disabled}
+      onDragEnter={event=>{event.preventDefault();if(!disabled){dragDepth.current++;setDragActive(true)}}}
+      onDragOver={event=>{event.preventDefault();event.dataTransfer.dropEffect=disabled?'none':'copy'}}
+      onDragLeave={event=>{event.preventDefault();if(--dragDepth.current<=0){dragDepth.current=0;setDragActive(false)}}}
+      onDrop={event=>{event.preventDefault();event.stopPropagation();dragDepth.current=0;setDragActive(false);choose(Array.from(event.dataTransfer.files))}}>
+
       <input
         id={inputId}
         type="file"
         accept={accept}
         disabled={disabled}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => { onFileChange(event.target.files?.[0] ?? null); event.target.value = ""; }}
+        aria-describedby={message?messageId:undefined}
+        aria-invalid={!!(error||uploadError)}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => { choose(Array.from(event.target.files??[])); event.target.value = ""; }}
       />
-      <span className="jf-upload__icon"><StateIcon size={21} aria-hidden="true" /></span>
+      <span className="jf-upload__icon">{displayedValue&&variant==='picture'&&(previewUrl||selectedFile)?(previewUrl?<img src={previewUrl} alt="Prévia do arquivo enviado"/>:selectedFile?<UploadImagePreview key={fileKey(selectedFile)} file={selectedFile}/>:null):<StateIcon size={21} aria-hidden="true" />}</span>
       <span className="jf-upload__content">
         <strong>{label}</strong>
-        <small title={displayedValue ?? undefined}>{displayedValue ?? guidance}</small>
+        <small className="jf-upload__state" aria-live="polite">{stateLabel||(displayedValue?(stored?"Arquivo enviado":"Arquivo selecionado"):"Nenhum arquivo selecionado")}</small>
+        <small className="jf-upload__filename" title={displayedValue ?? undefined}>{displayedValue ?? guidance}</small>
       </span>
       <em>
         {displayedValue ? <Check size={15} aria-hidden="true" /> : <UploadCloud size={15} aria-hidden="true" />}
         {displayedValue ? "Trocar" : "Selecionar"}
       </em>
     </label>
+    {displayedValue&&onRemove&&<ActionButton variant="quiet" className="jf-upload__remove" type="button" disabled={disabled} onClick={()=>{setSelectedFile(null);setUploadError('');onRemove()}} aria-label={`Remover ${label}`}>Remover arquivo</ActionButton>}
+    {message&&<small id={messageId} className="jf-field__message" role={error||uploadError?'alert':undefined}>{message}</small>}
+    </div>
   );
 }
 
@@ -882,6 +973,8 @@ type MultiFileUploadFieldProps = FieldBaseProps & {
   emptyHint: string;
   variant?: "file" | "picture";
   maxFiles?: number;
+  disabled?:boolean;
+  maxBytes?:number;
   onFilesChange: (files: File[]) => void;
 };
 
@@ -895,22 +988,10 @@ function formatFileSize(size: number) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function fileMatchesAccept(file: File, accept: string) {
-  const rules = accept.split(",").map((rule) => rule.trim().toLowerCase()).filter(Boolean);
-  if (!rules.length) return true;
-  const fileName = file.name.toLowerCase();
-  const fileType = file.type.toLowerCase();
-  return rules.some((rule) => {
-    if (rule.startsWith(".")) return fileName.endsWith(rule);
-    if (rule.endsWith("/*")) return fileType.startsWith(rule.slice(0, -1));
-    return fileType === rule;
-  });
-}
-
 function UploadImagePreview({ file }: { file: File }) {
   const [previewUrl] = useState(() => URL.createObjectURL(file));
   useEffect(() => () => URL.revokeObjectURL(previewUrl), [previewUrl]);
-  return <img src={previewUrl} alt={`Prévia de ${file.name}`} />;
+  return file.type==='image/svg+xml'||file.name.toLowerCase().endsWith('.svg')?<FileImage className="jf-upload-svg-preview" aria-label="SVG: prévia após conversão segura no servidor" size={32}/>:<img src={previewUrl} alt={`Prévia de ${file.name}`} />;
 }
 
 export function MultiFileUploadField({
@@ -923,44 +1004,50 @@ export function MultiFileUploadField({
   emptyHint,
   variant = "file",
   maxFiles = 8,
+  disabled=false,maxBytes,
   onFilesChange,
   className = "",
 }: MultiFileUploadFieldProps) {
-  const [dragActive, setDragActive] = useState(false);
+  const [dragActive, setDragActive] = useState(false),[uploadError,setUploadError]=useState('');
+  const dragDepth=useRef(0);
   const inputId = useId();
   const messageId = `${inputId}-message`;
   const StateIcon = variant === "picture" ? Images : Files;
   const hasFiles = files.length > 0;
 
   function addFiles(nextFiles: File[]) {
-    const knownFiles = new Set(files.map(fileKey));
-    const acceptedFiles = nextFiles.filter((file) => fileMatchesAccept(file, accept) && !knownFiles.has(fileKey(file)));
-    onFilesChange([...files, ...acceptedFiles].slice(0, maxFiles));
+    if(disabled||!nextFiles.length)return;
+    const knownFiles = new Set(files.map(fileKey));let invalid=false;
+    const acceptedFiles = nextFiles.filter(file=>{if(!fileMatchesAccept(file,accept)||maxBytes&&file.size>maxBytes){invalid=true;return false}const key=fileKey(file);if(knownFiles.has(key))return false;knownFiles.add(key);return true});
+    const next=[...files,...acceptedFiles].slice(0,maxFiles);
+    setUploadError(invalid?'Alguns arquivos excedem o tamanho ou o formato permitido. Confira as instruções.':files.length+acceptedFiles.length>maxFiles?`Limite de ${maxFiles} arquivos.`:acceptedFiles.length===0?'Esse arquivo já foi selecionado.':'');
+    if(next.length!==files.length)onFilesChange(next);
   }
 
   function removeFile(file: File) {
-    const targetKey = fileKey(file);
+    const targetKey = fileKey(file);setUploadError('');
     onFilesChange(files.filter((item) => fileKey(item) !== targetKey));
   }
 
   function handleDrop(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
+    event.preventDefault();event.stopPropagation();dragDepth.current=0;
     setDragActive(false);
     addFiles(Array.from(event.dataTransfer.files));
   }
 
   return (
-    <div className={`jf-multi-upload-field ${error ? "is-error" : ""} ${className}`}>
+    <div className={`jf-multi-upload-field ${error||uploadError ? "is-error" : ""} ${className}`}>
       <label className="jf-field__label" htmlFor={inputId}>
         <b>{label}</b>
         <i>{requiredLabel ?? `${files.length}/${maxFiles}`}</i>
       </label>
       <label
-        className={`jf-multi-upload jf-multi-upload--${variant} ${hasFiles ? "is-filled" : ""} ${dragActive ? "is-dragging" : ""}`}
+        className={`jf-multi-upload jf-multi-upload--${variant} ${hasFiles ? "is-filled" : ""} ${dragActive ? "is-dragging" : ""} ${disabled?"is-disabled":""}`}
         htmlFor={inputId}
-        onDragEnter={(event) => { event.preventDefault(); setDragActive(true); }}
-        onDragOver={(event) => event.preventDefault()}
-        onDragLeave={() => setDragActive(false)}
+        aria-disabled={disabled}
+        onDragEnter={(event) => { event.preventDefault(); if(!disabled){dragDepth.current++;setDragActive(true)} }}
+        onDragOver={(event) => {event.preventDefault();event.dataTransfer.dropEffect=disabled?"none":"copy"}}
+        onDragLeave={()=>{if(--dragDepth.current<=0){dragDepth.current=0;setDragActive(false)}}}
         onDrop={handleDrop}
       >
         <input
@@ -968,7 +1055,9 @@ export function MultiFileUploadField({
           type="file"
           accept={accept}
           multiple
-          aria-describedby={helpText || error ? messageId : undefined}
+          disabled={disabled}
+          aria-invalid={!!(error||uploadError)}
+          aria-describedby={helpText || error || uploadError ? messageId : undefined}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             addFiles(Array.from(event.target.files ?? []));
             event.target.value = "";
@@ -987,7 +1076,7 @@ export function MultiFileUploadField({
             <div key={fileKey(file)}>
               <span><FileCheck2 size={17} aria-hidden="true" /></span>
               <div><strong title={file.name}>{file.name}</strong><small>{formatFileSize(file.size)}</small></div>
-              <button type="button" aria-label={`Remover ${file.name}`} onClick={() => removeFile(file)}><X size={15} aria-hidden="true" /></button>
+              <button type="button" disabled={disabled} aria-label={`Remover ${file.name}`} onClick={() => removeFile(file)}><X size={15} aria-hidden="true" /></button>
             </div>
           ))}
         </div>
@@ -998,12 +1087,12 @@ export function MultiFileUploadField({
             <div key={fileKey(file)}>
               <UploadImagePreview file={file} />
               <span title={file.name}>{file.name}</span>
-              <button type="button" aria-label={`Remover ${file.name}`} onClick={() => removeFile(file)}><X size={15} aria-hidden="true" /></button>
+              <button type="button" disabled={disabled} aria-label={`Remover ${file.name}`} onClick={() => removeFile(file)}><X size={15} aria-hidden="true" /></button>
             </div>
           ))}
         </div>
       )}
-      {(error || helpText) && <small id={messageId} className="jf-field__message">{error ?? helpText}</small>}
+      {(error || uploadError || helpText) && <small id={messageId} role={error||uploadError?"alert":undefined} className="jf-field__message">{error || uploadError || helpText}</small>}
     </div>
   );
 }

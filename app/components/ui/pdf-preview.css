@@ -1,0 +1,5 @@
+.jf-pdf-preview{min-width:0;display:grid;gap:var(--jf-ui-space-3)}
+.jf-pdf-preview__controls{display:flex;justify-content:space-between;align-items:center;gap:var(--jf-ui-space-2);flex-wrap:wrap;font-size:var(--jf-ui-font-size-sm)}
+.jf-pdf-preview__viewport{min-width:0;max-height:65dvh;overflow:auto;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface-soft)}
+.jf-pdf-preview__viewport canvas{display:block;max-width:100%;margin-inline:auto}
+.jf-pdf-preview__text{white-space:pre-wrap;overflow-wrap:anywhere}

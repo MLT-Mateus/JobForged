@@ -1,6 +1,39 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+test('company activity, managed identity and page redirect enforce session and validation',async()=>{
+ const names=['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY','APP_ENV'];const previous=Object.fromEntries(names.map(k=>[k,process.env[k]]));const original=globalThis.fetch;
+ let role='owner',domainStatus='active',domainFailure=false;const calls=[];
+ Object.assign(process.env,{SUPABASE_INTERNAL_URL:'https://supabase.fixture.invalid',SUPABASE_ANON_KEY:'fixture-anon',APP_ENV:'test'});
+ globalThis.fetch=async(input,init)=>{
+  const url=String(input),body=init?.body?JSON.parse(init.body):null;
+  if(url.endsWith('/auth/v1/user'))return Response.json({id:'fixture-owner',email:'owner@example.invalid',email_confirmed_at:'2026-11-10T00:00:00Z'});
+  if(url.endsWith('/rpc/is_platform_admin'))return Response.json(false);
+  if(url.endsWith('/rpc/session_context_v1'))return Response.json({company_id:'fixture-company',role,full_name:'Fixture Owner',companies:{id:'fixture-company',name:'Fixture'}});
+  if(url.endsWith('/rpc/company_activity_v2')){calls.push(body);return Response.json({items:[],page:body.requested_page,pageSize:10,total:0})}
+  if(url.endsWith('/rpc/update_company_member_identity_v1')){calls.push(body);return Response.json({id:body.target_member_id,full_name:body.new_full_name,cpf:body.new_cpf,phone:body.new_phone})}
+  if(url.endsWith('/rpc/read_company_portal'))return Response.json({slug:'fixture-company',isPublic:true});
+  if(url.endsWith('/rpc/company_domain'))return domainFailure?new Response('',{status:503}):Response.json({status:domainStatus,hostname:'careers.fixture.invalid',checkedAt:new Date().toISOString(),version:1});
+  throw Error('Unexpected company fixture operation');
+ };
+ try{
+  const {default:worker}=await import('../dist/server/index.js');
+  const request=(path,body,origin='http://localhost',cookie='jf_auth_access=fixture-token')=>worker.fetch(new Request('http://localhost'+path,{method:body?'PATCH':'GET',headers:{host:'localhost',origin,cookie,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+  assert.equal((await request('/api/company/activity?page=0')).status,400);
+  assert.equal((await request('/api/company/activity?category=unknown')).status,400);
+  assert.equal((await request('/api/company/activity?page=2&category=member')).status,200);assert.deepEqual(calls.pop(),{requested_page:2,category:'member',actor_query:'',date_from:null,date_to:null});
+  const identity={id:'17000000-0000-4000-8000-000000000001',fullName:'Fixture Updated',cpf:'529.982.247-25',phone:'(11) 98765-4321'};
+  assert.equal((await request('/api/company/members/identity',identity,'https://foreign.invalid')).status,403);
+  assert.equal((await request('/api/company/members/identity',{...identity,cpf:'11111111111'})).status,400);
+  assert.equal((await request('/api/company/members/identity',identity)).status,200);assert.deepEqual(calls.pop(),{target_member_id:identity.id,new_full_name:'Fixture Updated',new_cpf:'52998224725',new_phone:'11987654321'});
+  role='member';assert.equal((await request('/api/company/activity')).status,403);assert.equal((await request('/api/company/members/identity',identity)).status,403);
+  role='owner';let opened=await request('/api/company/portal/open');assert.equal(opened.status,302);assert.equal(opened.headers.get('location'),'https://careers.fixture.invalid');assert.match(opened.headers.get('cache-control'),/no-store/);
+  domainStatus='pending';assert.equal((await request('/api/company/portal/open')).headers.get('location'),'/fixture-company');
+  domainFailure=true;assert.equal((await request('/api/company/portal/open')).headers.get('location'),'/fixture-company');
+  assert.equal((await request('/api/company/portal/open',null,undefined,'')).status,403);
+ }finally{globalThis.fetch=original;for(const [key,value]of Object.entries(previous)){if(value===undefined)delete process.env[key];else process.env[key]=value}}
+});
+
 test('administrative TOTP enrollment labels its issuer and protects one-time setup material', async () => {
  const previous={SUPABASE_INTERNAL_URL:process.env.SUPABASE_INTERNAL_URL,SUPABASE_ANON_KEY:process.env.SUPABASE_ANON_KEY,APP_ENV:process.env.APP_ENV};
  const originalFetch=globalThis.fetch;let invalid=true,enrollmentBody;
@@ -38,7 +71,7 @@ test('backoffice APIs enforce session, origin, validation and invitation secrecy
   if(url.endsWith('/auth/v1/user'))return Response.json({id:'26000000-0000-0000-0000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
   if(url.endsWith('/rest/v1/rpc/is_platform_admin'))return Response.json(admin);
   if(url.endsWith('/rest/v1/rpc/session_context_v1'))return Response.json(null);
-  if(url.endsWith('/rest/v1/rpc/platform_read'))return Response.json(databaseStatus===200?{total:0,items:[]}:{message:'recent MFA required'},{status:databaseStatus});
+  if(url.endsWith('/rest/v1/rpc/platform_read_v2'))return Response.json(databaseStatus===200?{total:0,items:[]}:{message:'recent MFA required'},{status:databaseStatus});
   if(url.endsWith('/rest/v1/rpc/platform_manage')){if(databaseStatus!==200)return Response.json({message:'recent MFA required'},{status:databaseStatus});calls.push(body);return Response.json(body.operation==='invitation.create'?{id:'26000000-0000-0000-0000-000000000031',email:'invite@example.invalid',token:'a'.repeat(64),company_name:'Fixture'}:{ok:true});}
   if(url.endsWith('/rest/v1/rpc/platform_public_settings'))return Response.json({platform_name:'Fixture',support_email:'support@example.invalid',support_url:'https://example.invalid'});
   if(url==='https://api.brevo.com/v3/smtp/email')return new Response('{}',{status:delivery?201:503});
@@ -60,4 +93,62 @@ test('backoffice APIs enforce session, origin, validation and invitation secrecy
   delivery=false;assert.equal((await request('/api/backoffice',mutation)).status,503);assert.equal(calls.at(-1).operation,'invitation.revoke');
   const settings=await request('/api/platform/settings',null,{cookie:''});assert.equal(settings.status,200);assert.equal(Object.keys(await settings.json()).length,3);
  } finally {globalThis.fetch=originalFetch;for(const name of names){if(previous[name]===undefined)delete process.env[name];else process.env[name]=previous[name];}}
+});
+
+
+test('logout works without MFA and deletion forwards only confirmed administrator inputs',async()=>{
+ const original=globalThis.fetch;const previous={...process.env};let platform=true,deny=true;const calls=[];
+ process.env.APP_ENV='test';process.env.SUPABASE_INTERNAL_URL='http://deletion-fixture.invalid';process.env.SUPABASE_ANON_KEY='fixture';
+ globalThis.fetch=async(input,init)=>{const path=new URL(String(input)).pathname;
+  if(path==='/auth/v1/user')return Response.json({id:'26000000-0000-0000-0000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
+  if(path.endsWith('/rpc/is_platform_admin'))return Response.json(platform);
+  if(path.endsWith('/rpc/session_context_v1'))return Response.json(null);
+  if(path.endsWith('/rpc/revoke_current_session')){calls.push('revoke');return new Response(null,{status:204})}
+  if(path==='/auth/v1/logout'){calls.push('logout');return new Response(null,{status:204})}
+  if(path.endsWith('/rpc/company_deletion')){calls.push(JSON.parse(init.body));return deny?Response.json({message:'recent MFA required'},{status:403}):Response.json({id:'fixture-job',state:'queued'})}
+  throw Error('Unexpected deletion fixture request');
+ };
+ try{
+ const {default:worker}=await import('../dist/server/index.js');
+ const send=(path,body,origin='http://localhost',cookie='jf_auth_access=fixture')=>worker.fetch(new Request('http://localhost'+path,{method:body?'POST':'GET',headers:{host:'localhost',origin,cookie,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+ assert.equal((await send('/api/auth/sign-out',{},'https://foreign.invalid')).status,403);
+ const logout=await send('/api/auth/sign-out',{});assert.equal(logout.status,200);assert.match(logout.headers.get('set-cookie'),/jf_auth_access=;.*Max-Age=0/);assert.ok(calls.includes('revoke'));assert.ok(calls.includes('logout'));
+ const body={company:'26000000-0000-0000-0000-000000000011',confirmation:'Fixture',reason:'Acceptance fixture',removeAccounts:true,operation:'force',mfa:true};
+ assert.equal((await send('/api/backoffice/company-deletion',body,'https://foreign.invalid')).status,403);
+ assert.equal((await send('/api/backoffice/company-deletion',body,undefined,'')).status,403);
+ platform=false;assert.equal((await send('/api/backoffice/company-deletion',body)).status,403);platform=true;
+ const factor=await send('/api/backoffice/company-deletion',body);assert.equal(factor.status,403);assert.equal((await factor.json()).code,'ADMIN_MFA_REQUIRED');
+ deny=false;assert.equal((await send('/api/backoffice/company-deletion',{...body,confirmation:''})).status,202); // Exact-name check is authoritative in SQL.
+ assert.deepEqual(calls.at(-1),{operation:'request',target_company:body.company,confirmation:'',change_reason:body.reason,remove_accounts:true});
+ assert.equal((await send('/api/backoffice/company-deletion',{...body,removeAccounts:'yes'})).status,400);
+ process.env.APP_ENV='live';assert.equal((await send('/api/backoffice/company-deletion',body)).status,503);
+ }finally{globalThis.fetch=original;for(const key of ['APP_ENV','SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY']){if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key]}}
+});
+
+test('account identity validates CPF and phone, preserves old clients and uses only the session identity',async()=>{
+ const names=['SUPABASE_INTERNAL_URL','SUPABASE_ANON_KEY','APP_ENV'];const previous=Object.fromEntries(names.map(k=>[k,process.env[k]]));const originalFetch=globalThis.fetch;let rpcCall;
+ Object.assign(process.env,{SUPABASE_INTERNAL_URL:'https://supabase.fixture.invalid',SUPABASE_ANON_KEY:'fixture-anon',APP_ENV:'test'});
+ globalThis.fetch=async(input,init)=>{
+  const url=String(input);
+  if(url.endsWith('/auth/v1/user'))return Response.json({id:'fixture-owner',email:'owner@example.invalid',email_confirmed_at:'2026-11-10T00:00:00Z'});
+  if(url.endsWith('/rpc/is_platform_admin'))return Response.json(false);
+  if(url.endsWith('/rpc/session_context_v1'))return Response.json({company_id:'fixture-company',role:'owner',full_name:'Fixture Owner',companies:{id:'fixture-company',name:'Fixture'}});
+  if(url.endsWith('/rpc/account_read_v1'))return Response.json({fullName:'Fixture Owner',cpf:null,phone:null});
+  if(url.endsWith('/rpc/update_my_member_identity_v1')){rpcCall=JSON.parse(init.body);return Response.json({fullName:rpcCall.new_full_name,cpf:rpcCall.new_cpf,phone:rpcCall.new_phone});}
+  if(url.endsWith('/rpc/update_my_member_profile')){rpcCall=JSON.parse(init.body);return Response.json({full_name:rpcCall.new_full_name});}
+  throw Error('Unexpected account fixture request');
+ };
+ try{
+  const {default:worker}=await import('../dist/server/index.js');
+  const request=(body,origin='http://localhost')=>worker.fetch(new Request('http://localhost/api/account',{method:body?'PATCH':'GET',headers:{host:'localhost',origin,cookie:'jf_auth_access=fixture-token','content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+  const read=await request();assert.equal(read.status,200);assert.equal((await read.json()).cpf,null);
+  assert.equal((await request({fullName:'Fixture Owner',cpf:'11111111111',phone:''})).status,400);
+  assert.equal((await request({fullName:'Fixture Owner',cpf:'52998224725',phone:'12'})).status,400);
+  assert.equal((await request({fullName:'Fixture Owner',cpf:'52998224725'})).status,400);
+  assert.equal((await request({fullName:'Fixture Owner'},'https://elsewhere.invalid')).status,403);
+  const saved=await request({fullName:'Fixture Updated',cpf:'529.982.247-25',phone:'(11) 98765-4321',userId:'other-account'});assert.equal(saved.status,200);
+  assert.deepEqual(rpcCall,{new_full_name:'Fixture Updated',new_cpf:'52998224725',new_phone:'11987654321'});
+  assert.equal((await saved.json()).cpf,'52998224725');
+  assert.equal((await request({fullName:'Fixture Legacy'})).status,200);assert.deepEqual(rpcCall,{new_full_name:'Fixture Legacy'});
+ }finally{globalThis.fetch=originalFetch;for(const [key,value]of Object.entries(previous)){if(value===undefined)delete process.env[key];else process.env[key]=value}}
 });

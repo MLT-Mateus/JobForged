@@ -17,5 +17,5 @@ export default async function Page({params,searchParams}:{params:Promise<{path:s
  if(!session)unauthorized();
  if(!session.platformAdmin)forbidden();
  const filter=(await searchParams).company;
- return <BackofficeManagementClient email={session.email} section={path.length===2?'company':section.id} companyId={path[1] || (filter&&/^[0-9a-f-]{36}$/i.test(filter)?filter:undefined)}/>;
+ return <BackofficeManagementClient deletionEnabled={process.env.APP_ENV==='test'} email={session.email} section={path.length===2?'company':section.id} companyId={path[1] || (filter&&/^[0-9a-f-]{36}$/i.test(filter)?filter:undefined)}/>;
 }

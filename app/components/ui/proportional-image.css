@@ -6,3 +6,6 @@ div.jf-proportional-image>picture>img.jf-proportional-image__foreground{object-f
 @media(prefers-reduced-transparency:reduce){div.jf-proportional-image>picture>img.jf-proportional-image__ambient{display:none}.jf-proportional-image__glass{display:none}}
 
 .jf-proportional-image>picture{display:contents}
+.jf-proportional-image__mask{position:absolute;inset:0;pointer-events:none;background:var(--jf-photo-ink);mask:var(--jf-photo-mask) center/contain no-repeat;mix-blend-mode:color}
+.jf-proportional-image__mask--compact{display:none}
+@media(max-width:680px){.jf-proportional-image__mask--wide{display:none}.jf-proportional-image__mask--compact{display:block}}

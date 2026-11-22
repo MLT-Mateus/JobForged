@@ -1,0 +1,11 @@
+"use client";
+import {useState} from 'react';
+import {Plus,ArrowUp,ArrowDown,Trash2} from 'lucide-react';
+import {ActionButton} from './AdminPrimitives';
+import {TextField} from './FormControls';
+export function ItemListField({label,items,onChange,maxItems=5,maxLength=200,ordered=false}:{label:string;items:string[];onChange:(items:string[])=>void;maxItems?:number;maxLength?:number;ordered?:boolean}){
+ const [entry,setEntry]=useState(''),[error,setError]=useState('');
+ const add=()=>{const text=entry.trim();if(!text)return;if(items.includes(text)){setError('Este item já foi adicionado.');return}if(items.length>=maxItems)return;onChange([...items,text]);setEntry('');setError('')};
+ const move=(index:number,by:number)=>{const next=[...items];[next[index],next[index+by]]=[next[index+by],next[index]];onChange(next)};
+ return <div className="jf-item-list-field"><div className="jf-item-list-field__add"><TextField label={label} value={entry} maxLength={maxLength} onBlur={add} disabled={items.length>=maxItems} onChange={e=>{setEntry(e.target.value);setError('')}} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();add()}}} placeholder="Digite um novo item..." error={error||undefined}/><ActionButton type="button" variant="secondary" icon={<Plus size={16}/>} disabled={!entry.trim()||items.length>=maxItems} onClick={add}>Adicionar</ActionButton></div><ol>{items.map((item,index)=><li key={index}><TextField label={`${label} · item ${index+1}`} value={item} maxLength={Math.max(maxLength,item.length)} onChange={e=>onChange(items.map((value,i)=>i===index?e.target.value:value))}/><div>{ordered&&<><ActionButton type="button" variant="quiet" aria-label={`Subir item ${index+1}`} disabled={!index} onClick={()=>move(index,-1)}><ArrowUp size={16}/></ActionButton><ActionButton type="button" variant="quiet" aria-label={`Descer item ${index+1}`} disabled={index===items.length-1} onClick={()=>move(index,1)}><ArrowDown size={16}/></ActionButton></>}<ActionButton type="button" variant="quiet" aria-label={`Remover item ${index+1}`} onClick={()=>onChange(items.filter((_,i)=>i!==index))}><Trash2 size={16}/></ActionButton></div></li>)}</ol><small>{items.length} de {maxItems} itens{items.length>maxItems?' · Itens antigos preservados':''}.</small>{entry.trim()&&<small role="status">O texto será incluído ao sair do campo ou clicar em Adicionar.</small>}</div>;
+}

@@ -33,8 +33,8 @@ export function policyPath(path){
   '/api/portal/resume':'/storage/v1/object/candidate-resumes','/api/auth/candidate-sign-up':'/auth/v1/signup','/rest/v1/rpc/create_candidate_signup_intent':'/auth/v1/signup',
   '/api/auth/sign-in':'/auth/v1/token','/api/auth/sign-up':'/auth/v1/signup',
   '/api/auth/invitee-sign-up':'/auth/v1/signup','/api/auth/recover':'/auth/v1/recover',
-  '/api/auth/confirmation/resend':'/auth/v1/resend','/api/auth/confirmation/session':'/auth/v1/verify',
-  '/api/auth/recovery/session':'/auth/v1/verify','/api/auth/recovery/password':'/auth/v1/user',
+  '/api/auth/confirmation/resend':'/auth/v1/resend','/api/auth/confirmation/session':'/auth/v1/verify','/rest/v1/rpc/change_my_login_email':'/auth/v1/user',
+  '/api/auth/recovery/session':'/auth/v1/verify','/api/auth/recovery/password':'/auth/v1/user','/api/account/credentials':'/auth/v1/user',
   '/api/backoffice/security':'/auth/v1/factors',
   '/rest/v1/rpc/create_company_signup_intent':'/auth/v1/signup',
  };

@@ -1,1 +1,3 @@
-import type { Metadata } from "next"; import JobWizardClient from "@/app/components/jobs/JobWizardClient"; import { activeOrganization,getAdminContext } from "@/app/components/admin/admin-data"; export const metadata:Metadata={title:"JobForged | Nova vaga"}; export default async function Page(){const context=await getAdminContext(activeOrganization.id);return context?<JobWizardClient context={context}/>:null}
+import JobsWorkspace from '@/app/components/jobs/JobsWorkspace';
+export const metadata={title:'JobForged | Nova vaga'};
+export default function Page(){return <JobsWorkspace view="edit" />}

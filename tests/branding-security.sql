@@ -24,6 +24,13 @@ begin
  result:=public.read_company_branding();if result->'published'<>config or jsonb_array_length(result->'history')<>2 then raise exception 'publication missing';end if;
  perform set_config('jbfd.history_id',result#>>'{history,0,id}',true);
  begin perform public.write_company_branding('save_public',v,config);raise exception 'stale version accepted';exception when sqlstate 'PT409' then null;end;
+ declare palette_config jsonb;begin
+  for palette_config in select value from jsonb_array_elements(current_setting('jbfd.palette_configs')::jsonb) loop
+   perform public.write_company_branding('save_public',(public.read_company_branding()->>'version')::bigint,palette_config);
+   if public.read_company_branding()->'published'<>palette_config then raise exception 'palette persistence mismatch';end if;
+  end loop;
+  raise exception using errcode='ZX001',message='rollback isolated palette roundtrip';
+ exception when sqlstate 'ZX001' then null;end;
  foreach pair in array array['jobforged','contemporaneo','objetivo','editorial'] loop
   v:=(public.read_company_branding()->>'version')::bigint;
   perform public.write_company_branding('save_public',v,jsonb_set(config,'{typography,fontPair}',to_jsonb(pair)));
@@ -38,7 +45,7 @@ begin
  v:=public.write_company_branding('reset_public',v,config);
  v:=public.write_company_branding('restore_public',v,null,current_setting('jbfd.history_id')::uuid);
  v:=public.write_company_branding('discard',v);
- result:=public.read_company_branding();if result->'draft'<>result->'published' or jsonb_array_length(result->'history')<>8 then raise exception 'history lost';end if;
+ result:=public.read_company_branding();if result->'published'<>config then raise exception 'restore did not recover complete configuration';end if;if result->'draft'<>result->'published' or jsonb_array_length(result->'history')<>8 then raise exception 'history lost';end if;
  begin update public.company_branding_history set snapshot='{}';raise exception 'history mutable';exception when insufficient_privilege then null;end;
  begin insert into storage.objects(bucket_id,name) values('company-branding','38000000-0000-0000-0000-000000000011/38000000-0000-0000-0000-000000000031.png');raise exception 'client bypassed image processor';exception when insufficient_privilege then null;end;
 end$$;

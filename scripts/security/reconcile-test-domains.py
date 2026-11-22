@@ -42,6 +42,12 @@ def labels_for(hosts,network):
 def reconcile():
  rows=json.loads(sql("select coalesce(json_agg(x),'[]') from(select d.*,c.operational_status from public.company_domains d join public.companies c on c.id=d.company_id where d.status<>'disabled' order by d.hostname limit 101)x;"))
  if len(rows)>100:raise RuntimeError('Domain platform quota exceeded')
+ candidates=json.loads(sql("select coalesce(json_agg(x),'[]') from(select d.*,c.operational_status from app_private.company_domain_requests d join public.companies c on c.id=d.company_id where d.status<>'draft' order by d.hostname limit 101)x;"))
+ if len(rows)+len(candidates)>100:raise RuntimeError('Domain platform quota exceeded')
+ for row in candidates:
+  good=row['operational_status']=='active' and valid_proof(row)
+  cid=row['company_id'];version=int(row['version'])
+  sql("update app_private.company_domain_requests set status='"+('verified' if good else 'pending')+"',checked_at=now() where company_id='"+cid+"' and version="+str(version)+" and status<>'draft';")
  verified=[]
  for row in rows:
   good=row['operational_status']=='active' and valid_proof(row)
@@ -50,7 +56,7 @@ def reconcile():
   if good:
    sql("update public.company_domains set status=case when status='active' then 'active' else 'verified' end,verified_at=coalesce(verified_at,now()),checked_at=now() "+guard)
   else:sql("update public.company_domains set status=case when status='pending' and requested_at<now()-interval '7 days' then 'disabled' else 'pending' end,checked_at=now(),verified_at=null "+guard)
- verified=json.loads(sql("select coalesce(json_agg(hostname order by hostname),'[]') from public.company_domains where status in ('verified','active') and checked_at>now()-interval '1 minute';"))
+ verified=json.loads(sql("select coalesce(json_agg(hostname order by hostname),'[]') from (select hostname from public.company_domains where status in ('verified','active') and checked_at>now()-interval '1 minute' union select hostname from app_private.company_domain_requests where status='verified' and checked_at>now()-interval '1 minute') routes;"))
  old=json.loads(run(['docker','inspect',NAME]))[0] if subprocess.run(['docker','inspect',NAME],capture_output=True).returncode==0 else None
  if old and old['Config']['Labels'].get('jbfd.domain.environment')!='test':raise RuntimeError('Unexpected container ownership')
  if verified:
@@ -71,6 +77,23 @@ def reconcile():
   if tls_ready(host):
    # host is validated above and SQL-quoted defensively.
    sql("update public.company_domains set status='active' where hostname='"+host.replace("'","''")+"' and status in ('verified','active');");ready+=1
+ for row in candidates:
+  if not valid_proof(row) or not tls_ready(row['hostname']):continue
+  cid=row['company_id'];version=int(row['version'])
+  # Lock the same company row used by publication. Never replace a newer edit.
+  sql("""do $$declare r app_private.company_domain_requests; current_v bigint;begin
+   perform 1 from public.companies where id='%s' and operational_status='active' for update;
+   if not found then return;end if;
+   select * into r from app_private.company_domain_requests where company_id='%s' and version=%d and status='verified' for update;
+   if r.company_id is null then return;end if;
+   select version into current_v from public.company_domains where company_id=r.company_id for update;
+   if coalesce(current_v,0)<>r.current_version then return;end if;
+   insert into public.company_domains(company_id,hostname,verification_token,status,version,verified_at,checked_at,address_kind,dns_zone,preferences_hostname)
+   values(r.company_id,r.hostname,r.verification_token,'active',r.current_version+1,now(),now(),r.address_kind,r.dns_zone,r.hostname)
+   on conflict(company_id) do update set hostname=excluded.hostname,verification_token=excluded.verification_token,status='active',version=excluded.version,verified_at=now(),checked_at=now(),address_kind=excluded.address_kind,dns_zone=excluded.dns_zone,preferences_hostname=excluded.hostname;
+   delete from app_private.company_domain_requests where company_id=r.company_id and version=r.version;
+   insert into public.company_audit_events(company_id,action,target_id,details) values(r.company_id,'domain.activated',r.company_id,jsonb_build_object('hostname',r.hostname));
+  end$$;"""%(cid,cid,version))
  print(json.dumps({'environment':'test','registered':len(rows),'dnsVerified':len(verified),'httpsReady':ready}))
 if __name__=='__main__':
  import fcntl

@@ -1,0 +1,74 @@
+import {Buffer} from 'node:buffer';
+import {createHash,randomBytes} from 'node:crypto';
+import type {NextRequest} from 'next/server';
+import {readSession,requestDatabase,requireSameOrigin} from '@/app/api/auth/_server';
+import {assistantDraft,validateAssistantPatch} from '@/app/components/jobs/job-assistant-contract';
+import {validateAssistantResponse} from '@/app/components/jobs/assistant-response';
+import {emptyJob} from '@/app/components/jobs/job-types';
+import {editorChecks} from '@/app/components/jobs/job-editor-model';
+import {jsonFrames,partialReply,parseAssistantJSON} from '@/app/components/jobs/chat-stream';
+import {assistantEnvironment,assistantWebhook} from './environment';
+export const runtime='nodejs';
+export async function POST(request:NextRequest){
+ const headers=new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'});
+ const fail=(message:string,status:number)=>Response.json({message},{status,headers});
+ const environment=assistantEnvironment();
+ if(!environment)return fail('Assistente indisponível neste ambiente.',404);
+ const authoringWebhook=assistantWebhook(environment,'authoring');
+ if(!requireSameOrigin(request))return fail('Origem inválida.',403);
+ const session=await readSession(request,headers);
+ if(!session?.company||session.platformAdmin||!['owner','admin'].includes(session.role))return fail('Acesso negado.',403);
+ const accessToken=session.accessToken;
+ try{
+  const reader=request.body?.getReader();let text='',size=0;const decoder=new TextDecoder();
+  if(reader)while(true){const part=await reader.read();if(part.done)break;size+=part.value.length;if(size>100000){await reader.cancel();return fail('Conversa muito longa.',413)}text+=decoder.decode(part.value,{stream:true})}
+  const body=JSON.parse(text+decoder.decode());
+  if(body.companyId!==session.company.id||typeof body.message!=='string'||!body.message.trim()||body.message.length>4000||!body.draft||typeof body.draft!=='object')return fail('Confira a mensagem e a empresa ativa.',400);
+  const attachments=body.attachments??[];
+  if(!Array.isArray(attachments)||attachments.length>2||attachments.some(a=>!a||typeof a.name!=='string'||a.name.length>180||typeof a.text!=='string'||!a.text.trim())||attachments.reduce((n,a)=>n+a.text.length,0)>16000)return fail('Anexe até dois documentos, com no máximo 16 mil caracteres no total.',400);
+  const response=await requestDatabase('rpc/company_branches_v1',session.accessToken,{operation:'list'});
+  if(!response?.ok)return fail('Não foi possível consultar as filiais.',503);
+  const branches=(await response.json() as {id:string;name:string;city:string;state:string;status:string}[]).filter(b=>b.status==='Ativo').map(({id,name,city,state})=>({id,name,city,state}));
+  let draft,pendingProposal;try{draft=validateAssistantPatch(assistantDraft(body.draft),branches.map(b=>b.id));pendingProposal=validateAssistantPatch(body.pendingProposal??{},branches.map(b=>b.id))}catch{return fail('Confira os valores do formulário. A sugestão não foi iniciada.',422)}
+  const currentDraft={...emptyJob(),...draft,lgpd:body.draft.lgpd===true};
+  const missing=editorChecks(currentDraft).filter(c=>!c.done).map(c=>c.label);
+  const history=Array.isArray(body.history)?body.history.slice(-12).map((m:{role?:string;text?:string})=>({role:m?.role==='assistant'?'assistant':'user',text:typeof m?.text==='string'?m.text.slice(0,3000):''})):[];
+  const payload={contractVersion:2,draft,currentDraft:draft,pendingProposal,objective:typeof body.objective==='string'?body.objective.slice(0,1000):'',validationState:{consentConfirmed:currentDraft.lgpd,essentialMissing:missing,example:currentDraft.example===true},branches,history,attachments:attachments.map(a=>({name:a.name,text:a.text})),company:{name:session.company.name},missing,message:body.message,today:new Date().toISOString().slice(0,10)};
+  if(new TextEncoder().encode(JSON.stringify(payload)).length>95000)return fail('Reduza o tamanho dos anexos para continuar.',413);
+  const token=Buffer.from(randomBytes(32)).toString('base64url');
+  const issued=await requestDatabase('rpc/job_assistant_issue',session.accessToken,{token_hash:createHash('sha256').update(token).digest('hex'),payload});
+  if(!issued?.ok)return fail(issued?.status===429?'Limite do assistente atingido. Tente novamente mais tarde.':'Não foi possível iniciar o assistente.',issued?.status===429?429:503);
+  const wantsStream=request.headers.get('accept')?.includes('application/x-ndjson');
+  const abort=new AbortController(),signal=AbortSignal.any([request.signal,abort.signal,AbortSignal.timeout(50000)]);
+  const result=await fetch(assistantWebhook(environment,wantsStream?'authoring-stream':'authoring'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),redirect:'error',signal});
+  if(!result.ok)return fail('O assistente está indisponível. Seu formulário permanece preservado.',503);
+  function validate(data:unknown){return {...validateAssistantResponse(data,branches.map(b=>b.id),currentDraft),branches}}
+  // One bounded format repair. The provider still cannot persist, confirm or publish.
+  async function validated(data:unknown){try{return validate(data)}catch(error){
+   const retryToken=Buffer.from(randomBytes(32)).toString('base64url');
+   const retryPayload={...payload,formatCorrection:{message:error instanceof Error?error.message:'Formato inválido.',previousProposal:data,instruction:'Responda novamente ao pedido original. Corrija todos os tipos conforme CAMPOS PERMITIDOS, preserve fatos e escopo. careerPlan é texto; performanceReviews e promotionPossible são booleanos. Não inclua example=false.'}};
+   if(new TextEncoder().encode(JSON.stringify(retryPayload)).length>95000)throw error;
+   const retryIssued=await requestDatabase('rpc/job_assistant_issue',accessToken,{token_hash:createHash('sha256').update(retryToken).digest('hex'),payload:retryPayload});
+   if(!retryIssued?.ok)throw error;
+   const retried=await fetch(authoringWebhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:retryToken}),redirect:'error',signal});
+   if(!retried.ok)throw error;return validate(await retried.json());
+  }}
+  if(!wantsStream)return Response.json(await validated(await result.json()),{headers});
+  headers.set('Content-Type','application/x-ndjson; charset=utf-8');headers.set('X-Accel-Buffering','no');
+  const encoder=new TextEncoder();let closed=false;
+  return new Response(new ReadableStream({
+   async start(controller){const emit=(data:unknown)=>{if(!closed)controller.enqueue(encoder.encode(JSON.stringify(data)+'\n'))};
+    try{
+     emit({type:'status',text:'Organizando as informações da vaga'});
+     const frames=jsonFrames(),upstream=result.body?.getReader(),decode=new TextDecoder();let raw='',reply='',total=0;
+     if(!upstream)throw Error('Resposta vazia.');
+     while(true){const chunk=await upstream.read();if(chunk.done)break;total+=chunk.value.length;if(total>250000)throw Error('Resposta muito longa.');for(const event of frames(decode.decode(chunk.value,{stream:true}))){if(event.type==='error')throw Error('Falha no assistente.');if(event.type==='item'&&typeof event.content==='string'&&(!event.metadata|| (event.metadata as {nodeName?:string}).nodeName==='Assistente de vagas')){raw+=event.content;if(raw.length>50000)throw Error('Resposta muito longa.');const next=partialReply(raw);if(next!==reply){reply=next;emit({type:'reply',text:reply})}}}}
+     emit({type:'status',text:'Conferindo os dados da proposta'});
+     const data=await validated(parseAssistantJSON(raw));
+     emit({type:'done',...data});
+    }catch{emit({type:'error',message:'A resposta não foi concluída. Tente novamente; o formulário não foi alterado.'})}
+    finally{closed=true;try{controller.close()}catch{/* Client disconnected. */}}
+   },cancel(){closed=true;abort.abort()}
+  }),{headers});
+ }catch{return fail('Não foi possível concluir a sugestão. Seus dados não foram alterados.',503)}
+}

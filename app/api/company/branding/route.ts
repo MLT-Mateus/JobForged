@@ -5,7 +5,9 @@ export const runtime='nodejs';
 export async function GET(request:NextRequest){
  const headers=new Headers({'Cache-Control':'no-store',Vary:'Cookie'}),session=await readSession(request,headers);
  if(!session?.company||session.platformAdmin)return Response.json({message:'Acesso negado.'},{status:403,headers});
- const response=await requestDatabase('rpc/read_company_branding',session.accessToken,{}).catch(()=>null);
+ const page=request.nextUrl.searchParams.get('historyPage');
+ if(page!==null&&(!/^[1-9][0-9]{0,5}$/.test(page)||Number(page)>100000))return Response.json({message:'Página inválida.'},{status:400,headers});
+ const response=await requestDatabase(page?'rpc/company_branding_history_page':'rpc/read_company_branding',session.accessToken,page?{page_number:Number(page)}:{}).catch(()=>null);
  if(!response?.ok)return Response.json({message:'Não foi possível carregar a identidade.'},{status:503,headers});
  const data=await response.json();return Response.json(data,{headers});
 }
@@ -19,8 +21,8 @@ export async function POST(request:NextRequest){
  let body:{operation?:string;version?:number;companyId?:string;configuration?:unknown;historyId?:string};
  try{body=JSON.parse(text)}catch{return Response.json({message:'Configuração inválida.'},{status:400,headers})}
  if(body?.companyId!==session.company.id)return Response.json({message:'O contexto da conta mudou. Recarregue os dados antes de continuar; seus campos foram preservados.',conflict:true},{status:409,headers});
- if(!body||!['save','publish','reset','discard','restore'].includes(body.operation||'')||!Number.isSafeInteger(body.version)||Number(body.version)<0||
-  (body.operation==='restore'&&!/^[0-9a-f-]{36}$/i.test(body.historyId||'')))return Response.json({message:'Operação inválida.'},{status:400,headers});
+ if(!body||!['save','publish','reset','discard','restore','restore_public'].includes(body.operation||'')||!Number.isSafeInteger(body.version)||Number(body.version)<0||
+  (['restore','restore_public'].includes(body.operation||'')&&!/^[0-9a-f-]{36}$/i.test(body.historyId||'')))return Response.json({message:'Operação inválida.'},{status:400,headers});
  const configuration=body.operation==='reset'?brandContent(brandingDefaults(session.company.id,session.company.name)):normalizeBrandingRichContent(body.configuration);
  if(['save','publish','reset'].includes(body.operation||'')){const error=validateBranding(configuration);if(error)return Response.json({message:error},{status:400,headers})}
  if(body.operation==='reset'){

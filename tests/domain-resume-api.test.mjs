@@ -3,9 +3,18 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {validResume} from '../shared/resume-policy.mjs';
-import {validCompanyHostname} from '../app/lib/company-domain.ts';
+import {validCompanyHostname,companyPageHref} from '../app/lib/company-domain.ts';
 import {brandingDefaults} from '../app/components/personalization/branding-model.ts';
 import {diagnoseCompanyDomain} from '../app/lib/company-domain-diagnostics.ts';
+
+test('open page prefers only an active, recently verified domain and safely falls back',()=>{
+ const now=Date.now(),active={status:'active',version:1,hostname:'careers.fixture.invalid',checkedAt:new Date(now-1000).toISOString()};
+ assert.equal(companyPageHref('fixture',active,now),'https://careers.fixture.invalid');
+ for(const status of ['none','pending','verified','disabled'])assert.equal(companyPageHref('fixture',{...active,status},now),'/fixture');
+ for(const checkedAt of [null,'invalid',new Date(now-1200000).toISOString(),new Date(now+1000).toISOString()])assert.equal(companyPageHref('fixture',{...active,checkedAt},now),'/fixture');
+ assert.equal(companyPageHref('fixture',{...active,hostname:'javascript:alert(1)'},now),'/fixture');
+ assert.equal(companyPageHref('fixture',null,now),'/fixture');
+});
 test('PDF envelope rejects executable, encrypted, oversized and fake content; hostnames reject URLs/IPs/internal names',async()=>{
  const pdf=await readFile('public/documents/curriculo-demonstrativo.pdf');assert.ok(validResume(pdf));
  for(const bytes of [Buffer.from('<html>bad</html>'),Buffer.alloc(5242881),Buffer.from('%PDF-1.4 /JavaScript /JS (alert(1)) %%EOF'),Buffer.from('%PDF-1.4 /Encrypt %%EOF')])assert.equal(validResume(bytes),false);
@@ -46,13 +55,21 @@ test('candidate resume BFF requires candidate identity, origin/version and serve
  assert.equal((await request('/api/portal/resume',pdf)).status,200);
  stale=true;assert.equal((await request('/api/portal/resume',pdf)).status,409);stale=false;
  const download=await request('/api/portal/resume');assert.equal(download.status,200);assert.match(download.headers.get('Content-Disposition'),/attachment/);assert.match(download.headers.get('Cache-Control'),/private, no-store/);assert.deepEqual(Buffer.from(await download.arrayBuffer()),pdf);
- const throughGateway=path=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':'careers.fixture.invalid','x-forwarded-proto':'https',cookie:'jf_auth_access=fixture'}}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
- assert.equal((await throughGateway('/api/portal/resume')).status,404);
- assert.equal((await throughGateway('/api/auth/session')).status,404);
- assert.equal((await throughGateway('/backoffice')).status,404);
+ const maskPath='/careers/masks/team-jobforged-v2-primary-v5.webp';
+ const throughGateway=(path,host='careers.fixture.invalid')=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':host,'x-forwarded-proto':'https',cookie:'jf_auth_access=fixture'}}),{ASSETS:{fetch:asset=>new URL(asset.url).pathname===maskPath?new Response('fixture',{headers:{'Content-Type':'image/webp','Cache-Control':'public, max-age=3600'}}):new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+ assert.equal((await throughGateway('/api/portal/resume')).status,200);
+ assert.equal((await throughGateway('/api/auth/session')).status,200);
+ const mask=await throughGateway(maskPath);assert.equal(mask.status,200);
+ assert.match(mask.headers.get('Cache-Control')??'',/public.*max-age=/);
+ assert.doesNotMatch(mask.headers.get('Cache-Control')??'',/private|no-store/);
+ assert.equal((await throughGateway(maskPath,'unknown.fixture.invalid')).status,404);
+ assert.equal((await throughGateway('/backoffice')).status,404);assert.equal((await throughGateway('/api/company/branding')).status,404);
+ const authRequest=(host,origin,body,path='/api/auth/sign-in')=>worker.fetch(new Request('http://jbfd-test-app-1:3000'+path,{method:'POST',headers:{host:'jbfd-test-app-1:3000','x-forwarded-host':host,'x-forwarded-proto':'https',origin,'Content-Type':'application/json'},body:JSON.stringify(body)}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
+ assert.equal((await authRequest('careers.fixture.invalid','https://careers.fixture.invalid',{email:'invalid',password:'x'})).status,400);assert.equal((await authRequest('careers.fixture.invalid','https://foreign.invalid',{email:'invalid',password:'x'})).status,403);assert.equal((await authRequest('unknown.fixture.invalid','https://unknown.fixture.invalid',{email:'invalid',password:'x'})).status,404);
+ assert.equal((await authRequest('careers.fixture.invalid','https://careers.fixture.invalid',{email:'candidate@example.invalid',password:'FixturePassword8!',confirmPassword:'FixturePassword8!',fullName:'Candidate Fixture',acceptedTerms:true,slug:'another-company'},'/api/auth/candidate-sign-up')).status,403);
  assert.equal((await throughGateway('/recuperar-senha')).status,303);
  assert.equal((await request('/backoffice',null,undefined,'','https://careers.fixture.invalid')).status,404);
  assert.equal((await request('/',null,undefined,'','https://unknown.fixture.invalid')).status,404);
- const page=await request('/',null,undefined,'','https://careers.fixture.invalid');assert.equal(page.status,200);const html=await page.text();assert.match(html,/Public Fixture/);assert.match(html,/acesso=entrar/);assert.doesNotMatch(html,/jf-widget-dialog--modal/);
+ const page=await request('/',null,undefined,'','https://careers.fixture.invalid');assert.equal(page.status,200);assert.match(page.headers.get('Cache-Control')??'',/no-store/);const html=await page.text();assert.match(html,/Public Fixture/);assert.doesNotMatch(html,/Entrar na JobForged/);assert.match(html,/jf-widget-dialog--modal/);
  }finally{globalThis.fetch=original;for(const [name,value] of [['SUPABASE_INTERNAL_URL',previous.url],['SUPABASE_ANON_KEY',previous.key]]){if(value===undefined)delete process.env[name];else process.env[name]=value}}
 });

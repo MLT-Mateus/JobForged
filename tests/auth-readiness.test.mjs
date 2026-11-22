@@ -9,7 +9,7 @@ async function check(overrides = {}, settingsStatus = 200, enabled = true, setti
   const server = createServer((request, response) => {
     const config = request.url === "/api/auth/config";
     response.writeHead(config ? 200 : settingsStatus, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(config ? { enabled } : { external: { email: true }, disable_signup: false, mailer_autoconfirm: false, ...settings }));
+    response.end(JSON.stringify(config ? { enabled } : { external: { email: true }, disable_signup: false, mailer_autoconfirm: true, ...settings }));
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address();
@@ -52,6 +52,6 @@ test("Test rejeita também o gateway interno de Live", async () => {
 test("Cadastro desabilitado impede publicar uma versão pronta para cadastro", async () => {
   assert.equal(await check({}, 200, true, { disable_signup: true }), 1);
 });
-test("Confirmação de e-mail é obrigatória também em Test", async () => {
-  assert.equal(await check({}, 200, true, { mailer_autoconfirm: true }), 1);
+test("Test exige cadastro imediato sem confirmação de e-mail", async () => {
+  assert.equal(await check({}, 200, true, { mailer_autoconfirm: false }), 1);
 });

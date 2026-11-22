@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
     const result = await requestAuth("token?grant_type=password", { email, password });
     if (!result.configured) return Response.json({ message: "A autenticação ainda não está configurada neste ambiente." }, { status: 503 });
     if (!result.response?.ok || !(result.payload as SupabaseSessionPayload).access_token) {
-      return Response.json({ message: "E-mail ou senha inválidos." }, { status: 401 });
+      const code = (result.payload as { error_code?: string }).error_code;
+      return Response.json({ message: code === "email_not_confirmed" ? "Este cadastro ainda aguarda confirmação de e-mail. Use o link recebido para ativar a conta." : "E-mail ou senha inválidos." }, { status: 401 });
     }
 
     const headers = new Headers({ "Cache-Control": "no-store" });
