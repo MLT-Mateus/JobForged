@@ -1,4 +1,6 @@
 "use client";
+import {useUrlFilter} from '../ui/useUrlFilter';
+
 import {usePendingChanges} from '../ui/PendingChanges';
 import {useCompanyAccess} from '../operations/access';
 import {Search,Plus,Building2} from 'lucide-react';
@@ -29,7 +31,7 @@ function Manager({companyId,manage}:{companyId:string;manage:boolean}){
  const [layout,setLayout]=useCollectionPreference('branches','blocks');
  const [pendingFiles,setPendingFiles]=useState<File[]>([]),[newTypes,setNewTypes]=useState<string[]>([]);
  const [jobs,setJobs]=useState<{id:string;title:string}[]>([]);
- const [items,setItems]=useState<Branch[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[query,setQuery]=useState(''),[type,setType]=useState(''),[status,setStatus]=useState(''),[page,setPage]=useState(1),[draft,setDraft]=useState<Branch|null>(null),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[confirm,setConfirm]=useState(false);
+ const [items,setItems]=useState<Branch[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[query,setQuery]=useUrlFilter('busca',''),[type,setType]=useUrlFilter('tipo',''),[status,setStatus]=useUrlFilter('situacao',''),[page,setPage]=useState(1),[draft,setDraft]=useState<Branch|null>(null),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[confirm,setConfirm]=useState(false);
  const [initial,setInitial]=useState<Branch|null>(null),[jobQuery,setJobQuery]=useState(''),[noticeKind,setNoticeKind]=useState<'info'|'success'|'danger'>('info');
  const dirty=!!draft&&(JSON.stringify(draft)!==JSON.stringify(initial)||pendingFiles.length>0);
  const guard=usePendingChanges(dirty);

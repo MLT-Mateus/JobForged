@@ -11,6 +11,7 @@ test('candidate BFF uses validated intent, same-origin writes and own explicit c
  if(path.endsWith('/rpc/candidate_context'))return Response.json({fullName:'Candidate fixture',version:0,slug:'fixture-company'});
  if(path.endsWith('/rpc/create_candidate_signup_intent'))return Response.json('a'.repeat(64));
  if(path==='/auth/v1/signup')return Response.json({access_token:'fixture-new',refresh_token:'fixture-refresh',expires_in:900,user:{id:'35000000-0000-4000-8000-000000000002'}});
+ if(path.endsWith('/rpc/my_notifications_v2'))return Response.json({items:[],unread:0,hasNext:false});
  if(path.endsWith('/rpc/candidate_resume'))return Response.json(null);
  if(path.endsWith('/rpc/candidate_account'))return conflict?Response.json({code:'40001'},{status:409}):Response.json({profile:{fullName:'Candidate fixture',version:0,slug:'fixture-company'},items:[]});
  throw new Error('Unexpected candidate fixture operation');};

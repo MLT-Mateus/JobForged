@@ -13,10 +13,12 @@ export async function GET(request: NextRequest) {
   const section = params.get("section") || "overview";
   const company = params.get("company") || null;
   const page = Number(params.get("page") || 1);
+  const actor=params.get('actor')||'',target=params.get('target')||'',from=params.get('from')||null,to=params.get('to')||null;
+  if(actor.length>160||target.length>160||[from,to].some(v=>v!==null&&!/^\d{4}-\d{2}-\d{2}$/.test(v))||from&&to&&from>to)return Response.json({message:'Filtros inválidos.'},{status:400,headers});
   if (!["overview","companies","company","users","invitations","settings","audit"].includes(section) ||
     (company && !/^[0-9a-f-]{36}$/i.test(company)) || !Number.isInteger(page) || page < 1 || page > 10000 || (params.get("search") || "").length > 160)
     return Response.json({ message: "Consulta inválida." }, { status: 400, headers });
-  const response = await requestDatabase("rpc/platform_read", session.accessToken, { section, search_text: params.get("search") || "", status_filter: params.get("status") || "", page_number: page, company_filter: company });
+  const response = await requestDatabase("rpc/platform_read_v2", session.accessToken, { actor_query:actor,target_query:target,date_from:from,date_to:to,section, search_text: params.get("search") || "", status_filter: params.get("status") || "", page_number: page, company_filter: company });
   if (!response?.ok) return administrativeFailure(response,"Não foi possível carregar os dados autorizados.",headers,503);
   return Response.json({ data: await response.json() }, { headers });
 }

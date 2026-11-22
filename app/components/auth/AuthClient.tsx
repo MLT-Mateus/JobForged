@@ -158,7 +158,7 @@ export function SignupClient() {
       }
       setRequiresConfirmation(Boolean(result.requiresConfirmation));
       setCreated(true);
-      showAppToast({kind:result.requiresConfirmation?"info":"success",title:result.requiresConfirmation?"Cadastro recebido":"Conta criada",text:result.requiresConfirmation?"Se o cadastro puder ser concluído, você receberá as instruções para confirmar seu e-mail.":"Seu acesso está ativo. Abrindo o painel da empresa."});
+      if(!result.requiresConfirmation)showAppToast({kind:result.requiresConfirmation?"info":"success",title:result.requiresConfirmation?"Cadastro recebido":"Conta criada",text:result.requiresConfirmation?"Se o cadastro puder ser concluído, você receberá as instruções para confirmar seu e-mail.":"Seu acesso está ativo. Abrindo o painel da empresa."});
       if (!result.requiresConfirmation) router.replace("/app/home");
     } finally {
       setLoading(false);
@@ -200,7 +200,7 @@ export function SignupClient() {
         <h1>Cadastre sua empresa</h1>
         <p>Crie o acesso do responsável e comece sem cobrança ou dados de pagamento.</p>
       </div>
-      <form className="auth-form auth-form--signup" noValidate onSubmit={submit}>
+      <form className="auth-form auth-form--signup" noValidate onSubmit={submit}><fieldset className="auth-form-group"><legend>Empresa e responsável</legend>
         <TextField
           name="responsible"
           label="Nome do responsável"
@@ -248,6 +248,7 @@ export function SignupClient() {
             error={errors.phone}
           />
         </div>
+</fieldset><fieldset className="auth-form-group"><legend>Acesso</legend>
         <TextField
           name="email"
           type="email"
@@ -294,7 +295,7 @@ export function SignupClient() {
           onChange={event => update("confirmPassword", event.target.value)}
           error={errors.confirmPassword}
         />
-        <div className="auth-selected-plan">
+        </fieldset><fieldset className="auth-form-group"><legend>Confirmação</legend><div className="auth-selected-plan">
           <span><b>Plano Freemium</b><small>Acesso inicial · sem cobrança</small></span>
           <strong>R$ 0<small>/mês</small></strong>
         </div>
@@ -306,7 +307,7 @@ export function SignupClient() {
             onChange={event => setAcceptedTerms(event.target.checked)}
           />
         </div>
-        <ActionButton type="submit" disabled={loading} className="auth-submit">
+        </fieldset><ActionButton type="submit" disabled={loading} className="auth-submit">
           <LoadingLabel loading={loading} idle="Criar conta grátis" />
         </ActionButton>
       </form>
@@ -348,7 +349,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
         return;
       }
       setRequestSent(true);
-      setNotice(createToastNotice({kind:"info",title:"Solicitação recebida",text:"Se houver uma conta associada a esse e-mail, enviaremos as instruções para redefinir sua senha."}));
+
     } finally {
       setLoading(false);
     }
@@ -407,7 +408,7 @@ export function PasswordRecoveryClient({ reset = false, initialTokenHash = "", r
       setPassword("");
       setConfirmPassword("");
       setRecoveryStatus("done");
-      setNotice(createToastNotice({kind:"success",title:"Senha atualizada",text:"Entre novamente usando sua nova senha. As sessões anteriores foram encerradas."}));
+
     } finally {
       setLoading(false);
     }

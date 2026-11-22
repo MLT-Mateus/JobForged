@@ -14,6 +14,9 @@ async function perform(request:NextRequest,write:boolean){
   const company=write?body?.company:request.nextUrl.searchParams.get('company');
   if(company&&(typeof company!=='string'||!/^[0-9a-f-]{36}$/i.test(company)))return Response.json({message:'Empresa inválida.'},{status:400,headers});
   if(write&&(!company||typeof body?.confirmation!=='string'||body.confirmation.length>160||typeof body.reason!=='string'||body.reason.trim().length<5||body.reason.length>500||typeof body.removeAccounts!=='boolean'))return Response.json({message:'Informe o nome exato e um motivo de 5 a 500 caracteres.'},{status:400,headers});
+  const page=Number(request.nextUrl.searchParams.get('page')||1);
+  if(!Number.isSafeInteger(page)||page<1||page>10000)return Response.json({message:'Página inválida.'},{status:400,headers});
+  if(!write&&!company){const response=await requestDatabase('rpc/company_deletion_page',session.accessToken,{page_number:page});if(!response?.ok)return administrativeFailure(response,'Não foi possível carregar as operações.',headers);return Response.json(await response.json(),{headers});}
   const response=await requestDatabase('rpc/company_deletion',session.accessToken,{operation:write?'request':company?'preview':'jobs',target_company:company||null,confirmation:body?.confirmation||'',change_reason:body?.reason||'',remove_accounts:body?.removeAccounts||false});
   if(!response?.ok)return administrativeFailure(response,'Exclusão recusada. Confira o nome exato da empresa e a autenticação recente.',headers);
   return Response.json(await response.json(),{status:write?202:200,headers});

@@ -10,6 +10,7 @@ insert into public.company_domains(company_id,hostname,status,version,checked_at
 set local role authenticated;
 select pg_temp.assume_user('61000000-0000-4000-8000-000000000001');
 do $$declare d jsonb;p jsonb;c jsonb:=current_setting('jbfd.fixture_config')::jsonb;v bigint;begin
+ c:=jsonb_set(c,'{banners,0,organizationId}','"61000000-0000-4000-8000-000000000011"');
  d:=public.page_domain_v2('prepare','new.example.invalid','subdomain','example.invalid',1,0);
  if d->>'hostname'<>'old.example.invalid' or d->>'status'<>'active' or d->'request'->>'status'<>'draft' then raise exception 'preparation replaced active address';end if;
  begin perform public.page_domain_v2('prepare','another.example.invalid','subdomain','example.invalid',1,0);raise exception 'stale preparation accepted';exception when sqlstate 'PT409' then null;end;
@@ -48,6 +49,6 @@ do $$begin if jsonb_array_length(public.my_notifications_v2()->'items')<>0 then 
 reset role;
 set local role authenticated;
 select pg_temp.assume_user('19000000-0000-4000-8000-000000000001');
-do $$begin perform public.communication_management_page('banners');perform public.communication_management_page('campaigns');end$$;
+do $$begin perform public.communication_management_page('banners');perform public.communication_management_page('campaigns');perform public.platform_read_v2('users');perform public.platform_read_v2('company','','',1,'61000000-0000-4000-8000-000000000011');perform public.platform_read_v2('audit','','',1,null,'','2026-01-01','2026-12-31','Fixture');perform public.platform_member_photo('61000000-0000-4000-8000-000000000011');perform public.company_deletion_page(1);end$$;
 rollback;
 select 'ux_publication_security_passed';

@@ -20,19 +20,19 @@ export const jobOptions={
 };
 export const selectOptions=(items:string[],current='')=>Array.from(new Set([...items,...(current?[current]:[])])).map(value=>({value,label:value}));
 export function editorChecks(job:Job){return [
- {section:0,label:'Título da vaga',done:!!job.title.trim()},
- {section:0,label:'Acessibilidade para PCD',done:!!job.pcd},
- {section:0,label:'Setor do cargo',done:!!job.area.trim()},
- {section:0,label:'Nível mínimo',done:!!job.level},
- {section:0,label:'Faixa salarial',done:job.salaryRange==='Informar valores'?!!job.salaryMin:!!job.salaryRange||!!job.salaryMin},
- {section:0,label:'Modelo de contrato',done:!!job.contractType},
- {section:0,label:'Modalidade de trabalho',done:!!job.modality},
- {section:0,label:'Jornada de trabalho',done:!!job.journey},
- {section:0,label:'Endereço da vaga',done:!!job.branchIds?.length&&!!job.city&&!!job.state},
- {section:1,label:'Descrição da vaga',done:!!job.summary.trim()},
- {section:1,label:'Atribuições do cargo',done:job.responsibilities.some(x=>!!x.trim())},
- {section:4,label:'Etapa do processo',done:job.stages.some(x=>!!x.name.trim())},
- {section:4,label:'Confirmação de privacidade',done:job.lgpd},
+ {section:0,key:'title',label:'Título da vaga',done:!!job.title.trim()},
+ {section:0,key:'pcd',label:'Acessibilidade para PCD',done:!!job.pcd},
+ {section:0,key:'area',label:'Setor do cargo',done:!!job.area.trim()},
+ {section:0,key:'level',label:'Nível mínimo',done:!!job.level},
+ {section:0,key:'salaryRange',label:'Faixa salarial',done:job.salaryRange==='Informar valores'?!!job.salaryMin:!!job.salaryRange||!!job.salaryMin},
+ {section:0,key:'contractType',label:'Modelo de contrato',done:!!job.contractType},
+ {section:0,key:'modality',label:'Modalidade de trabalho',done:!!job.modality},
+ {section:0,key:'journey',label:'Jornada de trabalho',done:!!job.journey},
+ {section:0,key:'branchIds',label:'Endereço da vaga',done:!!job.branchIds?.length&&!!job.city&&!!job.state},
+ {section:1,key:'description',label:'Descrição da vaga',done:!!job.summary.trim()},
+ {section:1,key:'attributions',label:'Atribuições do cargo',done:job.responsibilities.some(x=>!!x.trim())},
+ {section:4,key:'stages',label:'Etapa do processo',done:job.stages.some(x=>!!x.name.trim())},
+ {section:4,key:'lgpd',label:'Confirmação de privacidade',done:job.lgpd},
  ];}
 
 /** Preserve process identities across reorder, rename and removal. */

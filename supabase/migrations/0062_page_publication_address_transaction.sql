@@ -1,6 +1,18 @@
 -- migration-role: supabase_admin
 -- DNS preparation is not publication. A replacement is promoted only after the
 -- independent reconciler verifies DNS and TLS; the previous route stays active.
+-- Address values are version metadata only. Routing continues to use verified
+-- domain records; all other branding validation remains unchanged.
+alter function app_private.validate_branding(uuid,jsonb) rename to validate_branding_before_address_snapshot;
+create function app_private.validate_branding(cid uuid,c jsonb)
+returns void language plpgsql stable security definer set search_path=pg_catalog as $$
+begin
+ if coalesce(c#>>'{portal,jobforgedDomain}','')<>'' and not app_private.valid_portal_slug(c#>>'{portal,jobforgedDomain}') then raise exception 'invalid address snapshot' using errcode='22023';end if;
+ if coalesce(c#>>'{portal,customDomain}','')<>'' and (length(c#>>'{portal,customDomain}')>253 or c#>>'{portal,customDomain}' !~ '^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{1,62}$') then raise exception 'invalid domain snapshot' using errcode='22023';end if;
+ perform app_private.validate_branding_before_address_snapshot(cid,jsonb_set(jsonb_set(c,'{portal,jobforgedDomain}','""'),'{portal,customDomain}','""'));
+end;$$;
+alter function app_private.validate_branding(uuid,jsonb) owner to postgres;
+revoke all on function app_private.validate_branding(uuid,jsonb) from public,anon,authenticated,service_role;
 create table app_private.company_domain_requests(
  company_id uuid primary key references public.companies(id) on delete cascade,hostname text not null,
  address_kind text not null check(address_kind in ('root','subdomain')),dns_zone text not null,

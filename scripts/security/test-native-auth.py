@@ -246,6 +246,15 @@ def main():
         sql("update public.candidate_accounts set status='active' where user_id='"+candidate_id+"';")
         assert request(auth,'/logout?scope=global',{},candidate_token)[0] in (200,204),'Candidate logout failed'
         assert request(rest,'/rpc/candidate_context',{},candidate_token)[0]==403,'Revoked candidate JWT accepted'
+        # Candidate parity: isolated provider proves immediate login change, not merely UI copy.
+        status,candidate_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200
+        before_candidate_email=candidate_email;candidate_email='candidate-updated-'+suffix
+        candidate_token=candidate_session['access_token']
+        assert request(rest,'/rpc/change_my_login_email',{'new_email':candidate_email,'current_password':'Wrong9!'},candidate_token)[0]==401,'Candidate wrong password accepted'
+        assert request(rest,'/rpc/change_my_login_email',{'new_email':candidate_email,'current_password':password},candidate_token)[0]==200,'Candidate email not changed'
+        assert request(auth,'/token?grant_type=password',{'email':before_candidate_email,'password':password})[0] in (400,422),'Old candidate email accepted'
+        status,candidate_session=request(auth,'/token?grant_type=password',{'email':candidate_email,'password':password});assert status==200 and candidate_session['user']['id']==candidate_id
+        assert request(rest,'/rpc/my_notifications_v2',{},candidate_session['access_token'])[1]['hasNext'] is False,'Candidate inbox has phantom continuation'
         assert request(auth,'/signup',{'email':'weak-'+suffix,'password':'abc'})[0] in (400,422),'Weak password not rejected by Auth'
         for index,symbol in enumerate(policy['symbols']):
             assert request(auth,'/admin/users',{'email':'symbol-'+str(index)+'-'+suffix,'password':'Abcdef9'+symbol,'email_confirm':True},admin)[0] in (200,201),'Approved password symbol rejected by Auth'

@@ -26,7 +26,7 @@ export function ConfirmEmailClient({ tokenHash, type }: { tokenHash: string; typ
       const outcome=await response.json().catch(()=>null) as {pending?:boolean}|null;
       setPendingOther(!!outcome?.pending);
       setStatus("success");
-      setNotice(createToastNotice({kind:"success",title:"E-mail confirmado",text:"Seu e-mail foi validado. Você já pode continuar o acesso."}));
+
     } else { window.history.replaceState(null, "", "/confirmar-email"); setStatus("invalid"); setNotice(createToastNotice({kind:"danger",title:"Não foi possível confirmar",text:"O link pode ter expirado ou já ter sido usado. Solicite um novo e-mail de confirmação."})); }
   }
   async function resend(event: FormEvent<HTMLFormElement>) {

@@ -1,4 +1,6 @@
 "use client";
+import {useUrlFilter} from '../ui/useUrlFilter';
+
 import { Panel } from "@/app/components/ui";
 /* eslint-disable @next/next/no-html-link-for-pages */
 import { useCallback,useEffect,useMemo,useState } from "react";
@@ -15,7 +17,7 @@ const tone=(s:JobStatus)=>s==="Publicada"?"positive":s==="Pausada"?"warning":s==
 export default function JobsListClient({context}:{context:AwaitedAdminContext}){
  const manage=context.user.permissions.includes("vacancies.edit"),create=context.user.permissions.includes("vacancies.create"),canDelete=context.user.permissions.includes("vacancies.delete");
  const [page,setPage]=useState(1);
- const [jobs,setJobs]=useState<Job[]>([]),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[query,setQuery]=useState(""),[status,setStatus]=useState("Todos"),[sort,setSort]=useState("recent"),[pendingDelete,setPendingDelete]=useState<Job|null>(null),[notice,setNotice]=useState("");
+ const [jobs,setJobs]=useState<Job[]>([]),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(false),[query,setQuery]=useUrlFilter('busca',''),[status,setStatus]=useUrlFilter('situacao','Todos'),[sort,setSort]=useUrlFilter('ordem','recent'),[pendingDelete,setPendingDelete]=useState<Job|null>(null),[notice,setNotice]=useState("");
  const [layout,setLayout]=useCollectionPreference("vagas","blocks"),view=layout==="blocks"?"cards":"list";
  const [busy,setBusy]=useState(false),[noticeKind,setNoticeKind]=useState<"success"|"danger">("success");
  const load=useCallback(()=>jobService.listJobs(context.organization.id).then(data=>{setJobs(data);setLoadError(false)}).catch(()=>setLoadError(true)).finally(()=>setLoading(false)),[context.organization.id]); useEffect(()=>{void load()},[load]);
