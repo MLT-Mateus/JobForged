@@ -11,6 +11,10 @@ export function fieldPlaceholder({label='',type='text',placeholder,multiline=fal
  if(selection)return finish(multiple?'Selecione opções':'Selecione uma opção');
  const context=label.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  if(type==='search'||/buscar|pesquisar/.test(context)){
+  if(/titulo/.test(context))return finish('Busque pelo título');
+  if(/destinatario/.test(context))return finish('Busque um destinatário');
+  if(/empresa/.test(context)&&!/acao|motivo/.test(context))return finish('Busque uma empresa');
+  if(/integracao/.test(context))return finish('Busque uma integração');
   if(/fatura/.test(context))return finish('Busque uma fatura');
   if(/compromisso/.test(context))return finish('Busque um compromisso');
   return finish('Busque por nome');
