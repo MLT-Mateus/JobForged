@@ -1,0 +1,8 @@
+"use client";
+import {useState,type ReactNode} from 'react';
+import {ActionButton} from './AdminPrimitives';
+import {SelectField} from './FormControls';
+import './kanban-board.css';
+export type KanbanColumn={id:string;label:string;count:number;content:ReactNode;hasMore?:boolean};
+export function KanbanBoard({columns,onDrop,onMore,busy=false}:{columns:KanbanColumn[];onDrop?:(id:string,target:string)=>void;onMore:(column:string)=>void;busy?:boolean}){const [mobile,setMobile]=useState(columns[0]?.id||'');return <section className="jf-kanban" aria-label="Quadro de candidaturas"><div className="jf-kanban-mobile"><SelectField label="Etapa" value={mobile} onValueChange={setMobile} options={columns.map(c=>({value:c.id,label:c.label+' · '+c.count}))}/></div><div className="jf-kanban-columns">{columns.map(c=><section key={c.id} className="jf-kanban-column" data-mobile-active={c.id===mobile} aria-label={c.label} onDragOver={e=>{if(onDrop&&!busy){e.preventDefault();e.dataTransfer.dropEffect='move'}}} onDrop={e=>{e.preventDefault();if(!busy){const id=e.dataTransfer.getData('application/x-jbfd-candidacy');if(id)onDrop?.(id,c.id)}}}><header><h3>{c.label}</h3><span aria-label={c.count+' candidaturas'}>{c.count}</span></header><div className="jf-kanban-items">{c.content}{c.hasMore&&<ActionButton variant="secondary" disabled={busy} onClick={()=>onMore(c.id)}>Carregar mais</ActionButton>}</div></section>)}</div></section>}
+export function VacancyIdentity({title,id,color=0}:{title:string;id:string;color?:number}){return <span className="jf-vacancy-identity" data-vacancy-color={Math.abs(color)%12}><i aria-hidden="true"/><span title={title}>{title||'Vaga sem título'}</span><small>#{id.replaceAll('-','').slice(-6).toUpperCase()}</small></span>}

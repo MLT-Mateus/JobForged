@@ -28,7 +28,7 @@ export function EmptyState({ title, description, action, icon:Icon=Inbox, varian
   return <div className={`jf-empty jf-empty--${variant}`} role="status"><EmptyStateVisual icon={Icon}/><div className="jf-empty__content"><strong>{title}</strong><p>{description}</p>{action&&<div className="jf-empty__action">{action}</div>}</div></div>;
 }
 
-export function DataTable({ headers, children, label, layout='list' }: { headers: string[]; children: ReactNode; label: string;layout?:'list'|'blocks' }) {
+export function DataTable({ headers, children, label, layout='list' }: { headers: string[]; children: ReactNode; label: string;layout?:'list'|'blocks'|'board' }) {
   if(layout==='blocks')return <div className="jf-data-blocks" role="list" aria-label={label}>{Children.toArray(children).map((row,index)=>isValidElement<{children:ReactNode}>(row)?<article role="listitem" key={row.key??index}><dl>{Children.toArray(row.props.children).map((cell,column)=>isValidElement<{children:ReactNode}>(cell)?<div key={cell.key??column}><dt>{headers[column]}</dt><dd>{cell.props.children}</dd></div>:null)}</dl></article>:null)}</div>;
   return <div className="jf-table-wrap"><table className="jf-table" aria-label={label}><thead><tr>{headers.map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{children}</tbody></table></div>;
 }

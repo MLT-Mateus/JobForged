@@ -1,29 +1,25 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {readFileSync} from 'node:fs';
-import ts from 'typescript';
-async function load(path){const source=readFileSync(new URL(path,import.meta.url),'utf8');return import('data:text/javascript;base64,'+Buffer.from(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText).toString('base64'))}
-const {emptyJob}=await load('../app/components/jobs/job-types.ts');
-const {editorChecks,reconcileStages,applicationFeedback}=await load('../app/components/jobs/job-editor-model.ts');
-test('publication checklist matches required identification and leaves requirements optional',()=>{
- const job={...emptyJob('company'),title:'Cargo',area:'Área',level:'Pleno',pcd:'Disponível para PCD',salaryRange:'Salário a combinar',contractType:'CLT',modality:'Presencial',journey:'Matutino',branchIds:['a'],city:'Brasília',state:'DF',summary:'Descrição',responsibilities:['Atender clientes'],requirements:[],lgpd:true};
- assert.equal(editorChecks(job).every(x=>x.done),true);
- for(const key of ['pcd','journey','salaryRange'])assert.equal(editorChecks({...job,[key]:''}).every(x=>x.done),false);
- assert.equal(editorChecks({...job,branchIds:[]}).every(x=>x.done),false);
- assert.equal(editorChecks({...job,salaryRange:'Informar valores',salaryMin:''}).every(x=>x.done),false);
- assert.equal(editorChecks({...job,salaryRange:'Informar valores',salaryMin:'1500'}).every(x=>x.done),true);
+import {loadTs} from './load-ts-module.mjs';
+const {emptyJob}=await loadTs(new URL('../app/components/jobs/job-types.ts',import.meta.url));
+const {editorChecks,publicationIssues,normalizeJob,sectionIndex,applicationFeedback}=await loadTs(new URL('../app/components/jobs/job-editor-model.ts',import.meta.url));
+export const complete={...emptyJob('company'),title:'Analista',area:'Tecnologia',contractType:'Efetivo - CLT',modality:'Remoto',remoteScope:'Brasil',branchIds:['unit'],city:'Brasília',state:'DF',journey:'Flexível',description:'Atendimento a clientes.',attributions:'Responder chamados.',requirements:['Comunicação escrita'],lgpd:true,portalReady:true};
+test('ten essentials; salary, level, benefits and accessibility are optional',()=>{
+ assert.equal(editorChecks(complete).length,10);assert.deepEqual(publicationIssues(complete),[]);
+ for(const key of ['title','area','contractType','modality','remoteScope','journey','description','attributions','requirements','positions']){const value=key==='requirements'?[]:key==='positions'?0:'';assert.equal(editorChecks({...complete,[key]:value}).filter(c=>!c.done).length,1,key)}
+ assert.equal(editorChecks({...complete,requirements:[],noPrerequisites:true}).every(c=>c.done),true);
+ assert.equal(editorChecks({...complete,modality:'Presencial',branchIds:[],city:'Brasília',state:'DF'}).find(c=>c.key==='branchIds').done,false);
+ assert.equal(editorChecks({...complete,journey:'Escala',schedule:''}).find(c=>c.key==='journey').done,false);
 });
-test('stage identity survives reorder, deletion and renaming',()=>{
- const a={id:'a',name:'Triagem',required:false},b={id:'b',name:'Entrevista',required:true};
- assert.deepEqual(reconcileStages([a,b],['Entrevista','Triagem']),[b,a]);
- assert.deepEqual(reconcileStages([a,b],['Triagem inicial','Entrevista']),[{...a,name:'Triagem inicial'},b]);
- assert.deepEqual(reconcileStages([a,b],['Entrevista']),[b]);
+test('publication conditions are separate and malformed optional data can be removed',()=>{
+ assert.deepEqual(publicationIssues({...complete,example:true,lgpd:false,portalReady:false}).map(i=>i.key),['lgpd','example','portal']);
+ for(const patch of [{salaryMin:'2000',salaryMax:'1000'},{applicationDeadline:'2030-02-30'},{contactEmail:'invalid'},{contactPhone:'12'},{description:'<p>&nbsp;</p>'},{description:'\n\t '},{description:'x'.repeat(5001)},{careerPlan:'x'.repeat(5001)},{title:'x'.repeat(121)}])assert.ok(publicationIssues({...complete,...patch}).length);
+ assert.deepEqual(publicationIssues({...complete,salaryMin:'',salaryMax:'',applicationDeadline:'',contactEmail:'',contactPhone:''}),[]);
 });
-
-test('application feedback reports only applied facts and separates essentials from optional improvements',()=>{
- const partial={...emptyJob(),title:'Analista'};
- const feedback=applicationFeedback(partial);assert.match(feedback,/cargo identificado/);assert.match(feedback,/faixa salarial/);assert.doesNotMatch(feedback,/remuneração informada/);assert.match(feedback,/ainda precisam ser salvas/);
- const complete={...partial,area:'Tecnologia',level:'Pleno',pcd:'Disponível para PCD',salaryRange:'Salário a combinar',contractType:'CLT',modality:'Presencial',journey:'Matutino',branchIds:['a'],city:'Brasília',state:'DF',summary:'Descrição',responsibilities:['Atender clientes']};
- const result=applicationFeedback(complete);assert.match(result,/informações essenciais da vaga estão preenchidas/);assert.match(result,/complementos são opcionais/);assert.match(result,/confirmação de privacidade/);assert.doesNotMatch(result,/vaga está publicada/);
- assert.match(applicationFeedback({...complete,branchIds:[]}),/qual filial/);
+test('normalization and feedback use applied content; legacy routes survive',()=>{
+ const current=normalizeJob({...complete,description:'<b>Suporte</b>',attributions:'Responder\nOrientar',modality:'Home Office'});
+ assert.equal(current.summary,'Suporte');assert.deepEqual(current.responsibilities,['Responder','Orientar']);assert.equal(current.modality,'Remoto');assert.deepEqual(current.stages,[]);
+ assert.match(applicationFeedback(current),/10 dados essenciais/);assert.match(applicationFeedback({...current,requirements:[],noPrerequisites:false}),/requisitos/);
+ assert.doesNotMatch(applicationFeedback(current),/falta.*salário/i);
+ assert.deepEqual(['sobre','atribuicoes','beneficios','perfil','processo','revisao'].map(sectionIndex),[0,1,1,1,2,2]);
 });

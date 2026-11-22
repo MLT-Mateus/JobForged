@@ -1,4 +1,4 @@
-export const stages=['Candidatura','Triagem','Pré-aprovação','Pré-reprovação','Entrevista','Contratação','Reprovada','Desistência'];
+export const stages=['Triagem','Entrevista','Aprovação','Contratação','Não selecionado','Desistência'];
 export type Application={id:string;jobId:string;jobTitle:string;name:string;email:string;stage:string;notes:string;reason:string;version:number;createdAt:string;updatedAt:string;resume:string|null;history:{id:string;action:string;details:{from?:string;to?:string;reason?:string};actor:string;createdAt:string}[]};
 export type Interview={id:string;application_id:string|null;title:string;starts_at:string|null;ends_at:string|null;responsible_id:string|null;meeting_url:string;notes:string;status:string;version:number};
 export type JobOptions={acceptApplications:boolean;resumeRequired:boolean;positions:number;notifyApplication:boolean;notifyStage:boolean};
