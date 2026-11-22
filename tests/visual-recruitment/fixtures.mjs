@@ -23,7 +23,7 @@ export function response(u,method,b){
  }
  if(u.pathname==='/api/company/applications'){
   const op=b?.operation||u.searchParams.get('operation'),id=b?.id||u.searchParams.get('id'),a=cards.find(a=>a.id===id);
-  if(op==='detail')return{data:{...a,email:'pessoa.com.endereco.extenso@example.invalid',notes:'',reason:'',resume:a?.hasResume?'curriculo-exemplo.pdf':null}};
+  if(op==='detail')return{data:{...a,email:'pessoa.com.endereco.extenso@example.invalid',notes:a?.notes||'',reason:'',resume:a?.hasResume?'curriculo-exemplo.pdf':null}};
   if(op==='history')return{data:{items:Array.from({length:5},(_,i)=>({id:'event-'+i,action:'Etapa alterada',details:{from:'Triagem',to:'Entrevista'},actor:'Pessoa da equipe',createdAt:date})),total:42}};
   if(b){if(a){Object.assign(a,b.document);a.version++;a.stage=labels[keys.indexOf(a.stageKey)]}return{data:a}};
   const q=u.searchParams.get('query')||'',sk=u.searchParams.get('stageKey'),out=u.searchParams.get('outcome')||'active',pg=Number(u.searchParams.get('page'))||1,size=Number(u.searchParams.get('pageSize'))||20;

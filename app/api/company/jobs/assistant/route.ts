@@ -15,6 +15,7 @@ export async function POST(request:NextRequest){
  if(!requireSameOrigin(request))return fail('Origem inválida.',403);
  const session=await readSession(request,headers);
  if(!session?.company||session.platformAdmin||!['owner','admin'].includes(session.role))return fail('Acesso negado.',403);
+ const accessToken=session.accessToken;
  try{
   const reader=request.body?.getReader();let text='',size=0;const decoder=new TextDecoder();
   if(reader)while(true){const part=await reader.read();if(part.done)break;size+=part.value.length;if(size>100000){await reader.cancel();return fail('Conversa muito longa.',413)}text+=decoder.decode(part.value,{stream:true})}
@@ -35,11 +36,21 @@ export async function POST(request:NextRequest){
   const issued=await requestDatabase('rpc/job_assistant_issue',session.accessToken,{token_hash:createHash('sha256').update(token).digest('hex'),payload});
   if(!issued?.ok)return fail(issued?.status===429?'Limite do assistente atingido. Tente novamente mais tarde.':'Não foi possível iniciar o assistente.',issued?.status===429?429:503);
   const wantsStream=request.headers.get('accept')?.includes('application/x-ndjson');
-  const abort=new AbortController(),signal=AbortSignal.any([request.signal,abort.signal,AbortSignal.timeout(24000)]);
+  const abort=new AbortController(),signal=AbortSignal.any([request.signal,abort.signal,AbortSignal.timeout(50000)]);
   const result=await fetch('https://n8n.jobforged.com/webhook/'+(wantsStream?'jbfd-test-job-authoring-stream':'jbfd-test-job-authoring'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),redirect:'error',signal});
   if(!result.ok)return fail('O assistente está indisponível. Seu formulário permanece preservado.',503);
   function validate(data:unknown){return {...validateAssistantResponse(data,branches.map(b=>b.id),currentDraft),branches}}
-  if(!wantsStream)return Response.json(validate(await result.json()),{headers});
+  // One bounded format repair. The provider still cannot persist, confirm or publish.
+  async function validated(data:unknown){try{return validate(data)}catch(error){
+   const retryToken=Buffer.from(randomBytes(32)).toString('base64url');
+   const retryPayload={...payload,formatCorrection:{message:error instanceof Error?error.message:'Formato inválido.',previousProposal:data,instruction:'Responda novamente ao pedido original. Corrija todos os tipos conforme CAMPOS PERMITIDOS, preserve fatos e escopo. careerPlan é texto; performanceReviews e promotionPossible são booleanos. Não inclua example=false.'}};
+   if(new TextEncoder().encode(JSON.stringify(retryPayload)).length>95000)throw error;
+   const retryIssued=await requestDatabase('rpc/job_assistant_issue',accessToken,{token_hash:createHash('sha256').update(retryToken).digest('hex'),payload:retryPayload});
+   if(!retryIssued?.ok)throw error;
+   const retried=await fetch('https://n8n.jobforged.com/webhook/jbfd-test-job-authoring',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:retryToken}),redirect:'error',signal});
+   if(!retried.ok)throw error;return validate(await retried.json());
+  }}
+  if(!wantsStream)return Response.json(await validated(await result.json()),{headers});
   headers.set('Content-Type','application/x-ndjson; charset=utf-8');headers.set('X-Accel-Buffering','no');
   const encoder=new TextEncoder();let closed=false;
   return new Response(new ReadableStream({
@@ -49,7 +60,8 @@ export async function POST(request:NextRequest){
      const frames=jsonFrames(),upstream=result.body?.getReader(),decode=new TextDecoder();let raw='',reply='',total=0;
      if(!upstream)throw Error('Resposta vazia.');
      while(true){const chunk=await upstream.read();if(chunk.done)break;total+=chunk.value.length;if(total>250000)throw Error('Resposta muito longa.');for(const event of frames(decode.decode(chunk.value,{stream:true}))){if(event.type==='error')throw Error('Falha no assistente.');if(event.type==='item'&&typeof event.content==='string'&&(!event.metadata|| (event.metadata as {nodeName?:string}).nodeName==='Assistente de vagas')){raw+=event.content;if(raw.length>50000)throw Error('Resposta muito longa.');const next=partialReply(raw);if(next!==reply){reply=next;emit({type:'reply',text:reply})}}}}
-     const data=validate(parseAssistantJSON(raw));
+     emit({type:'status',text:'Conferindo os dados da proposta'});
+     const data=await validated(parseAssistantJSON(raw));
      emit({type:'done',...data});
     }catch{emit({type:'error',message:'A resposta não foi concluída. Tente novamente; o formulário não foi alterado.'})}
     finally{closed=true;try{controller.close()}catch{/* Client disconnected. */}}

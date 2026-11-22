@@ -44,7 +44,7 @@ export function JobAssistant({job,onApply,onNotice}:{job:Job;onApply:(patch:Assi
   setMessages(x=>[...x,{id:userId,role:'user',text:current,files:sentAttachments.map(a=>a.name)}]);setMessage('');setAttachments([]);
   const abort=new AbortController();controller.current=abort;
   try{
-   const r=await fetch('/api/company/jobs/assistant',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({companyId:job.organizationId,draft:job,pendingProposal:retained,objective:objective.current,message:current,attachments:sentAttachments,history:messages.filter(m=>!m.failed).slice(-12).map(({role,text})=>({role,text}))}),signal:AbortSignal.any([abort.signal,AbortSignal.timeout(29000)])});
+   const r=await fetch('/api/company/jobs/assistant',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({companyId:job.organizationId,draft:job,pendingProposal:retained,objective:objective.current,message:current,attachments:sentAttachments,history:messages.filter(m=>!m.failed).slice(-12).map(({role,text})=>({role,text}))}),signal:AbortSignal.any([abort.signal,AbortSignal.timeout(55000)])});
    if(!r.ok){const data=await r.json() as {message?:string;text?:string};throw Error(data.message||'Assistente indisponível.')}
    const reader=r.body?.getReader(),decode=new TextDecoder(),frames=jsonFrames();let done=false;if(!reader)throw Error('Resposta vazia.');
    while(true){const item=await reader.read();if(item.done)break;for(const event of frames(decode.decode(item.value,{stream:true}))){

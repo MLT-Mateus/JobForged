@@ -1,5 +1,5 @@
 "use client";
-import {editorChecks,normalizeJob,type PublicationIssue} from './job-editor-model';
+import {editorChecks,normalizeJob,publicationIssues,type PublicationIssue} from './job-editor-model';
 import type {Job,JobStatus} from './job-types';
 export class JobRequestError extends Error{constructor(message:string,public issues:PublicationIssue[]=[]){super(issues.length?message+" "+issues.map(i=>i.message).join(" "):message)}}
 async function request<T>(id?:string,body?:unknown):Promise<T>{const r=await fetch('/api/company/jobs'+(id?'?id='+encodeURIComponent(id):''),{method:body?'POST':'GET',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await r.json() as T&{message?:string;issues?:PublicationIssue[]};if(!r.ok)throw new JobRequestError(data.message||'Não foi possível salvar a vaga.',data.issues);return data;}
@@ -18,4 +18,4 @@ export const jobService={
  async archiveJob(id:string){return this.changeJobStatus(id,'Arquivada')},
  async deleteJob(id:string,observed?:Job){const job=observed||await this.getJobById(id);if(!job)throw Error('Vaga não encontrada.');await request(undefined,{operation:'delete',id,companyId:job.organizationId,version:job.version})},
 };
-export function getCompletion(job:Job){const required=editorChecks(job),optional=[job.experience,job.weeklyHours,job.benefits.length,job.teamDescription,job.education];const score=Math.round(required.filter(c=>c.done).length/required.length*100);return {score,optionalDone:optional.filter(Boolean).length,optionalTotal:optional.length,requiredDone:required.filter(c=>c.done).length,requiredTotal:required.length,quality:score===100?'Completa':'Em preparação',canPublish:required.every(c=>c.done)&&job.lgpd&&!job.example};}
+export function getCompletion(job:Job){const required=editorChecks(job),optional=[job.experience,job.weeklyHours,job.benefits.length,job.teamDescription,job.education];const score=Math.round(required.filter(c=>c.done).length/required.length*100);return {score,optionalDone:optional.filter(Boolean).length,optionalTotal:optional.length,requiredDone:required.filter(c=>c.done).length,requiredTotal:required.length,quality:score===100?'Completa':'Em preparação',canPublish:publicationIssues(job).length===0};}

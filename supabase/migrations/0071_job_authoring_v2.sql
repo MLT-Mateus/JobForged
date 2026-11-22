@@ -24,7 +24,7 @@ alter function app_private.job_document_valid(jsonb) owner to postgres;
 revoke all on function app_private.job_document_valid(jsonb) from public,anon,authenticated,service_role;
 
 create function app_private.job_plain(value text) returns text language sql immutable set search_path=pg_catalog as $$
- select trim(regexp_replace(regexp_replace(replace(coalesce(value,''),'&nbsp;',' '),'<[^>]*>','','g'),'\[/?(b|i|u|color|size)(=[^]]*)?\]','','gi'));
+ select trim(regexp_replace(regexp_replace(regexp_replace(replace(coalesce(value,''),'&nbsp;',' '),'<[^>]*>','','g'),'\[/?(b|i|u|color|size)(=[^]]*)?\]','','gi'),'[[:space:]]+',' ','g'));
 $$;
 create function app_private.job_issues(d jsonb,cid uuid,selected jsonb) returns jsonb language plpgsql stable set search_path=pg_catalog as $$
 declare issues jsonb:='[]';k text;keys text[]:=array['title','area','contractType','modality','journey','description','attributions','requirements','positions','branchIds'];labels text[]:=array['Cargo','Área','Contratação','Modalidade','Jornada','Apresentação','Atividades','Requisitos','Quantidade','Local de trabalho'];i integer;ok boolean;remote boolean:=d->>'modality' in ('Remoto','Home Office');v text;
@@ -43,6 +43,9 @@ begin
    else ok:=jsonb_array_length(selected)>0 and length(trim(coalesce(d->>'city','')))>0 and length(trim(coalesce(d->>'state','')))>0 and not exists(select 1 from jsonb_array_elements_text(selected) x where not exists(select 1 from app_private.company_branches b where b.company_id=cid and b.id::text=x and b.document->>'status'='Ativo'));end if;
   end if;
   if not coalesce(ok,false) then issues:=issues||jsonb_build_array(jsonb_build_object('key',k,'section',case when i in(6,7,8) then 1 else 0 end,'message','Confira '||lower(labels[i])||'.'));end if;
+ end loop;
+ foreach k in array array['description','attributions','additionalBenefits','careerPlan'] loop
+  if length(coalesce(d->>k,''))>5000 then issues:=issues||jsonb_build_array(jsonb_build_object('key',k,'section',1,'message','Reduza este texto para até 5.000 caracteres.'));end if;
  end loop;
  if d->>'lgpd' is distinct from 'true' then issues:=issues||'[{"key":"lgpd","section":2,"message":"Confirme a revisão e a privacidade dos candidatos."}]';end if;
  if coalesce(d->>'example','false')='true' then issues:=issues||'[{"key":"example","section":2,"message":"Converta o exemplo em uma vaga real após revisar os dados fictícios."}]';end if;

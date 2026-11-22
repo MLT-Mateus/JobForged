@@ -13,7 +13,7 @@ test('ten essentials; salary, level, benefits and accessibility are optional',()
 });
 test('publication conditions are separate and malformed optional data can be removed',()=>{
  assert.deepEqual(publicationIssues({...complete,example:true,lgpd:false,portalReady:false}).map(i=>i.key),['lgpd','example','portal']);
- for(const patch of [{salaryMin:'2000',salaryMax:'1000'},{applicationDeadline:'2030-02-30'},{contactEmail:'invalid'},{contactPhone:'12'},{description:'<p>&nbsp;</p>'},{title:'x'.repeat(121)}])assert.ok(publicationIssues({...complete,...patch}).length);
+ for(const patch of [{salaryMin:'2000',salaryMax:'1000'},{applicationDeadline:'2030-02-30'},{contactEmail:'invalid'},{contactPhone:'12'},{description:'<p>&nbsp;</p>'},{description:'\n\t '},{description:'x'.repeat(5001)},{careerPlan:'x'.repeat(5001)},{title:'x'.repeat(121)}])assert.ok(publicationIssues({...complete,...patch}).length);
  assert.deepEqual(publicationIssues({...complete,salaryMin:'',salaryMax:'',applicationDeadline:'',contactEmail:'',contactPhone:''}),[]);
 });
 test('normalization and feedback use applied content; legacy routes survive',()=>{

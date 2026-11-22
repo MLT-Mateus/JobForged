@@ -20,7 +20,7 @@ export function validateAssistantPatch(value:unknown,branchIds:string[]):Assista
  for(const [key,item] of Object.entries(value)){
   if(!Object.hasOwn(assistantFields,key))throw new Error('Campo não permitido.');
   if(['noPrerequisites','example','resumeRequired','technicalTest','performanceReviews','promotionPossible','salaryConfidential'].includes(key)){
-   if(typeof item!=='boolean')throw new Error('Opção inválida.');clean[key]=item;
+   if(typeof item!=='boolean')throw new Error(key+': use um booleano.');clean[key]=item;
   }else if(key==='positions'){
    if(!Number.isInteger(item)||Number(item)<1||Number(item)>99999)throw new Error('Quantidade inválida.');clean[key]=item;
   }else if(key==='languages'){
@@ -30,7 +30,7 @@ export function validateAssistantPatch(value:unknown,branchIds:string[]):Assista
    if(key==='branchIds'&&item.some(id=>!branchIds.includes(id)))throw new Error('Filial indisponível.');
    clean[key]=Array.from(new Set(item));
   }else{
-   if(typeof item!=='string'||item.length>(key==='summary'?500:key==='title'?120:['description','attributions'].includes(key)?5000:key==='remoteScope'?500:6000))throw new Error('Texto inválido.');
+   if(typeof item!=='string'||item.length>(key==='summary'?500:key==='title'?120:['description','attributions'].includes(key)?5000:key==='remoteScope'?500:6000))throw new Error(key+': use texto dentro do limite.');
    if(['salaryMin','salaryMax'].includes(key)&&item&&!/^\d+(\.\d{1,2})?$/.test(item))throw new Error('Salário inválido.');
    clean[key]=item;
   }

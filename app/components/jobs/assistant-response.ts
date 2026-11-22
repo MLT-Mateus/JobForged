@@ -12,9 +12,12 @@ export function validateAssistantResponse(value:unknown,branches:string[],draft:
  const data=value as Record<string,unknown>;
  if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>4000)throw Error('Resposta inválida.');
  if(!assistantIntents.includes(data.intent as Intent))throw Error('Intenção inválida.');
+ if(!data.patch||typeof data.patch!=='object'||Array.isArray(data.patch))throw Error('Proposta inválida.');
  const proposed={...(data.patch as Record<string,unknown>)};
  // Lossless normalization for numeric facts stored as text in the existing schema.
  for(const key of ['weeklyHours','teamSize'])if(typeof proposed[key]==='number'&&Number.isFinite(proposed[key]))proposed[key]=String(proposed[key]);
+ // A redundant false is not a conversion. Only a human may clear an existing example.
+ if(proposed.example===false&&!draft.example)delete proposed.example;
  const patch=validateAssistantPatch(proposed,branches);
  if(patch.example===false)throw Error('A conversão em vaga real exige revisão no formulário.');
  if(data.intent==='create_example'){

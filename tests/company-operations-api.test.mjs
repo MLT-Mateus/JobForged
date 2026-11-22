@@ -16,6 +16,7 @@ test('operational BFF rejects wrong origins and tenant switches, preserves versi
   if(address.endsWith('/rpc/is_platform_admin'))return Response.json(false);
   if(address.endsWith('/rpc/session_context_v1'))return Response.json(candidate?null:{company_id:cid,role:'owner',companies:{id:cid,name:'Fixture'}});
   if(address.endsWith('/rpc/candidate_context'))return Response.json(candidate?{fullName:'Candidate Fixture',version:0,slug:'fixture-company'}:null);
+  if(address.endsWith('/rpc/company_applications_v2')){calls.push(body);return code?Response.json({code},{status:400}):Response.json({companyId:cid,items:[],total:0})}
   if(address.endsWith('/rpc/company_operations_v1')){calls.push(body);return code?Response.json({code},{status:400}):Response.json({companyId:cid,applications:[]})}
   if(address.endsWith('/rpc/candidate_applications_v2')){calls.push(body);return Response.json([])}
   throw Error('Unexpected isolated request '+address);
@@ -28,7 +29,13 @@ test('operational BFF rejects wrong origins and tenant switches, preserves versi
  assert.equal((await request('/api/company/operations',{...move,companyId:'foreign'})).status,409);assert.equal(calls.length,0);
  assert.equal((await request('/api/company/operations',move)).status,200);assert.equal(calls.at(-1).expected_version,4);
  code='42501';assert.equal((await request('/api/company/operations',move)).status,403);code='40001';assert.equal((await request('/api/company/operations',move)).status,409);code=null;
- candidate=true;assert.equal((await request('/api/company/operations')).status,403);
+ const applicationMove={...move,document:{stageKey:'interview'}};
+ assert.equal((await request('/api/company/applications',applicationMove,undefined,'localhost','https://other.invalid')).status,403);
+ assert.equal((await request('/api/company/applications',{...applicationMove,companyId:'foreign'})).status,409);
+ assert.equal((await request('/api/company/applications',applicationMove)).status,200);assert.equal(calls.at(-1).expected_version,4);
+ assert.equal((await request('/api/company/applications?jobId='+id+'&stageKey=screening&page=2&pageSize=20')).status,200);assert.equal(calls.at(-1).document.jobId,id);assert.equal(calls.at(-1).document.page,'2');
+ code='40001';assert.equal((await request('/api/company/applications',applicationMove)).status,409);code='42501';assert.equal((await request('/api/company/applications',applicationMove)).status,403);code=null;
+ candidate=true;assert.equal((await request('/api/company/applications')).status,403);assert.equal((await request('/api/company/operations')).status,403);
  assert.equal((await request('/api/portal/applications',null,undefined,'careers.fixture.invalid')).status,200);
  assert.equal((await request('/api/portal/applications',{operation:'apply',jobId:id,accepted:true},undefined,'careers.fixture.invalid')).status,200);assert.equal(calls.at(-1).accepted,true);
  }finally{globalThis.fetch=original;for(const [k,v] of Object.entries(saved)){if(v===undefined)delete process.env[k];else process.env[k]=v}}

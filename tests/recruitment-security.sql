@@ -21,6 +21,8 @@ do $$declare d jsonb:=current_setting('jbfd.empty_job')::jsonb;r jsonb;v bigint;
  if checklist->>'canPublish'<>'false' or jsonb_array_length(checklist->'issues')<9 then raise exception 'incomplete checklist';end if;
  d:=d||'{"title":"Support","area":"Atendimento","contractType":"Efetivo - CLT","modality":"Remoto","remoteScope":"Brasil","journey":"Flexível","description":"Atendimento ao cliente","attributions":"Responder chamados","noPrerequisites":true,"lgpd":true,"resumeRequired":false}';
  if public.company_jobs_v2('validate',jid,d)->>'canPublish'<>'true' then raise exception 'optional fields blocked publication';end if;
+ if public.company_jobs_v2('validate',jid,d||jsonb_build_object('description',E'\n\t '))->>'canPublish'<>'false' then raise exception 'whitespace accepted';end if;
+ if public.company_jobs_v2('validate',jid,d||jsonb_build_object('description',repeat('x',5001)))->>'canPublish'<>'false' then raise exception 'rich text limit mismatch';end if;
  r:=public.company_jobs_v2('save',jid,d,null,v);v:=(r->>'version')::bigint;
  r:=public.company_jobs_v2('publish',jid,null,null,v);v:=(r->>'version')::bigint;
  perform set_config('jbfd.test_job',jid::text,true);

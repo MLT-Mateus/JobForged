@@ -36,13 +36,14 @@ export function editorChecks(job:Job){return [
  {section:0,key:remoteJob(job)?'remoteScope':'branchIds',label:remoteJob(job)?'Abrangência do trabalho':'Local de trabalho',done:remoteJob(job)?!!job.remoteScope?.trim():!!job.branchIds?.length&&!!job.city.trim()&&!!job.state.trim()},
  {section:0,key:'journey',label:'Jornada',done:!!job.journey.trim()&&(!['Horário definido','Escala'].includes(job.journey)||!!job.schedule.trim())},
  {section:0,key:'positions',label:'Quantidade',done:Number.isInteger(job.positions??1)&&(job.positions??1)>0&&(job.positions??1)<=99999},
- {section:1,key:'description',label:'Apresentação',done:!!richTextPlain(job.description||job.summary).trim()},
- {section:1,key:'attributions',label:'Atividades',done:!!richTextPlain(job.attributions||job.responsibilities.join('\n')).trim()},
+ {section:1,key:'description',label:'Apresentação',done:!!richTextPlain(job.description||job.summary).trim()&&(job.description||job.summary).length<=5000},
+ {section:1,key:'attributions',label:'Atividades',done:!!richTextPlain(job.attributions||job.responsibilities.join('\n')).trim()&&(job.attributions||job.responsibilities.join('\n')).length<=5000},
  {section:1,key:'requirements',label:'Requisitos',done:!!job.noPrerequisites||job.requirements.some(x=>!!x.trim())},
  ];}
 export type PublicationIssue={key:string;section:number;message:string};
 export function publicationIssues(job:Job):PublicationIssue[]{
  const issues:PublicationIssue[]=editorChecks(job).filter(c=>!c.done).map(c=>({key:c.key,section:c.section,message:'Confira '+c.label.toLowerCase()+'.'}));
+ for(const key of ['description','attributions','additionalBenefits','careerPlan'] as const)if(job[key].length>5000)issues.push({key,section:1,message:'Reduza este texto para até 5.000 caracteres.'});
  if(!job.lgpd)issues.push({key:'lgpd',section:2,message:'Confirme a revisão e a privacidade dos candidatos.'});
  if(job.example)issues.push({key:'example',section:2,message:'Exemplo fictício: revise os dados e converta em uma vaga real antes de publicar.'});
  if(job.portalReady===false)issues.push({key:'portal',section:2,message:'Publique a página da empresa em Personalização.'});

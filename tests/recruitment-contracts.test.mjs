@@ -9,7 +9,7 @@ const response=(patch,intent='create_example')=>({reply:'Preparei uma proposta p
 test('complete mock must contain every essential and remains non-publishable after partial application',()=>{
  const value=validateAssistantResponse(response(complete),[],emptyJob());assert.equal(value.patch.example,true);
  assert.throws(()=>validateAssistantResponse(response({title:'Mock'}),[],emptyJob()),/essenciais/);
- assert.throws(()=>validateAssistantResponse(response({example:false},'update_fields'),[],emptyJob()));
+ assert.throws(()=>validateAssistantResponse(response({example:false},'update_fields'),[],{...emptyJob(),example:true}));
  for(const patch of [{lgpd:true},{status:'Publicada'},{organizationId:'other'},{branchIds:['foreign']},{positions:0},{languages:[{language:4,level:'x'}]}])assert.throws(()=>validateAssistantResponse(response(patch,'update_fields'),[],emptyJob()));
 });
 test('focused edits preserve scope; provenance cannot be omitted or masquerade as persistence',()=>{
@@ -30,6 +30,7 @@ import {readFileSync} from 'node:fs';
 const corpus=JSON.parse(readFileSync(new URL('./fixtures/recruitment-ai-v2.json',import.meta.url),'utf8'));
 const {parseAssistantJSON}=await loadTs(new URL('../app/components/jobs/chat-stream.ts',import.meta.url));
 for(const entry of corpus.cases)test('recorded provider evaluation '+entry.id,()=>{
+ if(entry.invalidFirstResponse)assert.throws(()=>validateAssistantResponse(parseAssistantJSON(entry.invalidFirstResponse),[],emptyJob()),/careerPlan/);
  const proposal=validateAssistantResponse(parseAssistantJSON(entry.raw),[],{...emptyJob(),...entry.prompt.currentDraft,lgpd:entry.prompt.validationState?.consentConfirmed===true});
  assert.ok(proposal.reply);assert.equal(proposal.patch.lgpd,undefined);assert.equal(proposal.patch.status,undefined);
  if(['T23','T24'].includes(entry.id))assert.equal(proposal.patch.example,true);
