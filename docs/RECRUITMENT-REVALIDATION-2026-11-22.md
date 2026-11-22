@@ -13,6 +13,8 @@ Data: 22/11/2026. Referência: ESTUDO-VAGAS-ASSISTENTE-KANBAN-2026-11-22.md. Est
 7. Identidade: cor menos usada priorizada enquanto a paleta oferece opções. Exportação do quadro não considera um filtro de etapa que esteja oculto.
 8. Contratação/jornada: opções válidas conferidas no cliente e banco, com normalização de aliases de contratação.
 
+9. Currículo: a conferência da captura identificou bloqueio do leitor nativo em iframe. Substituído por PDF.js local, carregado sob demanda, com páginas, texto extraído, erro recuperável e download; mantém autorização e não executa ações do documento. Base: [API oficial PDF.js](https://mozilla.github.io/pdf.js/api/draft/module-pdfjsLib.html).
+
 ## Fluxo executado no Test
 
 - Cadastro de candidato sintético com endereço example.invalid, sem caixa de terceiros.
@@ -87,7 +89,7 @@ Data: 22/11/2026. Referência: ESTUDO-VAGAS-ASSISTENTE-KANBAN-2026-11-22.md. Est
 | T56 | Lista/Blocos/Quadro | Componente compartilhado e preferência por rota; exportação do quadro ignora filtro de etapa oculto. |
 | T57 | Currículo de outra empresa/ID alterado | Permissão applications.resume, vínculo empresarial e API privada; testes de Storage e ID externo. |
 | T58 | Currículo atualizado após inscrição | Test publicado: após currículo v2, candidatura manteve curriculo-validacao-v1.pdf. |
-| T59 | Currículo indisponível ou viewer incompatível | Download privado real 200; viewer com fallback Baixar e erro recuperável; não presume suporte PDF em todo navegador. |
+| T59 | Currículo indisponível ou viewer incompatível | Download privado real 200; leitor nativo bloqueado substituído por canvas PDF.js. Teste isolado com duas páginas, texto, erro de arquivo, 390 px e alternativa Baixar. |
 | T60 | Muitas notas/eventos | Histórico de cinco eventos por página; notas sob demanda; fluxo real gravou anotação. |
 | T61 | Migração dos oito estados | Migração aditiva preserva stage legado e vínculos; pré-decisões ficam pendentes de revisão. |
 | T62 | Cor de vaga em tema claro/escuro | Tokens DS em claro/escuro; 0075 prioriza cor menos usada entre vagas não arquivadas; nome/código sempre presentes. |
@@ -122,3 +124,7 @@ Data: 22/11/2026. Referência: ESTUDO-VAGAS-ASSISTENTE-KANBAN-2026-11-22.md. Est
 - Recibo do SHA final e CI: REVALIDACAO-VAGAS-DEPLOY-2026-11-22.md no workspace.
 
 Live permanece dependente de aprovação explícita posterior. Não se copiam dados Test para Live.
+
+## Dependências do leitor
+
+PDF.js 6.5.438 fixado no lockfile, carregado somente ao abrir o PDF. A auditoria de dependências identificou avisos já existentes em Next 16.3.8; a dependência foi atualizada para 16.4.6, com build e CI completos. Isso não constitui prova de exploração no aplicativo, que utiliza Vinext. [Aviso oficial](https://github.com/advisories/GHSA-2464-fhr4-w9xw).

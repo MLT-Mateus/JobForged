@@ -37,5 +37,20 @@ try{
  await page.getByRole('link',{name:'Ver candidaturas',exact:true}).waitFor();
  check('publication offers direct next actions',await page.getByRole('link',{name:'Abrir página',exact:true}).isVisible());
  await page.screenshot({path:out+'/published-actions-isolated.png'});
+ await page.setViewportSize({width:390,height:844});
+ await page.goto(base+'?application=73000000-0000-4000-8000-000000000002');
+ await page.getByRole('button',{name:'Ver currículo',exact:true}).click();
+ await page.locator('.jf-pdf-preview canvas').waitFor();
+ check('private PDF renders without native viewer',await page.locator('.jf-pdf-preview canvas').count()===1&&await page.locator('.jf-pdf-preview iframe').count()===0);
+ await page.getByRole('button',{name:'Próxima',exact:true}).click();
+ await page.locator('.jf-pdf-preview summary').click();
+ await page.getByText('Experiencia sintetica - pagina dois',{exact:true}).waitFor();
+ check('PDF pagination and accessible text work',await page.getByText('Página 2 de 2',{exact:true}).isVisible());
+ check('PDF does not overflow mobile',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await page.screenshot({path:out+'/pdf-mobile-page-two.png'});
+ await page.route('**/api/company/operations?operation=resume*',route=>route.fulfill({status:200,contentType:'application/pdf',body:'invalid PDF'}));
+ await page.getByRole('button',{name:'Ver currículo',exact:true}).click();
+ await page.locator('.jf-pdf-preview [role=alert]').waitFor();
+ check('invalid PDF has recoverable fallback',await page.getByRole('link',{name:'Baixar',exact:true}).isVisible());
  check('no runtime errors',errors.length===0);
 }finally{await fs.writeFile(out+'/revalidation-checks.json',JSON.stringify({passed,errors},null,2));console.log(JSON.stringify({passed,errors}));await browser.close()}
