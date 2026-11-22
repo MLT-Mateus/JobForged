@@ -7,11 +7,14 @@ import {validateAssistantResponse} from '@/app/components/jobs/assistant-respons
 import {emptyJob} from '@/app/components/jobs/job-types';
 import {editorChecks} from '@/app/components/jobs/job-editor-model';
 import {jsonFrames,partialReply,parseAssistantJSON} from '@/app/components/jobs/chat-stream';
+import {assistantEnvironment,assistantWebhook} from './environment';
 export const runtime='nodejs';
 export async function POST(request:NextRequest){
  const headers=new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'});
  const fail=(message:string,status:number)=>Response.json({message},{status,headers});
- if(process.env.APP_ENV!=='test')return fail('Assistente disponível no ambiente Test.',404);
+ const environment=assistantEnvironment();
+ if(!environment)return fail('Assistente indisponível neste ambiente.',404);
+ const authoringWebhook=assistantWebhook(environment,'authoring');
  if(!requireSameOrigin(request))return fail('Origem inválida.',403);
  const session=await readSession(request,headers);
  if(!session?.company||session.platformAdmin||!['owner','admin'].includes(session.role))return fail('Acesso negado.',403);
@@ -37,7 +40,7 @@ export async function POST(request:NextRequest){
   if(!issued?.ok)return fail(issued?.status===429?'Limite do assistente atingido. Tente novamente mais tarde.':'Não foi possível iniciar o assistente.',issued?.status===429?429:503);
   const wantsStream=request.headers.get('accept')?.includes('application/x-ndjson');
   const abort=new AbortController(),signal=AbortSignal.any([request.signal,abort.signal,AbortSignal.timeout(50000)]);
-  const result=await fetch('https://n8n.jobforged.com/webhook/'+(wantsStream?'jbfd-test-job-authoring-stream':'jbfd-test-job-authoring'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),redirect:'error',signal});
+  const result=await fetch(assistantWebhook(environment,wantsStream?'authoring-stream':'authoring'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token}),redirect:'error',signal});
   if(!result.ok)return fail('O assistente está indisponível. Seu formulário permanece preservado.',503);
   function validate(data:unknown){return {...validateAssistantResponse(data,branches.map(b=>b.id),currentDraft),branches}}
   // One bounded format repair. The provider still cannot persist, confirm or publish.
@@ -47,7 +50,7 @@ export async function POST(request:NextRequest){
    if(new TextEncoder().encode(JSON.stringify(retryPayload)).length>95000)throw error;
    const retryIssued=await requestDatabase('rpc/job_assistant_issue',accessToken,{token_hash:createHash('sha256').update(retryToken).digest('hex'),payload:retryPayload});
    if(!retryIssued?.ok)throw error;
-   const retried=await fetch('https://n8n.jobforged.com/webhook/jbfd-test-job-authoring',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:retryToken}),redirect:'error',signal});
+   const retried=await fetch(authoringWebhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:retryToken}),redirect:'error',signal});
    if(!retried.ok)throw error;return validate(await retried.json());
   }}
   if(!wantsStream)return Response.json(await validated(await result.json()),{headers});
