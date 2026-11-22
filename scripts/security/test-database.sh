@@ -20,12 +20,20 @@ wait_for_database
 sql() { docker exec -i "$container" psql -h 127.0.0.1 -Xq -U postgres -v ON_ERROR_STOP=1; }
 sql < tests/security-provider-contract.sql
 for migration in supabase/migrations/[0-9]*.sql; do
-  { printf 'BEGIN;\n'; cat "$migration"; printf '\nCOMMIT;\n'; } | sql
+  migration_role=$(python3 scripts/security/migration_transaction.py "$migration" --operator)
+  { printf 'BEGIN;\n'; cat "$migration"; printf '\nCOMMIT;\n'; } | docker exec -i "$container" psql -h 127.0.0.1 -Xq -U "$migration_role" -v ON_ERROR_STOP=1
 done
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/ux-publication-security.sql; } | sql
 sql < tests/security-foundation.sql
 sql < tests/signup-contracts.sql
+# Exercise the real production execution boundary: postgres owns business RPCs
+# but is not superuser; migrations may be created by supabase_admin.
+docker exec -i "$container" psql -h 127.0.0.1 -Xq -U supabase_admin -v ON_ERROR_STOP=1 <<'SQL'
+grant authenticated to postgres;
+alter role postgres nosuperuser bypassrls;
+SQL
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/recruitment-fixture.mjs;cat tests/recruitment-security.sql; } | sql
+docker exec -i "$container" psql -h 127.0.0.1 -Xq -U supabase_admin -v ON_ERROR_STOP=1 -c 'alter role postgres superuser;'
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql tests/company-operations-security.sql; } | sql
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql tests/backoffice-security.sql; } | sql
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/branding-security.sql; } | sql
