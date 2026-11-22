@@ -68,8 +68,9 @@ declare cid uuid:=app_private.current_company_id();j app_private.company_jobs;se
 begin
  perform app_private.require_company_permission(case when operation in('list','get','context') then 'jobs.view' when operation='delete' then 'jobs.delete' when operation in('save','validate') and job_id is null then 'jobs.create' else 'jobs.edit' end);
  if operation='context' then return jsonb_build_object('portalReady',exists(select 1 from public.company_portals p join public.company_branding b on b.company_id=p.company_id where p.company_id=cid and p.is_public and b.published<>'{}'));end if;
- if operation in('list','get') then return public.company_jobs_v1(operation,job_id);end if;
+ if operation='list' then select coalesce(jsonb_agg(app_private.job_result_v2(x) order by x.updated_at desc),'[]') into answer from app_private.company_jobs x where x.company_id=cid and x.deleted_at is null;return answer;end if;
  if job_id is not null then select * into j from app_private.company_jobs where id=job_id and company_id=cid and deleted_at is null for update;if j.id is null then raise exception 'not found' using errcode='P0002';end if;end if;
+ if operation='get' then return case when j.id is null then null else app_private.job_result_v2(j) end;end if;
  if operation='validate' and job_id is null then perform app_private.require_company_permission('jobs.create');end if;
  if operation not in('save','publish','status','validate','delete','color') then raise exception 'invalid operation' using errcode='22023';end if;
  if operation='color' then
@@ -78,10 +79,10 @@ begin
   if jsonb_typeof(document->'colorToken') is distinct from 'number' or document->>'colorToken' !~ '^([0-9]|1[01])$' then raise exception 'invalid color' using errcode='22023';end if;
   update app_private.company_jobs set color_token=(document->>'colorToken')::integer,version=version+1,updated_at=now() where id=j.id returning * into j;
   insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(cid,auth.uid(),'job.color',j.id);
-  return app_private.job_result(j);
+  return app_private.job_result_v2(j);
  end if;
  if operation='delete' then return public.company_jobs_v1('delete',job_id,null,null,expected_version);end if;
- if operation in('publish','status') then if j.id is null then raise exception 'not found' using errcode='P0002';end if;document:=app_private.job_result(j);end if;
+ if operation in('publish','status') then if j.id is null then raise exception 'not found' using errcode='P0002';end if;document:=app_private.job_result_v2(j);end if;
  selected:=coalesce(document->'branchIds','[]');
  document:=document-array['branchIds','id','organizationId','createdAt','updatedAt','status','version','applicationsCount','colorToken','hasUnpublishedChanges','publishedVersion','portalReady'];
  if not app_private.job_document_valid(document||jsonb_build_object('contactEmail','','contactPhone','','contactWhatsapp','')) or jsonb_typeof(selected)<>'array' then raise exception 'invalid fields' using errcode='22023';end if;
@@ -108,7 +109,7 @@ begin
  insert into app_private.company_job_options(job_id,document) values(j.id,coalesce(opts,'{"acceptApplications":true,"resumeRequired":true,"positions":1,"notifyApplication":true,"notifyStage":true}')||jsonb_build_object('positions',coalesce((document->>'positions')::integer,1),'resumeRequired',coalesce((document->>'resumeRequired')::boolean,true))) on conflict(job_id) do update set document=excluded.document,version=company_job_options.version+1;
  end if;
  insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(cid,auth.uid(),'job.'||operation,j.id);
- answer:=app_private.job_result(j);return answer;
+ answer:=app_private.job_result_v2(j);return answer;
 end;$$;
 
 -- Preserve the existing, curated public field allowlist and use the published revision.
@@ -120,7 +121,7 @@ do $$declare definition text;begin
  execute definition;
 end;$$;
 
-create or replace function app_private.job_result(j app_private.company_jobs) returns jsonb language sql stable set search_path=pg_catalog as $$
+create function app_private.job_result_v2(j app_private.company_jobs) returns jsonb language sql stable set search_path=pg_catalog as $$
  select j.document||jsonb_build_object('branchIds',coalesce((select jsonb_agg(b.id order by b.id) from app_private.company_branches b where b.company_id=j.company_id and b.document->'jobIds' ? j.id::text),'[]'),
  'id',j.id,'organizationId',j.company_id,'status',j.status,'version',j.version,'createdAt',j.created_at,'updatedAt',j.updated_at,'colorToken',j.color_token,'publishedVersion',j.published_version,
  'hasUnpublishedChanges',j.published_document is not null and j.published_document is distinct from (j.document||jsonb_build_object('branchIds',coalesce((select jsonb_agg(b.id order by b.id) from app_private.company_branches b where b.company_id=j.company_id and b.document->'jobIds' ? j.id::text),'[]'))),
@@ -129,6 +130,6 @@ create or replace function app_private.job_result(j app_private.company_jobs) re
  'resumeRequired',coalesce(j.document->'resumeRequired',(select o.document->'resumeRequired' from app_private.company_job_options o where o.job_id=j.id),'true'));
 $$;
 alter function public.company_jobs_v2(text,uuid,jsonb,text,bigint) owner to postgres;
-revoke all on function public.company_jobs_v2(text,uuid,jsonb,text,bigint),app_private.job_plain(text),app_private.job_issues(jsonb,uuid,jsonb) from public,anon,authenticated,service_role;
+revoke all on function public.company_jobs_v2(text,uuid,jsonb,text,bigint),app_private.job_plain(text),app_private.job_issues(jsonb,uuid,jsonb),app_private.job_result_v2(app_private.company_jobs) from public,anon,authenticated,service_role;
 grant execute on function public.company_jobs_v2(text,uuid,jsonb,text,bigint) to authenticated;
 notify pgrst,'reload schema';
