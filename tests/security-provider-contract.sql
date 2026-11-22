@@ -5,6 +5,7 @@ create role anon nologin;
 create role authenticated nologin;
 create role service_role nologin bypassrls;
 create role supabase_admin login superuser;
+create role supabase_storage_admin nologin;
 create schema auth;
 create schema storage;
 create schema extensions;

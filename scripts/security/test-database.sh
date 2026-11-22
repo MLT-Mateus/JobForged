@@ -21,7 +21,7 @@ sql() { docker exec -i "$container" psql -h 127.0.0.1 -Xq -U postgres -v ON_ERRO
 sql < tests/security-provider-contract.sql
 for migration in supabase/migrations/[0-9]*.sql; do
   migration_role=$(python3 scripts/security/migration_transaction.py "$migration" --operator)
-  { printf 'BEGIN;\n'; cat "$migration"; printf '\nCOMMIT;\n'; } | docker exec -i "$container" psql -h 127.0.0.1 -Xq -U "$migration_role" -v ON_ERROR_STOP=1
+  python3 -c 'from pathlib import Path;import sys;from scripts.security.migration_transaction import transaction;print(transaction(Path(sys.argv[1])))' "$migration" | docker exec -i "$container" psql -h 127.0.0.1 -Xq -U "$migration_role" -v ON_ERROR_STOP=1
 done
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/ux-publication-security.sql; } | sql
 sql < tests/security-foundation.sql
