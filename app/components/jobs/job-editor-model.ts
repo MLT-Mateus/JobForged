@@ -71,3 +71,8 @@ export function applicationFeedback(job:Job){
  const process=checks.filter(c=>!c.done&&c.section===4);if(process.length)lines.push('No formulário, confira também: '+process.map(c=>c.label.toLowerCase()).join(' e ')+'.');
  return lines.join('\n\n');
 }
+
+/** Rascunhos podem existir antes de receberem um título. */
+export function jobDisplayTitle(title: string | undefined): string {
+ return title?.trim() || "Vaga sem título";
+}

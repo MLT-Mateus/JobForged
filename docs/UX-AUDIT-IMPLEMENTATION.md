@@ -622,3 +622,7 @@ Validação: DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, ti
 ## Publicação
 
 A publicação final deve registrar SHA, execução de CI, execução de deploy, backup automático, migrations aplicadas, healthcheck e inspeção da interface. Não usar este documento como evidência de deploy antes do resultado efetivo do pipeline.
+
+## Conferência autenticada após a publicação
+
+O primeiro deploy foi confirmado em Test no SHA `6d375c6818cd42688b984f10e7365cfb32265d62`, pipeline `44977932125`, com backup cifrado automático e migrations verificadas. A conta Hitori confirmou Home sem os dois banners demonstrativos, Financeiro real, coleção de vagas, domínio ativo, histórico com 10 versões por página e comparação, além da proteção de rascunho na Personalização. Um rascunho vazio foi criado para exercitar o bloqueio de publicação e removido pelo fluxo de exclusão lógica; nenhuma vaga foi publicada nem candidatura enviada. A revisão revelou título vazio no detalhe/menu/confirmação: o complemento usa `jobDisplayTitle` compartilhado e ajusta o singular da contagem. O recibo local de publicação registra o SHA final e demais verificações.
