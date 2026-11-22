@@ -233,8 +233,16 @@ function useFloatingMenu(open: boolean, onClose: () => void) {
       const placement = popoverPosition(bounds, panel.scrollHeight + 2, {
         width: vp?.width ?? view.innerWidth,
         height: vp?.height ?? view.innerHeight,
+        left: vp?.offsetLeft ?? 0,
         top: vp?.offsetTop ?? 0,
       });
+      if (panel.classList.contains("jf-calendar")) {
+        // A calendar needs room for seven days even when its field is narrow.
+        panel.style.width = `${placement.width}px`;
+        panel.style.minWidth = "0";
+        panel.style.left = `${placement.left - bounds.left}px`;
+        panel.style.right = "auto";
+      }
       panel.dataset.side = placement.side;
       panel.style.maxHeight = `${placement.maxHeight}px`;
     };
@@ -534,6 +542,7 @@ export function DateField({
           id={buttonId}
           type="button"
           className="jf-control jf-date__control"
+          aria-label={`${label}: ${selectedValue ? formatDate(selectedValue) : "Selecione a data"}`}
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={calendarId}
