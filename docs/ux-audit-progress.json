@@ -1,0 +1,2401 @@
+{
+  "auditRevision": "dfec14e23f21f4d1d397d8717144350f50929c84",
+  "target": "Test",
+  "entries": [
+    {
+      "id": "G01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Utilitário sr-only único elimina status duplicado sem perder anúncio acessível.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Ajuda ausente deixa de reservar linha vazia; campos compartilham densidade e alinhamento.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Escala operacional e auxiliar elevada nos componentes e exemplos; fontes de marca preservadas.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Menu móvel fechado usa inert/aria-hidden; abertura e retorno de foco permanecem no shell.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Organização curta visível no topo móvel, com truncamento.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Link Pular para o conteúdo e alvo estável no shell.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G07",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "PendingChanges, DraftBoundary e useDraftScope cobrem editores, diálogos, navegação e modos.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G08",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "FormActions estabelece secundária antes da principal, à direita, estado ocupado e perigo.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G09",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "CollectionViewSwitch compartilhado nas entidades; logs/calendários/gráficos são exceções documentadas.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G10",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Blocos usam auto-fill com largura limitada e alinhamento inicial.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G11",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Mutações têm busy/feedback semântico e preservação dos valores após falha.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G12",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Taxonomia revisada em vagas, conta, configurações e BO; termos DNS mantidos onde úteis.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G13",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Visão de coleção persistida por contexto; filtros de vagas, filiais, operações, equipe e BO na URL.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G14",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "DateField para datas; datetime-local documentado para data/hora com Brasília explícita.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G15",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Dados ausentes não viram zero fictício; plano e métricas têm fallback.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "G16",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Ajuda progressiva, formulários curtos, seções e histórico separados; sem reformular Home aprovada.",
+      "validation": "Typecheck, lint, testes de API/HTML; DS interativo com navegação, descarte, coleção e viewport.",
+      "sources": [
+        "app/components/ui",
+        "app/components/ui/ui.css",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "H01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Dois banners demonstrativos identificados por título+asset serão desativados reversivelmente na migration; destino administrativo bloqueado para empresa.",
+      "validation": "Estrutura aprovada preservada; leitura da conta Hitori e identificação dos dois assets demonstrativos; verificação após deploy.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx",
+        "app/components/admin/PlatformHomeBanners.tsx",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "H02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Métricas móveis em grade 2×2 preservam ordem e hierarquia.",
+      "validation": "Estrutura aprovada preservada; leitura da conta Hitori e identificação dos dois assets demonstrativos; verificação após deploy.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx",
+        "app/components/admin/PlatformHomeBanners.tsx",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "H03",
+      "priority": "P3",
+      "status": "implemented",
+      "implementation": "Configuração da empresa e próximos passos substituem explicação técnica de setup.",
+      "validation": "Estrutura aprovada preservada; leitura da conta Hitori e identificação dos dois assets demonstrativos; verificação após deploy.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx",
+        "app/components/admin/PlatformHomeBanners.tsx",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "H04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Estado inicial orienta o recrutamento sem multiplicar CTAs de criação.",
+      "validation": "Estrutura aprovada preservada; leitura da conta Hitori e identificação dos dois assets demonstrativos; verificação após deploy.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx",
+        "app/components/admin/PlatformHomeBanners.tsx",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "H05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Resumo limita vagas e oferece coleção completa.",
+      "validation": "Estrutura aprovada preservada; leitura da conta Hitori e identificação dos dois assets demonstrativos; verificação após deploy.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx",
+        "app/components/admin/PlatformHomeBanners.tsx",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "D01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Vazios não geram categoria Nenhuma vaga como dado.",
+      "validation": "Contrato de dados inspecionado: coleção autorizada completa, sem LIMIT silencioso. Testes operacionais e renderização.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0057_company_operations.sql"
+      ]
+    },
+    {
+      "id": "D02",
+      "priority": "P3",
+      "status": "implemented",
+      "implementation": "Títulos e explicações redundantes reduzidos.",
+      "validation": "Contrato de dados inspecionado: coleção autorizada completa, sem LIMIT silencioso. Testes operacionais e renderização.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0057_company_operations.sql"
+      ]
+    },
+    {
+      "id": "D03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Totais e últimos seis meses identificados explicitamente.",
+      "validation": "Contrato de dados inspecionado: coleção autorizada completa, sem LIMIT silencioso. Testes operacionais e renderização.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0057_company_operations.sql"
+      ]
+    },
+    {
+      "id": "D04",
+      "priority": "P2",
+      "status": "reviewed-existing",
+      "implementation": "Verificado que fonte atual não é truncada; UI não inventa agregação ou filtro inexistente. Escala de carga continua documentada.",
+      "validation": "Contrato de dados inspecionado: coleção autorizada completa, sem LIMIT silencioso. Testes operacionais e renderização.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0057_company_operations.sql"
+      ]
+    },
+    {
+      "id": "V01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Vazio da coleção distinto de ausência causada por filtros.",
+      "validation": "Testes job-editor, jobs-api, rendered-html e typecheck; vazio e filtros via UI após deploy.",
+      "sources": [
+        "app/components/jobs/JobsListClient.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "V02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Lista/Blocos usa switch compartilhado.",
+      "validation": "Testes job-editor, jobs-api, rendered-html e typecheck; vazio e filtros via UI após deploy.",
+      "sources": [
+        "app/components/jobs/JobsListClient.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "V03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Metadados ausentes exibem ausência, sem valores fictícios.",
+      "validation": "Testes job-editor, jobs-api, rendered-html e typecheck; vazio e filtros via UI após deploy.",
+      "sources": [
+        "app/components/jobs/JobsListClient.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "V04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Lista e wizard compartilham os mesmos 13 critérios de completude.",
+      "validation": "Testes job-editor, jobs-api, rendered-html e typecheck; vazio e filtros via UI após deploy.",
+      "sources": [
+        "app/components/jobs/JobsListClient.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "V05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Troca de estado protegida por busy e feedback de resultado.",
+      "validation": "Testes job-editor, jobs-api, rendered-html e typecheck; vazio e filtros via UI após deploy.",
+      "sources": [
+        "app/components/jobs/JobsListClient.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "V06",
+      "priority": "P3",
+      "status": "reviewed-existing",
+      "implementation": "Mantidos apenas CTA principal e ação contextual do vazio; proposta avaliada sem apagar continuidade útil.",
+      "validation": "Testes job-editor, jobs-api, rendered-html e typecheck; vazio e filtros via UI após deploy.",
+      "sources": [
+        "app/components/jobs/JobsListClient.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Rótulos e cabeçalhos redundantes removidos.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Salvar, Prévia e Assistência têm hierarquia e textos curtos.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Completude explicita critérios, incluindo padrões; pendências navegam aos campos.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Seleção de filial precede resumo do endereço; saída protegida.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Atividades, requisitos, diferenciais e benefícios têm nomes coerentes.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Campos curtos e editores longos dimensionados pelo conteúdo, densidade compartilhada.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J07",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Competências comportamentais e Prazo de retorno substituem jargão.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J08",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "JobDraftDescription reutiliza JobDescription público com rascunho e filiais.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J09",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Pendências associadas a campo, erro inline e revelação/foco da etapa.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "J10",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Detalhe, editar e prévia têm rotas e significados distintos.",
+      "validation": "Testes de editor, assistente, API e build; prévia usa o mesmo renderizador público.",
+      "sources": [
+        "app/components/jobs/JobWizardClient.tsx",
+        "app/components/jobs/JobDraftDescription.tsx",
+        "app/components/jobs/job-editor-model.ts"
+      ]
+    },
+    {
+      "id": "JD01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Metadados são compostos apenas quando presentes.",
+      "validation": "Testes jobs-api/company-operations-api e typecheck.",
+      "sources": [
+        "app/components/jobs/JobDetailClient.tsx",
+        "app/components/operations/JobSettings.tsx"
+      ]
+    },
+    {
+      "id": "JD02",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Resumo factual substitui falso histórico reconstruído.",
+      "validation": "Testes jobs-api/company-operations-api e typecheck.",
+      "sources": [
+        "app/components/jobs/JobDetailClient.tsx",
+        "app/components/operations/JobSettings.tsx"
+      ]
+    },
+    {
+      "id": "JD03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Editar exige a mesma permissão do editor.",
+      "validation": "Testes jobs-api/company-operations-api e typecheck.",
+      "sources": [
+        "app/components/jobs/JobDetailClient.tsx",
+        "app/components/operations/JobSettings.tsx"
+      ]
+    },
+    {
+      "id": "JD04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Avisos automáticos descreve o recurso existente.",
+      "validation": "Testes jobs-api/company-operations-api e typecheck.",
+      "sources": [
+        "app/components/jobs/JobDetailClient.tsx",
+        "app/components/operations/JobSettings.tsx"
+      ]
+    },
+    {
+      "id": "JD05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Opções têm leitura, erro, carregamento, guard e ações compartilhadas.",
+      "validation": "Testes jobs-api/company-operations-api e typecheck.",
+      "sources": [
+        "app/components/jobs/JobDetailClient.tsx",
+        "app/components/operations/JobSettings.tsx"
+      ]
+    },
+    {
+      "id": "F01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Filial é a entidade consistente em vazio, formulário e ação.",
+      "validation": "Typecheck/lint; validação da abertura, edição local e descarte sem gravar dados reais.",
+      "sources": [
+        "app/components/admin/BranchesClient.tsx",
+        "app/components/admin/branches.css"
+      ]
+    },
+    {
+      "id": "F02",
+      "priority": "P3",
+      "status": "implemented",
+      "implementation": "Limpeza desabilitada sem filtros; resumo condicionado ao conteúdo.",
+      "validation": "Typecheck/lint; validação da abertura, edição local e descarte sem gravar dados reais.",
+      "sources": [
+        "app/components/admin/BranchesClient.tsx",
+        "app/components/admin/branches.css"
+      ]
+    },
+    {
+      "id": "F03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Identificação/endereço/fotos organizados; Cancelar e Salvar à direita.",
+      "validation": "Typecheck/lint; validação da abertura, edição local e descarte sem gravar dados reais.",
+      "sources": [
+        "app/components/admin/BranchesClient.tsx",
+        "app/components/admin/branches.css"
+      ]
+    },
+    {
+      "id": "F04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Falha parcial informa filial persistida e mantém somente arquivos pendentes para reenviar.",
+      "validation": "Typecheck/lint; validação da abertura, edição local e descarte sem gravar dados reais.",
+      "sources": [
+        "app/components/admin/BranchesClient.tsx",
+        "app/components/admin/branches.css"
+      ]
+    },
+    {
+      "id": "F05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Vagas vinculáveis têm pesquisa, quantidade e área de rolagem limitada.",
+      "validation": "Typecheck/lint; validação da abertura, edição local e descarte sem gravar dados reais.",
+      "sources": [
+        "app/components/admin/BranchesClient.tsx",
+        "app/components/admin/branches.css"
+      ]
+    },
+    {
+      "id": "F06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Página efetiva limitada ao conjunto filtrado.",
+      "validation": "Typecheck/lint; validação da abertura, edição local e descarte sem gravar dados reais.",
+      "sources": [
+        "app/components/admin/BranchesClient.tsx",
+        "app/components/admin/branches.css"
+      ]
+    },
+    {
+      "id": "C01",
+      "priority": "P3",
+      "status": "implemented",
+      "implementation": "Vazio contextual oferece Ver vagas conforme acesso.",
+      "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx"
+      ]
+    },
+    {
+      "id": "C02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Página efetiva ajustada após filtro/redução.",
+      "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx"
+      ]
+    },
+    {
+      "id": "C03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Histórico de candidatura em lotes de cinco, com rótulos humanos.",
+      "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx"
+      ]
+    },
+    {
+      "id": "C04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Agendamento recebe candidatura e vaga de origem.",
+      "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx"
+      ]
+    },
+    {
+      "id": "C05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Drawer dividido em Dados, Processo e Notas e histórico.",
+      "validation": "Testes de API e SQL em fixtures; não foram tomadas decisões sobre candidatos reais.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx"
+      ]
+    },
+    {
+      "id": "AG01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Alternância compacta mantém as duas opções na linha móvel.",
+      "validation": "Testes de calendário, filtro temporal e contratos operacionais. Nenhum convite real enviado.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0060_interview_candidate_context.sql"
+      ]
+    },
+    {
+      "id": "AG02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Lista cronológica é padrão; calendário alternativo com rolagem localizada; datas DS.",
+      "validation": "Testes de calendário, filtro temporal e contratos operacionais. Nenhum convite real enviado.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0060_interview_candidate_context.sql"
+      ]
+    },
+    {
+      "id": "AG03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Compromisso é termo consistente; candidatura opcional caracteriza entrevista.",
+      "validation": "Testes de calendário, filtro temporal e contratos operacionais. Nenhum convite real enviado.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0060_interview_candidate_context.sql"
+      ]
+    },
+    {
+      "id": "AG04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Link começa vazio e endereço genérico não é aceito como reunião pronta.",
+      "validation": "Testes de calendário, filtro temporal e contratos operacionais. Nenhum convite real enviado.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0060_interview_candidate_context.sql"
+      ]
+    },
+    {
+      "id": "AG05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Candidatura selecionável e persistida no compromisso com isolamento empresarial.",
+      "validation": "Testes de calendário, filtro temporal e contratos operacionais. Nenhum convite real enviado.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0060_interview_candidate_context.sql"
+      ]
+    },
+    {
+      "id": "AG06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Lista paginada em dez itens e período identificado.",
+      "validation": "Testes de calendário, filtro temporal e contratos operacionais. Nenhum convite real enviado.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0060_interview_candidate_context.sql"
+      ]
+    },
+    {
+      "id": "AG07",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Leitura desabilita campos; edição usa guard e Cancelar.",
+      "validation": "Testes de calendário, filtro temporal e contratos operacionais. Nenhum convite real enviado.",
+      "sources": [
+        "app/components/operations/OperationalModule.tsx",
+        "supabase/migrations/0060_interview_candidate_context.sql"
+      ]
+    },
+    {
+      "id": "FIN01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Plano real substitui plano/faturas/cartão fictícios.",
+      "validation": "Inspeção de fonte e build; comparação do plano com contexto empresarial real.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx"
+      ]
+    },
+    {
+      "id": "FIN02",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Fluxo transacional simulado removido do módulo operacional.",
+      "validation": "Inspeção de fonte e build; comparação do plano com contexto empresarial real.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx"
+      ]
+    },
+    {
+      "id": "FIN03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Indisponibilidade de cobrança indicada na origem, sem documento fiscal fictício.",
+      "validation": "Inspeção de fonte e build; comparação do plano com contexto empresarial real.",
+      "sources": [
+        "app/components/admin/AdminModuleClient.tsx"
+      ]
+    },
+    {
+      "id": "ADM01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Cartão de pessoa limitado pela grade de blocos e badges agrupados.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Filtro usa largura útil e opções legíveis.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Membro incluído nas funções reconhecidas e permitidas.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Detalhe organiza identificação e acesso sem cartão por atributo.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Próprio perfil oferece Minha conta.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Convite usa rodapé comum e ordem Cancelar/Convidar.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM07",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Bloquear/desbloquear coerente e confirmado; titular protegido.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM08",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Permissões agrupadas por módulo e dependências explicadas.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM09",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Permissões e identidade usam dirty, descarte e FormActions.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "ADM10",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Filtros compactos sem ajuda vazia e densidade móvel compartilhada.",
+      "validation": "API/SQL de autorização e sessões; comparação lista/blocos na UI da Hitori; não alterar papéis reais.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/MemberIdentityForm.tsx",
+        "app/components/operations/MemberPermissions.tsx"
+      ]
+    },
+    {
+      "id": "CFG01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Dados normalizados determinam dirty; salvar/descarte e saída protegidos.",
+      "validation": "API/SQL paginada e isolamento; navegação por abas e edição local.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/CompanyActivity.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "CFG02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Plano e situação contratual exibem conceitos diferentes.",
+      "validation": "API/SQL paginada e isolamento; navegação por abas e edição local.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/CompanyActivity.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "CFG03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Dados, Preferências e Histórico em áreas distintas.",
+      "validation": "API/SQL paginada e isolamento; navegação por abas e edição local.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/CompanyActivity.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "CFG04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Atualizar tem largura natural na barra de resumo.",
+      "validation": "API/SQL paginada e isolamento; navegação por abas e edição local.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/CompanyActivity.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "CFG05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Eventos da mesma operação agrupados mantendo detalhes.",
+      "validation": "API/SQL paginada e isolamento; navegação por abas e edição local.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/CompanyActivity.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "CFG06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Histórico tem autor/data/categoria e atalho ao histórico da página.",
+      "validation": "API/SQL paginada e isolamento; navegação por abas e edição local.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/CompanyActivity.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "CFG07",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Preferências não sobrescrevem rascunho ao atualizar; ações compartilhadas.",
+      "validation": "API/SQL paginada e isolamento; navegação por abas e edição local.",
+      "sources": [
+        "app/components/admin/CompanyManagementClient.tsx",
+        "app/components/admin/CompanyActivity.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "MC01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Resumo decorativo inicial removido.",
+      "validation": "Testes nativos de e-mail e login com contas descartáveis; inspeção Hitori sem mudar credenciais.",
+      "sources": [
+        "app/components/admin/AccountManagementClient.tsx",
+        "app/components/admin/ProfilePhoto.tsx"
+      ]
+    },
+    {
+      "id": "MC02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Foto compacta no formulário aproxima os dados essenciais.",
+      "validation": "Testes nativos de e-mail e login com contas descartáveis; inspeção Hitori sem mudar credenciais.",
+      "sources": [
+        "app/components/admin/AccountManagementClient.tsx",
+        "app/components/admin/ProfilePhoto.tsx"
+      ]
+    },
+    {
+      "id": "MC03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Upload de avatar tem prévia e ação legível.",
+      "validation": "Testes nativos de e-mail e login com contas descartáveis; inspeção Hitori sem mudar credenciais.",
+      "sources": [
+        "app/components/admin/AccountManagementClient.tsx",
+        "app/components/admin/ProfilePhoto.tsx"
+      ]
+    },
+    {
+      "id": "MC04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Foto informa salvamento imediato; descarte refere-se aos campos do formulário.",
+      "validation": "Testes nativos de e-mail e login com contas descartáveis; inspeção Hitori sem mudar credenciais.",
+      "sources": [
+        "app/components/admin/AccountManagementClient.tsx",
+        "app/components/admin/ProfilePhoto.tsx"
+      ]
+    },
+    {
+      "id": "MC05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Textos não dependem de cartão ao lado; labels de credenciais curtos.",
+      "validation": "Testes nativos de e-mail e login com contas descartáveis; inspeção Hitori sem mudar credenciais.",
+      "sources": [
+        "app/components/admin/AccountManagementClient.tsx",
+        "app/components/admin/ProfilePhoto.tsx"
+      ]
+    },
+    {
+      "id": "MC06",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Troca de modo de credencial confirma abandono e limpa segredos.",
+      "validation": "Testes nativos de e-mail e login com contas descartáveis; inspeção Hitori sem mudar credenciais.",
+      "sources": [
+        "app/components/admin/AccountManagementClient.tsx",
+        "app/components/admin/ProfilePhoto.tsx"
+      ]
+    },
+    {
+      "id": "MC07",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Segurança mostra resumo e somente o formulário ativo.",
+      "validation": "Testes nativos de e-mail e login com contas descartáveis; inspeção Hitori sem mudar credenciais.",
+      "sources": [
+        "app/components/admin/AccountManagementClient.tsx",
+        "app/components/admin/ProfilePhoto.tsx"
+      ]
+    },
+    {
+      "id": "N01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "hasNext calculado no servidor impede página final fantasma.",
+      "validation": "SQL com 21 alertas e isolamento por destinatário; contrato candidato validado pelo teste nativo.",
+      "sources": [
+        "app/components/ui/NotificationPanel.tsx",
+        "app/components/admin/NotificationBell.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "N02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Mensagens resumidas/expansíveis e filtro Somente não lidos.",
+      "validation": "SQL com 21 alertas e isolamento por destinatário; contrato candidato validado pelo teste nativo.",
+      "sources": [
+        "app/components/ui/NotificationPanel.tsx",
+        "app/components/admin/NotificationBell.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "N03",
+      "priority": "P3",
+      "status": "implemented",
+      "implementation": "Nome acessível do destino inclui o assunto do aviso.",
+      "validation": "SQL com 21 alertas e isolamento por destinatário; contrato candidato validado pelo teste nativo.",
+      "sources": [
+        "app/components/ui/NotificationPanel.tsx",
+        "app/components/admin/NotificationBell.tsx",
+        "supabase/migrations/0063_activity_and_alert_pagination.sql"
+      ]
+    },
+    {
+      "id": "PER01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Um status visual de salvamento e anúncio assistivo oculto.",
+      "validation": "Estrutura aprovada mantida; DS guard e galeria de templates; revisão visual Test.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/ui/Widgets.tsx"
+      ]
+    },
+    {
+      "id": "PER02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Acesso móvel Editor/Prévia e salvar sem quebrar cartão aprovado.",
+      "validation": "Estrutura aprovada mantida; DS guard e galeria de templates; revisão visual Test.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/ui/Widgets.tsx"
+      ]
+    },
+    {
+      "id": "PER03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Descartar é local; padrão e versão são carregados para revisar antes de publicar.",
+      "validation": "Estrutura aprovada mantida; DS guard e galeria de templates; revisão visual Test.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/ui/Widgets.tsx"
+      ]
+    },
+    {
+      "id": "PER04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Tratamento semântico de confirmação conforme consequência.",
+      "validation": "Estrutura aprovada mantida; DS guard e galeria de templates; revisão visual Test.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/ui/Widgets.tsx"
+      ]
+    },
+    {
+      "id": "PER05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Seção desativada explica onde reativar e preserva conteúdo.",
+      "validation": "Estrutura aprovada mantida; DS guard e galeria de templates; revisão visual Test.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/ui/Widgets.tsx"
+      ]
+    },
+    {
+      "id": "EL01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Template, seções e composição em ordem; filtros subordinados a Vagas.",
+      "validation": "Cinco templates: 320/390/768/1280; textos extensos e quatro pares tipográficos em 390.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/design-system/PortalValidationDemo.tsx"
+      ]
+    },
+    {
+      "id": "EL02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Atalhos entre Elementos e Textos usam os mesmos nomes.",
+      "validation": "Cinco templates: 320/390/768/1280; textos extensos e quatro pares tipográficos em 390.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/design-system/PortalValidationDemo.tsx"
+      ]
+    },
+    {
+      "id": "EL03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Orientação de imagem reduzida a formatos, tamanho e proporção; prévia preservada.",
+      "validation": "Cinco templates: 320/390/768/1280; textos extensos e quatro pares tipográficos em 390.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/design-system/PortalValidationDemo.tsx"
+      ]
+    },
+    {
+      "id": "EL04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Galeria real dos cinco templates, conteúdo extremo e quatro larguras.",
+      "validation": "Cinco templates: 320/390/768/1280; textos extensos e quatro pares tipográficos em 390.",
+      "sources": [
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/design-system/PortalValidationDemo.tsx"
+      ]
+    },
+    {
+      "id": "TX01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "ContentField usa input/textarea para textos simples e preserva rich text legado.",
+      "validation": "Testes branding-model/public-access-ui; galeria real de prévia.",
+      "sources": [
+        "app/components/ui/ContentField.tsx",
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/personalization/PublicCompanyPortal.tsx"
+      ]
+    },
+    {
+      "id": "TX02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Título de apresentação e texto complementar substituem hero.",
+      "validation": "Testes branding-model/public-access-ui; galeria real de prévia.",
+      "sources": [
+        "app/components/ui/ContentField.tsx",
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/personalization/PublicCompanyPortal.tsx"
+      ]
+    },
+    {
+      "id": "TX03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Validação impede publicar destinos internos inadequados e mantém URLs públicas legítimas.",
+      "validation": "Testes branding-model/public-access-ui; galeria real de prévia.",
+      "sources": [
+        "app/components/ui/ContentField.tsx",
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/personalization/PublicCompanyPortal.tsx"
+      ]
+    },
+    {
+      "id": "TX04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Controle de tema tem uma fonte no editor.",
+      "validation": "Testes branding-model/public-access-ui; galeria real de prévia.",
+      "sources": [
+        "app/components/ui/ContentField.tsx",
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/personalization/PublicCompanyPortal.tsx"
+      ]
+    },
+    {
+      "id": "TX05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "PublicJobs recebe flags e textos do mesmo contrato da prévia.",
+      "validation": "Testes branding-model/public-access-ui; galeria real de prévia.",
+      "sources": [
+        "app/components/ui/ContentField.tsx",
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/personalization/PublicCompanyPortal.tsx"
+      ]
+    },
+    {
+      "id": "TX06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Limites semânticos e quebra de conteúdo preservam textos completos.",
+      "validation": "Testes branding-model/public-access-ui; galeria real de prévia.",
+      "sources": [
+        "app/components/ui/ContentField.tsx",
+        "app/components/personalization/PersonalizationClient.tsx",
+        "app/components/personalization/PublicCompanyPortal.tsx"
+      ]
+    },
+    {
+      "id": "MAR01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Orientação de cores curta e ajustes por grupo.",
+      "validation": "Testes de seis paletas, extremos, foreground, hover e semântica nos dois temas; quatro fontes × cinco templates.",
+      "sources": [
+        "app/components/personalization/BrandColorsEditor.tsx",
+        "app/components/personalization/CareerPortalPreview.tsx",
+        "app/components/SiteFooter.tsx"
+      ]
+    },
+    {
+      "id": "MAR02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Logo sem versão escura ganha superfície de apoio no cabeçalho e rodapé.",
+      "validation": "Testes de seis paletas, extremos, foreground, hover e semântica nos dois temas; quatro fontes × cinco templates.",
+      "sources": [
+        "app/components/personalization/BrandColorsEditor.tsx",
+        "app/components/personalization/CareerPortalPreview.tsx",
+        "app/components/SiteFooter.tsx"
+      ]
+    },
+    {
+      "id": "MAR03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Tokens compartilhados mantêm derivação contrastante; paletas e extremos testados.",
+      "validation": "Testes de seis paletas, extremos, foreground, hover e semântica nos dois temas; quatro fontes × cinco templates.",
+      "sources": [
+        "app/components/personalization/BrandColorsEditor.tsx",
+        "app/components/personalization/CareerPortalPreview.tsx",
+        "app/components/SiteFooter.tsx"
+      ]
+    },
+    {
+      "id": "MAR04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Quatro fontes mantidas e testadas nos cinco templates em 390 px.",
+      "validation": "Testes de seis paletas, extremos, foreground, hover e semântica nos dois temas; quatro fontes × cinco templates.",
+      "sources": [
+        "app/components/personalization/BrandColorsEditor.tsx",
+        "app/components/personalization/CareerPortalPreview.tsx",
+        "app/components/SiteFooter.tsx"
+      ]
+    },
+    {
+      "id": "END01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Slug participa do mesmo salvar/versionamento da página.",
+      "validation": "SQL transacional: conflito, versão, slug, domínio pendente, desconexão e isolamento. Worker: DNS, TLS e guarda de versão.",
+      "sources": [
+        "app/components/personalization/CompanyDomainEditor.tsx",
+        "supabase/migrations/0062_page_publication_address_transaction.sql",
+        "scripts/security/reconcile-test-domains.py"
+      ]
+    },
+    {
+      "id": "END02",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Intenções de domínio/preparação/desconexão integram a publicação transacional.",
+      "validation": "SQL transacional: conflito, versão, slug, domínio pendente, desconexão e isolamento. Worker: DNS, TLS e guarda de versão.",
+      "sources": [
+        "app/components/personalization/CompanyDomainEditor.tsx",
+        "supabase/migrations/0062_page_publication_address_transaction.sql",
+        "scripts/security/reconcile-test-domains.py"
+      ]
+    },
+    {
+      "id": "END03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Desconectar exige confirmação e só aplica ao publicar.",
+      "validation": "SQL transacional: conflito, versão, slug, domínio pendente, desconexão e isolamento. Worker: DNS, TLS e guarda de versão.",
+      "sources": [
+        "app/components/personalization/CompanyDomainEditor.tsx",
+        "supabase/migrations/0062_page_publication_address_transaction.sql",
+        "scripts/security/reconcile-test-domains.py"
+      ]
+    },
+    {
+      "id": "END04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Carregando/erro/ativo/pendente/ausente são estados distintos.",
+      "validation": "SQL transacional: conflito, versão, slug, domínio pendente, desconexão e isolamento. Worker: DNS, TLS e guarda de versão.",
+      "sources": [
+        "app/components/personalization/CompanyDomainEditor.tsx",
+        "supabase/migrations/0062_page_publication_address_transaction.sql",
+        "scripts/security/reconcile-test-domains.py"
+      ]
+    },
+    {
+      "id": "END05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Resumo ativo primeiro e procedimento DNS progressivo.",
+      "validation": "SQL transacional: conflito, versão, slug, domínio pendente, desconexão e isolamento. Worker: DNS, TLS e guarda de versão.",
+      "sources": [
+        "app/components/personalization/CompanyDomainEditor.tsx",
+        "supabase/migrations/0062_page_publication_address_transaction.sql",
+        "scripts/security/reconcile-test-domains.py"
+      ]
+    },
+    {
+      "id": "END06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Atalho de prévia usa resolvedor público comum.",
+      "validation": "SQL transacional: conflito, versão, slug, domínio pendente, desconexão e isolamento. Worker: DNS, TLS e guarda de versão.",
+      "sources": [
+        "app/components/personalization/CompanyDomainEditor.tsx",
+        "supabase/migrations/0062_page_publication_address_transaction.sql",
+        "scripts/security/reconcile-test-domains.py"
+      ]
+    },
+    {
+      "id": "HIS01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Histórico servidor com dez versões por página.",
+      "validation": "SQL paginado/isolamento; comparação no mesmo painel, sem empilhar modais.",
+      "sources": [
+        "app/components/personalization/BrandingHistory.tsx",
+        "supabase/migrations/0061_branding_history_pagination.sql"
+      ]
+    },
+    {
+      "id": "HIS02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Somente versão publicada corrente recebe Atual.",
+      "validation": "SQL paginado/isolamento; comparação no mesmo painel, sem empilhar modais.",
+      "sources": [
+        "app/components/personalization/BrandingHistory.tsx",
+        "supabase/migrations/0061_branding_history_pagination.sql"
+      ]
+    },
+    {
+      "id": "HIS03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Lista e comparação usam o mesmo painel com retorno.",
+      "validation": "SQL paginado/isolamento; comparação no mesmo painel, sem empilhar modais.",
+      "sources": [
+        "app/components/personalization/BrandingHistory.tsx",
+        "supabase/migrations/0061_branding_history_pagination.sql"
+      ]
+    },
+    {
+      "id": "HIS04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Diff percorre configuração versionada completa com textos, cores, imagens e endereço.",
+      "validation": "SQL paginado/isolamento; comparação no mesmo painel, sem empilhar modais.",
+      "sources": [
+        "app/components/personalization/BrandingHistory.tsx",
+        "supabase/migrations/0061_branding_history_pagination.sql"
+      ]
+    },
+    {
+      "id": "HIS05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Revisar esta versão prepara rascunho; publicação é explícita e gera nova versão.",
+      "validation": "SQL paginado/isolamento; comparação no mesmo painel, sem empilhar modais.",
+      "sources": [
+        "app/components/personalization/BrandingHistory.tsx",
+        "supabase/migrations/0061_branding_history_pagination.sql"
+      ]
+    },
+    {
+      "id": "P01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Busca, filtros e vazio publicados respeitam configuração.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Título e descrição públicos identificam a empresa.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Lista/Blocos e busca normalizada por acentos.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Resumo respeita palavras; múltiplas filiais têm síntese e detalhe.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Links publicados para administração são suprimidos; editor exige destino público. Nenhum telefone/WhatsApp foi inventado ou substituído sem fonte.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Página canônica de vaga e compatibilidade com hash antigo.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P07",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Renderizador/projeção pública incluem campos destinados ao candidato; classificação descrita no relatório.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P08",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Tema e marca herdados do portal no anúncio individual.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "P09",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Cabeçalho compacto da empresa, retorno e candidatura no contexto.",
+      "validation": "Testes de projeção pública, links, busca e branding; matriz visual de templates e inspeção do portal Test.",
+      "sources": [
+        "app/components/jobs/PublicJobs.tsx",
+        "app/components/jobs/JobDescription.tsx",
+        "app/components/jobs/PublicVacancy.tsx",
+        "app/[companySlug]/page.tsx"
+      ]
+    },
+    {
+      "id": "CA01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Labels legais legíveis; ação principal alinhada à direita.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "CA02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Modos preservam e-mail e protegem cadastro; segredos não persistidos.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "CA03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Credenciais usam mesma linguagem e feedback do painel empresarial.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "CA04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Candidato altera e-mail/senha imediatamente mediante senha atual no contrato próprio.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "CA05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Perfil e credenciais têm guard; currículo informa persistência imediata.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "CA06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Minhas candidaturas tem busca, etapa, paginação e Lista/Blocos.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "CA07",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Etapa legível e link canônico à vaga com situação real.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "CA08",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Retirada tem Cancelar e logout usa perigo.",
+      "validation": "Testes nativos com conta sintética: troca de e-mail, login novo/antigo, senha incorreta, conta/alertas/currículo.",
+      "sources": [
+        "app/components/personalization/PublicPortalAccount.tsx",
+        "app/components/personalization/CandidateCredentials.tsx",
+        "app/components/operations/MyApplications.tsx"
+      ]
+    },
+    {
+      "id": "AP01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Login integrado retorna à mesma vaga sem ação atrás de modal.",
+      "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
+      "sources": [
+        "app/components/operations/ApplicationAction.tsx"
+      ]
+    },
+    {
+      "id": "AP02",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Sessão ausente e erro de rede têm estados/continuidade distintos.",
+      "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
+      "sources": [
+        "app/components/operations/ApplicationAction.tsx"
+      ]
+    },
+    {
+      "id": "AP03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Arquivo salvo é separado do envio efetivo da candidatura.",
+      "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
+      "sources": [
+        "app/components/operations/ApplicationAction.tsx"
+      ]
+    },
+    {
+      "id": "AP04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Situação anterior é reconhecida sem prometer reenvio não suportado.",
+      "validation": "Testes de API, autorização e renderização; nenhum envio para vaga real.",
+      "sources": [
+        "app/components/operations/ApplicationAction.tsx"
+      ]
+    },
+    {
+      "id": "BO01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Identidade fica no shell; cabeçalhos focam tarefa.",
+      "validation": "Build, APIs e SQL com plataforma/MFA; Hitori deve continuar recebendo 403. Inspeção visual autenticada como plataforma não presumida.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "BO02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Filtros, resultados e vazio no mesmo contêiner.",
+      "validation": "Build, APIs e SQL com plataforma/MFA; Hitori deve continuar recebendo 403. Inspeção visual autenticada como plataforma não presumida.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "BO03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Entidades usam alternância e paginação compartilhadas; auditoria mantém tabela.",
+      "validation": "Build, APIs e SQL com plataforma/MFA; Hitori deve continuar recebendo 403. Inspeção visual autenticada como plataforma não presumida.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "BO04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Filtros aplicados juntos em Buscar, labels por entidade e URL compartilhável.",
+      "validation": "Build, APIs e SQL com plataforma/MFA; Hitori deve continuar recebendo 403. Inspeção visual autenticada como plataforma não presumida.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "BO05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Escopo de rascunho protege editores e atualização; motivo mantido.",
+      "validation": "Build, APIs e SQL com plataforma/MFA; Hitori deve continuar recebendo 403. Inspeção visual autenticada como plataforma não presumida.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "BO06",
+      "priority": "P2",
+      "status": "reviewed-existing",
+      "implementation": "Placeholders finais seguem normalização do componente; exemplos em fonte não são tratados como bug visual sem evidência.",
+      "validation": "Build, APIs e SQL com plataforma/MFA; Hitori deve continuar recebendo 403. Inspeção visual autenticada como plataforma não presumida.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/ui/WorkspaceShell.tsx"
+      ]
+    },
+    {
+      "id": "BOV01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Ausência de métrica é Indisponível, zero real preservado.",
+      "validation": "Projeção real, typecheck e testes backoffice-api/SQL.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOV02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Vocabulário de pessoas/empresas/convites e escopo explícito.",
+      "validation": "Projeção real, typecheck e testes backoffice-api/SQL.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOV03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Acompanhar agora usa contagens reais de convites e suspensão, com links filtrados.",
+      "validation": "Projeção real, typecheck e testes backoffice-api/SQL.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOE01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Plano, documento e estado legíveis, ausência explícita.",
+      "validation": "Typecheck e SQL/API administrativa com MFA.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOE02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Coleção de empresas integrada com Lista/Blocos.",
+      "validation": "Typecheck e SQL/API administrativa com MFA.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOE03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Situação operacional e situação do plano separadas.",
+      "validation": "Typecheck e SQL/API administrativa com MFA.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOD01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Equipe resumida a dez e convites a 25, com acesso à coleção completa.",
+      "validation": "SQL/API administrativa e testes de exclusão isolados; nenhuma exclusão real.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/admin/CompanyDeletion.tsx"
+      ]
+    },
+    {
+      "id": "BOD02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Dados, equipe, plano e operações sensíveis têm grupos identificados.",
+      "validation": "SQL/API administrativa e testes de exclusão isolados; nenhuma exclusão real.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/admin/CompanyDeletion.tsx"
+      ]
+    },
+    {
+      "id": "BOD03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Exclusão em área própria, mantendo nome, motivo e MFA.",
+      "validation": "SQL/API administrativa e testes de exclusão isolados; nenhuma exclusão real.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "app/components/admin/CompanyDeletion.tsx"
+      ]
+    },
+    {
+      "id": "BOU01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Nome e empresa substituem IDs no conteúdo principal.",
+      "validation": "Projeção de dados e foto restrita a administrador/MFA, tests SQL.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "BOU02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "CPF, telefone, foto leve e papel contextual com autorização administrativa existente.",
+      "validation": "Projeção de dados e foto restrita a administrador/MFA, tests SQL.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "BOU03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Alterar vínculo explica que não bloqueia a identidade global.",
+      "validation": "Projeção de dados e foto restrita a administrador/MFA, tests SQL.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "BOC01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Convite apresenta data, validade, função, empresa e ações conforme estado.",
+      "validation": "Typecheck, contrato de estados e testes de convite; sem envio real.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOC02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Formulário protegido e feedback não promete entrega de e-mail comprovada.",
+      "validation": "Typecheck, contrato de estados e testes de convite; sem envio real.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOC03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Blocos mantêm destinatário, situação e prazo, com paginação.",
+      "validation": "Typecheck, contrato de estados e testes de convite; sem envio real.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "COM01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Banners e Comunicados separados e paginados no servidor.",
+      "validation": "SQL paginado, teste de dispatch bloqueado antes de criar destinatários; sem envio real.",
+      "sources": [
+        "app/components/admin/CommunicationsClient.tsx",
+        "supabase/migrations/0064_communication_management_pagination.sql",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "COM02",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Matriz de canais corresponde ao suporte existente; cadastro do candidato não é negado.",
+      "validation": "SQL paginado, teste de dispatch bloqueado antes de criar destinatários; sem envio real.",
+      "sources": [
+        "app/components/admin/CommunicationsClient.tsx",
+        "supabase/migrations/0064_communication_management_pagination.sql",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "COM03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Conteúdo, Imagens e Destino/exibição organizados.",
+      "validation": "SQL paginado, teste de dispatch bloqueado antes de criar destinatários; sem envio real.",
+      "sources": [
+        "app/components/admin/CommunicationsClient.tsx",
+        "supabase/migrations/0064_communication_management_pagination.sql",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "COM04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Upload não equivale a publicação; rascunho protegido e feedback parcial claro.",
+      "validation": "SQL paginado, teste de dispatch bloqueado antes de criar destinatários; sem envio real.",
+      "sources": [
+        "app/components/admin/CommunicationsClient.tsx",
+        "supabase/migrations/0064_communication_management_pagination.sql",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "COM05",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Revisão de público/destino antes de enviar; servidor também revalida drafts antigos.",
+      "validation": "SQL paginado, teste de dispatch bloqueado antes de criar destinatários; sem envio real.",
+      "sources": [
+        "app/components/admin/CommunicationsClient.tsx",
+        "supabase/migrations/0064_communication_management_pagination.sql",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "COM06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Verbos de envio/publicação substituem Confirmar genérico.",
+      "validation": "SQL paginado, teste de dispatch bloqueado antes de criar destinatários; sem envio real.",
+      "sources": [
+        "app/components/admin/CommunicationsClient.tsx",
+        "supabase/migrations/0064_communication_management_pagination.sql",
+        "supabase/migrations/0068_communication_destination_guard.sql"
+      ]
+    },
+    {
+      "id": "BOS01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Valores ausentes não exibem undefined.",
+      "validation": "Typecheck e APIs administrativas; motivo/MFA preservados.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOS02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Suporte público primeiro, informações técnicas progressivas.",
+      "validation": "Typecheck e APIs administrativas; motivo/MFA preservados.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOS03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Motivo, dirty e ações comuns preservados.",
+      "validation": "Typecheck e APIs administrativas; motivo/MFA preservados.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx"
+      ]
+    },
+    {
+      "id": "BOA01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Evento mostra autor, ação, empresa, motivo; JSON em detalhe técnico.",
+      "validation": "SQL com filtros de autor/data/alvo e páginas limitadas.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "BOA02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Autor, datas e alvo no servidor, URL e paginação.",
+      "validation": "SQL com filtros de autor/data/alvo e páginas limitadas.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "BOA03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Dicionário de ações e fallback legível mantêm código original no detalhe.",
+      "validation": "SQL com filtros de autor/data/alvo e páginas limitadas.",
+      "sources": [
+        "app/components/admin/BackofficeManagementClient.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "BSEC01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Estado do MFA primeiro; solução de problemas recolhível.",
+      "validation": "Typecheck e testes de sessão/MFA existentes. Não se simulou relógio divergente na conta real.",
+      "sources": [
+        "app/components/admin/SecurityClient.tsx"
+      ]
+    },
+    {
+      "id": "BSEC02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Suporte usa destino configurado.",
+      "validation": "Typecheck e testes de sessão/MFA existentes. Não se simulou relógio divergente na conta real.",
+      "sources": [
+        "app/components/admin/SecurityClient.tsx"
+      ]
+    },
+    {
+      "id": "BSEC03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Sessão elevada separada de MFA cadastrado; ação aparece quando necessária.",
+      "validation": "Typecheck e testes de sessão/MFA existentes. Não se simulou relógio divergente na conta real.",
+      "sources": [
+        "app/components/admin/SecurityClient.tsx"
+      ]
+    },
+    {
+      "id": "INT01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Busca examina nomes e configurações reais.",
+      "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
+      "sources": [
+        "app/components/admin/IntegrationsClient.tsx"
+      ]
+    },
+    {
+      "id": "INT02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Sem resultado apresenta vazio e limpar busca.",
+      "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
+      "sources": [
+        "app/components/admin/IntegrationsClient.tsx"
+      ]
+    },
+    {
+      "id": "INT03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Coleção integrada, paginada e com alternância.",
+      "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
+      "sources": [
+        "app/components/admin/IntegrationsClient.tsx"
+      ]
+    },
+    {
+      "id": "INT04",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Editor com guard, Cancelar e preservação em erro.",
+      "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
+      "sources": [
+        "app/components/admin/IntegrationsClient.tsx"
+      ]
+    },
+    {
+      "id": "INT05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "URLs validadas por linha e erro de autorização/MFA acionável.",
+      "validation": "Typecheck, validação por linha e testes de API existentes. Nenhuma integração externa ativada.",
+      "sources": [
+        "app/components/admin/IntegrationsClient.tsx"
+      ]
+    },
+    {
+      "id": "DEL01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Fila servidor paginada com empresa, solicitante e horários.",
+      "validation": "Testes nativos de isolamento/eliminação e SQL paginado em fixtures; nenhuma operação destrutiva real.",
+      "sources": [
+        "app/components/admin/CompanyDeletion.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "DEL02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Texto corresponde à cópia cifrada automática; não exige computador ligado.",
+      "validation": "Testes nativos de isolamento/eliminação e SQL paginado em fixtures; nenhuma operação destrutiva real.",
+      "sources": [
+        "app/components/admin/CompanyDeletion.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "DEL03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Cancelar antes da ação de perigo; confirmação nominal/MFA preservados.",
+      "validation": "Testes nativos de isolamento/eliminação e SQL paginado em fixtures; nenhuma operação destrutiva real.",
+      "sources": [
+        "app/components/admin/CompanyDeletion.tsx",
+        "supabase/migrations/0067_backoffice_read_context.sql"
+      ]
+    },
+    {
+      "id": "AU01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Contrato numérico existente verificado; filial agora usa a mesma máscara/validação. Alfanumérico não é anunciado como suportado pelo cadastro.",
+      "validation": "Testes signup-session, contratos de documento e build. Backend atual aceita CNPJ numérico.",
+      "sources": [
+        "app/components/auth/AuthClient.tsx",
+        "app/components/auth/auth-validation.ts"
+      ]
+    },
+    {
+      "id": "AU02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Cadastro agrupado em empresa/responsável, acesso e confirmação.",
+      "validation": "Testes signup-session, contratos de documento e build. Backend atual aceita CNPJ numérico.",
+      "sources": [
+        "app/components/auth/AuthClient.tsx",
+        "app/components/auth/auth-validation.ts"
+      ]
+    },
+    {
+      "id": "AU03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Resultado de confirmação/recuperação não é duplicado e não promete entrega.",
+      "validation": "Testes signup-session, contratos de documento e build. Backend atual aceita CNPJ numérico.",
+      "sources": [
+        "app/components/auth/AuthClient.tsx",
+        "app/components/auth/auth-validation.ts"
+      ]
+    },
+    {
+      "id": "IV01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Sessão identificada; contexto do convite é validado antes de permitir aceite.",
+      "validation": "SQL: contexto somente para destinatário confirmado; testes nativos de aceite existentes.",
+      "sources": [
+        "app/components/auth/CompanyInvitationClient.tsx",
+        "supabase/migrations/0069_invitation_recipient_context.sql"
+      ]
+    },
+    {
+      "id": "IV02",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Entrar/Criar conta são modos claros, com empresa/função após autenticar destinatário.",
+      "validation": "SQL: contexto somente para destinatário confirmado; testes nativos de aceite existentes.",
+      "sources": [
+        "app/components/auth/CompanyInvitationClient.tsx",
+        "supabase/migrations/0069_invitation_recipient_context.sql"
+      ]
+    },
+    {
+      "id": "IV03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Convite inválido/expirado/revogado/aceito tem estado e continuidade.",
+      "validation": "SQL: contexto somente para destinatário confirmado; testes nativos de aceite existentes.",
+      "sources": [
+        "app/components/auth/CompanyInvitationClient.tsx",
+        "supabase/migrations/0069_invitation_recipient_context.sql"
+      ]
+    },
+    {
+      "id": "IV04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Após aceite, orientação e link para completar perfil.",
+      "validation": "SQL: contexto somente para destinatário confirmado; testes nativos de aceite existentes.",
+      "sources": [
+        "app/components/auth/CompanyInvitationClient.tsx",
+        "supabase/migrations/0069_invitation_recipient_context.sql"
+      ]
+    },
+    {
+      "id": "EM01",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Estados legados de confirmação têm resultado específico.",
+      "validation": "Testes de email/API e typecheck; fluxo novo imediato permanece independente.",
+      "sources": [
+        "app/components/auth/ConfirmEmailClient.tsx"
+      ]
+    },
+    {
+      "id": "EM02",
+      "priority": "P3",
+      "status": "implemented",
+      "implementation": "Resultado persistente evita toast duplicado.",
+      "validation": "Testes de email/API e typecheck; fluxo novo imediato permanece independente.",
+      "sources": [
+        "app/components/auth/ConfirmEmailClient.tsx"
+      ]
+    },
+    {
+      "id": "ST01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "403 distingue empresa de administração da plataforma.",
+      "validation": "Renderização, service-status e rotas Docker.",
+      "sources": [
+        "app/components/system/SystemPage.tsx",
+        "app/status"
+      ]
+    },
+    {
+      "id": "ST02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Voltar ao espaço autorizado é prioridade; troca de conta é secundária.",
+      "validation": "Renderização, service-status e rotas Docker.",
+      "sources": [
+        "app/components/system/SystemPage.tsx",
+        "app/status"
+      ]
+    },
+    {
+      "id": "ST03",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Links contextuais sem recomendar backoffice a visitante.",
+      "validation": "Renderização, service-status e rotas Docker.",
+      "sources": [
+        "app/components/system/SystemPage.tsx",
+        "app/status"
+      ]
+    },
+    {
+      "id": "ST04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Orientação decorativa genérica removida.",
+      "validation": "Renderização, service-status e rotas Docker.",
+      "sources": [
+        "app/components/system/SystemPage.tsx",
+        "app/status"
+      ]
+    },
+    {
+      "id": "ST05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "FAQ rotulado como Central de ajuda; suporte mantém resolvedor configurado.",
+      "validation": "Renderização, service-status e rotas Docker.",
+      "sources": [
+        "app/components/system/SystemPage.tsx",
+        "app/status"
+      ]
+    },
+    {
+      "id": "ST06",
+      "priority": "P3",
+      "status": "implemented",
+      "implementation": "Detalhes de atualização ficam recolhidos, horário e estado permanecem.",
+      "validation": "Renderização, service-status e rotas Docker.",
+      "sources": [
+        "app/components/system/SystemPage.tsx",
+        "app/status"
+      ]
+    },
+    {
+      "id": "DS01",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Demonstração viva de edição, guarda de navegação e diálogo.",
+      "validation": "DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, tipografia e camadas; contrastes automatizados.",
+      "sources": [
+        "app/design-system/OperationalPatternsDemo.tsx",
+        "app/design-system/PortalValidationDemo.tsx",
+        "app/components/ui"
+      ]
+    },
+    {
+      "id": "DS02",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Demonstração 0/1/2/11 registros, busca, paginação e modos.",
+      "validation": "DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, tipografia e camadas; contrastes automatizados.",
+      "sources": [
+        "app/design-system/OperationalPatternsDemo.tsx",
+        "app/design-system/PortalValidationDemo.tsx",
+        "app/components/ui"
+      ]
+    },
+    {
+      "id": "DS03",
+      "priority": "P1",
+      "status": "implemented",
+      "implementation": "Escala legível compartilhada e demonstrações atualizadas.",
+      "validation": "DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, tipografia e camadas; contrastes automatizados.",
+      "sources": [
+        "app/design-system/OperationalPatternsDemo.tsx",
+        "app/design-system/PortalValidationDemo.tsx",
+        "app/components/ui"
+      ]
+    },
+    {
+      "id": "DS04",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Densidade/ajuda/erro demonstrados nos componentes reais.",
+      "validation": "DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, tipografia e camadas; contrastes automatizados.",
+      "sources": [
+        "app/design-system/OperationalPatternsDemo.tsx",
+        "app/design-system/PortalValidationDemo.tsx",
+        "app/components/ui"
+      ]
+    },
+    {
+      "id": "DS05",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "FormActions demonstrado e consumido nos editores operacionais.",
+      "validation": "DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, tipografia e camadas; contrastes automatizados.",
+      "sources": [
+        "app/design-system/OperationalPatternsDemo.tsx",
+        "app/design-system/PortalValidationDemo.tsx",
+        "app/components/ui"
+      ]
+    },
+    {
+      "id": "DS06",
+      "priority": "P2",
+      "status": "implemented",
+      "implementation": "Contrato diagnóstico/rascunho/publicação documentado e demonstrado.",
+      "validation": "DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, tipografia e camadas; contrastes automatizados.",
+      "sources": [
+        "app/design-system/OperationalPatternsDemo.tsx",
+        "app/design-system/PortalValidationDemo.tsx",
+        "app/components/ui"
+      ]
+    },
+    {
+      "id": "DS07",
+      "priority": "P2",
+      "status": "reviewed-existing",
+      "implementation": "Primitivo de camadas mantido; testes de borda/foco na galeria sem criar implementações por página.",
+      "validation": "DS interativo: dirty, navegação, coleção 0/1/2/11, tamanhos, tipografia e camadas; contrastes automatizados.",
+      "sources": [
+        "app/design-system/OperationalPatternsDemo.tsx",
+        "app/design-system/PortalValidationDemo.tsx",
+        "app/components/ui"
+      ]
+    }
+  ],
+  "implementationBranch": "feat/ux-audit-revitalization",
+  "pullRequest": 220
+}

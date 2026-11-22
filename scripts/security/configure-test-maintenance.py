@@ -68,6 +68,17 @@ WantedBy=timers.target
     Path(timer_path).write_text(timer)
     run(['systemd-analyze','verify',service_path,timer_path])
     run(['systemctl','daemon-reload']);run(['systemctl','enable','--now','jbfd-'+environment.name+'-orphan-maintenance.timer'])
+    if environment.name=='test':
+        # Keep the already-installed timer on the reviewed release's domain worker.
+        domain_worker=Path('/opt/jbfd/bin/reconcile-test-domains.py')
+        domain_worker.parent.mkdir(mode=0o700,exist_ok=True)
+        shutil.copyfile(release/'scripts/security/reconcile-test-domains.py',domain_worker);domain_worker.chmod(0o700)
+        units=Path('/etc/systemd/system')
+        installed=any('reconcile-test-domains.py' in item.read_text(errors='replace') for item in units.glob('*.service') if item.is_file())
+        if not installed:
+            (units/'jbfd-test-domains.service').write_text('[Unit]\nDescription=JobForged Test domain verification\nAfter=docker.service\n[Service]\nType=oneshot\nUser=root\nUMask=0077\nExecStart=/usr/bin/python3 /opt/jbfd/bin/reconcile-test-domains.py --apply\nTimeoutStartSec=300\n')
+            (units/'jbfd-test-domains.timer').write_text('[Unit]\nDescription=JobForged Test domain verification\n[Timer]\nOnBootSec=60\nOnUnitActiveSec=300\nUnit=jbfd-test-domains.service\n[Install]\nWantedBy=timers.target\n')
+            run(['systemctl','daemon-reload']);run(['systemctl','enable','--now','jbfd-test-domains.timer'])
     print(json.dumps({'environment':environment.name,'timer':'jbfd-'+environment.name+'-orphan-maintenance.timer','maximum_files_per_run':20,'abandoned_grace_hours':24,'quarantine_days':7,'purge_requires_recent_verified_offsite_copy':True}))
 
 if __name__=='__main__':main()

@@ -1,0 +1,16 @@
+"use client";
+import {useCallback,useEffect,useState} from 'react';
+import {ActionButton,FormActions,CheckboxField,TextField,Panel,PanelHeading,WorkspaceState,AppToast} from '../ui';
+import {usePendingChanges} from '../ui/PendingChanges';
+import {operations,type Operations,type JobOptions} from './model';
+export function JobOptionsPanel({jobId,automation=false}:{jobId:string;automation?:boolean}){
+ const [data,setData]=useState<Operations|null>(null),[value,setValue]=useState<JobOptions|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState('');
+ const load=useCallback(async()=>{try{const next=await operations();setData(next);setValue(next.jobs.find(j=>j.id===jobId)?.options||null);setError('')}catch{setError('Não foi possível carregar as configurações.')}},[jobId]);
+ useEffect(()=>{const timer=setTimeout(()=>void load(),0);return()=>clearTimeout(timer)},[load]);
+ const job=data?.jobs.find(j=>j.id===jobId),dirty=!!value&&JSON.stringify(value)!==JSON.stringify(job?.options),guard=usePendingChanges(dirty);
+ if(!data)return <WorkspaceState kind={error?'error':'loading'} title={error||'Carregando configurações...'} action={error?<ActionButton onClick={()=>void load()}>Tentar novamente</ActionButton>:undefined}/>;
+ if(!value||!job)return <WorkspaceState kind="empty" title="Configurações indisponíveis" description="A vaga pode ter sido removida ou seu acesso mudou."/>;
+ const editable=data.access.permissions['jobs.edit'];
+ async function save(){if(!data||!job||!value||busy||!dirty)return;setBusy(true);try{const next=await operations({operation:'options',id:jobId,companyId:data.companyId,document:value,version:job.optionsVersion});setData(next);setValue(next.jobs.find(j=>j.id===jobId)?.options||null);setError('');setNotice('Configurações salvas.')}catch(e){setError(e instanceof Error?e.message:'Não foi possível salvar.')}finally{setBusy(false)}}
+ return <Panel>{guard.dialog}<PanelHeading title={automation?'Avisos automáticos':'Configurações da vaga'}/><div className="jf-panel-body jf-workspace-stack"><fieldset className="jf-fieldset" disabled={busy||!editable}>{automation?<><CheckboxField label="Avisar sobre novas candidaturas" checked={value.notifyApplication} onChange={e=>setValue({...value,notifyApplication:e.target.checked})}/><CheckboxField label="Avisar sobre mudanças de etapa" checked={value.notifyStage} onChange={e=>setValue({...value,notifyStage:e.target.checked})}/><p>Alertas internos para o titular e responsáveis.</p></>:<><CheckboxField label="Aceitar candidaturas" checked={value.acceptApplications} onChange={e=>setValue({...value,acceptApplications:e.target.checked})}/><CheckboxField label="Exigir currículo" checked={value.resumeRequired} onChange={e=>setValue({...value,resumeRequired:e.target.checked})}/><TextField label="Quantidade de posições" type="number" min={1} max={99999} value={value.positions} onChange={e=>setValue({...value,positions:Number(e.target.value)})}/></>}</fieldset>{error&&<p role="alert">{error}</p>}{editable&&<FormActions dirty={dirty} busy={busy} disabled={!Number.isInteger(value.positions)||value.positions<1||value.positions>99999} onCancel={()=>setValue(job.options)} onSave={()=>void save()}/>}{notice&&<AppToast notice={{kind:'success',title:'Vaga atualizada',text:notice}} onClose={()=>setNotice('')}/>}</div></Panel>
+}

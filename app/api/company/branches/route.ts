@@ -1,5 +1,6 @@
 import type {NextRequest} from 'next/server';
 import {readSession,requestDatabase,requireSameOrigin} from '@/app/api/auth/_server';
+import {isValidCnpj} from '@/app/components/auth/auth-validation';
 export const runtime='nodejs';
 async function handle(request:NextRequest,mutate=false){
  const headers=new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'});
@@ -14,6 +15,7 @@ async function handle(request:NextRequest,mutate=false){
   if(!body||!['save','delete'].includes(String(body.operation))||body.companyId!==session.company.id)return Response.json({message:'A empresa ativa mudou. Recarregue a página.'},{status:409,headers});
  }
  if(body.id!=null&&(typeof body.id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.id)))return Response.json({message:'Filial inválida.'},{status:400,headers});
+ if(body.operation==='save'){const document=body.document as Record<string,unknown>|undefined;if(document?.cnpj&&(typeof document.cnpj!=='string'||!isValidCnpj(document.cnpj)))return Response.json({message:'Informe um CNPJ válido com 14 dígitos ou deixe o campo vazio.'},{status:400,headers});}
  const result=await requestDatabase('rpc/company_branches_v1',session.accessToken,{operation:body.operation,branch_id:body.id??null,document:body.document??null,expected_version:body.version??null}).catch(()=>null);
  if(!result)return Response.json({message:'Serviço indisponível.'},{status:503,headers});
  if(!result.ok){const error=await result.json().catch(()=>({})) as {code?:string};return Response.json({message:error.code==='PT422'?'Desvincule ou transfira as vagas antes de excluir a filial.':error.code==='PT409'?'Uma das vagas já pertence a outra filial. Remova o vínculo anterior primeiro.':error.code==='40001'?'Outra pessoa alterou esta filial. Feche e recarregue antes de editar.':error.code==='42501'?'Você não tem permissão para esta operação.':'Confira os campos obrigatórios e tente novamente.'},{status:error.code==='40001'?409:error.code==='42501'?403:400,headers})}

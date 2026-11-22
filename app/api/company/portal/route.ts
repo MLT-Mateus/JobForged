@@ -11,12 +11,28 @@ export async function POST(request:NextRequest){
  const headers=new Headers({'Cache-Control':'no-store',Vary:'Cookie'}),session=await readSession(request,headers);
  if(!session?.company||session.platformAdmin||!['owner','admin'].includes(session.role))return Response.json({message:'Acesso negado.'},{status:403,headers});
  const reader=request.body?.getReader();let text='',bytes=0;const decoder=new TextDecoder();if(reader){while(true){const item=await reader.read();if(item.done)break;bytes+=item.value.byteLength;if(bytes>131072){await reader.cancel();return Response.json({message:'Conteúdo muito grande.'},{status:413,headers})}text+=decoder.decode(item.value,{stream:true})}text+=decoder.decode()}
- let body:{operation?:string;companyId?:string;version?:number;slug?:string;brandingVersion?:number;configuration?:unknown;domain?:DomainReplacement};try{body=JSON.parse(text)}catch{return Response.json({message:'Dados inválidos.'},{status:400,headers})}
+ let body:{contract?:number;domainChange?:import('@/app/lib/company-domain').DomainChange;operation?:string;companyId?:string;version?:number;slug?:string;brandingVersion?:number;configuration?:unknown;domain?:DomainReplacement};try{body=JSON.parse(text)}catch{return Response.json({message:'Dados inválidos.'},{status:400,headers})}
  if(!body||!['address','publish','save'].includes(body.operation||'')||!Number.isSafeInteger(body.version)||Number(body.version)<0)return Response.json({message:'Operação inválida.'},{status:400,headers});
  if(body.companyId!==session.company.id)return Response.json({message:'A empresa ativa mudou. Recarregue antes de continuar.'},{status:409,headers});
  const configuration=normalizeBrandingRichContent(body.configuration);
- if(body.operation==='address'&&!validPortalSlug(body.slug))return Response.json({message:'Use de 3 a 63 letras minúsculas, números e hífens. Este endereço não pode ser reservado.'},{status:400,headers});
+ if((body.operation==='address'||body.contract===2)&&!validPortalSlug(body.slug))return Response.json({message:'Use de 3 a 63 letras minúsculas, números e hífens. Este endereço não pode ser reservado.'},{status:400,headers});
  if(body.operation==='publish'||body.operation==='save'){if(!Number.isSafeInteger(body.brandingVersion)||Number(body.brandingVersion)<0)return Response.json({message:'Versão inválida.'},{status:400,headers});const error=validateBranding(configuration);if(error)return Response.json({message:error},{status:400,headers})}
+ if(body.contract===2){
+  if(body.operation!=='save')return Response.json({message:'Publicação inválida.'},{status:400,headers});
+  const change=body.domainChange;
+  if(change&&(!['set','disconnect'].includes(change.action)||!Number.isSafeInteger(change.version)||change.version<0||change.action==='set'&&(!Number.isSafeInteger(change.requestVersion)||change.requestVersion<1)))return Response.json({message:'Alteração de domínio inválida.'},{status:400,headers});
+  if(change?.action==='set'){
+   const r=await requestDatabase('rpc/page_domain_v2',session.accessToken,{}).catch(()=>null);
+   const current=r?.ok?await r.json() as CompanyDomain&{request?:import('@/app/lib/company-domain').PreparedDomain}:null;
+   if(!current||current.version!==change.version||current.request?.version!==change.requestVersion)return Response.json({message:'A preparação do domínio mudou. Consulte o status e revise.'},{status:409,headers});
+   const diagnosis=await diagnoseCompanyDomain(current.request.hostname,current.request.proof).catch(()=>null);
+   if(!diagnosis?.ready)return Response.json({message:'O DNS ainda não está confirmado. Seus dados foram preservados.'},{status:409,headers});
+  }
+  const response=await requestDatabase('rpc/publish_company_page_v2',session.accessToken,{expected_version:body.version,branding_version:body.brandingVersion,configuration,requested_slug:body.slug,domain_action:change?.action||'keep',domain_version:change?.version??null,request_version:change?.action==='set'?change.requestVersion:null}).catch(()=>null);
+  if(!response)return Response.json({message:'Não foi possível publicar agora. Tente novamente.'},{status:503,headers});
+  if(!response.ok){const e=await response.json().catch(()=>null) as {code?:string}|null;return Response.json({message:e?.code==='23505'?'Este endereço já está em uso.':e?.code==='PT409'||e?.code==='40001'?'Outra sessão alterou a página. Recarregue antes de salvar; seus campos foram preservados.':'Não foi possível publicar. Confira os dados e sua permissão.'},{status:['23505','PT409','40001'].includes(e?.code||'')?409:e?.code==='42501'?403:400,headers})}
+  return Response.json(await response.json(),{headers});
+ }
  const domain=body.domain;
  if(domain){
   if(body.operation!=='save'||!Number.isSafeInteger(domain.version)||!validCompanyHostname(domain.hostname)||!validCompanyHostname(domain.zone)||!(domain.kind==='root'?domain.hostname===domain.zone:domain.kind==='subdomain'&&domain.hostname.endsWith('.'+domain.zone)))return Response.json({message:'Confira o novo domínio e a zona DNS.'},{status:400,headers});

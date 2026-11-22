@@ -6,7 +6,7 @@ import {fontPairs} from '../app/components/ui/font-pairs.ts';
 import {normalizeBrandingImage} from '../app/lib/branding-image.ts';
 test('defaults are company-specific, with no demo assets or local cross-company data',()=>{
  const a=brandingDefaults('company-a','Empresa A'),b=brandingDefaults('company-b','Empresa B');
- assert.equal(a.organizationId,'company-a');assert.equal(b.displayName,'Empresa B');assert.equal(a.banners[0].id,'default-culture');assert.match(a.banners[0].description,/mock/);assert.equal(a.assets.logoMain,null);
+ assert.equal(a.organizationId,'company-a');assert.equal(b.displayName,'Empresa B');assert.equal(a.banners[0].id,'default-culture');assert.match(a.banners[0].description,/exemplo/);assert.equal(a.assets.logoMain,null);
  assert.equal(validateBranding(brandContent(a)),null);assert.equal(a.portal.customDomain,'');assert.equal(a.portal.jobforgedDomain,'');
  a.palette.text='#ffffff';assert.notEqual(b.palette.text,'#ffffff');
 });
@@ -45,7 +45,7 @@ test('chrome, navigation and reset defaults are bounded and theme specific',asyn
  assert.equal(isDefaultBranding({...normalizeBrandingRichContent(c),organizationId:c.organizationId},'Fixture'),true);
  c.portal.chrome=portalChrome(c);c.portal.navigation=portalMenu(c);assert.equal(isDefaultBranding(c,'Fixture'),true);
  c.portal.navigation[0].href='https://example.invalid/culture';assert.equal(validateBranding(brandContent(c)),null);assert.equal(isDefaultBranding(c,'Fixture'),false);
- c.portal.navigation[0].href='javascript:alert(1)';assert.match(validateBranding(brandContent(c)),/cabeçalho/);c.portal.navigation=[];
+ c.portal.navigation[0].href='javascript:alert(1)';assert.match(validateBranding(brandContent(c)),/destino público/);c.portal.navigation=[];
  c.portal.chrome.light.headerText=c.portal.chrome.light.headerBackground;assert.match(validateBranding(brandContent(c)),/contraste/);
  const f=portalFooter(brandingDefaults('fixture','Fixture'));assert.ok(f.description.length>20);assert.ok(f.links.every(link=>link.href.startsWith('/')||link.href.startsWith('https://')));assert.equal(f.email,'');assert.equal(f.phone,'');
 });

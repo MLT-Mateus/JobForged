@@ -18,6 +18,6 @@ export const jobService={
 export function getCompletion(job:Job){
  const required=editorChecks({...job,pcd:job.pcd||"",journey:job.journey||"",salaryRange:job.salaryRange||""}).map(c=>c.done);
  const optional=[job.experience,job.weeklyHours,job.softSkills.length,job.benefits.length,job.teamDescription,job.tools.length,job.applicationDeadline,job.education,job.interviewTypes.length];
- const score=Math.round((required.filter(Boolean).length*2+optional.filter(Boolean).length)/(required.length*2+optional.length)*100);
- return {score,requiredDone:required.filter(Boolean).length,requiredTotal:required.length,quality:score>=85?"Completa":score>=55?"Estruturada":"Básica",canPublish:required.every(Boolean)};
+ const score=Math.round(required.filter(Boolean).length/required.length*100);
+ return {score,optionalDone:optional.filter(Boolean).length,optionalTotal:optional.length,requiredDone:required.filter(Boolean).length,requiredTotal:required.length,quality:score>=85?"Completa":score>=55?"Estruturada":"Básica",canPublish:required.every(Boolean)};
 }

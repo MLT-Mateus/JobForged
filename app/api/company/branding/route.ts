@@ -5,7 +5,9 @@ export const runtime='nodejs';
 export async function GET(request:NextRequest){
  const headers=new Headers({'Cache-Control':'no-store',Vary:'Cookie'}),session=await readSession(request,headers);
  if(!session?.company||session.platformAdmin)return Response.json({message:'Acesso negado.'},{status:403,headers});
- const response=await requestDatabase('rpc/read_company_branding',session.accessToken,{}).catch(()=>null);
+ const page=request.nextUrl.searchParams.get('historyPage');
+ if(page!==null&&(!/^[1-9][0-9]{0,5}$/.test(page)||Number(page)>100000))return Response.json({message:'Página inválida.'},{status:400,headers});
+ const response=await requestDatabase(page?'rpc/company_branding_history_page':'rpc/read_company_branding',session.accessToken,page?{page_number:Number(page)}:{}).catch(()=>null);
  if(!response?.ok)return Response.json({message:'Não foi possível carregar a identidade.'},{status:503,headers});
  const data=await response.json();return Response.json(data,{headers});
 }

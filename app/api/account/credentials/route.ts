@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
  if (!requireSameOrigin(request)) return reply("Origem inválida.", 403);
  try {
   const session = await readSession(request, headers);
-  if (!session || !session.company || session.platformAdmin) return reply("Entre novamente para continuar.", 401);
+  if (!session || (!session.company && session.role!=="candidate") || session.platformAdmin) return reply("Entre novamente para continuar.", 401);
   const input = await request.json().catch(() => null) as {operation?: unknown; password?: unknown; email?: unknown; confirmation?: unknown; currentPassword?: unknown} | null;
   if (input?.operation === "password") {
    const password = typeof input.password === "string" ? input.password : "";

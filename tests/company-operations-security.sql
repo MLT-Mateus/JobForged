@@ -33,11 +33,11 @@ do $$declare r jsonb;a jsonb;e jsonb;begin
  begin perform public.company_operations_v1('note',(a->>'id')::uuid,'{"notes":"stale"}',1);raise exception 'stale overwrite';exception when serialization_failure then null;end;
  r:=public.company_operations_v1('move',(a->>'id')::uuid,'{"stage":"Entrevista"}',2);
  e:=r->'events'->0;if e->>'status'<>'A agendar' then raise exception 'missing interview';end if;
- r:=public.company_operations_v1('event',(e->>'id')::uuid,jsonb_build_object('title','Interview fixture','status','Agendada','responsibleId','58000000-0000-4000-8000-000000000021','startsAt',now()+interval '5 minutes','endsAt',now()+interval '35 minutes','meetingUrl','https://meet.google.com/'),1);
+ r:=public.company_operations_v1('event',(e->>'id')::uuid,jsonb_build_object('title','Interview fixture','status','Agendada','responsibleId','58000000-0000-4000-8000-000000000021','startsAt',now()+interval '5 minutes','endsAt',now()+interval '35 minutes','meetingUrl','https://meet.google.com/abc-defg-hij'),1);
  r:=public.company_operations_v1('invitation',(e->>'id')::uuid,'{"email":"wrong@example.invalid"}',null);
  if r->>'email'<>'operations-candidate@example.invalid' then raise exception 'invitation recipient is not linked candidate';end if;
  if jsonb_array_length(public.company_operations_v1('alerts')->'items')<1 then raise exception 'missing reminders';end if;
- begin perform public.company_operations_v1('event',null,jsonb_build_object('title','Conflict fixture','status','Agendada','responsibleId','58000000-0000-4000-8000-000000000021','startsAt',now()+interval '10 minutes','endsAt',now()+interval '20 minutes','meetingUrl','https://meet.google.com/'),null);raise exception 'schedule conflict bypass';exception when sqlstate 'PT409' then null;end;
+ begin perform public.company_operations_v1('event',null,jsonb_build_object('title','Conflict fixture','status','Agendada','responsibleId','58000000-0000-4000-8000-000000000021','startsAt',now()+interval '10 minutes','endsAt',now()+interval '20 minutes','meetingUrl','https://meet.google.com/abc-defg-hij'),null);raise exception 'schedule conflict bypass';exception when sqlstate 'PT409' then null;end;
  perform public.company_access_v1('save','58000000-0000-4000-8000-000000000022','{"jobs.view":true,"applications.view":true}',0);
  begin perform public.company_access_v1('save','58000000-0000-4000-8000-000000000021','{}',0);raise exception 'owner changed';exception when insufficient_privilege then null;end;
 end$$;

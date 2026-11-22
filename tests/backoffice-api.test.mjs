@@ -10,7 +10,7 @@ test('company activity, managed identity and page redirect enforce session and v
   if(url.endsWith('/auth/v1/user'))return Response.json({id:'fixture-owner',email:'owner@example.invalid',email_confirmed_at:'2026-11-10T00:00:00Z'});
   if(url.endsWith('/rpc/is_platform_admin'))return Response.json(false);
   if(url.endsWith('/rpc/session_context_v1'))return Response.json({company_id:'fixture-company',role,full_name:'Fixture Owner',companies:{id:'fixture-company',name:'Fixture'}});
-  if(url.endsWith('/rpc/company_activity_v1')){calls.push(body);return Response.json({items:[],page:body.requested_page,pageSize:10,total:0})}
+  if(url.endsWith('/rpc/company_activity_v2')){calls.push(body);return Response.json({items:[],page:body.requested_page,pageSize:10,total:0})}
   if(url.endsWith('/rpc/update_company_member_identity_v1')){calls.push(body);return Response.json({id:body.target_member_id,full_name:body.new_full_name,cpf:body.new_cpf,phone:body.new_phone})}
   if(url.endsWith('/rpc/read_company_portal'))return Response.json({slug:'fixture-company',isPublic:true});
   if(url.endsWith('/rpc/company_domain'))return domainFailure?new Response('',{status:503}):Response.json({status:domainStatus,hostname:'careers.fixture.invalid',checkedAt:new Date().toISOString(),version:1});
@@ -21,7 +21,7 @@ test('company activity, managed identity and page redirect enforce session and v
   const request=(path,body,origin='http://localhost',cookie='jf_auth_access=fixture-token')=>worker.fetch(new Request('http://localhost'+path,{method:body?'PATCH':'GET',headers:{host:'localhost',origin,cookie,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),{ASSETS:{fetch:()=>new Response('',{status:404})}},{waitUntil(){},passThroughOnException(){}});
   assert.equal((await request('/api/company/activity?page=0')).status,400);
   assert.equal((await request('/api/company/activity?category=unknown')).status,400);
-  assert.equal((await request('/api/company/activity?page=2&category=member')).status,200);assert.deepEqual(calls.pop(),{requested_page:2,category:'member'});
+  assert.equal((await request('/api/company/activity?page=2&category=member')).status,200);assert.deepEqual(calls.pop(),{requested_page:2,category:'member',actor_query:'',date_from:null,date_to:null});
   const identity={id:'17000000-0000-4000-8000-000000000001',fullName:'Fixture Updated',cpf:'529.982.247-25',phone:'(11) 98765-4321'};
   assert.equal((await request('/api/company/members/identity',identity,'https://foreign.invalid')).status,403);
   assert.equal((await request('/api/company/members/identity',{...identity,cpf:'11111111111'})).status,400);
@@ -71,7 +71,7 @@ test('backoffice APIs enforce session, origin, validation and invitation secrecy
   if(url.endsWith('/auth/v1/user'))return Response.json({id:'26000000-0000-0000-0000-000000000001',email:'fixture@example.invalid',email_confirmed_at:'2026-10-19T00:00:00Z'});
   if(url.endsWith('/rest/v1/rpc/is_platform_admin'))return Response.json(admin);
   if(url.endsWith('/rest/v1/rpc/session_context_v1'))return Response.json(null);
-  if(url.endsWith('/rest/v1/rpc/platform_read'))return Response.json(databaseStatus===200?{total:0,items:[]}:{message:'recent MFA required'},{status:databaseStatus});
+  if(url.endsWith('/rest/v1/rpc/platform_read_v2'))return Response.json(databaseStatus===200?{total:0,items:[]}:{message:'recent MFA required'},{status:databaseStatus});
   if(url.endsWith('/rest/v1/rpc/platform_manage')){if(databaseStatus!==200)return Response.json({message:'recent MFA required'},{status:databaseStatus});calls.push(body);return Response.json(body.operation==='invitation.create'?{id:'26000000-0000-0000-0000-000000000031',email:'invite@example.invalid',token:'a'.repeat(64),company_name:'Fixture'}:{ok:true});}
   if(url.endsWith('/rest/v1/rpc/platform_public_settings'))return Response.json({platform_name:'Fixture',support_email:'support@example.invalid',support_url:'https://example.invalid'});
   if(url==='https://api.brevo.com/v3/smtp/email')return new Response('{}',{status:delivery?201:503});

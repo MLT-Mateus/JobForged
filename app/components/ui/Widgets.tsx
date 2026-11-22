@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useLayoutEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useId, useRef, useState, type ReactNode } from "react";
+import {DraftBoundary} from "./DraftBoundary";
 import { ChevronDown, X } from "lucide-react";
 import { ActionButton, StatusBadge } from "./AdminPrimitives";
 
@@ -16,6 +17,10 @@ function lockWorkspace(workspace: HTMLElement) {
 export function WidgetGroup({variant="card",children,className=""}:{variant?:"card"|"outline"|"plain";children:ReactNode;className?:string}) {return <div className={`jf-widget jf-widget--${variant} ${className}`}>{children}</div>}
 export function WidgetDivider({label}:{label?:string}) {return <div className="jf-widget-divider">{label&&<span>{label}</span>}</div>}
 export function WidgetDialog({open,onClose,title,description,kind="modal",size="default",children,footer}:{open:boolean;onClose:()=>void;title:string;description?:string;kind?:"modal"|"drawer"|"sheet";size?:"default"|"wide";children:ReactNode;footer?:ReactNode}) {
+ const drafts=useRef(new Set<string>()),[closePrompt,setClosePrompt]=useState(false);
+ const register=useCallback((key:string,dirty:boolean)=>{if(dirty)drafts.current.add(key);else drafts.current.delete(key);return()=>{drafts.current.delete(key)}},[]);
+ const requestClose=()=>{if(drafts.current.size)setClosePrompt(true);else onClose()};
+ useEffect(()=>{if(!open){const timer=setTimeout(()=>setClosePrompt(false),0);return()=>clearTimeout(timer)}},[open]);
  const ref=useRef<HTMLDialogElement>(null),id=useId(),drag=useRef({start:0,delta:0,time:0}),unlock=useRef<()=>void>(()=>{});
  useEffect(()=>{
   const dialog=ref.current;if(!dialog)return;
@@ -28,10 +33,10 @@ export function WidgetDialog({open,onClose,title,description,kind="modal",size="
  },[open]);
  useEffect(()=>()=>{ref.current?.close();unlock.current()},[]);
  useEffect(()=>{if(!open)return;const update=()=>ref.current?.style.setProperty('--widget-viewport',`${window.visualViewport?.height??window.innerHeight}px`);update();window.visualViewport?.addEventListener('resize',update);return()=>window.visualViewport?.removeEventListener('resize',update)},[open]);
- function finishDrag(){const dialog=ref.current;if(!dialog)return;const {delta,time}=drag.current;dialog.removeAttribute('data-dragging');if(delta>80||(delta>28&&delta/Math.max(1,performance.now()-time)>.55))onClose();else dialog.style.setProperty('--sheet-drag','0px')}
- return <dialog ref={ref} tabIndex={-1} className={`jf-widget-dialog jf-widget-dialog--${kind} jf-widget-dialog--${size}`} aria-labelledby={id} aria-describedby={description?`${id}-description`:undefined} onCancel={e=>{e.preventDefault();onClose()}} onClick={e=>{if(e.target===e.currentTarget){const box=e.currentTarget.getBoundingClientRect();if(e.clientX<box.left||e.clientX>box.right||e.clientY<box.top||e.clientY>box.bottom)onClose()}}}>
-  {kind==='sheet'&&<button type="button" className="jf-sheet-grip" aria-label="Fechar painel; também é possível arrastar para baixo" onClick={e=>{if(drag.current.delta>4){e.preventDefault();return}onClose()}} onPointerDown={e=>{drag.current={start:e.clientY,delta:0,time:performance.now()};e.currentTarget.setPointerCapture(e.pointerId);ref.current?.setAttribute('data-dragging','true')}} onPointerMove={e=>{if(!e.currentTarget.hasPointerCapture(e.pointerId))return;drag.current.delta=Math.max(0,e.clientY-drag.current.start);ref.current?.style.setProperty('--sheet-drag',`${drag.current.delta}px`)}} onPointerUp={finishDrag} onPointerCancel={()=>{ref.current?.removeAttribute('data-dragging');ref.current?.style.setProperty('--sheet-drag','0px')}}><span className="jf-sheet-handle"/></button>}
-  <header className="jf-widget-dialog__header"><div><h3 id={id}>{title}</h3>{description&&<p id={`${id}-description`}>{description}</p>}</div><ActionButton variant="quiet" aria-label="Fechar" onClick={onClose}><X/></ActionButton></header><div className="jf-widget-dialog__body">{children}</div>{footer&&<footer className="jf-widget-dialog__footer">{footer}</footer>}
+ function finishDrag(){const dialog=ref.current;if(!dialog)return;const {delta,time}=drag.current;dialog.removeAttribute('data-dragging');if(delta>80||(delta>28&&delta/Math.max(1,performance.now()-time)>.55))requestClose();else dialog.style.setProperty('--sheet-drag','0px')}
+ return <dialog ref={ref} tabIndex={-1} className={`jf-widget-dialog jf-widget-dialog--${kind} jf-widget-dialog--${size}`} aria-labelledby={id} aria-describedby={description?`${id}-description`:undefined} onCancel={e=>{e.preventDefault();requestClose()}} onClick={e=>{if(e.target===e.currentTarget){const box=e.currentTarget.getBoundingClientRect();if(e.clientX<box.left||e.clientX>box.right||e.clientY<box.top||e.clientY>box.bottom)requestClose()}}}>
+  {kind==='sheet'&&<button type="button" className="jf-sheet-grip" aria-label="Fechar painel; também é possível arrastar para baixo" onClick={e=>{if(drag.current.delta>4){e.preventDefault();return}requestClose()}} onPointerDown={e=>{drag.current={start:e.clientY,delta:0,time:performance.now()};e.currentTarget.setPointerCapture(e.pointerId);ref.current?.setAttribute('data-dragging','true')}} onPointerMove={e=>{if(!e.currentTarget.hasPointerCapture(e.pointerId))return;drag.current.delta=Math.max(0,e.clientY-drag.current.start);ref.current?.style.setProperty('--sheet-drag',`${drag.current.delta}px`)}} onPointerUp={finishDrag} onPointerCancel={()=>{ref.current?.removeAttribute('data-dragging');ref.current?.style.setProperty('--sheet-drag','0px')}}><span className="jf-sheet-handle"/></button>}
+  <header className="jf-widget-dialog__header"><div><h3 id={id}>{title}</h3>{description&&<p id={`${id}-description`}>{description}</p>}</div><ActionButton variant="quiet" aria-label="Fechar" onClick={requestClose}><X/></ActionButton></header><DraftBoundary.Provider value={register}>{(children!=null||closePrompt)&&<div className="jf-widget-dialog__body"><div hidden={closePrompt}>{children}</div>{closePrompt&&<section className="jf-workspace-stack" role="alert"><h4>Descartar alterações?</h4><p>Existem informações não salvas. Volte para continuar editando ou descarte antes de fechar.</p><div className="jf-form-actions__buttons"><ActionButton autoFocus variant="secondary" onClick={()=>setClosePrompt(false)}>Continuar editando</ActionButton><ActionButton variant="danger" onClick={()=>{setClosePrompt(false);onClose()}}>Descartar</ActionButton></div></section>}</div>}{footer&&!closePrompt&&<footer className="jf-widget-dialog__footer">{footer}</footer>}</DraftBoundary.Provider>
  </dialog>;
 }
 
@@ -64,9 +69,10 @@ export function EditorAccordion({title,icon,badge,children,defaultOpen=false}:{t
  return <details className="jf-editor-accordion" open={open} onToggle={e=>setOpen(e.currentTarget.open)}><summary>{icon}<span className="jf-editor-accordion__title">{title}</span>{badge&&<span className="jf-editor-accordion__badge">{badge}</span>}<ChevronDown aria-hidden="true"/></summary><div className="jf-editor-accordion__body">{children}</div></details>;
 }
 export function EditorWorkbench({editor,preview,previewDevice="desktop"}:{editor:ReactNode;preview:ReactNode;previewDevice?:"desktop"|"tablet"|"mobile"}) {
- return <div className="jf-editor-workbench-shell"><div className={`jf-editor-workbench jf-editor-workbench--${previewDevice}`}><div className="jf-editor-workbench__form">{editor}</div><div className="jf-editor-workbench__preview">{preview}</div></div></div>;
+ const editorId=useId(),previewId=useId();
+  return <div className="jf-editor-workbench-shell"><nav className="jf-editor-mobile-jump" aria-label="Navegação do editor"><a href={'#'+editorId}>Editor</a><a href={'#'+previewId}>Prévia e salvar</a></nav><div className={`jf-editor-workbench jf-editor-workbench--${previewDevice}`}><div id={editorId} className="jf-editor-workbench__form">{editor}</div><div id={previewId} className="jf-editor-workbench__preview">{preview}</div></div></div>;
 }
 
 export function EditorSection({title,description,action,children}:{title:string;description?:string;action?:ReactNode;children:ReactNode}){return <section className="jf-editor-section"><header><div><h3>{title}</h3>{description&&<p>{description}</p>}</div>{action}</header><div className="jf-editor-section__body">{children}</div></section>}
 
-export function PreviewDock({label='Prévia privada · mock',href='/app/personalizacao',floating=true}:{label?:string;href?:string;floating?:boolean}){return <aside className={`jf-preview-dock ${floating?'is-floating':''}`} aria-label="Contexto da prévia"><StatusBadge>{label}</StatusBadge><a className="jf-action jf-action--secondary" href={href}>Continuar editando</a></aside>}
+export function PreviewDock({label='Prévia',href='/app/personalizacao',floating=true}:{label?:string;href?:string;floating?:boolean}){return <aside className={`jf-preview-dock ${floating?'is-floating':''}`} aria-label="Contexto da prévia"><StatusBadge>{label}</StatusBadge><a className="jf-action jf-action--secondary" href={href}>Continuar editando</a></aside>}

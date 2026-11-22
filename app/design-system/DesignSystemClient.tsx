@@ -1,4 +1,5 @@
 "use client";
+import {OperationalPatternsDemo} from './OperationalPatternsDemo';
 import {FormInputGuide} from './FormInputGuide';
 import {BrandColorsDemo} from '../components/personalization/BrandColorsEditor';
 import {imageAccept,imageFormats} from '@/shared/image-upload';
@@ -366,7 +367,7 @@ export default function DesignSystemClient({initialSection="fundamentos"}:{initi
 
           <section className="ds-section ds-section--first" hidden={currentPage.id !== "formularios"} aria-label="Formulários">
             <SectionHeading title="Inputs claros, do primeiro toque ao envio." description="Regras de preenchimento e exemplos para manter os campos consistentes." />
-            <FormInputGuide/>
+            <FormInputGuide/><OperationalPatternsDemo/>
             <div className="ds-form-showcase">
               <ExampleCard title="Inputs essenciais" className="ds-example-card--form ds-form-card--wide">
                 <div className="ds-modern-field-grid">

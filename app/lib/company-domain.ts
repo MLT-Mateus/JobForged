@@ -1,3 +1,5 @@
+export type DomainChange={action:'set';version:number;requestVersion:number}|{action:'disconnect';version:number};
+export type PreparedDomain={hostname:string;kind:'root'|'subdomain';zone:string;version:number;status:'draft'|'pending'|'verified';proof:string;checkedAt?:string};
 export type DomainReplacement={hostname:string;kind:'root'|'subdomain';zone:string;version:number};
 export type CompanyDomain={hostname?:string;kind?:'root'|'subdomain';zone?:string;targetHost?:string;version:number;status:'none'|'pending'|'verified'|'active'|'disabled';record?:string;proof?:string;checkedAt?:string|null};
 export function companyPageHref(slug:string,domain:CompanyDomain|null,now=Date.now()){

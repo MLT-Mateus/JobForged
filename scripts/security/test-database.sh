@@ -22,6 +22,7 @@ sql < tests/security-provider-contract.sql
 for migration in supabase/migrations/[0-9]*.sql; do
   { printf 'BEGIN;\n'; cat "$migration"; printf '\nCOMMIT;\n'; } | sql
 done
+{ printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/ux-publication-security.sql; } | sql
 sql < tests/security-foundation.sql
 sql < tests/signup-contracts.sql
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql tests/company-operations-security.sql; } | sql
