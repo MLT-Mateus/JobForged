@@ -19,7 +19,7 @@ async function handle(request:NextRequest,mutation:boolean){
  const data=await response.json() as Record<string,unknown>;
  const inbox=await requestDatabase('rpc/my_notifications_v2',session.accessToken,{page_number:page,unread_only:request.nextUrl.searchParams.get('unread')==='true'}).catch(()=>null);
  if(!inbox?.ok){if(!mutation)return Response.json({message:'Não foi possível carregar os alertas.'},{status:503,headers});data.alertsUnavailable=true;}else Object.assign(data,await inbox.json());
- let resume:unknown=null;if(session.role==='candidate'){const file=await requestDatabase('rpc/candidate_resume',session.accessToken,{operation:'read'});if(file?.ok)resume=await file.json()}return Response.json({...data,resume,role:session.role,email:session.email,fullName:'fullName' in session?session.fullName:''},{headers});
+ let resume:unknown=null;if(session.role==='candidate'){const file=await requestDatabase('rpc/candidate_resume',session.accessToken,{operation:'read'}).catch(()=>null);if(file?.ok)resume=await file.json()}return Response.json({...data,resume,role:session.role,email:session.email,fullName:'fullName' in session?session.fullName:''},{headers});
  }catch{return Response.json({message:'Serviço indisponível. Tente novamente.'},{status:503,headers})}
 }
 export const GET=(request:NextRequest)=>handle(request,false);

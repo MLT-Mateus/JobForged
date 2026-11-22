@@ -23,7 +23,7 @@ export function PublicPortalAccount({slug,demo=false,demoUnread=0,demoSignedIn=t
  const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[name,setName]=useState(''),[accepted,setAccepted]=useState(false),[profileName,setProfileName]=useState('');
  const [unreadOnly,setUnreadOnly]=useState(false);const unreadOnlyRef=useRef(false);
  const [credentialDirty,setCredentialDirty]=useState(false);
- const profileDirty=!!session&&session.role==='candidate'&&!!account&&profileName!==(account.profile?.fullName||account.fullName||'');
+ const profileDirty=open&&tab==='account'&&!!session&&session.role==='candidate'&&!!account&&profileName!==(account.profile?.fullName||account.fullName||'');
  const guard=usePendingChanges(credentialDirty||profileDirty||(!session&&mode==='signup'&&!!(name||password||confirm||accepted)));
 
  function notify(kind:ToastKind,text:string){setNotice(createToastNotice({kind,title:kind==='danger'?'Confira a solicitação':kind==='info'?'Solicitação recebida':'Minha conta',text}))}
