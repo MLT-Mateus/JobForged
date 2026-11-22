@@ -4,7 +4,7 @@ returns jsonb language plpgsql security definer set search_path=pg_catalog as $$
 declare cid uuid; result jsonb;
 begin
  perform app_private.security_gate();
- if not app_private.communications_access() then raise exception 'denied' using errcode='42501';end if;
+ if not app_private.communications_access() and public.candidate_context() is null then raise exception 'denied' using errcode='42501';end if;
  if page_number is null or page_number<1 or page_number>10000 or unread_only is null then raise exception 'invalid page' using errcode='22023';end if;
  if not public.is_platform_admin() then cid:=app_private.current_company_id();if cid is not null then perform public.company_operations_v1('alerts');end if;end if;
  with inbox as (

@@ -2,7 +2,7 @@
 -- Read-only administrative projections; no new mutation or role elevation.
 create function public.platform_read_v2(section text,search_text text default '',status_filter text default '',page_number integer default 1,company_filter uuid default null,actor_query text default '',date_from date default null,date_to date default null,target_query text default '')
 returns jsonb language plpgsql stable security definer set search_path=pg_catalog as $$
-declare result jsonb;page integer;collection text;
+declare result jsonb;effective_page integer;collection text;
 begin
  perform app_private.security_gate(true);
  if not public.is_platform_admin() then raise exception 'denied' using errcode='42501';end if;
@@ -25,7 +25,7 @@ begin
   return result;
  end if;
  result:=public.platform_read(section,search_text,status_filter,page_number,company_filter);
- if result?'total' then page:=greatest(1,least(page_number,ceil((result->>'total')::numeric/25)::integer));if page<>page_number then result:=public.platform_read(section,search_text,status_filter,page,company_filter);end if;result:=result||jsonb_build_object('page',page);end if;
+ if result?'total' then effective_page:=greatest(1,least(page_number,ceil((result->>'total')::numeric/25)::integer));if effective_page<>page_number then result:=public.platform_read(section,search_text,status_filter,effective_page,company_filter);end if;result:=result||jsonb_build_object('page',effective_page);end if;
  if section in ('users','company') then
   collection:=case when section='users' then 'items' else 'members' end;
   result:=jsonb_set(result,array[collection],coalesce((select jsonb_agg(e.value||jsonb_build_object('cpf',m.cpf,'phone',m.phone,'photo_version',case when exists(select 1 from app_private.member_photos p where p.member_id=m.id) then m.photo_version else 0 end) order by e.ordinality) from jsonb_array_elements(result->collection) with ordinality e(value,ordinality) left join public.company_members m on m.id=(e.value->>'id')::uuid),'[]'::jsonb));
