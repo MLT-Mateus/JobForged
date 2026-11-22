@@ -2,9 +2,10 @@
 
 import {AuthShell} from './AuthShell';
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
-import { ActionButton, AppToast, TextField, createToastNotice, type ToastNotice } from "@/app/components/ui";
-import { isEmail } from "./auth-validation";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ActionButton, WorkspaceState, FormActions, AppToast, TextField, createToastNotice, type ToastNotice } from "@/app/components/ui";
+import {usePendingChanges} from "../ui/PendingChanges";
+import { isEmail, passwordRules } from "./auth-validation";
 import { focusFirstInvalid } from "./focus-first-invalid";
 import "./auth.css";
 
@@ -14,6 +15,9 @@ export function CompanyInvitationClient({ token }: { token: string }) {
   const [notice,setNotice]=useState<ToastNotice|null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [mode,setMode]=useState<'login'|'signup'>('login'),[sessionEmail,setSessionEmail]=useState(''),[checking,setChecking]=useState(true),[confirmation,setConfirmation]=useState('');
+  const guard=usePendingChanges(mode==='signup'&&!!(email||password||confirmation));
+  useEffect(()=>{const c=new AbortController();fetch('/api/auth/session',{cache:'no-store',signal:c.signal}).then(async r=>r.ok?await r.json() as {email?:string}:null).then(s=>{if(!c.signal.aborted)setSessionEmail(s?.email||'')}).catch(()=>{}).finally(()=>{if(!c.signal.aborted)setChecking(false)});return()=>c.abort()},[]);
   const credentialsForm = useRef<HTMLFormElement>(null);
   function credentialsReady(form: HTMLFormElement | null) {
     const invalid = [!isEmail(email) && "email", !password && "password"].filter(Boolean) as string[];
@@ -29,15 +33,11 @@ export function CompanyInvitationClient({ token }: { token: string }) {
     setBusy(false); setNotice(createToastNotice({kind:response?.ok?"success":"danger",title:response?.ok?"Convite empresarial":"Convite não concluído",text:payload?.message??(response?.ok?"Concluído.":"Não foi possível concluir.")}));
     return Boolean(response?.ok);
   }
-  async function register(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!credentialsReady(credentialsForm.current)) return; await act("/api/auth/invitee-sign-up", { token, email, password }); }
-  async function login(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!credentialsReady(event.currentTarget)) return; const okay = await act("/api/auth/sign-in", { email, password }); if (okay) setNotice(createToastNotice({kind:"success",title:"Acesso confirmado",text:"Sessão iniciada. Aceite o convite abaixo."})); }
+  async function register(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!credentialsReady(credentialsForm.current)) return; if(!Object.values(passwordRules(password)).every(Boolean)||password!==confirmation){setNotice(createToastNotice({kind:'danger',title:'Confira a senha',text:'Use 8 caracteres ou mais, maiúscula, minúscula, número e símbolo; repita a mesma senha.'}));return}if(await act("/api/auth/invitee-sign-up", { token, email, password })){setMode('login');setPassword('');setConfirmation('')} }
+  async function login(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!credentialsReady(event.currentTarget)) return; const okay = await act("/api/auth/sign-in", { email, password }); if (okay) {setSessionEmail(email);setPassword('');setNotice(createToastNotice({kind:"success",title:"Acesso confirmado",text:"Sessão iniciada. Confira o e-mail antes de aceitar."}));} }
   async function accept() { const okay = await act("/api/company/invitations/accept", { token }); if (okay) { window.history.replaceState(null, "", "/convite"); setDone(true); } }
-  return <AuthShell compact><div className="auth-heading"><h1>Convite empresarial</h1><p>Entre com o e-mail convidado e confirmado para participar da empresa.</p></div>
-    {!/^[0-9a-f]{64}$/.test(token) && !done ? <p>Convite inválido. Solicite um novo convite à empresa.</p> : done ? <><p>Convite aceito.</p><Link href="/app/home">Abrir aplicativo</Link></> : <>
-      <ActionButton type="button" disabled={busy} onClick={accept}>Já entrei: aceitar convite</ActionButton>
-      <form ref={credentialsForm} className="auth-form" noValidate onSubmit={login}><h2>Entrar em uma conta existente</h2><TextField name="email" label="E-mail convidado" type="email" value={email} onChange={event => setEmail(event.target.value)} required />
-        <TextField name="password" label="Senha" type="password" value={password} onChange={event => setPassword(event.target.value)} required /><ActionButton type="submit" disabled={busy}>Entrar</ActionButton></form>
-      <form className="auth-form" onSubmit={register}><h2>Criar conta para o convite</h2><p>Use o mesmo e-mail do convite. Depois confirme seu endereço na mensagem recebida.</p>
-        <ActionButton type="submit" disabled={busy}>Criar conta com estes dados</ActionButton></form></>}
+  return <AuthShell compact>{guard.dialog}<div className="auth-heading"><h1>Convite empresarial</h1><p>Entre com o e-mail convidado e confirmado para participar da empresa.</p></div>
+    {!/^[0-9a-f]{64}$/.test(token) && !done ? <WorkspaceState kind="error" title="Convite inválido" description="Solicite um novo convite à gestão da empresa." action={<Link href="/login">Ir para o acesso</Link>}/> : done ? <><p>Convite aceito. Complete seus dados pessoais para que a equipe reconheça seu perfil.</p><Link className="jf-action jf-action--primary" href="/app/minha-conta">Completar perfil</Link><Link href="/app/home">Abrir Home</Link></> : <>
+      {checking?<WorkspaceState title="Conferindo seu acesso..."/>:sessionEmail?<div className="jf-workspace-stack"><p>Conectado como <strong>{sessionEmail}</strong></p><p>Aceite usando a conta que recebeu o convite. A empresa validará o destinatário antes de vincular seu acesso.</p><FormActions busy={busy} onSave={()=>void accept()} saveLabel="Aceitar convite"/><ActionButton variant="quiet" disabled={busy} onClick={async()=>{if(await act('/api/auth/sign-out',{}))setSessionEmail('')}}>Usar outra conta</ActionButton></div>:<form ref={credentialsForm} className="auth-form" onSubmit={mode==='login'?login:register}><h2>{mode==='login'?'Entre para continuar':'Crie sua conta'}</h2><TextField name="email" label="E-mail convidado" type="email" autoComplete="email" value={email} onChange={event=>setEmail(event.target.value)} required disabled={busy}/><TextField name="password" label="Senha" type="password" autoComplete={mode==='signup'?'new-password':'current-password'} value={password} onChange={event=>setPassword(event.target.value)} required disabled={busy} helpText={mode==='signup'?'8 caracteres ou mais, maiúscula, minúscula, número e símbolo.':undefined}/>{mode==='signup'&&<><TextField label="Confirme a senha" type="password" autoComplete="new-password" required value={confirmation} onChange={e=>setConfirmation(e.target.value)} disabled={busy}/><p>Confirme seu endereço no e-mail recebido e volte ao convite.</p></>}<FormActions busy={busy} saveLabel={mode==='login'?'Entrar':'Criar conta'}/><ActionButton variant="quiet" type="button" disabled={busy} onClick={()=>guard.confirm(()=>{setMode(mode==='login'?'signup':'login');setPassword('');setConfirmation('')})}>{mode==='login'?'Criar conta':'Já tenho conta'}</ActionButton></form>}</>}
     {notice&&<AppToast notice={notice} onClose={()=>setNotice(null)}/>}<p><Link href="/recuperar-senha">Esqueci minha senha</Link></p></AuthShell>;
 }

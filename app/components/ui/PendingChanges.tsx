@@ -1,9 +1,12 @@
 "use client";
-import {useEffect,useRef,useState} from 'react';
+import {useContext,useId,useEffect,useRef,useState} from 'react';
 import {ActionButton} from './AdminPrimitives';
+import {DraftBoundary} from './DraftBoundary';
 import {WidgetDialog} from './Widgets';
 
 export function usePendingChanges(dirty:boolean){
+ const boundary=useContext(DraftBoundary),id=useId();
+ useEffect(()=>boundary?.(id,dirty),[boundary,id,dirty]);
  const savedNavigation=useRef(false);
  const [pending,setPending]=useState<null|(()=>void)>(null);
  function confirm(action:()=>void){if(dirty)setPending(()=>action);else action()}
@@ -15,7 +18,7 @@ export function usePendingChanges(dirty:boolean){
    const link=(event.target as Element|null)?.closest?.('a[href]') as HTMLAnchorElement|null;
    if(!link||link.download||(link.target&&link.target!=='_self'))return;
    const to=new URL(link.href);
-   if(to.origin!==location.origin||to.pathname===location.pathname&&to.search===location.search)return;
+   if(to.origin===location.origin&&to.pathname===location.pathname&&to.search===location.search)return;
    event.preventDefault();event.stopPropagation();
    setPending(()=>()=>{window.removeEventListener('beforeunload',warn);location.assign(to.href)});
   };

@@ -11,5 +11,5 @@ export function PublicCompanyPortal({data,slug,initialLogin=false}:{data:Customi
  const {theme,changeTheme}=useThemePreference();
  useBrandingIcon(brandingIcon(data,theme));
  useCompanyScrollbar(data,theme);
- return <div className="company-branding jf-company-portal" style={brandingStyle(data,theme)}><CareerPortalPreview data={data} theme={theme} mode="public" opportunities={<PublicJobs slug={slug}/> } onThemeChange={changeTheme} account={<PublicPortalAccount slug={slug} initialLogin={initialLogin}/>}/></div>;
+ return <div className="company-branding jf-company-portal" style={brandingStyle(data,theme)}><CareerPortalPreview data={data} theme={theme} mode="public" opportunities={<PublicJobs slug={slug} config={data}/> } onThemeChange={changeTheme} account={<PublicPortalAccount slug={slug} initialLogin={initialLogin}/>}/></div>;
 }

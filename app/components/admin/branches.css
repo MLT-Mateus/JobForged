@@ -29,3 +29,5 @@
 .branches-collection[data-layout="list"] .branch-card>p,.branches-collection[data-layout="list"] .branch-card>h2{grid-column:2}
 .branches-collection[data-layout="list"] .branch-card>.jf-action{grid-column:3;grid-row:1/7;align-self:center;margin:0}
 @media(max-width:640px){.branches-collection[data-layout="list"] .branch-card{grid-template-columns:1fr}.branches-collection[data-layout="list"] .branch-card>*{grid-column:1!important;grid-row:auto!important}.branches-collection[data-layout="list"] .branch-cover{width:100%}}
+
+.branch-job-options{display:grid;gap:var(--jf-ui-space-3);max-height:280px;overflow:auto;padding:var(--jf-ui-space-2)}

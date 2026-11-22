@@ -1,9 +1,9 @@
 import type {Job} from './job-types';
 export const jobSections=[
- {id:'sobre',label:'Sobre o Cargo',title:'Identificação da vaga',description:'Informações essenciais para o candidato entender onde e como vai trabalhar.'},
- {id:'atribuicoes',label:'Atribuições',title:'Funções da vaga',description:'Descreva as atividades do cotidiano e os atributos esperados para o cargo.'},
+ {id:'sobre',label:'Identificação',title:'Identificação da vaga',description:'Informações essenciais para o candidato entender onde e como vai trabalhar.'},
+ {id:'atribuicoes',label:'Atribuições',title:'Atividades e requisitos',description:'Descreva as atividades do cotidiano e os requisitos para o cargo.'},
  {id:'beneficios',label:'Benefícios',title:'Benefícios e crescimento',description:'Apresente os benefícios e as possibilidades de desenvolvimento.'},
- {id:'perfil',label:'Perfil Esperado',title:'Perfil e diferenciais',description:'Defina a formação, as habilidades e os diferenciais recomendados.'},
+ {id:'perfil',label:'Perfil',title:'Perfil e diferenciais',description:'Defina a formação, as habilidades e os diferenciais recomendados.'},
  {id:'processo',label:'Processo',title:'Processo seletivo',description:'Deixe claras as etapas, os prazos e as formas de contato.'},
 ] as const;
 export const jobOptions={
@@ -26,7 +26,7 @@ export function editorChecks(job:Job){return [
  {section:0,label:'Nível mínimo',done:!!job.level},
  {section:0,label:'Faixa salarial',done:job.salaryRange==='Informar valores'?!!job.salaryMin:!!job.salaryRange||!!job.salaryMin},
  {section:0,label:'Modelo de contrato',done:!!job.contractType},
- {section:0,label:'Disposição do trabalho',done:!!job.modality},
+ {section:0,label:'Modalidade de trabalho',done:!!job.modality},
  {section:0,label:'Jornada de trabalho',done:!!job.journey},
  {section:0,label:'Endereço da vaga',done:!!job.branchIds?.length&&!!job.city&&!!job.state},
  {section:1,label:'Descrição da vaga',done:!!job.summary.trim()},
@@ -53,7 +53,7 @@ export function applicationFeedback(job:Job){
   'Nível mínimo':'Qual é o nível esperado para o cargo?',
   'Faixa salarial':'Qual é o salário previsto ou prefere informar “a combinar”?',
   'Modelo de contrato':'Qual será o tipo de contratação?',
-  'Disposição do trabalho':'O trabalho será presencial, híbrido ou remoto?',
+  'Modalidade de trabalho':'O trabalho será presencial, híbrido ou remoto?',
   'Jornada de trabalho':'Em qual período a pessoa vai trabalhar?',
   'Endereço da vaga':'Para qual filial e cidade é a vaga?',
   'Descrição da vaga':'Como você resumiria o propósito deste cargo?',

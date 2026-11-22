@@ -149,7 +149,7 @@
   width: 100%;
   min-width: 0;
   align-content: start;
-  grid-template-rows: minmax(20px, auto) minmax(var(--jf-ui-control-height), auto) minmax(18px, auto);
+  grid-template-rows: minmax(20px, auto) minmax(var(--jf-ui-control-height), auto);
   gap: var(--jf-ui-space-2);
   font-family: var(--jf-ui-font-body);
 }
@@ -164,7 +164,7 @@
 }
 
 .jf-field__label b { font-family: var(--jf-ui-font-heading); font-size: 14px; font-weight: 700; }
-.jf-field__label i { color: var(--jf-ui-text-soft); font-size: 8px; font-style: normal; font-weight: 600; }
+.jf-field__label i { color: var(--jf-ui-text-soft); font-size: var(--jf-ui-font-size-xs); font-style: normal; font-weight: 600; }
 .jf-field > small,
 .jf-field__message { color: var(--jf-ui-text-soft); font-size: 12px; line-height: 1.5; }
 
@@ -251,7 +251,7 @@
   cursor: pointer;
 }
 
-.jf-field--native { grid-template-rows: minmax(20px, auto) minmax(var(--jf-ui-control-height), auto) minmax(18px, auto); }
+.jf-field--native { grid-template-rows: minmax(20px, auto) minmax(var(--jf-ui-control-height), auto); }
 .jf-field--native > .jf-control > input,
 .jf-field--native > .jf-control > select,
 .jf-field--native > .jf-control > textarea { min-width: 0; }
@@ -268,7 +268,7 @@
 .jf-control input::placeholder,
 .jf-select__control .is-placeholder { color: var(--jf-ui-text-soft); }
 .jf-control input[type="search"]::-webkit-search-cancel-button { display: none; appearance: none; -webkit-appearance: none; }
-.jf-control kbd { padding: 4px 6px; border: 1px solid var(--jf-ui-border); border-radius: 5px; background: var(--jf-ui-surface-soft); color: var(--jf-ui-text-soft); font-family: var(--jf-ui-font-body); font-size: 8px; }
+.jf-control kbd { padding: 4px 6px; border: 1px solid var(--jf-ui-border); border-radius: 5px; background: var(--jf-ui-surface-soft); color: var(--jf-ui-text-soft); font-family: var(--jf-ui-font-body); font-size: var(--jf-ui-font-size-xs); }
 .jf-search-clear,
 .jf-password-toggle {
   display: grid;
@@ -300,7 +300,7 @@
 .jf-multiselect__control,
 .jf-date__control { cursor: pointer; text-align: left; }
 .jf-select__control > span { min-width: 0; flex: 1; color: var(--jf-ui-text); font-size: var(--jf-ui-font-size-sm); }
-.jf-date__control > span { min-width: 0; flex: 1; color: var(--jf-ui-text); font-size: 11px; font-variant-numeric: tabular-nums; }
+.jf-date__control > span { min-width: 0; flex: 1; color: var(--jf-ui-text); font-size: var(--jf-ui-font-size-xs); font-variant-numeric: tabular-nums; }
 .jf-date__control > span.is-placeholder { color: var(--jf-ui-text-soft); }
 .jf-select__control > svg:last-child,
 .jf-multiselect__control > svg:last-child,
@@ -423,12 +423,12 @@
 .jf-select__menu strong,
 .jf-multiselect__options strong { color: var(--jf-ui-text); font-size: var(--jf-ui-font-size-sm); }
 .jf-select__menu small,
-.jf-multiselect__options small { color: var(--jf-ui-text-soft); font-size: 8px; }
+.jf-multiselect__options small { color: var(--jf-ui-text-soft); font-size: var(--jf-ui-font-size-xs); }
 
 .jf-multiselect__control { width: 100%; padding-block: 7px; }
 .jf-multiselect__value { display: flex; min-width: 0; flex: 1; flex-wrap: wrap; gap: 5px; }
-.jf-multiselect__value i { padding: 4px 7px; border-radius: 5px; background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); font-size: 8px; font-style: normal; font-weight: 700; }
-.jf-multiselect__value em { color: var(--jf-ui-text-soft); font-size: 10px; font-style: normal; }
+.jf-multiselect__value i { padding: 4px 7px; border-radius: 5px; background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); font-size: var(--jf-ui-font-size-xs); font-style: normal; font-weight: 700; }
+.jf-multiselect__value em { color: var(--jf-ui-text-soft); font-size: var(--jf-ui-font-size-xs); font-style: normal; }
 .jf-multiselect__options { display: grid; max-height: 248px; gap: 2px; overflow-y: auto; padding: 7px; }
 .jf-multiselect__options > button { justify-content: flex-start; }
 .jf-choice-box { display: grid; width: 18px; height: 18px; flex: 0 0 18px; place-items: center; border: 1px solid var(--jf-ui-border-strong); border-radius: 5px; background: var(--jf-ui-surface); color: transparent; }
@@ -437,7 +437,7 @@
 .jf-create-option-shell { padding: 8px; border-top: 1px solid var(--jf-ui-border); background: var(--jf-ui-surface-soft); }
 .jf-create-option { display: grid; grid-template-columns: minmax(0, 1fr) 34px; align-items: center; gap: 4px; padding: 0 4px 0 10px; border: 1px solid var(--jf-ui-border-strong); border-radius: 8px; background: var(--jf-ui-surface); transition: border-color 180ms ease, box-shadow 180ms ease; }
 .jf-create-option:focus-within { border-color: var(--jf-ui-focus); box-shadow: 0 0 0 3px var(--jf-ui-focus-ring); }
-.jf-create-option input { box-sizing: border-box; width: 100%; min-width: 0; height: 40px; padding: 0; border: 0 !important; border-radius: 0; outline: 0 !important; appearance: none; -webkit-appearance: none; background: transparent !important; box-shadow: none !important; color: var(--jf-ui-text); font-family: var(--jf-ui-font-body); font-size: 9px; }
+.jf-create-option input { box-sizing: border-box; width: 100%; min-width: 0; height: 40px; padding: 0; border: 0 !important; border-radius: 0; outline: 0 !important; appearance: none; -webkit-appearance: none; background: transparent !important; box-shadow: none !important; color: var(--jf-ui-text); font-family: var(--jf-ui-font-body); font-size: var(--jf-ui-font-size-xs); }
 .jf-create-option input:focus,
 .jf-create-option input:focus-visible,
 .jf-create-option input:active { border: 0 !important; outline: 0 !important; background: transparent !important; box-shadow: none !important; }
@@ -447,26 +447,26 @@
 
 .jf-calendar { padding: 12px; }
 .jf-calendar__header { display: grid; grid-template-columns: 34px minmax(0, 1fr) 34px; align-items: center; gap: 8px; margin-bottom: 10px; }
-.jf-calendar__header strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: 10px; text-align: center; }
+.jf-calendar__header strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: var(--jf-ui-font-size-xs); text-align: center; }
 .jf-calendar__header > button { display: grid; width: 34px; height: 34px; place-items: center; padding: 0; border: 1px solid var(--jf-ui-border); border-radius: 8px; background: var(--jf-ui-surface); color: var(--jf-ui-text-muted); cursor: pointer; }
 .jf-calendar__header > button:hover:not(:disabled) { border-color: var(--jf-ui-brand); background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-calendar__header > button:disabled { cursor: not-allowed; opacity: 0.32; }
 .jf-calendar__period { display: flex; min-width: 0; align-items: center; justify-content: center; gap: 4px; }
-.jf-calendar__period button { display: inline-flex; min-height: 32px; align-items: center; justify-content: center; gap: 4px; padding: 0 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--jf-ui-text); cursor: pointer; font-family: var(--jf-ui-font-heading); font-size: 10px; font-weight: 700; }
+.jf-calendar__period button { display: inline-flex; min-height: 32px; align-items: center; justify-content: center; gap: 4px; padding: 0 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--jf-ui-text); cursor: pointer; font-family: var(--jf-ui-font-heading); font-size: var(--jf-ui-font-size-xs); font-weight: 700; }
 .jf-calendar__period button:hover { border-color: var(--jf-ui-border); background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-calendar__period button:focus-visible { outline: 3px solid color-mix(in srgb, var(--jf-ui-brand) 20%, transparent); outline-offset: 1px; }
 .jf-calendar__picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 4px 0; }
-.jf-calendar__picker-grid button { min-height: 42px; padding: 0 6px; border: 1px solid transparent; border-radius: 8px; background: var(--jf-ui-surface-soft); color: var(--jf-ui-text-muted); cursor: pointer; font-family: var(--jf-ui-font-body); font-size: 9px; font-weight: 650; }
+.jf-calendar__picker-grid button { min-height: 42px; padding: 0 6px; border: 1px solid transparent; border-radius: 8px; background: var(--jf-ui-surface-soft); color: var(--jf-ui-text-muted); cursor: pointer; font-family: var(--jf-ui-font-body); font-size: var(--jf-ui-font-size-xs); font-weight: 650; }
 .jf-calendar__picker-grid button:hover:not(:disabled) { border-color: color-mix(in srgb, var(--jf-ui-brand) 32%, var(--jf-ui-border)); background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-calendar__picker-grid button.is-current { border-color: var(--jf-ui-brand); background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); font-weight: 750; }
 .jf-calendar__picker-grid button:disabled { cursor: not-allowed; opacity: 0.28; }
 .jf-calendar__weekdays,
 .jf-calendar__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
 .jf-calendar__weekdays { margin-bottom: 4px; }
-.jf-calendar__weekdays span { display: grid; min-height: 24px; place-items: center; color: var(--jf-ui-text-soft); font-size: 8px; font-weight: 700; }
+.jf-calendar__weekdays span { display: grid; min-height: 24px; place-items: center; color: var(--jf-ui-text-soft); font-size: var(--jf-ui-font-size-xs); font-weight: 700; }
 .jf-calendar__days > button,
 .jf-calendar__days > span { display: grid; min-width: 0; min-height: 32px; place-items: center; }
-.jf-calendar__days > button { padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--jf-ui-text-muted); cursor: pointer; font-family: var(--jf-ui-font-body); font-size: 9px; }
+.jf-calendar__days > button { padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--jf-ui-text-muted); cursor: pointer; font-family: var(--jf-ui-font-body); font-size: var(--jf-ui-font-size-xs); }
 .jf-calendar__days > button:hover { border-color: color-mix(in srgb, var(--jf-ui-brand) 28%, var(--jf-ui-border)); background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-calendar__days > button.is-today { border-color: var(--jf-ui-border-strong); color: var(--jf-ui-brand-strong); font-weight: 700; }
 .jf-calendar__days > button.is-selected { border-color: var(--jf-ui-brand); background: var(--jf-ui-brand); color: white; font-weight: 700; }
@@ -479,7 +479,7 @@
 .jf-calendar__range-status { display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr); align-items: center; gap: 7px; margin-bottom: 10px; padding: 8px; border: 1px solid var(--jf-ui-border); border-radius: 9px; background: var(--jf-ui-surface-soft); color: var(--jf-ui-text-soft); }
 .jf-calendar__range-status > span { display: grid; min-width: 0; gap: 2px; padding: 6px 8px; border-radius: 7px; background: var(--jf-ui-surface); }
 .jf-calendar__range-status small { color: var(--jf-ui-text-soft); font-size: 7px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-.jf-calendar__range-status strong { overflow: hidden; color: var(--jf-ui-text); font-family: var(--jf-ui-font-body); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.jf-calendar__range-status strong { overflow: hidden; color: var(--jf-ui-text); font-family: var(--jf-ui-font-body); font-size: var(--jf-ui-font-size-xs); text-overflow: ellipsis; white-space: nowrap; }
 .jf-calendar__range-status > svg { justify-self: center; }
 
 .jf-upload {
@@ -505,9 +505,9 @@
 .jf-upload input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .jf-upload__icon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 10px; background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-upload__content { display: grid; min-width: 0; gap: 4px; }
-.jf-upload__content strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: 11px; }
-.jf-upload__content small { overflow: hidden; color: var(--jf-ui-text-soft); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
-.jf-upload em { display: inline-flex; min-height: 34px; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--jf-ui-border-strong); border-radius: 7px; background: var(--jf-ui-surface); color: var(--jf-ui-brand-strong); font-size: 8px; font-style: normal; font-weight: 700; white-space: nowrap; }
+.jf-upload__content strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: var(--jf-ui-font-size-xs); }
+.jf-upload__content small { overflow: hidden; color: var(--jf-ui-text-soft); font-size: var(--jf-ui-font-size-xs); text-overflow: ellipsis; white-space: nowrap; }
+.jf-upload em { display: inline-flex; min-height: 34px; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--jf-ui-border-strong); border-radius: 7px; background: var(--jf-ui-surface); color: var(--jf-ui-brand-strong); font-size: var(--jf-ui-font-size-xs); font-style: normal; font-weight: 700; white-space: nowrap; }
 .jf-upload--picture { border-color: color-mix(in srgb, var(--jf-ui-accent) 42%, var(--jf-ui-border-strong)); background: color-mix(in srgb, var(--jf-ui-accent-soft) 32%, var(--jf-ui-surface)); }
 .jf-upload--picture .jf-upload__icon { background: var(--jf-ui-accent-soft); color: var(--jf-ui-accent); }
 .jf-upload.is-filled { border-style: solid; border-color: color-mix(in srgb, var(--jf-ui-success) 62%, var(--jf-ui-border-strong)); background: color-mix(in srgb, var(--jf-ui-success-soft) 42%, var(--jf-ui-surface)); }
@@ -542,9 +542,9 @@
 .jf-multi-upload input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .jf-multi-upload__icon { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 11px; background: var(--jf-ui-brand-soft); color: var(--jf-ui-brand-strong); }
 .jf-multi-upload__content { display: grid; min-width: 0; gap: 5px; }
-.jf-multi-upload__content strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: 11px; }
-.jf-multi-upload__content small { color: var(--jf-ui-text-soft); font-size: 8px; line-height: 1.5; }
-.jf-multi-upload em { display: inline-flex; min-height: 34px; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--jf-ui-border-strong); border-radius: 7px; background: var(--jf-ui-surface); color: var(--jf-ui-brand-strong); font-size: 8px; font-style: normal; font-weight: 700; white-space: nowrap; }
+.jf-multi-upload__content strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: var(--jf-ui-font-size-xs); }
+.jf-multi-upload__content small { color: var(--jf-ui-text-soft); font-size: var(--jf-ui-font-size-xs); line-height: 1.5; }
+.jf-multi-upload em { display: inline-flex; min-height: 34px; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--jf-ui-border-strong); border-radius: 7px; background: var(--jf-ui-surface); color: var(--jf-ui-brand-strong); font-size: var(--jf-ui-font-size-xs); font-style: normal; font-weight: 700; white-space: nowrap; }
 .jf-multi-upload--picture { border-color: color-mix(in srgb, var(--jf-ui-accent) 46%, var(--jf-ui-border-strong)); background: color-mix(in srgb, var(--jf-ui-accent-soft) 34%, var(--jf-ui-surface)); }
 .jf-multi-upload--picture:hover,
 .jf-multi-upload--picture.is-dragging { border-color: var(--jf-ui-accent); background: color-mix(in srgb, var(--jf-ui-accent-soft) 58%, var(--jf-ui-surface)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jf-ui-accent) 13%, transparent); }
@@ -555,8 +555,8 @@
 .jf-multi-upload__list > div { display: grid; min-width: 0; grid-template-columns: 34px minmax(0, 1fr) 30px; align-items: center; gap: 9px; padding: 9px; border: 1px solid var(--jf-ui-border); border-radius: 9px; background: var(--jf-ui-surface); }
 .jf-multi-upload__list > div > span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 8px; background: var(--jf-ui-success-soft); color: var(--jf-ui-success); }
 .jf-multi-upload__list > div > div { display: grid; min-width: 0; gap: 2px; }
-.jf-multi-upload__list strong { overflow: hidden; color: var(--jf-ui-text); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-.jf-multi-upload__list small { color: var(--jf-ui-text-soft); font-size: 8px; }
+.jf-multi-upload__list strong { overflow: hidden; color: var(--jf-ui-text); font-size: var(--jf-ui-font-size-xs); text-overflow: ellipsis; white-space: nowrap; }
+.jf-multi-upload__list small { color: var(--jf-ui-text-soft); font-size: var(--jf-ui-font-size-xs); }
 
 .jf-multi-upload__gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .jf-multi-upload__gallery > div { position: relative; min-width: 0; overflow: hidden; aspect-ratio: 1.15; border: 1px solid var(--jf-ui-border); border-radius: 10px; background: var(--jf-ui-surface-soft); }
@@ -572,14 +572,14 @@
 
 .jf-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px; border: 1px solid var(--jf-ui-border); border-radius: var(--jf-ui-control-radius); background: var(--jf-ui-surface); font-family: var(--jf-ui-font-body); }
 .jf-toggle-row > div { display: grid; gap: 5px; }
-.jf-toggle-row strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: 10px; }
-.jf-toggle-row > div span { color: var(--jf-ui-text-muted); font-size: 9px; line-height: 1.5; }
+.jf-toggle-row strong { color: var(--jf-ui-text); font-family: var(--jf-ui-font-heading); font-size: var(--jf-ui-font-size-xs); }
+.jf-toggle-row > div span { color: var(--jf-ui-text-muted); font-size: var(--jf-ui-font-size-xs); line-height: 1.5; }
 .jf-toggle { position: relative; width: 42px; height: 24px; flex: 0 0 42px; padding: 0; border: 1px solid var(--jf-ui-border-strong); border-radius: 7px; background: var(--jf-ui-surface-soft); cursor: pointer; transition: background 180ms ease, border-color 180ms ease; }
 .jf-toggle > span { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 5px; background: var(--jf-ui-text-soft); transition: transform 180ms ease, background 180ms ease; }
 .jf-toggle.is-active { border-color: var(--jf-ui-brand); background: var(--jf-ui-brand-soft); }
 .jf-toggle.is-active > span { background: var(--jf-ui-brand); transform: translateX(18px); }
 
-.jf-choice { position: relative; display: flex; align-items: center; gap: 9px; color: var(--jf-ui-text-muted); cursor: pointer; font-family: var(--jf-ui-font-body); font-size: 10px; font-weight: 600; }
+.jf-choice { position: relative; display: flex; align-items: center; gap: 9px; color: var(--jf-ui-text-muted); cursor: pointer; font-family: var(--jf-ui-font-body); font-size: var(--jf-ui-font-size-xs); font-weight: 600; }
 .jf-choice input { position: absolute; top: 0; left: 0; width: 19px; height: 19px; margin: 0; cursor: pointer; opacity: 0; }
 .jf-choice > .jf-choice-box { width: 19px; height: 19px; flex-basis: 19px; color: transparent; }
 .jf-choice input:checked + .jf-choice-box { border-color: var(--jf-ui-brand); background: var(--jf-ui-brand); color: white; }
@@ -793,7 +793,7 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 .jf-workspace-tabs { display:flex; min-width:0; flex-wrap:wrap; gap:var(--jf-ui-space-2); padding:var(--jf-ui-space-2); border:1px solid var(--jf-ui-border); border-radius:var(--jf-ui-radius-card); background:var(--jf-ui-surface); }
 .jf-workspace-tabs > .jf-action { flex:0 1 auto; min-width:0; height:auto; white-space:normal; text-align:left; }
 .jf-workspace-tabs .jf-status { font-size:var(--jf-ui-font-size-xs); }
-@media(max-width:680px) { .jf-page-head__actions { width:100%; } .jf-workspace-stack,.jf-workspace-grid { gap:var(--jf-ui-space-4); } .jf-workspace-toolbar > .jf-field { flex-basis:100%; } .jf-workspace-tabs > .jf-action { justify-content:flex-start; flex:1 1 140px; } .jf-page-head__actions .jf-action { flex:1 1 auto; white-space:normal; } }
+@media(max-width:680px) { .jf-page-head__actions { width:100%; } .jf-workspace-stack,.jf-workspace-grid { gap:var(--jf-ui-space-4); } .jf-workspace-toolbar > .jf-field { flex-basis:100%; } .jf-workspace-tabs > .jf-action { justify-content:flex-start; flex:1 1 auto; } .jf-page-head__actions .jf-action { flex:1 1 auto; white-space:normal; } }
 
 .jf-action-menu > .jf-action { min-width:40px; padding-inline:var(--jf-ui-space-2); }
 .jf-action-menu__items > :is(a,button) { display:flex; width:100%; height:auto; min-height:40px; align-items:center; justify-content:flex-start; gap:var(--jf-ui-space-2); padding:var(--jf-ui-space-2); border-radius:var(--jf-ui-control-radius); color:var(--jf-ui-text); font:600 var(--jf-ui-font-size-sm)/1.5 var(--jf-ui-font-body); text-align:left; white-space:normal; }
@@ -949,3 +949,44 @@ a[href] *, button *, [role="button"] * { -webkit-user-drag:none; }
 @media(max-width:420px){.jf-directory__filters,.jf-directory__filters--pair{grid-template-columns:minmax(0,1fr)}}
 
 .jf-profile-security-form{padding:var(--jf-ui-space-5);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);background:var(--jf-ui-brand-soft)}
+
+
+/* Shared form and keyboard-navigation patterns. */
+.jf-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.jf-skip-link{position:fixed;top:8px;left:8px;z-index:10000;transform:translateY(-150%);padding:12px 16px;border-radius:var(--jf-ui-control-radius);background:var(--jf-ui-surface);color:var(--jf-ui-brand-strong);box-shadow:var(--jf-ui-shadow)}
+.jf-skip-link:focus{transform:none}
+.jf-form-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:var(--jf-ui-space-4);padding-top:var(--jf-ui-space-5);border-top:1px solid var(--jf-ui-border);margin-top:var(--jf-ui-space-5)}
+.jf-form-actions__status{margin-right:auto;color:var(--jf-ui-text-muted);font-size:var(--jf-ui-font-size-sm)}
+.jf-form-actions__buttons{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--jf-ui-space-3);margin-left:auto}
+.jf-field:has(>.jf-field__message:empty){row-gap:var(--jf-ui-space-2)}
+.jf-field__message:empty{display:none}
+.jf-choice,.jf-toggle-row strong{font-size:var(--jf-ui-font-size-sm)}
+.jf-toggle-row>div span,.jf-upload__content small,.jf-multi-upload__content small{font-size:var(--jf-ui-font-size-xs)}
+.jf-upload em,.jf-multi-upload em{font-size:var(--jf-ui-font-size-sm)}
+.jf-workspace-toolbar{align-items:start}
+.jf-workspace-toolbar>.jf-action{align-self:center}
+.jf-workspace-tabs{min-width:0}
+@media(max-width:600px){.jf-workspace-tabs>.jf-action{flex:1 1 auto;min-width:0}.jf-form-actions__status{flex-basis:100%}.jf-form-actions__buttons{max-width:100%}}
+
+.jf-fieldset{border:0;padding:0;margin:0;min-width:0;display:grid;gap:var(--jf-ui-space-5)}
+.jf-admin-member-details__facts{display:grid;gap:var(--jf-ui-space-4)}
+.jf-admin-member-details__facts>div{padding:0;border:0;background:none}
+.jf-admin-member-details__identity strong{display:none}
+.jf-profile-security-form{border:0;border-top:1px solid var(--jf-ui-border);border-radius:0;padding:var(--jf-ui-space-5) 0 0;background:none}
+.jf-company-activity .jf-directory__filters--pair{grid-template-columns:minmax(0,1fr) auto;align-items:end}.jf-company-activity .jf-directory__filters--pair>.jf-action{align-self:end;min-height:var(--jf-ui-control-height)}
+@media(max-width:600px){.jf-profile-photo{align-items:start;grid-template-columns:56px minmax(0,1fr)}.jf-profile-photo .jf-upload{min-height:88px}.jf-profile-photo .jf-user-avatar{width:56px;height:56px}}
+
+.jf-job-description{display:grid;gap:var(--jf-ui-space-6);overflow-wrap:anywhere}.jf-job-description section{min-width:0}.jf-job-description h2{font-size:var(--jf-ui-font-size-lg)}.jf-job-description h3{font-size:var(--jf-ui-font-size-md)}.jf-job-description p,.jf-job-description li{line-height:1.7}
+.jf-detail-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:var(--jf-ui-space-4);margin:0}.jf-detail-facts dt{font-size:var(--jf-ui-font-size-xs);color:var(--jf-ui-text-muted)}.jf-detail-facts dd{margin:4px 0 0;overflow-wrap:anywhere}
+.jf-vacancy-navigation{display:flex;align-items:center;justify-content:space-between;gap:var(--jf-ui-space-3);margin-bottom:var(--jf-ui-space-6)}.jf-vacancy-navigation>a{min-width:0}.jf-vacancy-navigation img{max-width:150px;max-height:48px;object-fit:contain}.jf-vacancy-navigation>div{display:flex;gap:var(--jf-ui-space-2);align-items:center}
+.job-editor-heading h2{scroll-margin-top:calc(var(--jf-ui-workspace-header-height) + 24px)}
+@media(max-width:600px){.jf-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.jf-vacancy-navigation img{max-width:100px}}
+
+.jf-public-jobs .jf-career-search{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}.jf-public-jobs[data-jobs-layout="list"] .jf-career-jobs{grid-template-columns:1fr}.jf-public-jobs-empty{padding:var(--jf-ui-space-8);text-align:center}.jf-public-jobs-empty>svg{color:var(--jf-ui-primary);width:40px;height:40px;margin:auto}.jf-public-jobs-empty h3{margin-block:var(--jf-ui-space-4)}.jf-public-jobs-empty p{margin:0}.jf-career-job-location{overflow-wrap:anywhere}
+
+.jf-editor-mobile-jump{display:none}.jf-editor-workbench__form,.jf-editor-workbench__preview{scroll-margin-top:100px}@media(max-width:800px){.jf-editor-mobile-jump{position:sticky;top:0;z-index:25;display:flex;justify-content:flex-end;gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-3);background:var(--jf-ui-surface);border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-control-radius);margin-block-end:var(--jf-ui-space-3)}.jf-editor-mobile-jump a{font-size:var(--jf-ui-font-size-sm);font-weight:600}}
+
+.jf-data-blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:var(--jf-ui-space-4);padding:var(--jf-ui-space-5)}.jf-data-blocks>article{min-width:0;border:1px solid var(--jf-ui-border);border-radius:var(--jf-ui-radius-card);padding:var(--jf-ui-space-4);background:var(--jf-ui-surface)}.jf-data-blocks dl{display:grid;gap:var(--jf-ui-space-3);margin:0}.jf-data-blocks dt{font-size:var(--jf-ui-font-size-xs);color:var(--jf-ui-text-muted)}.jf-data-blocks dd{margin:var(--jf-ui-space-1) 0 0;overflow-wrap:anywhere;font-size:var(--jf-ui-font-size-sm)}.jf-data-blocks dd .jf-workspace-toolbar{display:flex;flex-wrap:wrap;gap:var(--jf-ui-space-2)}
+
+.jf-danger-zone {border-color:var(--jf-ui-danger);margin-block-start:var(--jf-ui-space-6,24px)}
+.jf-detail-facts dd,.jf-data-blocks dd{overflow-wrap:anywhere}

@@ -22,6 +22,10 @@ export function SystemPage({ code, reset }: { code: SystemPageCode; reset?: () =
   const [query, setQuery] = useState("");
   const next = useSyncExternalStore(subscribeLocation, returnSnapshot, () => null);
   const router = useRouter();
+  const [session,setSession]=useState<{platformAdmin?:boolean;role?:string}|null>(null);
+  useEffect(()=>{const c=new AbortController();fetch('/api/auth/session',{cache:'no-store',signal:c.signal}).then(async r=>r.ok?await r.json() as {platformAdmin?:boolean;role?:string}:null).then(value=>{if(!c.signal.aborted)setSession(value)}).catch(()=>{});return()=>c.abort()},[]);
+  const home=session?.platformAdmin?'/backoffice':session?.role==='candidate'?'/candidato':session?'/app/home':'/';
+  const restrictedAdmin=code===403&&!!next?.startsWith('/backoffice');
   const [support, setSupport] = useState("/#faq");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,23 +50,23 @@ export function SystemPage({ code, reset }: { code: SystemPageCode; reset?: () =
     } catch { setNotice("Sem conexão. Tente novamente."); }
     finally { setBusy(false); }
   }
-  const results = pageLinks.filter(page => fold(`${page.title} ${page.keywords}`).includes(fold(query.trim())));
+  const results = pageLinks.filter(page => (page.href!=='/backoffice'||session?.platformAdmin)&&(page.href!=='/app/home'||!!session&&session.role!=='candidate')&& fold(`${page.title} ${page.keywords}`).includes(fold(query.trim())));
   return <main className="not-found-page system-page">
     <div className="not-found-grid" aria-hidden="true" />
     <header className="not-found-header container"><Link className="brand" href="/" aria-label="JobForged — início"><BrandAsset src="/brand/jobforged-logo-primary.svg" alt="JobForged" width={636} height={184} /></Link><ThemeSelector theme={theme} onChange={changeTheme} /></header>
     <section className="not-found-content container"><div className="not-found-copy">
-      <span className="eyebrow">{copy.label}</span><span className="not-found-code">{code}</span><h1>{copy.title}</h1><p>{copy.description}</p>
+      <span className="eyebrow">{copy.label}</span><span className="not-found-code">{code}</span><h1>{copy.title}</h1><p>{restrictedAdmin?"Esta área é exclusiva da administração JobForged. Seu acesso empresarial continua disponível no painel da empresa.":copy.description}</p>
       {code === 404 && <div className="system-page__search"><TextField label="Buscar páginas" placeholder="Busque uma página..." value={query} onChange={event => setQuery(event.target.value)} maxLength={80} icon={Search} /><nav aria-label="Páginas sugeridas" className="system-page__links">{results.map(page => {const LinkIcon=linkIcons[page.icon];return <Link key={page.href} className="jf-action jf-action--secondary" href={page.href}><LinkIcon size={18}/>{page.title}</Link>})}</nav>{!results.length && <EmptyState variant="inline" icon={Search} title="Nenhuma página encontrada" description="Tente outro termo ou volte ao início." />}</div>}
       <div className="not-found-actions">
         {code === 401 && <><Link className="jf-action jf-action--primary" href={login}><LogIn size={18}/>Entrar na conta</Link></>}
-        {code === 403 && <><ActionButton icon={<RefreshCw/>} onClick={()=>window.location.reload()}>Tentar novamente</ActionButton><ActionButton icon={<LogIn/>} disabled={busy} onClick={switchAccount}>{busy ? "Encerrando sessão..." : "Entrar com outra conta"}</ActionButton></>}
-        {(code === 500 || code === 503) && <><ActionButton icon={<RefreshCw/>} onClick={() => reset ? reset() : window.location.reload()}>Tentar novamente</ActionButton><div className="system-page__support-actions"><a className="jf-action jf-action--secondary" href={support}><Headphones size={18}/>Contatar suporte</a><Link className="jf-action jf-action--secondary" href="/status"><Activity size={18}/>Status atual</Link></div></>}
-        {code!==404&&<Link className="jf-action jf-action--secondary" href="/"><Home size={18} aria-hidden="true" />Voltar ao início</Link>}
+        {code === 403 && <><Link className="jf-action jf-action--primary" href={home}>Voltar ao painel</Link><ActionButton variant="secondary" icon={<LogIn/>} disabled={busy} onClick={switchAccount}>{busy ? "Encerrando sessão..." : "Entrar com outra conta"}</ActionButton></>}
+        {(code === 500 || code === 503) && <><ActionButton icon={<RefreshCw/>} onClick={() => reset ? reset() : window.location.reload()}>Tentar novamente</ActionButton><div className="system-page__support-actions"><a className="jf-action jf-action--secondary" href={support}><Headphones size={18}/>{support==="/#faq"?"Central de ajuda":"Contatar suporte"}</a><Link className="jf-action jf-action--secondary" href="/status"><Activity size={18}/>Status atual</Link></div></>}
+        {code!==404&&code!==403&&<Link className="jf-action jf-action--secondary" href={home}><Home size={18} aria-hidden="true" />Voltar ao início</Link>}
       </div>
-      {code === 403 && <p className="system-page__help">Solicite ao responsável da sua empresa a revisão do seu vínculo e das permissões. Esta página não concede acesso automaticamente.</p>}
+
       {code===503&&<div className="system-page__help" role="status"><p>{liveStatus.error?'Não foi possível verificar a disponibilidade. Consulte o status ou tente novamente.':!liveStatus.status?'Verificando a disponibilidade atual...':liveStatus.status.state==='operational'?'A plataforma está ativa. Nenhuma manutenção em andamento no momento.':liveStatus.status.state==='maintenance'?'Manutenção em andamento. Acompanhe a disponibilidade na página de status. Ainda não há previsão de retorno.':'Há instabilidade em um ou mais serviços. Acompanhe a página de status.'}</p></div>}
 
       {notice && <AppToast notice={{kind:"danger",title:"Não foi possível trocar de conta",text:notice}} onClose={()=>setNotice("")}/>}
-    </div><div className="not-found-visual" aria-hidden="true"><div className="not-found-window"><div className="window-bar"><WindowControls/><span className="window-address">JobForged</span><Compass /></div><div className="not-found-window__body"><span><Icon /></span><strong>{copy.label}</strong><small>Seu próximo passo começa por aqui.</small></div></div></div></section>
+    </div><div className="not-found-visual" aria-hidden="true"><div className="not-found-window"><div className="window-bar"><WindowControls/><span className="window-address">JobForged</span><Compass /></div><div className="not-found-window__body"><span><Icon /></span><strong>{copy.label}</strong></div></div></div></section>
   </main>;
 }
