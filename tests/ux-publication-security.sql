@@ -50,5 +50,27 @@ reset role;
 set local role authenticated;
 select pg_temp.assume_user('19000000-0000-4000-8000-000000000001');
 do $$begin perform public.communication_management_page('banners');perform public.communication_management_page('campaigns');perform public.platform_read_v2('users');perform public.platform_read_v2('company','','',1,'61000000-0000-4000-8000-000000000011');perform public.platform_read_v2('audit','','',1,null,'','2026-01-01','2026-12-31','Fixture');perform public.platform_member_photo('61000000-0000-4000-8000-000000000011');perform public.company_deletion_page(1);end$$;
+reset role;
+insert into public.platform_communications(id,title,message,link,audience,channel,created_by)
+values('61000000-0000-4000-8000-000000000099','Legacy invalid destination','Fixture only','https://test.jobforged.com/backoffice/comunicacoes','companies','inapp','19000000-0000-4000-8000-000000000001');
+set local role authenticated;
+select pg_temp.assume_user('19000000-0000-4000-8000-000000000001');
+do $$begin
+ begin perform public.communications_manage('campaign.dispatch','61000000-0000-4000-8000-000000000099',1,'{}');raise exception 'invalid destination was dispatched';exception when invalid_parameter_value then null;end;
+end$$;
+reset role;
+do $$begin
+ if exists(select 1 from public.platform_communication_deliveries where communication_id='61000000-0000-4000-8000-000000000099') then raise exception 'invalid communication has recipients';end if;
+ if not app_private.communication_audience_link('https://test.jobforged.com/app/home','companies') then raise exception 'valid company destination rejected';end if;
+ if not app_private.communication_audience_link('https://test.jobforged.com/backoffice','platform_admins') then raise exception 'admin destination rejected';end if;
+end$$;
+insert into public.company_invitations(company_id,email,role,token_hash,invited_by,expires_at)
+values('61000000-0000-4000-8000-000000000011','ux-owner@example.invalid','admin',encode(extensions.digest(repeat('b',64),'sha256'),'hex'),'61000000-0000-4000-8000-000000000001',now()+interval '1 hour');
+set local role authenticated;
+select pg_temp.assume_user('61000000-0000-4000-8000-000000000001');
+do $$begin if public.my_invitation_context(repeat('b',64))->>'company'<>'UX Fixture' then raise exception 'missing recipient context';end if;end$$;
+select pg_temp.assume_user('61000000-0000-4000-8000-000000000002');
+do $$begin if public.my_invitation_context(repeat('b',64)) is not null then raise exception 'invitation context leaked';end if;end$$;
+reset role;
 rollback;
 select 'ux_publication_security_passed';

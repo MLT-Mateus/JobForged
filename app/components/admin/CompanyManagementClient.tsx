@@ -1,4 +1,5 @@
 "use client";
+import {useUrlFilter} from "../ui/useUrlFilter";
 import Link from 'next/link';
 import {useCompanyAccess} from '../operations/access';
 import {MemberPermissions} from '../operations/MemberPermissions';
@@ -38,9 +39,9 @@ export function CompanyManagementClient({ mode }: { mode: "settings" | "members"
   const [phone, setPhone] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"admin" | "member">("admin");
-  const [query,setQuery]=useState("");
-  const [roleFilter,setRoleFilter]=useState("all");
-  const [statusFilter,setStatusFilter]=useState("all");
+  const [query,setQuery]=useUrlFilter("busca");
+  const [roleFilter,setRoleFilter]=useUrlFilter("funcao","all");
+  const [statusFilter,setStatusFilter]=useUrlFilter("situacao","all");
   const [inviteOpen,setInviteOpen]=useState(false);
   const [selectedMember,setSelectedMember]=useState<Member|null>(null);
   const [busy, setBusy] = useState(false);
