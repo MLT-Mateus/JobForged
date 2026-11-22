@@ -300,7 +300,7 @@
 .jf-multiselect__control,
 .jf-date__control { cursor: pointer; text-align: left; }
 .jf-select__control > span { min-width: 0; flex: 1; color: var(--jf-ui-text); font-size: var(--jf-ui-font-size-sm); }
-.jf-date__control > span { min-width: 0; flex: 1; color: var(--jf-ui-text); font-size: var(--jf-ui-font-size-xs); font-variant-numeric: tabular-nums; }
+.jf-date__control > span { min-width: 0; flex: 1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color: var(--jf-ui-text); font-size: var(--jf-ui-font-size-xs); font-variant-numeric: tabular-nums; }
 .jf-date__control > span.is-placeholder { color: var(--jf-ui-text-soft); }
 .jf-select__control > svg:last-child,
 .jf-multiselect__control > svg:last-child,
