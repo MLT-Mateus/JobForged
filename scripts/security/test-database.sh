@@ -5,27 +5,45 @@ container="jbfd-security-ci-${GITHUB_RUN_ID:-$$}"
 cleanup() { docker rm -f "$container" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 docker run -d --name "$container" --network none --memory 768m --cpus 1 \
-  -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94 >/dev/null
+  -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=jbfd_fixture_bootstrap -e POSTGRES_DB=postgres postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94 >/dev/null
 wait_for_database() {
   # The entrypoint starts a temporary socket-only initialization server. Wait
   # for final TCP readiness to avoid racing its intentional shutdown.
   for attempt in $(seq 1 60); do
-    if docker exec "$container" psql -h 127.0.0.1 -U postgres -Atqc 'select 1' >/dev/null 2>&1; then return 0; fi
+    if docker exec "$container" psql -h 127.0.0.1 -d postgres -U jbfd_fixture_bootstrap -Atqc 'select 1' >/dev/null 2>&1; then return 0; fi
     sleep 1
   done
   echo 'Disposable database readiness failed' >&2
   return 1
 }
 wait_for_database
+# PostgreSQL's bootstrap role cannot lose SUPERUSER. Create a separate business
+# owner so the fixture can exercise Supabase's actual postgres privilege model.
+docker exec -i "$container" psql -h 127.0.0.1 -d postgres -Xq -U jbfd_fixture_bootstrap -v ON_ERROR_STOP=1 -c 'create role postgres login superuser createdb createrole bypassrls; alter database postgres owner to postgres;'
 sql() { docker exec -i "$container" psql -h 127.0.0.1 -Xq -U postgres -v ON_ERROR_STOP=1; }
 sql < tests/security-provider-contract.sql
 for migration in supabase/migrations/[0-9]*.sql; do
-  { printf 'BEGIN;\n'; cat "$migration"; printf '\nCOMMIT;\n'; } | sql
+  migration_role=$(python3 scripts/security/migration_transaction.py "$migration" --operator)
+  # pg_has_role returns true for every role when postgres is superuser. The
+  # legacy Storage wrapper deliberately checks actual membership in production.
+  case "${migration##*/}" in
+    0008_company_branding.sql|0013_platform_banner_storage.sql)
+      docker exec -i "$container" psql -h 127.0.0.1 -d postgres -Xq -U supabase_admin -v ON_ERROR_STOP=1 -c 'alter role postgres nosuperuser bypassrls;' ;;
+  esac
+  python3 -c 'from pathlib import Path;import sys;from scripts.security.migration_transaction import transaction;print(transaction(Path(sys.argv[1])))' "$migration" | docker exec -i "$container" psql -h 127.0.0.1 -d postgres -Xq -U "$migration_role" -v ON_ERROR_STOP=1
+  docker exec -i "$container" psql -h 127.0.0.1 -d postgres -Xq -U supabase_admin -v ON_ERROR_STOP=1 -c 'alter role postgres superuser;'
 done
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/ux-publication-security.sql; } | sql
 sql < tests/security-foundation.sql
 sql < tests/signup-contracts.sql
+# Exercise the real production execution boundary: postgres owns business RPCs
+# but is not superuser; migrations may be created by supabase_admin.
+docker exec -i "$container" psql -h 127.0.0.1 -d postgres -Xq -U supabase_admin -v ON_ERROR_STOP=1 <<'SQL'
+grant authenticated to postgres;
+alter role postgres nosuperuser bypassrls;
+SQL
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/recruitment-fixture.mjs;cat tests/recruitment-security.sql; } | sql
+docker exec -i "$container" psql -h 127.0.0.1 -d postgres -Xq -U supabase_admin -v ON_ERROR_STOP=1 -c 'alter role postgres superuser;'
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql tests/company-operations-security.sql; } | sql
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql tests/backoffice-security.sql; } | sql
 { printf 'BEGIN;\n';cat tests/security-session-fixtures.sql;node tests/branding-fixture.mjs;cat tests/branding-security.sql; } | sql

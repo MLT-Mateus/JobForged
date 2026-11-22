@@ -40,7 +40,11 @@ Adições compartilhadas: FormReadiness, OptionalSection, KanbanBoard, VacancyId
 
 ## Banco, compatibilidade e isolamento
 
-Migrations novas 0071–0073: versão pública imutável do anúncio, metadados do editor, cores; pipeline canônico e histórico; revisões públicas e compatibilidade. Estados legados são preservados como evidência. Pré-aprovação/pré-reprovação não se tornam decisões finais automaticamente e recebem indicação de revisão.
+Migrations novas 0071–0074: versão pública imutável do anúncio, metadados do editor, cores; pipeline canônico e histórico; revisões públicas, compatibilidade e proprietário das funções privadas. Estados legados são preservados como evidência. Pré-aprovação/pré-reprovação não se tornam decisões finais automaticamente e recebem indicação de revisão.
+
+Na conferência autenticada após a primeira publicação, o Test recusou consultas novas com 403 apesar da permissão do titular. O banco real usa `postgres` sem superusuário e as funções auxiliares recém-criadas pertenciam ao operador da migration. A 0074 alinha essas funções ao proprietário dos pontos de entrada, mantendo os acessos privados. O CI passou a usar o construtor de transações e operador da produção e a testar o recrutamento com `postgres NOSUPERUSER`, para reproduzir essa fronteira. O complemento está no PR #225.
+
+O mesmo complemento corrige quebra de nomes/e-mails longos no diálogo compartilhado: um endereço criava rolagem interna a 320 px, embora o quadro e a página não transbordassem. A conferência foi ampliada ao conteúdo do drawer, com largura interna verificada após a animação de abertura.
 
 RPCs anteriores continuam disponíveis para leitura/rollback. Escritas antigas não podem publicar vagas do contrato v2 e contornar as validações. Novas candidaturas mantêm correspondência de estado legado. Versão esperada, empresa ativa e permissão são conferidas no servidor; ID informado no navegador não concede acesso.
 

@@ -1,4 +1,8 @@
 -- Entire test is isolated, uses example.invalid, and rolls back.
+do $$begin
+ if(select rolsuper from pg_roles where rolname='postgres') then raise exception 'recruitment must be tested without superuser bypass';end if;
+ if exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='app_private' and p.proname in('job_plain','job_issues','job_result_v2','sync_pipeline_legacy','pipeline_label','application_card') and p.proowner<>'postgres'::regrole) then raise exception 'private helper owner mismatch';end if;
+end$$;
 insert into auth.users(id,email,email_confirmed_at) values
 ('71000000-0000-4000-8000-000000000001','recruitment-owner@example.invalid',now()),
 ('71000000-0000-4000-8000-000000000002','recruitment-reviewer@example.invalid',now()),
