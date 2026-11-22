@@ -1,9 +1,10 @@
 import {createHash} from 'node:crypto';
 import {getSupabaseConfig,requestDatabase} from '@/app/api/auth/_server';
+import {assistantEnvironment} from '../environment';
 export const runtime='nodejs';
 export async function POST(request:Request){
  const headers={'Cache-Control':'no-store'};
- if(process.env.APP_ENV!=='test')return Response.json({message:'Indisponível.'},{status:404,headers});
+ if(!assistantEnvironment())return Response.json({message:'Indisponível.'},{status:404,headers});
  const token=request.headers.get('authorization')?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
  const config=getSupabaseConfig();
  if(!token||!config)return Response.json({message:'Acesso negado.'},{status:403,headers});
