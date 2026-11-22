@@ -12,7 +12,10 @@ export function validateAssistantResponse(value:unknown,branches:string[],draft:
  const data=value as Record<string,unknown>;
  if(typeof data.reply!=='string'||!data.reply.trim()||data.reply.length>4000)throw Error('Resposta inválida.');
  if(!assistantIntents.includes(data.intent as Intent))throw Error('Intenção inválida.');
- const patch=validateAssistantPatch(data.patch,branches);
+ const proposed={...(data.patch as Record<string,unknown>)};
+ // Lossless normalization for numeric facts stored as text in the existing schema.
+ for(const key of ['weeklyHours','teamSize'])if(typeof proposed[key]==='number'&&Number.isFinite(proposed[key]))proposed[key]=String(proposed[key]);
+ const patch=validateAssistantPatch(proposed,branches);
  if(patch.example===false)throw Error('A conversão em vaga real exige revisão no formulário.');
  if(data.intent==='create_example'){
   patch.example=true;
@@ -30,5 +33,5 @@ export function validateAssistantResponse(value:unknown,branches:string[],draft:
  const coverage=data.coverage as {completed?:unknown;missing?:unknown};
  if(!coverage||!['completed','missing'].every(k=>Array.isArray(coverage[k as keyof typeof coverage])&&(coverage[k as keyof typeof coverage] as unknown[]).length<=30&&(coverage[k as keyof typeof coverage] as unknown[]).every(v=>typeof v==='string'&&v.length<=200)))throw Error('Cobertura inválida.');
  if(typeof data.objective!=='string'||data.objective.length>1000)throw Error('Objetivo inválido.');
- return {reply:data.reply,patch,intent:data.intent as Intent,objective:data.objective,origins,coverage:coverage as AssistantResponse['coverage']};
+ return {reply:data.reply,patch,intent:data.intent as Intent,objective:data.objective,origins,coverage:{completed:coverage.completed as string[],missing:editorChecks(normalizeJob({...draft,...patch})).filter(c=>!c.done).map(c=>c.label)}};
 }

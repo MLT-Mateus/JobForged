@@ -6,7 +6,7 @@ import {assistantDraft,validateAssistantPatch} from '@/app/components/jobs/job-a
 import {validateAssistantResponse} from '@/app/components/jobs/assistant-response';
 import {emptyJob} from '@/app/components/jobs/job-types';
 import {editorChecks} from '@/app/components/jobs/job-editor-model';
-import {jsonFrames,partialReply} from '@/app/components/jobs/chat-stream';
+import {jsonFrames,partialReply,parseAssistantJSON} from '@/app/components/jobs/chat-stream';
 export const runtime='nodejs';
 export async function POST(request:NextRequest){
  const headers=new Headers({'Cache-Control':'private, no-store',Vary:'Cookie'});
@@ -49,7 +49,7 @@ export async function POST(request:NextRequest){
      const frames=jsonFrames(),upstream=result.body?.getReader(),decode=new TextDecoder();let raw='',reply='',total=0;
      if(!upstream)throw Error('Resposta vazia.');
      while(true){const chunk=await upstream.read();if(chunk.done)break;total+=chunk.value.length;if(total>250000)throw Error('Resposta muito longa.');for(const event of frames(decode.decode(chunk.value,{stream:true}))){if(event.type==='error')throw Error('Falha no assistente.');if(event.type==='item'&&typeof event.content==='string'&&(!event.metadata|| (event.metadata as {nodeName?:string}).nodeName==='Assistente de vagas')){raw+=event.content;if(raw.length>50000)throw Error('Resposta muito longa.');const next=partialReply(raw);if(next!==reply){reply=next;emit({type:'reply',text:reply})}}}}
-     const data=validate(JSON.parse(raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'')));
+     const data=validate(parseAssistantJSON(raw));
      emit({type:'done',...data});
     }catch{emit({type:'error',message:'A resposta não foi concluída. Tente novamente; o formulário não foi alterado.'})}
     finally{closed=true;try{controller.close()}catch{/* Client disconnected. */}}

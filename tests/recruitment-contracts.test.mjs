@@ -26,3 +26,16 @@ test('decision and reason matrix covers approval, reopening and finalized contra
  assert.equal(decisionRequired({...card,outcome:'rejected'},'screening'),true);
  assert.equal(reasonRequired({...card,stageKey:'hired'},'screening'),true);
 });
+import {readFileSync} from 'node:fs';
+const corpus=JSON.parse(readFileSync(new URL('./fixtures/recruitment-ai-v2.json',import.meta.url),'utf8'));
+const {parseAssistantJSON}=await loadTs(new URL('../app/components/jobs/chat-stream.ts',import.meta.url));
+for(const entry of corpus.cases)test('recorded provider evaluation '+entry.id,()=>{
+ const proposal=validateAssistantResponse(parseAssistantJSON(entry.raw),[],{...emptyJob(),...entry.prompt.currentDraft,lgpd:entry.prompt.validationState?.consentConfirmed===true});
+ assert.ok(proposal.reply);assert.equal(proposal.patch.lgpd,undefined);assert.equal(proposal.patch.status,undefined);
+ if(['T23','T24'].includes(entry.id))assert.equal(proposal.patch.example,true);
+ if(entry.id==='T25'){assert.notEqual(proposal.patch.example,true);assert.equal(proposal.patch.salaryMin,undefined);assert.equal(proposal.patch.benefits,undefined)}
+ if(entry.id==='T29')assert.deepEqual(Object.keys(proposal.patch),['title']);
+ if(entry.id==='T30')assert.ok(proposal.coverage.missing.includes('Área'));
+ if(entry.id==='T33')assert.deepEqual(proposal.coverage.missing,[]);
+ if(entry.id==='T35')assert.deepEqual(proposal.patch,{title:'Analista de dados'});
+});

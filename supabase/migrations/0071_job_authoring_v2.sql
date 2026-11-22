@@ -77,7 +77,7 @@ begin
   if j.id is null then raise exception 'not found' using errcode='P0002';end if;
   if expected_version is distinct from j.version then raise exception 'conflict' using errcode='40001';end if;
   if jsonb_typeof(document->'colorToken') is distinct from 'number' or document->>'colorToken' !~ '^([0-9]|1[01])$' then raise exception 'invalid color' using errcode='22023';end if;
-  update app_private.company_jobs set color_token=(document->>'colorToken')::integer,version=version+1,updated_at=now() where id=j.id returning * into j;
+  update app_private.company_jobs set color_token=(company_jobs_v2.document->>'colorToken')::integer,version=version+1,updated_at=now() where id=j.id returning * into j;
   insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(cid,auth.uid(),'job.color',j.id);
   return app_private.job_result_v2(j);
  end if;
@@ -106,7 +106,7 @@ begin
  update app_private.company_branches b set document=jsonb_set(b.document,'{jobIds}',((b.document->'jobIds')-j.id::text)||case when selected ? b.id::text then jsonb_build_array(j.id::text) else '[]'::jsonb end),version=b.version+1,updated_at=now() where b.company_id=cid and ((b.document->'jobIds' ? j.id::text) is distinct from (selected ? b.id::text));
  if operation='publish' or operation='status' and next_status='Publicada' or j.published_document is null then
  select o.document into opts from app_private.company_job_options o where o.job_id=j.id;
- insert into app_private.company_job_options(job_id,document) values(j.id,coalesce(opts,'{"acceptApplications":true,"resumeRequired":true,"positions":1,"notifyApplication":true,"notifyStage":true}')||jsonb_build_object('positions',coalesce((document->>'positions')::integer,1),'resumeRequired',coalesce((document->>'resumeRequired')::boolean,true))) on conflict(job_id) do update set document=excluded.document,version=company_job_options.version+1;
+ insert into app_private.company_job_options(job_id,document) values(j.id,coalesce(opts,'{"acceptApplications":true,"resumeRequired":true,"positions":1,"notifyApplication":true,"notifyStage":true}')||jsonb_build_object('positions',coalesce((document->>'positions')::integer,1),'resumeRequired',coalesce((document->>'resumeRequired')::boolean,true))) on conflict on constraint company_job_options_pkey do update set document=excluded.document,version=company_job_options.version+1;
  end if;
  insert into public.company_audit_events(company_id,actor_user_id,action,target_id) values(cid,auth.uid(),'job.'||operation,j.id);
  answer:=app_private.job_result_v2(j);return answer;
