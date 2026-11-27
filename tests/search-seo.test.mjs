@@ -41,6 +41,12 @@ test('rendered metadata, headers, canonicals and sitemaps obey environment at ru
 test('edge routes redirect HTTP and canonical www without matching other hosts',()=>{
  const compose=readFileSync(new URL('../deploy/compose.yml',import.meta.url),'utf8');
  const expression=compose.match(/canonical\.redirectregex\.regex=(.+)/)[1];
+ const replacement=compose.match(/canonical\.redirectregex\.replacement=(.+)/)[1].replaceAll('$$','$');
+ // Compose escapes dollars with $$; Traefik expands Go-style ${1} captures.
+ const redirect=url=>url.replace(new RegExp(expression),(...match)=>replacement.replace(/\$\{(\d+)\}/g,(_,index)=>match[Number(index)]));
+ for(const path of ['', 'login', 'vagas/engenharia?origem=www&pagina=2', 'busca?q=Jo%C3%A3o']){
+  for(const scheme of ['http','https'])assert.equal(redirect(`${scheme}://www.jobforged.com/${path}`),`https://jobforged.com/${path}`);
+ }
  assert.ok(new RegExp(expression).test('https://www.jobforged.com/a?b=c'));
  assert.ok(!new RegExp(expression).test('https://www.jobforged.com.evil.invalid/a'));
  assert.ok(compose.includes('-http.entrypoints=web'));
