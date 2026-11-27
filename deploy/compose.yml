@@ -27,7 +27,7 @@ services:
       - traefik.http.routers.jbfd-${APP_ENV}.middlewares=jbfd-${APP_ENV}-canonical
       - traefik.http.routers.jbfd-${APP_ENV}.service=jbfd-${APP_ENV}
       - traefik.http.middlewares.jbfd-${APP_ENV}-canonical.redirectregex.regex=^https?://www[.]jobforged[.]com/(.*)
-      - traefik.http.middlewares.jbfd-${APP_ENV}-canonical.redirectregex.replacement=https://jobforged.com/\$\$1
+      - traefik.http.middlewares.jbfd-${APP_ENV}-canonical.redirectregex.replacement=https://jobforged.com/$${1}
       - traefik.http.middlewares.jbfd-${APP_ENV}-canonical.redirectregex.permanent=true
       - traefik.http.services.jbfd-${APP_ENV}.loadbalancer.server.port=3000
     networks:
